@@ -17,6 +17,7 @@
 
 .order-input-form__asset {
   grid-area: asset;
+  margin-bottom: var(--default-spacing);
 }
 
 .order-input-form__pieces {

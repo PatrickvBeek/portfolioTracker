@@ -8,7 +8,7 @@ import {
 } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props, isNotNil } from "../../../utility/types";
-import AssetDropdown from "../../Assets/AssetDropdown/AssetDropdown";
+import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
 import { Button } from "../../general/Button";
 import { DateInput, DateInputValue } from "../../general/DateInput";
 import {
