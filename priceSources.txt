@@ -1,0 +1,7 @@
+FXCM
+Google Finance (even in spreadsheets)
+Alpha Vantage
+World Trading Data
+Intrinio
+EOD Historical Data
+TwelveData and IEX

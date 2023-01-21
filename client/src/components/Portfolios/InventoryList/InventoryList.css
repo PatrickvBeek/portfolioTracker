@@ -1,0 +1,23 @@
+.inventory-list {
+  border-collapse: collapse;
+}
+
+.inventory-list__header-row {
+  height: 2rem;
+  background-color: var(--theme);
+  color: white;
+}
+
+.inventory-list__data-row {
+  height: 2.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.inventory-list__data-cell--right {
+  text-align: right;
+}
+
+.inventory-list__footer {
+  background-color: #eee;
+  height: 2rem;
+}

@@ -1,0 +1,32 @@
+.navigation-bar {
+  background-color: var(--theme);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 3rem;
+}
+
+.navigation-bar__tab-list {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  padding: 0 var(--default-spacing);
+  max-width: var(--max-layout-width);
+  box-sizing: border-box;
+}
+
+.navigation-bar__tab {
+  color: var(--theme-tint);
+  font-weight: bold;
+  font-size: var(--font-large1);
+}
+
+.navigation-bar__tab:hover {
+  color: white;
+  cursor: pointer;
+}
+
+.navigation-bar__tab--selected {
+  color: white;
+}

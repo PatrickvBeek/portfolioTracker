@@ -1,0 +1,52 @@
+.portfolios {
+  padding-top: var(--double-spacing);
+  padding-left: var(--default-spacing);
+  width: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: auto 1fr 12rem;
+  grid-template-areas:
+    "sideBar header header"
+    "sideBar content orderSideBar";
+  gap: 4rem 4rem;
+}
+
+.portfolios__header {
+  display: flex;
+  justify-content: flex-start;
+  grid-area: header;
+}
+
+.portfolios__side-bar {
+  grid-area: sideBar;
+  display: flex;
+  flex-direction: column;
+  gap: var(--double-spacing);
+}
+
+.portfolios__content {
+  grid-area: content;
+  align-self: flex-start;
+}
+
+.portfolios__order-form {
+  grid-area: orderForm;
+}
+
+.portfolios__portfolio-selection {
+  font-size: var(--font-large1);
+  width: 100%;
+}
+
+.portfolios__order-side-bar {
+  grid-area: orderSideBar;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.portfolios__form-headline {
+  font-size: var(--font-large1);
+  font-weight: bold;
+  margin-bottom: 1rem;
+}

@@ -1,0 +1,25 @@
+.portfolio-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.portfolio-view__button-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.portfolio-view__delete-button {
+  display: block;
+  align-self: flex-end;
+  background-color: var(--red);
+}
+.portfolio-view__add-transaction-button {
+  align-self: flex-start;
+  right: 1rem;
+}
+
+.portfolio-view__inventory {
+  width: 100%;
+}

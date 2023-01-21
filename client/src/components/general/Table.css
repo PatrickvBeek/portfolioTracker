@@ -1,0 +1,29 @@
+.overflow-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table__table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+  border-radius: var(--default-border-radius);
+  overflow: hidden;
+}
+
+.table__data-row:nth-child(even) {
+  background-color: var(--theme-tint-soft);
+}
+
+.table__header-element {
+  font-weight: bold;
+  height: 2em;
+  border-bottom: solid black 2px;
+  padding: 0 0.5rem;
+}
+
+.table__data-element {
+  height: 2em;
+  border-bottom: 0.5px #aaa solid;
+  padding: 0 0.5rem;
+}

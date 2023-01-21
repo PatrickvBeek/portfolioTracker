@@ -1,0 +1,11 @@
+.asset-table-container {
+  width: 100%;
+}
+
+.asset-table-footer {
+  color: #999;
+  display: flex;
+  margin-top: 0.25em;
+  font-size: var(--font-small1);
+  padding-left: 0.5rem;
+}

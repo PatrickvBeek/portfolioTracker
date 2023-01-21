@@ -1,0 +1,9 @@
+.portfolio-input-form {
+  display: flex;
+  align-items: flex-start;
+}
+
+.portfolio-input-form__add-button {
+  margin-left: 0.5rem;
+  margin-top: 1.25rem;
+}

@@ -1,0 +1,32 @@
+.input__label {
+  font-size: var(--font-small1);
+  padding-left: 0.25rem;
+  display: block;
+}
+
+.input__field {
+  height: 2rem;
+  font-size: 1rem;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: var(--default-border-radius);
+  width: 100%;
+  padding-left: 0.25rem;
+  margin: 0.25em 0px;
+  box-sizing: border-box;
+}
+
+input::placeholder {
+  font-weight: 100;
+}
+
+.input__field--mandatory {
+  border-left-color: var(--theme);
+  border-left-width: 4px;
+}
+
+.input__error-message {
+  color: red;
+  font-size: var(--font-small1);
+  min-height: 1em;
+}

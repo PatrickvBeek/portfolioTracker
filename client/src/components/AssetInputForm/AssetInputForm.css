@@ -1,0 +1,10 @@
+.asset-input-form {
+  display: flex;
+  flex-direction: column;
+  width: 600px;
+  align-items: flex-end;
+}
+
+.asset-input-form__submit-button {
+  margin-top: 1.35em;
+}

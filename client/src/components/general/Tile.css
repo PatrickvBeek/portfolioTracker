@@ -1,0 +1,19 @@
+.tile {
+  background-color: white;
+  width: fit-content;
+  box-shadow: -1px 3px 5px rgb(50, 50, 50, 0.25);
+  border-radius: var(--default-border-radius);
+}
+
+.tile__element {
+  padding: 1rem;
+}
+
+.tile__element--header {
+  background-color: var(--theme);
+  color: white;
+  font-size: var(--font-large1);
+  font-weight: bold;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
