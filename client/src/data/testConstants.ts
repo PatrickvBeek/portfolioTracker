@@ -18,7 +18,7 @@ export const TEST_ASSET_LIB = {
 export const TEST_ORDER_TESLA = {
   uuid: randomUUID(),
   asset: TEST_ASSET_TESLA.isin,
-  amount: 100,
+  sharePrice: 100,
   orderFee: 1,
   pieces: 2.4,
   timestamp: "2022-04-02",
@@ -27,7 +27,7 @@ export const TEST_ORDER_TESLA = {
 export const TEST_ORDER_1_GOOGLE = {
   uuid: randomUUID(),
   asset: TEST_ASSET_GOOGLE.isin,
-  amount: 100,
+  sharePrice: 100,
   orderFee: 1,
   pieces: 1.1,
   timestamp: "2022-04-02",
@@ -36,7 +36,7 @@ export const TEST_ORDER_1_GOOGLE = {
 export const TEST_ORDER_2_GOOGLE = {
   uuid: randomUUID(),
   asset: TEST_ASSET_GOOGLE.isin,
-  amount: -105,
+  sharePrice: -105,
   orderFee: 1,
   pieces: -1,
   timestamp: "2022-04-02",

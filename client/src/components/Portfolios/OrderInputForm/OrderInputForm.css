@@ -4,7 +4,7 @@
   grid-template-columns: repeat(3, 1fr);
   grid-template-areas:
     "asset asset asset"
-    "pieces amount fees"
+    "pieces price fees"
     "date date date"
     "xx xx button";
   gap: 0.5rem 1rem;
@@ -23,8 +23,8 @@
   grid-area: pieces;
 }
 
-.order-input-form__amount {
-  grid-area: amount;
+.order-input-form__price {
+  grid-area: price;
 }
 
 .order-input-form__fees {
@@ -38,4 +38,13 @@
 .order-input-form__button {
   grid-area: button;
   margin-top: 1rem;
+}
+
+.order-input-form__summary {
+  font-size: var(--font-small1);
+  color: gray;
+}
+
+.order-input-form__calculation {
+  min-height: 1rem;
 }

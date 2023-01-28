@@ -125,7 +125,10 @@ export const getInvestedValueOfIsinInPortfolio = (
   isin: string
 ): number => {
   return isin in portfolio.orders
-    ? sumBy(getPositions(portfolio.orders[isin])?.open, (p) => p.bought)
+    ? sumBy(
+        getPositions(portfolio.orders[isin])?.open,
+        (p) => p.bought * p.pieces
+      )
     : 0;
 };
 
@@ -138,13 +141,13 @@ export const getPositions = (orders: Order[]): AssetPositions | undefined => {
     const [firstPosition, ...remaining] = openPositions;
 
     if (piecesToSell === firstPosition.pieces) {
-      return [remaining, [{ ...firstPosition, sold: sell.amount }]];
+      return [remaining, [{ ...firstPosition, sold: sell.sharePrice }]];
     }
     if (piecesToSell < firstPosition.pieces) {
       const newlyClosed = {
         ...firstPosition,
         pieces: piecesToSell,
-        sold: sell.amount,
+        sold: sell.sharePrice,
       };
       const reducedPosition = {
         ...firstPosition,
@@ -152,7 +155,7 @@ export const getPositions = (orders: Order[]): AssetPositions | undefined => {
       };
       return [[reducedPosition, ...remaining], [newlyClosed]];
     } else {
-      const newlyClosed = { ...firstPosition, sold: sell.amount };
+      const newlyClosed = { ...firstPosition, sold: sell.sharePrice };
       const piecesStillToSell = piecesToSell - firstPosition.pieces;
       const [finallyOpen, alsoClosed] = getPositionsFromSell(remaining, {
         ...sell,
@@ -172,7 +175,7 @@ export const getPositions = (orders: Order[]): AssetPositions | undefined => {
   );
   const openPositions = buyOrders.map((buy) => ({
     pieces: buy.pieces,
-    bought: buy.amount,
+    bought: buy.sharePrice,
   }));
 
   return sellOrders.reduce(
