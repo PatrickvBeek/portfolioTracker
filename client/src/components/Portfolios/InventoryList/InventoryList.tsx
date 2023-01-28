@@ -165,7 +165,9 @@ function getListItemsFromPortfolio(
   return Object.keys(portfolio.orders)
     .map((isin) => ({
       asset: assets[isin]?.displayName || "asset not found",
-      pieces: getPiecesOfIsinInPortfolio(portfolio, isin),
+      pieces: Number(
+        getPiecesOfIsinInPortfolio(portfolio, isin).toPrecision(4)
+      ),
       invested: getInvestedValueOfIsinInPortfolio(portfolio, isin),
       orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin),
     }))
