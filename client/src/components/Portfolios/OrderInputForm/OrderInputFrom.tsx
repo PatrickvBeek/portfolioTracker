@@ -7,7 +7,7 @@ import {
   useGetPortfolios,
 } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
-import { Props } from "../../../utility/types";
+import { Props, isNotNil } from "../../../utility/types";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetDropdown";
 import { Button } from "../../general/Button";
 import { DateInput, DateInputValue } from "../../general/DateInput";
@@ -118,7 +118,7 @@ export function OrderInputForm({
       />
       <div className={bemElement("summary")}>
         Summary:
-        <div className={bemElement("calculation")}>
+        <div className={bemElement("calculation")} title="Summary Text">
           {getCalculationText({ pieces, sharePrice, fees })}
         </div>
       </div>
@@ -142,11 +142,11 @@ function getCalculationText({
   sharePrice: NumberInputValue;
   fees: NumberInputValue;
 }): string {
-  if (!(pieces && sharePrice && fees)) {
-    return "undetermined";
+  if (isNotNil(pieces) && isNotNil(sharePrice) && isNotNil(fees)) {
+    return `${pieces} x ${sharePrice} + ${fees} = ${(
+      pieces * sharePrice +
+      fees
+    ).toFixed(2)}`;
   }
-  return `${pieces} x ${sharePrice} + ${fees} = ${(
-    pieces * sharePrice +
-    fees
-  ).toFixed(2)}`;
+  return "undetermined";
 }

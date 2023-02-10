@@ -17,6 +17,15 @@ describe("The OrderInputForm", () => {
 
   const TEST_ASSET = TEST_ASSET_TESLA;
 
+  function fillValidOder(): void {
+    render(<OrderInputForm {...PROPS} />);
+    userEvent.click(screen.getByLabelText("Asset"));
+    userEvent.click(screen.getByText(TEST_ASSET.displayName));
+    userEvent.type(screen.getByLabelText("Pieces"), "4");
+    userEvent.type(screen.getByLabelText("Fees"), "1");
+    userEvent.type(screen.getByLabelText("Share Price"), "400");
+  }
+
   beforeEach(() => {
     mockUseGetPortfolios.mockReturnValue({
       isLoading: false,
@@ -83,5 +92,12 @@ describe("The OrderInputForm", () => {
     userEvent.clear(screen.getByLabelText("Pieces"));
     userEvent.type(screen.getByLabelText("Pieces"), "-3");
     expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
+  });
+
+  it("renders a summary text", () => {
+    fillValidOder();
+    expect(screen.getByTitle("Summary Text")).toHaveTextContent(
+      "4 x 400 + 1 = 1601.00"
+    );
   });
 });

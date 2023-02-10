@@ -1,6 +1,7 @@
 .portfolios {
   padding-top: var(--double-spacing);
   padding-left: var(--default-spacing);
+  padding-right: var(--default-spacing);
   width: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
