@@ -49,13 +49,11 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^13.3.0",
-    "@types/classnames": "^2.3.1",
     "@types/lodash": "^4.14.184",
     "@types/react": "^18.0.12",
     "@types/react-dom": "^18.0.5",
     "@types/uuid": "^8.3.4",
     "jest": "^28.1.1",
-    "jest-dom": "^4.0.0",
     "jest-environment-jsdom": "^29.0.1",
     "jest-transform-stub": "^2.0.0",
     "ts-jest": "^28.0.4",
