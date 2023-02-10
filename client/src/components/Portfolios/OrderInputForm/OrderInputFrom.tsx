@@ -7,7 +7,7 @@ import {
   useGetPortfolios,
 } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
-import { Props } from "../../../utility/types";
+import { Props, isNotNil } from "../../../utility/types";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetDropdown";
 import { Button } from "../../general/Button";
 import { DateInput, DateInputValue } from "../../general/DateInput";
@@ -27,7 +27,7 @@ export type OrderInputFormProps = Props<{
 const DEFAULTS = {
   isin: "",
   pieces: undefined,
-  amount: undefined,
+  sharePrice: undefined,
   fees: 0,
   date: new Date(),
 };
@@ -40,7 +40,9 @@ export function OrderInputForm({
   const addOrder = useAddOrderToPortfolio(portfolioName).mutate;
   const [isin, setAssetIsin] = useState(DEFAULTS.isin);
   const [pieces, setPieces] = useState<NumberInputValue>(DEFAULTS.pieces);
-  const [amount, setAmount] = useState<NumberInputValue>(DEFAULTS.amount);
+  const [sharePrice, setSharePrice] = useState<NumberInputValue>(
+    DEFAULTS.sharePrice
+  );
   const [fees, setFees] = useState<NumberInputValue>(DEFAULTS.fees);
   const [date, setDate] = useState<DateInputValue>(DEFAULTS.date);
   const portfoliosResponse = useGetPortfolios();
@@ -51,7 +53,7 @@ export function OrderInputForm({
 
   const portfolio = portfoliosResponse.data[portfolioName];
 
-  const isFormValid = isin && pieces && pieces !== 0 && amount && date;
+  const isFormValid = isin && pieces && pieces !== 0 && sharePrice && date;
 
   const isOrderValid =
     pieces &&
@@ -62,7 +64,7 @@ export function OrderInputForm({
 
   const orderToSubmit = isFormValid
     ? {
-        amount: Number(amount),
+        sharePrice: Number(sharePrice),
         asset: isin,
         orderFee: Number(fees),
         pieces: Number(pieces),
@@ -90,11 +92,11 @@ export function OrderInputForm({
         autoComplete={"off"}
       />
       <NumberInput
-        className={bemElement("amount")}
-        onChange={setAmount}
-        label={"Amount"}
+        className={bemElement("sharePrice")}
+        onChange={setSharePrice}
+        label={"Share Price"}
         digits={2}
-        defaultValue={DEFAULTS.amount}
+        defaultValue={DEFAULTS.sharePrice}
         isMandatory={true}
         autoComplete={"off"}
       />
@@ -114,6 +116,12 @@ export function OrderInputForm({
         defaultDate={DEFAULTS.date}
         isMandatory={true}
       />
+      <div className={bemElement("summary")}>
+        Summary:
+        <div className={bemElement("calculation")} title="Summary Text">
+          {getCalculationText({ pieces, sharePrice, fees })}
+        </div>
+      </div>
       <Button
         className={bemElement("button")}
         onClick={() => orderToSubmit && addOrder(orderToSubmit)}
@@ -123,4 +131,22 @@ export function OrderInputForm({
       />
     </div>
   );
+}
+
+function getCalculationText({
+  pieces,
+  sharePrice,
+  fees,
+}: {
+  pieces: NumberInputValue;
+  sharePrice: NumberInputValue;
+  fees: NumberInputValue;
+}): string {
+  if (isNotNil(pieces) && isNotNil(sharePrice) && isNotNil(fees)) {
+    return `${pieces} x ${sharePrice} + ${fees} = ${(
+      pieces * sharePrice +
+      fees
+    ).toFixed(2)}`;
+  }
+  return "undetermined";
 }
