@@ -1,0 +1,10 @@
+.asset-select__option {
+  display: flex;
+  flex-direction: column;
+  padding: var(--half-spacing);
+}
+
+.asset-select__option-fine-print {
+  font-size: var(--font-small1);
+  color: gray;
+}
