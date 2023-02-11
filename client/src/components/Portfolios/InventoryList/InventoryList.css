@@ -1,5 +1,16 @@
-.inventory-list {
+.inventory-list{
+  display: flex;
+  flex-direction: column;
+}
+
+.inventory-list__switch {
+  align-self: flex-end;
+  margin: 0
+}
+
+.inventory-list__table {
   border-collapse: collapse;
+  width: 100%;
 }
 
 .inventory-list__header-row {

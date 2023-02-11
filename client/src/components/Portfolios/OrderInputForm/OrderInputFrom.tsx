@@ -1,13 +1,13 @@
 import { sumBy } from "lodash";
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
-import { getPositions } from "../../../data/portfolio/portfolio";
+import { getPositions } from "../../../data/portfolio/portfolioPositions";
 import {
   useAddOrderToPortfolio,
   useGetPortfolios,
 } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
-import { Props, isNotNil } from "../../../utility/types";
+import { isNotNil, Props } from "../../../utility/types";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
 import { Button } from "../../general/Button";
 import { DateInput, DateInputValue } from "../../general/DateInput";

@@ -43,13 +43,19 @@ export interface CashTransaction {
   type: CashTransactionKind;
 }
 
-export interface Position {
-  pieces: number;
-  bought: number;
-  sold?: number;
+export interface OpenPosition {
+  pieces: Order["pieces"];
+  buyDate: Order["timestamp"];
+  buyPrice: Order["sharePrice"];
+  orderFee: Order["orderFee"];
+}
+
+export interface ClosedPosition extends OpenPosition {
+  sellDate: Order["timestamp"];
+  sellPrice: Order["sharePrice"];
 }
 
 export interface AssetPositions {
-  open: Position[];
-  closed: Position[];
+  open: OpenPosition[];
+  closed: ClosedPosition[];
 }

@@ -1,5 +1,4 @@
 import {
-  getTestOrder,
   TEST_ASSET_GOOGLE,
   TEST_ASSET_TESLA,
   TEST_ORDER_1_GOOGLE,
@@ -7,7 +6,7 @@ import {
   TEST_ORDER_TESLA,
   TEST_TRANSACTION,
 } from "../testConstants";
-import { Order, Portfolio } from "../types";
+import { Portfolio } from "../types";
 import {
   addOrderToPortfolio,
   addTransactionToPortfolio,
@@ -15,7 +14,6 @@ import {
   deleteTransactionFromPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfAssetInPortfolio,
-  getPositions,
 } from "./portfolio";
 
 const TEST_PORTFOLIO: Portfolio = {
@@ -134,142 +132,51 @@ describe("The Portfolio utility function", () => {
   });
 
   describe("getOrderFeesOfIsinInPortfolio", () => {
-    it("calculates the order fees correctly", () => {
+    describe("calculates the order fees correctly", () => {
       const testPortfolio = TEST_PORTFOLIO;
       const isins = Object.keys(testPortfolio.orders);
-      expect(
-        isins.map((isin) => getOrderFeesOfIsinInPortfolio(testPortfolio, isin))
-      ).toEqual([1, 2]);
+
+      it("for open", () => {
+        expect(
+          isins.map((isin) =>
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "open")
+          )
+        ).toEqual([1, 0.5]);
+      });
+
+      it("for closed", () => {
+        expect(
+          isins.map((isin) =>
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "closed")
+          )
+        ).toEqual([0, 1.5]);
+      });
+
+      it("for both", () => {
+        expect(
+          isins.map((isin) =>
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "both")
+          )
+        ).toEqual([1, 2]);
+      });
     });
 
-    it("returns null if there are no orders for this isin", () => {
+    it("returns 0 if there are no orders for this isin", () => {
       const testPortfolio: Portfolio = {
         orders: {},
         name: "test",
         transactions: [],
       };
 
-      expect(getOrderFeesOfIsinInPortfolio(testPortfolio, "not There")).toBe(0);
+      expect(
+        getOrderFeesOfIsinInPortfolio(testPortfolio, "not there", "open")
+      ).toBe(0);
     });
   });
 
   describe("getInvestedValueOfIsinInPortfolio", () => {
     it.skip("returns the correct value", () => {
       expect(1).toEqual(1);
-    });
-  });
-
-  describe("getPositions", () => {
-    function getOrders(orderProps: Partial<Order>[]) {
-      return orderProps.map((prop) => getTestOrder(prop));
-    }
-
-    describe("returns the correct positions when", () => {
-      it("buying 1, selling 1", () => {
-        const orders = getOrders([
-          { pieces: 1, sharePrice: 50 },
-          { pieces: -1, sharePrice: 55 },
-        ]);
-
-        expect(getPositions(orders)).toEqual({
-          open: [],
-          closed: [{ pieces: 1, bought: 50, sold: 55 }],
-        });
-      });
-
-      it("buying 2, selling 1", () => {
-        const orders = getOrders([
-          { pieces: 2, sharePrice: 50 },
-          { pieces: -1, sharePrice: 55 },
-        ]);
-
-        expect(getPositions(orders)).toEqual({
-          open: [{ pieces: 1, bought: 50 }],
-          closed: [{ pieces: 1, bought: 50, sold: 55 }],
-        });
-      });
-
-      it("buying 1,1, selling 2", () => {
-        const orders = getOrders([
-          { pieces: 1, sharePrice: 50 },
-          { pieces: 1, sharePrice: 55 },
-          { pieces: -2, sharePrice: 60 },
-        ]);
-
-        expect(getPositions(orders)).toEqual({
-          open: [],
-          closed: [
-            { pieces: 1, bought: 50, sold: 60 },
-            { pieces: 1, bought: 55, sold: 60 },
-          ],
-        });
-      });
-
-      it("buying 2, selling 1,1", () => {
-        const orders = getOrders([
-          { pieces: 2, sharePrice: 50 },
-          { pieces: -1, sharePrice: 55 },
-          { pieces: -1, sharePrice: 60 },
-        ]);
-
-        expect(getPositions(orders)).toEqual({
-          open: [],
-          closed: [
-            { pieces: 1, bought: 50, sold: 55 },
-            { pieces: 1, bought: 50, sold: 60 },
-          ],
-        });
-      });
-
-      it("buying/selling 10,5,-10,-5,12,4,-3,-13", () => {
-        const orders = getOrders([
-          { pieces: 10, sharePrice: 50 },
-          { pieces: 5, sharePrice: 55 },
-          { pieces: -10, sharePrice: 60 },
-          { pieces: -5, sharePrice: 60 },
-          { pieces: 12, sharePrice: 65 },
-          { pieces: 4, sharePrice: 65 },
-          { pieces: -3, sharePrice: 85 },
-          { pieces: -13, sharePrice: 100 },
-        ]);
-
-        expect(getPositions(orders)).toEqual({
-          open: [],
-          closed: [
-            { pieces: 10, bought: 50, sold: 60 },
-            { pieces: 5, bought: 55, sold: 60 },
-            { pieces: 3, bought: 65, sold: 85 },
-            { pieces: 9, bought: 65, sold: 100 },
-            { pieces: 4, bought: 65, sold: 100 },
-          ],
-        });
-      });
-    });
-
-    it("orders are not given chronologically", () => {
-      const orders = getOrders([
-        { pieces: 1, sharePrice: 50, timestamp: "2022-02-01" },
-        { pieces: 1, sharePrice: 45, timestamp: "2022-01-15" },
-        { pieces: -1, sharePrice: 55, timestamp: "2022-02-15" },
-        { pieces: -1, sharePrice: 60, timestamp: "2022-03-01" },
-      ]);
-
-      expect(getPositions(orders)).toEqual({
-        open: [],
-        closed: [
-          { pieces: 1, bought: 45, sold: 55 },
-          { pieces: 1, bought: 50, sold: 60 },
-        ],
-      });
-    });
-
-    it("returns undefined if more positions are sold than bought", () => {
-      const orders = getOrders([
-        { pieces: 2, sharePrice: 50 },
-        { pieces: -3, sharePrice: 55 },
-      ]);
-
-      expect(getPositions(orders)).toBeUndefined();
     });
   });
 });
