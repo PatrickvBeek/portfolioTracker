@@ -11,10 +11,12 @@ import {
 import { sumBy } from "lodash";
 import { useEffect, useState } from "react";
 import {
+  getEndValueOfIsinInPortfolio,
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfIsinInPortfolio,
 } from "../../../../data/portfolio/portfolio";
+import { getPositions } from "../../../../data/portfolio/portfolioPositions";
 import { AssetLibrary, Portfolio } from "../../../../data/types";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
@@ -30,13 +32,22 @@ const { bemBlock, bemElement } = bemHelper("open-closed-inventory-list");
 interface InventoryItem {
   asset: string;
   pieces: number;
-  invested: number;
+  initialValue: number;
+  endValue: number;
   orderFees: number;
+  profit: number;
 }
 
-const TABLE_HEADERS = ["Asset", "Pieces", "Initial Value", "Fees"];
+const TABLE_HEADERS = [
+  "Asset",
+  "Pieces",
+  "Initial Value",
+  "End Value",
+  "Fees",
+  "Profit",
+];
 
-export const OpenInventoryList = ({
+export const ClosedInventoryList = ({
   className,
   portfolioName,
 }: OpenInventoryListProps) => {
@@ -52,7 +63,7 @@ export const OpenInventoryList = ({
 
   return (
     <div className={bemBlock(className)}>
-      <div className={bemElement("heading")}>Open Positions</div>
+      <div className={bemElement("heading")}>Closed Positions</div>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -82,8 +93,10 @@ export const OpenInventoryList = ({
               <TableRow key={row.asset}>
                 <TableCell align="left">{row.asset}</TableCell>
                 <TableCell align="right">{row.pieces}</TableCell>
-                <TableCell align="right">{toPrice(row.invested)}</TableCell>
+                <TableCell align="right">{toPrice(row.initialValue)}</TableCell>
+                <TableCell align="right">{toPrice(row.endValue)}</TableCell>
                 <TableCell align="right">{toPrice(row.orderFees)}</TableCell>
+                <TableCell align="right">{toPrice(row.profit)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -94,10 +107,16 @@ export const OpenInventoryList = ({
               }`}</TableCell>
               <TableCell align="right">{""}</TableCell>
               <TableCell align="right">
-                {`${toPrice(sumBy(rows, (a) => a.invested))}`}
+                {`${toPrice(sumBy(rows, (a) => a.initialValue))}`}
+              </TableCell>
+              <TableCell align="right">
+                {`${toPrice(sumBy(rows, (a) => a.endValue))}`}
               </TableCell>
               <TableCell align="right">
                 {`${toPrice(sumBy(rows, (a) => a.orderFees))}`}
+              </TableCell>
+              <TableCell align="right">
+                {`${toPrice(sumBy(rows, (a) => a.profit))}`}
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -118,10 +137,16 @@ function getInventoryRows(
     .map((isin) => ({
       asset: assets[isin]?.displayName || "asset not found",
       pieces: Number(
-        getPiecesOfIsinInPortfolio(portfolio, isin, "open").toPrecision(4)
+        getPiecesOfIsinInPortfolio(portfolio, isin, "closed").toPrecision(4)
       ),
-      invested: getInitialValueOfIsinInPortfolio(portfolio, isin, "open"),
-      orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "open"),
+      initialValue: getInitialValueOfIsinInPortfolio(portfolio, isin, "closed"),
+      endValue: getEndValueOfIsinInPortfolio(portfolio, isin),
+      orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "both"),
+      profit: sumBy(
+        getPositions(portfolio.orders[isin])?.closed,
+        ({ pieces, buyPrice, sellPrice, orderFee }) =>
+          pieces * (sellPrice - buyPrice) - orderFee
+      ),
     }))
     .filter((pos) => pos.pieces > 0);
 }

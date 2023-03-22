@@ -100,14 +100,12 @@ export const addTransactionToPortfolio = (
 export const deleteTransactionFromPortfolio = (
   portfolio: Portfolio,
   transaction: CashTransaction
-): Portfolio => {
-  return {
-    ...portfolio,
-    transactions: portfolio.transactions.filter(
-      (currentTransaction) => currentTransaction.uuid !== transaction.uuid
-    ),
-  };
-};
+): Portfolio => ({
+  ...portfolio,
+  transactions: portfolio.transactions.filter(
+    (currentTransaction) => currentTransaction.uuid !== transaction.uuid
+  ),
+});
 
 export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
   name: name,
@@ -132,15 +130,25 @@ export const getOrderFeesOfIsinInPortfolio = (
   return sumBy(fees[positionType], (pos) => pos.orderFee);
 };
 
-export const getInvestedValueOfIsinInPortfolio = (
+export const getInitialValueOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
   positionType: keyof AssetPositions = "open"
-): number => {
-  return isin in portfolio.orders
+): number =>
+  isin in portfolio.orders
     ? sumBy(
         getPositions(portfolio.orders[isin])?.[positionType],
         (p) => p.buyPrice * p.pieces
       )
     : 0;
-};
+
+export const getEndValueOfIsinInPortfolio = (
+  portfolio: Portfolio,
+  isin: string
+): number =>
+  isin in portfolio.orders
+    ? sumBy(
+        getPositions(portfolio.orders[isin])?.closed,
+        (p) => p.sellPrice * p.pieces
+      )
+    : 0;

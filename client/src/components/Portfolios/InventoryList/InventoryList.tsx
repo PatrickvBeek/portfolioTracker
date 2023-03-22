@@ -1,3 +1,5 @@
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import {
   createColumnHelper,
   flexRender,
@@ -7,7 +9,7 @@ import {
 import { sumBy } from "lodash";
 import { useEffect, useState } from "react";
 import {
-  getInvestedValueOfIsinInPortfolio,
+  getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfIsinInPortfolio,
 } from "../../../data/portfolio/portfolio";
@@ -17,8 +19,6 @@ import { useGetPortfolios } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import "./InventoryList.css";
 
 const { bemBlock, bemElement } = bemHelper("inventory-list");
@@ -198,11 +198,7 @@ function getListItemsFromPortfolio(
       pieces: Number(
         getPiecesOfIsinInPortfolio(portfolio, isin, positionType).toPrecision(4)
       ),
-      invested: getInvestedValueOfIsinInPortfolio(
-        portfolio,
-        isin,
-        positionType
-      ),
+      invested: getInitialValueOfIsinInPortfolio(portfolio, isin, positionType),
       orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, positionType),
     }))
     .filter((pos) => pos.pieces > 0);

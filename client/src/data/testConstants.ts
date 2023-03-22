@@ -36,7 +36,7 @@ export const TEST_ORDER_1_GOOGLE = {
 export const TEST_ORDER_2_GOOGLE = {
   uuid: randomUUID(),
   asset: TEST_ASSET_GOOGLE.isin,
-  sharePrice: -105,
+  sharePrice: 105,
   orderFee: 1,
   pieces: -1,
   timestamp: "2022-04-02",

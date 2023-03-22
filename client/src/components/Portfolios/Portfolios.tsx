@@ -10,6 +10,7 @@ import Confirmation from "../general/Confirmation/Confirmation";
 import Overlay from "../general/Overlay/Overlay";
 import SelectionHeader from "../general/SelectionHeader";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
+import { ClosedInventoryList } from "./InventoryList/ClosedInventoryList/ClosedInventoryList";
 import { OpenInventoryList } from "./InventoryList/OpenInventoryList/OpenInventoryList";
 import { OrderInputForm } from "./OrderInputForm/OrderInputFrom";
 import PortfolioInputForm from "./PortfolioInputForm/PortfolioInputForm";
@@ -81,6 +82,7 @@ function Portfolios({ className }: PortfolioProps) {
       </div>
       <div className={bemElement("content")}>
         <OpenInventoryList portfolioName={selectedPortfolio} />
+        <ClosedInventoryList portfolioName={selectedPortfolio} />
       </div>
       <div className={bemElement("order-side-bar")}>
         <div>

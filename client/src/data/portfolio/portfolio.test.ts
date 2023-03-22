@@ -12,6 +12,7 @@ import {
   addTransactionToPortfolio,
   deleteOrderFromPortfolio,
   deleteTransactionFromPortfolio,
+  getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfAssetInPortfolio,
 } from "./portfolio";
@@ -174,9 +175,29 @@ describe("The Portfolio utility function", () => {
     });
   });
 
-  describe("getInvestedValueOfIsinInPortfolio", () => {
-    it.skip("returns the correct value", () => {
-      expect(1).toEqual(1);
+  describe("getInvestedValueOfIsinInPortfolio returns the correct value for", () => {
+    const testPortfolio = TEST_PORTFOLIO;
+
+    it("a single open position", () => {
+      expect(
+        getInitialValueOfIsinInPortfolio(testPortfolio, TEST_ASSET_GOOGLE.isin)
+      ).toEqual(100);
+    });
+
+    it("a single closed position", () => {
+      expect(
+        getInitialValueOfIsinInPortfolio(
+          testPortfolio,
+          TEST_ASSET_GOOGLE.isin,
+          "closed"
+        )
+      ).toEqual(100);
+    });
+
+    it("for an non existing isin", () => {
+      expect(
+        getInitialValueOfIsinInPortfolio(testPortfolio, "not present", "closed")
+      ).toEqual(0);
     });
   });
 });
