@@ -42,7 +42,10 @@ export const OpenInventoryList = ({
 }: OpenInventoryListProps) => {
   const portfolioQuery = useGetPortfolios();
   const assetQuery = useGetAssets();
-  const [rows, setRows] = useState<InventoryItem[]>([]);
+  const portfolioData = portfolioQuery.data?.[portfolioName];
+  const [rows, setRows] = useState<InventoryItem[]>(
+    getInventoryRows(portfolioData, assetQuery.data)
+  );
 
   useEffect(() => {
     setRows(
