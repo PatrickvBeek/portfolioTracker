@@ -141,7 +141,7 @@ function getInventoryRows(
       ),
       initialValue: getInitialValueOfIsinInPortfolio(portfolio, isin, "closed"),
       endValue: getEndValueOfIsinInPortfolio(portfolio, isin),
-      orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "both"),
+      orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "closed"),
       profit: sumBy(
         getPositions(portfolio.orders[isin])?.closed,
         ({ pieces, buyPrice, sellPrice, orderFee }) =>
