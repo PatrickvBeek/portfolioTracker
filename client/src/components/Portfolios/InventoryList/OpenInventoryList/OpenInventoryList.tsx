@@ -8,7 +8,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { sumBy } from "lodash";
+import { sum } from "radash";
 import { useEffect, useState } from "react";
 import {
   getInitialValueOfIsinInPortfolio,
@@ -97,10 +97,10 @@ export const OpenInventoryList = ({
               }`}</TableCell>
               <TableCell align="right">{""}</TableCell>
               <TableCell align="right">
-                {`${toPrice(sumBy(rows, (a) => a.invested))}`}
+                {`${toPrice(sum(rows, (a) => a.invested))}`}
               </TableCell>
               <TableCell align="right">
-                {`${toPrice(sumBy(rows, (a) => a.orderFees))}`}
+                {`${toPrice(sum(rows, (a) => a.orderFees))}`}
               </TableCell>
             </TableRow>
           </TableFooter>

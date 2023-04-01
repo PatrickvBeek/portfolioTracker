@@ -1,4 +1,4 @@
-import { sortBy, sumBy } from "lodash";
+import { sort, sum } from "radash";
 import {
   Asset,
   AssetPositions,
@@ -47,8 +47,8 @@ export const getPiecesOfIsinInPortfolio = (
   positionType: keyof AssetPositions = "open"
 ): number => {
   return isin in portfolio.orders
-    ? sumBy(
-        getPositions(portfolio.orders[isin])?.[positionType],
+    ? sum(
+        getPositions(portfolio.orders[isin])?.[positionType] || [],
         (pos) => pos.pieces
       )
     : 0;
@@ -61,9 +61,9 @@ export const addOrderToPortfolio = (
   ...portfolio,
   orders: {
     ...portfolio.orders,
-    [order.asset]: sortBy(
+    [order.asset]: sort(
       [...(portfolio.orders[order.asset] || []), order],
-      (order) => new Date(order.timestamp)
+      (order) => new Date(order.timestamp).getTime()
     ),
   },
 });
@@ -91,9 +91,8 @@ export const addTransactionToPortfolio = (
   transaction: CashTransaction
 ): Portfolio => ({
   ...portfolio,
-  transactions: sortBy(
-    [...portfolio.transactions, transaction],
-    (transaction) => new Date(transaction.date)
+  transactions: sort([...portfolio.transactions, transaction], (transaction) =>
+    new Date(transaction.date).getTime()
   ),
 });
 
@@ -127,7 +126,7 @@ export const getOrderFeesOfIsinInPortfolio = (
     both: positions.open.concat(positions.closed),
   };
 
-  return sumBy(fees[positionType], (pos) => pos.orderFee);
+  return sum(fees[positionType], (pos) => pos.orderFee);
 };
 
 export const getInitialValueOfIsinInPortfolio = (
@@ -136,8 +135,8 @@ export const getInitialValueOfIsinInPortfolio = (
   positionType: keyof AssetPositions = "open"
 ): number =>
   isin in portfolio.orders
-    ? sumBy(
-        getPositions(portfolio.orders[isin])?.[positionType],
+    ? sum(
+        getPositions(portfolio.orders[isin])?.[positionType] || [],
         (p) => p.buyPrice * p.pieces
       )
     : 0;
@@ -147,8 +146,8 @@ export const getEndValueOfIsinInPortfolio = (
   isin: string
 ): number =>
   isin in portfolio.orders
-    ? sumBy(
-        getPositions(portfolio.orders[isin])?.closed,
+    ? sum(
+        getPositions(portfolio.orders[isin])?.closed || [],
         (p) => p.sellPrice * p.pieces
       )
     : 0;

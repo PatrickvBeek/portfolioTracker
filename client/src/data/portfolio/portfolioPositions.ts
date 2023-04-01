@@ -1,13 +1,13 @@
-import { partition, sortBy, sumBy } from "lodash";
+import { fork, sort, sum } from "radash";
 import { AssetPositions, ClosedPosition, OpenPosition, Order } from "../types";
 
 export function getPositions(orders: Order[]): AssetPositions | undefined {
-  if (sumBy(orders, (order) => order.pieces) < 0) {
+  if (sum(orders, (order) => order.pieces) < 0) {
     return undefined;
   }
 
-  const [buyOrders, sellOrders] = partition(
-    sortBy(orders, (order) => new Date(order.timestamp)),
+  const [buyOrders, sellOrders] = fork(
+    sort(orders, (order) => new Date(order.timestamp).getTime()),
     (order) => order.pieces > 0
   );
   const openPositions: OpenPosition[] = buyOrders.map(orderToOpenPosition);

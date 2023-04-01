@@ -1,4 +1,4 @@
-import { sumBy } from "lodash";
+import { sum } from "radash";
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
 import { getPositions } from "../../../data/portfolio/portfolioPositions";
@@ -57,8 +57,10 @@ export function OrderInputForm({
 
   const isOrderValid =
     pieces &&
-    (sumBy(getPositions(portfolio.orders[isin])?.open, (pos) => pos.pieces) ||
-      0) +
+    (sum(
+      getPositions(portfolio.orders[isin])?.open || [],
+      (pos) => pos.pieces
+    ) || 0) +
       pieces >=
       0;
 

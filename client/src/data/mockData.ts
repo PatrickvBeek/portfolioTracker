@@ -1,27 +1,16 @@
-import { list } from "radash";
+import { uid } from "radash";
 import { v4 } from "uuid";
-import { getRandomString } from "../utils";
-import { Order, Portfolio } from "./types";
+import { Order } from "./types";
 
 export function getTestOrder(order: Partial<Order>): Order {
   return {
-    asset: getRandomString(6),
+    asset: uid(6),
     orderFee: Math.random() * 100,
     pieces: Math.random() * 100,
     sharePrice: Math.random() * 1000,
     timestamp: new Date().toISOString(),
     uuid: v4(),
     ...order,
-  };
-}
-
-function getTestPortfolio(portfolio: Partial<Portfolio>): Portfolio {
-  const numberOfRandomOrders = Math.floor(Math.random() * 10);
-  const orders = list(numberOfRandomOrders).map(() => getTestOrder({}));
-  return {
-    name: getRandomString(6),
-    orders: getElementsGroupedByAsset(orders),
-    transactions: [],
   };
 }
 

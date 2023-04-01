@@ -8,7 +8,7 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { sumBy } from "lodash";
+import { sum } from "radash";
 import { useEffect, useState } from "react";
 import {
   getEndValueOfIsinInPortfolio,
@@ -107,16 +107,16 @@ export const ClosedInventoryList = ({
               }`}</TableCell>
               <TableCell align="right">{""}</TableCell>
               <TableCell align="right">
-                {`${toPrice(sumBy(rows, (a) => a.initialValue))}`}
+                {`${toPrice(sum(rows, (a) => a.initialValue))}`}
               </TableCell>
               <TableCell align="right">
-                {`${toPrice(sumBy(rows, (a) => a.endValue))}`}
+                {`${toPrice(sum(rows, (a) => a.endValue))}`}
               </TableCell>
               <TableCell align="right">
-                {`${toPrice(sumBy(rows, (a) => a.orderFees))}`}
+                {`${toPrice(sum(rows, (a) => a.orderFees))}`}
               </TableCell>
               <TableCell align="right">
-                {`${toPrice(sumBy(rows, (a) => a.profit))}`}
+                {`${toPrice(sum(rows, (a) => a.profit))}`}
               </TableCell>
             </TableRow>
           </TableFooter>
@@ -142,8 +142,8 @@ function getInventoryRows(
       initialValue: getInitialValueOfIsinInPortfolio(portfolio, isin, "closed"),
       endValue: getEndValueOfIsinInPortfolio(portfolio, isin),
       orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "closed"),
-      profit: sumBy(
-        getPositions(portfolio.orders[isin])?.closed,
+      profit: sum(
+        getPositions(portfolio.orders[isin])?.closed || [],
         ({ pieces, buyPrice, sellPrice, orderFee }) =>
           pieces * (sellPrice - buyPrice) - orderFee
       ),
