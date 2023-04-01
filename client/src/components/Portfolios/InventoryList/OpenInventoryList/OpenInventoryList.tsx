@@ -21,11 +21,11 @@ import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
 import { toPrice } from "../../../../utility/prices";
 import { Props } from "../../../../utility/types";
-import "../OpenClosedInventoryList.css";
+import "../InventoryList.css";
 
 type OpenInventoryListProps = Props<{ portfolioName: string }>;
 
-const { bemBlock, bemElement } = bemHelper("open-closed-inventory-list");
+const { bemBlock, bemElement } = bemHelper("inventory-list");
 
 interface InventoryItem {
   asset: string;
