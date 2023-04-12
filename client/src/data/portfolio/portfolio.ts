@@ -1,4 +1,4 @@
-import { partition, sortBy, sumBy } from "lodash";
+import { sort, sum } from "radash";
 import {
   Asset,
   AssetPositions,
@@ -6,8 +6,8 @@ import {
   Order,
   Portfolio,
   PortfolioLibrary,
-  Position,
 } from "../types";
+import { getPositions } from "./portfolioPositions";
 
 export function addPortfolioToLibrary(
   previousLibrary: PortfolioLibrary,
@@ -35,17 +35,22 @@ export function deletePortfolioFromLibrary(
 
 export const getPiecesOfAssetInPortfolio = (
   portfolio: Portfolio,
-  asset: Asset
+  asset: Asset,
+  positionType: keyof AssetPositions = "open"
 ): number => {
-  return getPiecesOfIsinInPortfolio(portfolio, asset.isin);
+  return getPiecesOfIsinInPortfolio(portfolio, asset.isin, positionType);
 };
 
 export const getPiecesOfIsinInPortfolio = (
   portfolio: Portfolio,
-  isin: string
+  isin: string,
+  positionType: keyof AssetPositions = "open"
 ): number => {
   return isin in portfolio.orders
-    ? sumBy(getPositions(portfolio.orders[isin])?.open, (pos) => pos.pieces)
+    ? sum(
+        getPositions(portfolio.orders[isin])?.[positionType] || [],
+        (pos) => pos.pieces
+      )
     : 0;
 };
 
@@ -56,9 +61,9 @@ export const addOrderToPortfolio = (
   ...portfolio,
   orders: {
     ...portfolio.orders,
-    [order.asset]: sortBy(
+    [order.asset]: sort(
       [...(portfolio.orders[order.asset] || []), order],
-      (order) => new Date(order.timestamp)
+      (order) => new Date(order.timestamp).getTime()
     ),
   },
 });
@@ -86,23 +91,20 @@ export const addTransactionToPortfolio = (
   transaction: CashTransaction
 ): Portfolio => ({
   ...portfolio,
-  transactions: sortBy(
-    [...portfolio.transactions, transaction],
-    (transaction) => new Date(transaction.date)
+  transactions: sort([...portfolio.transactions, transaction], (transaction) =>
+    new Date(transaction.date).getTime()
   ),
 });
 
 export const deleteTransactionFromPortfolio = (
   portfolio: Portfolio,
   transaction: CashTransaction
-): Portfolio => {
-  return {
-    ...portfolio,
-    transactions: portfolio.transactions.filter(
-      (currentTransaction) => currentTransaction.uuid !== transaction.uuid
-    ),
-  };
-};
+): Portfolio => ({
+  ...portfolio,
+  transactions: portfolio.transactions.filter(
+    (currentTransaction) => currentTransaction.uuid !== transaction.uuid
+  ),
+});
 
 export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
   name: name,
@@ -112,83 +114,40 @@ export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
 
 export const getOrderFeesOfIsinInPortfolio = (
   portfolio: Portfolio,
-  isin: string
+  isin: string,
+  positionType: keyof AssetPositions | "both"
 ): number => {
-  return sumBy(
-    Object.values(portfolio.orders[isin] || []),
-    (order) => order.orderFee
-  );
+  const positions = getPositions(portfolio.orders[isin] || []);
+  if (!positions) {
+    return 0;
+  }
+  const fees = {
+    ...positions,
+    both: positions.open.concat(positions.closed),
+  };
+
+  return sum(fees[positionType], (pos) => pos.orderFee);
 };
 
-export const getInvestedValueOfIsinInPortfolio = (
+export const getInitialValueOfIsinInPortfolio = (
   portfolio: Portfolio,
-  isin: string
-): number => {
-  return isin in portfolio.orders
-    ? sumBy(
-        getPositions(portfolio.orders[isin])?.open,
-        (p) => p.bought * p.pieces
+  isin: string,
+  positionType: keyof AssetPositions = "open"
+): number =>
+  isin in portfolio.orders
+    ? sum(
+        getPositions(portfolio.orders[isin])?.[positionType] || [],
+        (p) => p.buyPrice * p.pieces
       )
     : 0;
-};
 
-export const getPositions = (orders: Order[]): AssetPositions | undefined => {
-  function getPositionsFromSell(
-    openPositions: Position[],
-    sell: Order
-  ): [Position[], Position[]] {
-    const piecesToSell = -sell.pieces;
-    const [firstPosition, ...remaining] = openPositions;
-
-    if (piecesToSell === firstPosition.pieces) {
-      return [remaining, [{ ...firstPosition, sold: sell.sharePrice }]];
-    }
-    if (piecesToSell < firstPosition.pieces) {
-      const newlyClosed = {
-        ...firstPosition,
-        pieces: piecesToSell,
-        sold: sell.sharePrice,
-      };
-      const reducedPosition = {
-        ...firstPosition,
-        pieces: firstPosition.pieces - piecesToSell,
-      };
-      return [[reducedPosition, ...remaining], [newlyClosed]];
-    } else {
-      const newlyClosed = { ...firstPosition, sold: sell.sharePrice };
-      const piecesStillToSell = piecesToSell - firstPosition.pieces;
-      const [finallyOpen, alsoClosed] = getPositionsFromSell(remaining, {
-        ...sell,
-        pieces: -piecesStillToSell,
-      });
-      return [finallyOpen, [newlyClosed, ...alsoClosed]];
-    }
-  }
-
-  if (sumBy(orders, (order) => order.pieces) < 0) {
-    return undefined;
-  }
-
-  const [buyOrders, sellOrders] = partition(
-    sortBy(orders, (order) => new Date(order.timestamp)),
-    (order) => order.pieces > 0
-  );
-  const openPositions = buyOrders.map((buy) => ({
-    pieces: buy.pieces,
-    bought: buy.sharePrice,
-  }));
-
-  return sellOrders.reduce(
-    (positions, sell) => {
-      const [stillOpen, closedFromSell] = getPositionsFromSell(
-        positions.open,
-        sell
-      );
-      return {
-        open: stillOpen,
-        closed: [...positions.closed, ...closedFromSell],
-      };
-    },
-    { open: openPositions, closed: [] } as AssetPositions
-  );
-};
+export const getEndValueOfIsinInPortfolio = (
+  portfolio: Portfolio,
+  isin: string
+): number =>
+  isin in portfolio.orders
+    ? sum(
+        getPositions(portfolio.orders[isin])?.closed || [],
+        (p) => p.sellPrice * p.pieces
+      )
+    : 0;

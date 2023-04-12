@@ -16,12 +16,14 @@
   --accent-color: var(--light-blue);
 
   --default-border-radius: 4px;
+  --half-spacing: 0.5rem;
   --default-spacing: 1rem;
   --double-spacing: 2rem;
-  --half-spacing: 0.5rem;
+  --triple-spacing: 3em;
 
   --font-small2: 0.64rem;
   --font-small1: 0.8rem;
+  --font-base: 1rem;
   --font-large1: 1.25rem;
   --font-large2: 1.563rem;
   --font-large3: 1.953rem;

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { mapKeys, partial } from "lodash";
+import { mapKeys, partial } from "radash";
 
 type Modifiers =
   | string
@@ -25,7 +25,7 @@ function modify(className: string, modifiers: Modifiers): Modifiers {
     );
   }
 
-  return mapKeys(modifiers, (enabled, modifier) =>
+  return mapKeys<unknown, string, string>(modifiers, (modifier, enabled) =>
     withModifier(className, modifier)
   );
 }
