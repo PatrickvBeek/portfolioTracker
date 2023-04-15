@@ -4,19 +4,27 @@ import {
   addPortfolioToLibrary,
   addTransactionToPortfolio,
   deletePortfolioFromLibrary,
-} from "../../data/portfolio/portfolio";
+} from "../..//domain/portfolio/portfolio";
 import {
   CashTransaction,
   Order,
   Portfolio,
   PortfolioLibrary,
-} from "../../data/types";
+} from "../..//domain/types";
 
 export function useGetPortfolios() {
   return useQuery("portfolios", fetchPortfolios);
 }
 
-export function useUpdatePortfolios<T extends PortfolioUpdate>(
+export function useAddPortfolio() {
+  return useUpdatePortfolios(addPortfolioToLibrary);
+}
+
+export function useDeletePortfolio() {
+  return useUpdatePortfolios(deletePortfolioFromLibrary);
+}
+
+function useUpdatePortfolios<T extends PortfolioUpdate>(
   updater: PortfolioUpdater<T>
 ) {
   const queryClient = useQueryClient();
@@ -38,41 +46,13 @@ export function useUpdatePortfolios<T extends PortfolioUpdate>(
   );
 }
 
-export function useAddPortfolio() {
-  return useUpdatePortfolios(addPortfolioToLibrary);
-}
-
-export function useDeletePortfolio() {
-  return useUpdatePortfolios(deletePortfolioFromLibrary);
-}
-
-export function useAddOrderToPortfolio(portfolio: string) {
-  const addOrder: (
-    library: PortfolioLibrary,
-    order: Order
-  ) => PortfolioLibrary = (lib, order) => {
-    if (!lib[portfolio]) {
-      console.log(
-        "portfolio with name",
-        portfolio,
-        "unexpectedly not found in library:",
-        JSON.stringify(lib, null, 4)
-      );
-      return lib;
-    }
-    const newPortfolio = addOrderToPortfolio(lib[portfolio], order);
-    return addPortfolioToLibrary(lib, newPortfolio);
-  };
-  return useUpdatePortfolios(addOrder);
-}
-
-export function useAddCashTransactionToPortfolioWithName(portfolio: string) {
+export function useAddCashTransactionToPortfolio(portfolio: string) {
   const addTransaction: (
     library: PortfolioLibrary,
     transaction: CashTransaction
   ) => PortfolioLibrary = (lib, transaction) => {
     if (!lib[portfolio]) {
-      console.log(
+      console.error(
         "portfolio with name",
         portfolio,
         "unexpectedly not found in library:",
@@ -84,6 +64,26 @@ export function useAddCashTransactionToPortfolioWithName(portfolio: string) {
     return addPortfolioToLibrary(lib, newPortfolio);
   };
   return useUpdatePortfolios(addTransaction);
+}
+
+export function useAddOrderToPortfolio(portfolio: string) {
+  const addOrder: (
+    library: PortfolioLibrary,
+    order: Order
+  ) => PortfolioLibrary = (lib, order) => {
+    if (!lib[portfolio]) {
+      console.error(
+        "portfolio with name",
+        portfolio,
+        "unexpectedly not found in library:",
+        JSON.stringify(lib, null, 4)
+      );
+      return lib;
+    }
+    const newPortfolio = addOrderToPortfolio(lib[portfolio], order);
+    return addPortfolioToLibrary(lib, newPortfolio);
+  };
+  return useUpdatePortfolios(addOrder);
 }
 
 const fetchPortfolios = async (): Promise<Record<string, Portfolio>> => {

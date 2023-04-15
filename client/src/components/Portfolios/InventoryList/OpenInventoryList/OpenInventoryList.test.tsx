@@ -3,8 +3,12 @@ import {
   getElementsByIsin,
   getElementsGroupedByAsset,
   getTestOrder,
-} from "../../../../data/mockData";
-import { Asset, AssetLibrary, PortfolioLibrary } from "../../../../data/types";
+} from "../../../..//domain/mockData";
+import {
+  Asset,
+  AssetLibrary,
+  PortfolioLibrary,
+} from "../../../..//domain/types";
 import { mockUseGetAssets, mockUseGetPortfolios } from "../../../../testUtils";
 import { OpenInventoryList } from "./OpenInventoryList";
 
