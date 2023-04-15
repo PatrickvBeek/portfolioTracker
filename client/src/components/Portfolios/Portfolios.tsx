@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  useAddCashTransactionToPortfolioWithName,
+  useAddCashTransactionToPortfolio,
   useDeletePortfolio,
   useGetPortfolios,
 } from "../../hooks/portfolios/portfolioHooks";
@@ -14,8 +14,8 @@ import { ClosedInventoryList } from "./InventoryList/ClosedInventoryList/ClosedI
 import { OpenInventoryList } from "./InventoryList/OpenInventoryList/OpenInventoryList";
 import { OrderInputForm } from "./OrderInputForm/OrderInputFrom";
 import PortfolioInputForm from "./PortfolioInputForm/PortfolioInputForm";
-import "./Portfolios.css";
 import PortfolioViewSideBar from "./PortfolioViewSideBar/PortfolioViewSideBar";
+import "./Portfolios.css";
 import TransactionInputForm from "./TransactionInputForm/TransactionInputForm";
 
 const { bemBlock, bemElement } = bemHelper("portfolios");
@@ -30,7 +30,7 @@ function Portfolios({ className }: PortfolioProps) {
     useState(false);
   const deletePortfolio = useDeletePortfolio().mutate;
   const addTransaction =
-    useAddCashTransactionToPortfolioWithName(selectedPortfolio).mutate;
+    useAddCashTransactionToPortfolio(selectedPortfolio).mutate;
 
   useEffect(() => {
     const portfolios = Object.keys(portfoliosQuery.data || {});

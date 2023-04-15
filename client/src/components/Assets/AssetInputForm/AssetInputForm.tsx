@@ -1,9 +1,9 @@
 import { ReactElement, useState } from "react";
-import { useAddAsset } from "../../hooks/assets/assetHooks";
-import { bemHelper } from "../../utility/bemHelper";
-import { Button } from "../general/Button";
-import { FormRowFlex } from "../general/FormRowFlex/FormRowFlex";
-import { TextInput } from "../general/TextInput";
+import { useAddAsset } from "../../../hooks/assets/assetHooks";
+import { bemHelper } from "../../../utility/bemHelper";
+import { Button } from "../../general/Button";
+import { FormRowFlex } from "../../general/FormRowFlex/FormRowFlex";
+import { TextInput } from "../../general/TextInput";
 import "./AssetInputForm.css";
 
 const { bemBlock, bemElement } = bemHelper("asset-input-form");

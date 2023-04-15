@@ -1,5 +1,5 @@
 import { Autocomplete, Box, TextField } from "@mui/material";
-import { Asset } from "../../../data/types";
+import { Asset } from "../../..//domain/types";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";

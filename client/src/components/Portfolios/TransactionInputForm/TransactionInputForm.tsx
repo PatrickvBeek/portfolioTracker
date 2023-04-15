@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { v4 as uuidV4 } from "uuid";
-import { CashTransaction } from "../../../data/types";
+import { CashTransaction } from "../../..//domain/types";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
 import { Button } from "../../general/Button";

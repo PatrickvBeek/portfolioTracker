@@ -1,6 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { TEST_ASSET_TESLA, TEST_PORTFOLIO } from "../../../data/testConstants";
+import {
+  TEST_ASSET_TESLA,
+  TEST_PORTFOLIO,
+} from "../../..//domain/testConstants";
 import {
   mockUseAddOrder,
   mockUseGetAssets,

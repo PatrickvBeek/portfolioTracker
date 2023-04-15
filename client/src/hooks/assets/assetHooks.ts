@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { addAssetToLibrary, deleteAssetFromLib } from "../../data/asset/asset";
-import { Asset, AssetLibrary } from "../../data/types";
+import {
+  addAssetToLibrary,
+  deleteAssetFromLib,
+} from "../..//domain/asset/asset";
+import { Asset, AssetLibrary } from "../..//domain/types";
 
 export function useGetAssets() {
   return useQuery("assets", fetchAssets);

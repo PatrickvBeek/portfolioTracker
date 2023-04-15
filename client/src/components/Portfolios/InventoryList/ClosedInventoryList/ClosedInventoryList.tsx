@@ -15,9 +15,9 @@ import {
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfIsinInPortfolio,
-} from "../../../../data/portfolio/portfolio";
-import { getPositions } from "../../../../data/portfolio/portfolioPositions";
-import { AssetLibrary, Portfolio } from "../../../../data/types";
+} from "../../../..//domain/portfolio/portfolio";
+import { getPositions } from "../../../..//domain/portfolio/portfolioPositions";
+import { AssetLibrary, Portfolio } from "../../../..//domain/types";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";

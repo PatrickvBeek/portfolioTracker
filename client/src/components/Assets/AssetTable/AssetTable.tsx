@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
-import { Asset } from "../../data/types";
-import { useDeleteAsset, useGetAssets } from "../../hooks/assets/assetHooks";
-import Table, { TableRow } from "../general/Table";
+import { Asset } from "../../../domain/types";
+import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
+import Table, { TableRow } from "../../general/Table";
 import "./AssetTable.css";
 
 const DeleteButton = (onClick: () => void): ReactElement => {

@@ -1,8 +1,8 @@
 import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
-import AssetInputForm from "../AssetInputForm/AssetInputForm";
-import AssetTable from "../AssetTable/AssetTable";
 import Tile from "../general/Tile";
+import AssetInputForm from "./AssetInputForm/AssetInputForm";
+import AssetTable from "./AssetTable/AssetTable";
 import "./Assets.css";
 
 const { bemBlock, bemElement } = bemHelper("assets-page");
