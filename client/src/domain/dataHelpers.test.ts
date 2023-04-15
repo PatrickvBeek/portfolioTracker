@@ -1,4 +1,4 @@
-import { getElementsGroupedByAsset, getTestOrder } from "./mockData";
+import { getElementsGroupedByAsset, getTestOrder } from "./dataHelpers";
 
 describe("the mock data util function", () => {
   describe("getElementsByAsset", () => {

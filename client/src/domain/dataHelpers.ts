@@ -14,6 +14,12 @@ export function getTestOrder(order: Partial<Order>): Order {
   };
 }
 
+export function getTestOrdersGroupedByAsset(
+  orderProps: Partial<Order>[]
+): Record<string, Order[]> {
+  return getElementsGroupedByAsset(orderProps.map(getTestOrder));
+}
+
 export function getElementsGroupedByAsset<T extends { asset: string }>(
   elements: T[]
 ): Record<string, T[]> {

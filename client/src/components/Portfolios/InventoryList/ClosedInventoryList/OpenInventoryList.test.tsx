@@ -1,14 +1,14 @@
 import { render, screen, within } from "@testing-library/react";
 import {
-  getElementsByIsin,
-  getElementsGroupedByAsset,
-  getTestOrder,
-} from "../../../..//domain/mockData";
-import {
   Asset,
   AssetLibrary,
   PortfolioLibrary,
 } from "../../../..//domain/types";
+import {
+  getElementsByIsin,
+  getElementsGroupedByAsset,
+  getTestOrder,
+} from "../../../../domain/dataHelpers";
 import { mockUseGetAssets, mockUseGetPortfolios } from "../../../../testUtils";
 import { ClosedInventoryList } from "./ClosedInventoryList";
 
