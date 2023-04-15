@@ -7,11 +7,12 @@
 .input__field {
   height: 2rem;
   font-size: 1rem;
-  border-width: 2px;
+  border-width: 1px;
+  border-color: rgba(0, 0, 0, 0.25);
   border-style: solid;
   border-radius: var(--default-border-radius);
   width: 100%;
-  padding-left: 0.25rem;
+  padding: 1.5rem;
   margin: 0.25em 0px;
   box-sizing: border-box;
 }

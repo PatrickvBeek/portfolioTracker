@@ -33,7 +33,7 @@ const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
     <Autocomplete
       className={bemBlock(className)}
       renderInput={(params) => (
-        <TextField {...params} variant="standard" label="Asset" />
+        <TextField {...params} variant="outlined" label="Asset" />
       )}
       options={assets}
       onChange={(event, value) => value?.isin && onSelect(value?.isin)}
