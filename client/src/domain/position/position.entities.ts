@@ -1,10 +1,5 @@
 import { Order } from "../order/order.entities";
 
-export interface AssetPositions {
-  open: OpenPosition[];
-  closed: ClosedPosition[];
-}
-
 export interface OpenPosition {
   pieces: Order["pieces"];
   buyDate: Order["timestamp"];
@@ -16,3 +11,15 @@ export interface ClosedPosition extends OpenPosition {
   sellDate: Order["timestamp"];
   sellPrice: Order["sharePrice"];
 }
+
+export interface Positions {
+  open: OpenPosition[];
+  closed: ClosedPosition[];
+}
+
+export interface PositionHistoryDataPoint {
+  date: Date;
+  positions: Positions;
+}
+
+export type PositionHistory = PositionHistoryDataPoint[];

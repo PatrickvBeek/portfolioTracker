@@ -1,12 +1,12 @@
 import { sum } from "radash";
 import { getPositions } from "../position/position.derivers";
-import { AssetPositions } from "../position/position.entities";
+import { Positions } from "../position/position.entities";
 import { Portfolio } from "./portfolio.entities";
 
 export const getPiecesOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  positionType: keyof AssetPositions = "open"
+  positionType: keyof Positions = "open"
 ): number => {
   return isin in portfolio.orders
     ? sum(
@@ -19,7 +19,7 @@ export const getPiecesOfIsinInPortfolio = (
 export const getOrderFeesOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  positionType: keyof AssetPositions | "both"
+  positionType: keyof Positions | "both"
 ): number => {
   const positions = getPositions(portfolio.orders[isin] || []);
   if (!positions) {
@@ -36,7 +36,7 @@ export const getOrderFeesOfIsinInPortfolio = (
 export const getInitialValueOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  positionType: keyof AssetPositions = "open"
+  positionType: keyof Positions = "open"
 ): number =>
   isin in portfolio.orders
     ? sum(

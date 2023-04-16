@@ -1,12 +1,14 @@
-import { fork, sort, sum } from "radash";
+import { fork, last, sort, sum } from "radash";
+import { getOrderDate } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import {
-  AssetPositions,
   ClosedPosition,
   OpenPosition,
+  PositionHistory,
+  Positions,
 } from "./position.entities";
 
-export function getPositions(orders: Order[]): AssetPositions | undefined {
+export function getPositions(orders: Order[]): Positions | undefined {
   if (sum(orders, (order) => order.pieces) < 0) {
     return undefined;
   }
@@ -17,32 +19,28 @@ export function getPositions(orders: Order[]): AssetPositions | undefined {
   );
   const openPositions: OpenPosition[] = buyOrders.map(orderToOpenPosition);
 
-  return sellOrders.reduce(
-    (positions: AssetPositions, sell) => {
-      const [stillOpen, closedFromSell] = getPositionsFromSell(
-        positions.open,
-        sell
-      );
-      return {
-        open: stillOpen,
-        closed: [...positions.closed, ...closedFromSell],
-      };
-    },
-    { open: openPositions, closed: [] }
-  );
+  return sellOrders.reduce<Positions | undefined>(getPositionsFromSell, {
+    open: openPositions,
+    closed: [],
+  });
 }
 
 function getPositionsFromSell(
-  openPositions: OpenPosition[],
+  positions: Positions | undefined,
   sell: Order
-): [OpenPosition[], ClosedPosition[]] {
+): Positions | undefined {
+  if (!positions || sell.pieces > 0 || positions.open.length < 1) {
+    return undefined;
+  }
+
   const piecesToSell = -sell.pieces;
-  const [firstPosition, ...remaining] = openPositions;
+  const [firstPosition, ...remaining] = positions.open;
 
   if (piecesToSell === firstPosition.pieces) {
-    return [
-      remaining,
-      [
+    return {
+      open: remaining,
+      closed: [
+        ...positions.closed,
         {
           ...firstPosition,
           sellPrice: sell.sharePrice,
@@ -50,7 +48,7 @@ function getPositionsFromSell(
           orderFee: firstPosition.orderFee + sell.orderFee,
         },
       ],
-    ];
+    };
   }
   if (piecesToSell < firstPosition.pieces) {
     const newlyClosed: ClosedPosition = {
@@ -68,7 +66,10 @@ function getPositionsFromSell(
       orderFee:
         (1 - piecesToSell / firstPosition.pieces) * firstPosition.orderFee,
     };
-    return [[reducedPosition, ...remaining], [newlyClosed]];
+    return {
+      open: [reducedPosition, ...remaining],
+      closed: [...positions.closed, newlyClosed],
+    };
   } else {
     const newlyClosed: ClosedPosition = {
       ...firstPosition,
@@ -79,12 +80,14 @@ function getPositionsFromSell(
         (firstPosition.pieces / piecesToSell) * sell.orderFee,
     };
     const piecesStillToSell = piecesToSell - firstPosition.pieces;
-    const [finallyOpen, alsoClosed] = getPositionsFromSell(remaining, {
-      ...sell,
-      pieces: -piecesStillToSell,
-      orderFee: (1 - firstPosition.pieces / piecesToSell) * sell.orderFee,
-    });
-    return [finallyOpen, [newlyClosed, ...alsoClosed]];
+    return getPositionsFromSell(
+      { open: remaining, closed: [...positions.closed, newlyClosed] },
+      {
+        ...sell,
+        pieces: -piecesStillToSell,
+        orderFee: (1 - firstPosition.pieces / piecesToSell) * sell.orderFee,
+      }
+    );
   }
 }
 
@@ -94,3 +97,48 @@ const orderToOpenPosition = (order: Order): OpenPosition => ({
   buyPrice: order.sharePrice,
   orderFee: order.orderFee,
 });
+
+export function getPositionHistory(
+  orders: Order[]
+): PositionHistory | undefined {
+  const history = orders.reduce<PositionHistory>((history, order) => {
+    const oldPositions = last(history)?.positions || { open: [], closed: [] };
+    const newPositions = getPositionsFromOrder(oldPositions, order);
+    if (!newPositions) {
+      return history;
+    }
+    return [...history, { date: getOrderDate(order), positions: newPositions }];
+  }, [] as PositionHistory);
+
+  if (history.length !== orders.length) {
+    return undefined;
+  }
+
+  return history;
+}
+
+function getPositionsFromOrder(
+  positions: Positions | undefined,
+  order: Order
+): Positions | undefined {
+  if (!positions) {
+    return undefined;
+  }
+  return order.pieces < 0
+    ? getPositionsFromSell(positions, order)
+    : getPositionsFromBuy(positions, order);
+}
+
+function getPositionsFromBuy(
+  positions: Positions,
+  buy: Order
+): Positions | undefined {
+  if (buy.pieces < 0) {
+    return undefined;
+  }
+
+  return {
+    closed: positions.closed,
+    open: [...positions.open, orderToOpenPosition(buy)],
+  };
+}
