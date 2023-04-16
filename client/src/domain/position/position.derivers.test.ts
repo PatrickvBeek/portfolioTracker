@@ -1,6 +1,11 @@
+import { Order } from "../order/order.entities";
 import { TEST_ORDER_TESLA } from "../testConstants";
-import { AssetPositions, ClosedPosition, OpenPosition, Order } from "../types";
-import { getPositions } from "./portfolioPositions";
+import { getPositions } from "./position.derivers";
+import {
+  AssetPositions,
+  ClosedPosition,
+  OpenPosition,
+} from "./position.entities";
 
 function getTestOrder(overrides: Partial<Order>): Order {
   return { ...TEST_ORDER_TESLA, ...overrides };

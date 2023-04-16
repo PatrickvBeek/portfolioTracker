@@ -1,16 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { Order } from "../../domain/order/order.entities";
+import {
+  Portfolio,
+  PortfolioLibrary,
+} from "../../domain/portfolio/portfolio.entities";
 import {
   addOrderToPortfolio,
   addPortfolioToLibrary,
-  addTransactionToPortfolio,
   deletePortfolioFromLibrary,
-} from "../..//domain/portfolio/portfolio";
-import {
-  CashTransaction,
-  Order,
-  Portfolio,
-  PortfolioLibrary,
-} from "../..//domain/types";
+} from "../../domain/portfolio/portfolio.operations";
 
 export function useGetPortfolios() {
   return useQuery("portfolios", fetchPortfolios);
@@ -46,26 +44,6 @@ function useUpdatePortfolios<T extends PortfolioUpdate>(
   );
 }
 
-export function useAddCashTransactionToPortfolio(portfolio: string) {
-  const addTransaction: (
-    library: PortfolioLibrary,
-    transaction: CashTransaction
-  ) => PortfolioLibrary = (lib, transaction) => {
-    if (!lib[portfolio]) {
-      console.error(
-        "portfolio with name",
-        portfolio,
-        "unexpectedly not found in library:",
-        JSON.stringify(lib, null, 4)
-      );
-      return lib;
-    }
-    const newPortfolio = addTransactionToPortfolio(lib[portfolio], transaction);
-    return addPortfolioToLibrary(lib, newPortfolio);
-  };
-  return useUpdatePortfolios(addTransaction);
-}
-
 export function useAddOrderToPortfolio(portfolio: string) {
   const addOrder: (
     library: PortfolioLibrary,
@@ -99,7 +77,7 @@ const savePortfoliosOnServer = async (portfolioLib: PortfolioLibrary) => {
   });
 };
 
-type PortfolioUpdate = Portfolio | Order | CashTransaction;
+type PortfolioUpdate = Portfolio | Order;
 
 type PortfolioUpdater<T extends PortfolioUpdate> = (
   lib: PortfolioLibrary,

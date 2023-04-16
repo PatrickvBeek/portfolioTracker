@@ -3,9 +3,9 @@ import {
   TEST_PORTFOLIO,
   TEST_TRANSACTION,
 } from "../../dataClasses/testUtils";
-import { PortfolioLibrary } from "./portfolioLibrary";
+import { PortfolioLibrary } from "./portfolio.entities";
 
-const TEST_PATH = "./test_data/portfolioLibrary";
+const TEST_PATH = "./test_data/portfolio.entities";
 const TEST_FILE = "PortfolioLibrary";
 
 describe("the portfolio library", () => {

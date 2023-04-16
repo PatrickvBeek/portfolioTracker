@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Asset } from "../../../domain/types";
+import { Asset } from "../../../domain/asset/asset.entities";
 import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
 import Table, { TableRow } from "../../general/Table";
 import "./AssetTable.css";

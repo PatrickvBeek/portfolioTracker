@@ -1,6 +1,6 @@
 import { uid } from "radash";
 import { v4 } from "uuid";
-import { Order } from "./types";
+import { Order } from "./order/order.entities";
 
 export function getTestOrder(order: Partial<Order>): Order {
   return {

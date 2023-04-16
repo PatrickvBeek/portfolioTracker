@@ -1,6 +1,6 @@
 import { getTestOrdersGroupedByAsset } from "../dataHelpers";
-import { Portfolio } from "../types";
-import { getInvestedValueSeries } from "./series.operations";
+import { Portfolio } from "../portfolio/portfolio.entities";
+import { getInvestedValueSeriesForPortfolio } from "./series.derivers";
 
 describe("the series operation", () => {
   describe("getInvestedValueSeries", () => {
@@ -27,10 +27,9 @@ describe("the series operation", () => {
             sharePrice: 11,
           },
         ]),
-        transactions: [],
       };
 
-      expect(getInvestedValueSeries(TEST_PORTFOLIO)).toEqual({
+      expect(getInvestedValueSeriesForPortfolio(TEST_PORTFOLIO)).toEqual({
         seriesType: "invested_value",
         data: [
           [new Date("2023-01-01"), 20],

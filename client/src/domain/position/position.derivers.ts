@@ -1,5 +1,10 @@
 import { fork, sort, sum } from "radash";
-import { AssetPositions, ClosedPosition, OpenPosition, Order } from "../types";
+import { Order } from "../order/order.entities";
+import {
+  AssetPositions,
+  ClosedPosition,
+  OpenPosition,
+} from "./position.entities";
 
 export function getPositions(orders: Order[]): AssetPositions | undefined {
   if (sum(orders, (order) => order.pieces) < 0) {

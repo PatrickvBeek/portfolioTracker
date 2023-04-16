@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  useAddCashTransactionToPortfolio,
   useDeletePortfolio,
   useGetPortfolios,
 } from "../../hooks/portfolios/portfolioHooks";
@@ -16,7 +15,6 @@ import { OrderInputForm } from "./OrderInputForm/OrderInputFrom";
 import PortfolioInputForm from "./PortfolioInputForm/PortfolioInputForm";
 import PortfolioViewSideBar from "./PortfolioViewSideBar/PortfolioViewSideBar";
 import "./Portfolios.css";
-import TransactionInputForm from "./TransactionInputForm/TransactionInputForm";
 
 const { bemBlock, bemElement } = bemHelper("portfolios");
 
@@ -29,8 +27,6 @@ function Portfolios({ className }: PortfolioProps) {
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
     useState(false);
   const deletePortfolio = useDeletePortfolio().mutate;
-  const addTransaction =
-    useAddCashTransactionToPortfolio(selectedPortfolio).mutate;
 
   useEffect(() => {
     const portfolios = Object.keys(portfoliosQuery.data || {});
@@ -92,10 +88,6 @@ function Portfolios({ className }: PortfolioProps) {
             className={bemElement("order-from")}
             shape={"column"}
           />
-        </div>
-        <div>
-          <div className={bemElement("form-headline")}>Add Transaction</div>
-          <TransactionInputForm onSubmit={addTransaction} />
         </div>
       </div>
       {isAddPortfolioOverlayOpen && (

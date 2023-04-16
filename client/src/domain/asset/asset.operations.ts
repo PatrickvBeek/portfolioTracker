@@ -1,4 +1,4 @@
-import { Asset, AssetLibrary } from "../types";
+import { Asset, AssetLibrary } from "./asset.entities";
 
 export const deleteAssetFromLib: (
   lib: AssetLibrary,
