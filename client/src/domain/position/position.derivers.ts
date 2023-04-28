@@ -1,5 +1,5 @@
 import { fork, last, sort, sum } from "radash";
-import { getOrderDate } from "../order/order.derivers";
+import { getNumericDateTime, getOrderDate } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import {
   ClosedPosition,
@@ -101,14 +101,20 @@ const orderToOpenPosition = (order: Order): OpenPosition => ({
 export function getPositionHistory(
   orders: Order[]
 ): PositionHistory | undefined {
-  const history = orders.reduce<PositionHistory>((history, order) => {
-    const oldPositions = last(history)?.positions || { open: [], closed: [] };
-    const newPositions = getPositionsFromOrder(oldPositions, order);
-    if (!newPositions) {
-      return history;
-    }
-    return [...history, { date: getOrderDate(order), positions: newPositions }];
-  }, [] as PositionHistory);
+  const history = sort(orders, getNumericDateTime).reduce<PositionHistory>(
+    (history, order) => {
+      const oldPositions = last(history)?.positions || { open: [], closed: [] };
+      const newPositions = getPositionsFromOrder(oldPositions, order);
+      if (!newPositions) {
+        return history;
+      }
+      return [
+        ...history,
+        { date: getOrderDate(order), positions: newPositions },
+      ];
+    },
+    [] as PositionHistory
+  );
 
   if (history.length !== orders.length) {
     return undefined;

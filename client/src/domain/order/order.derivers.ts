@@ -5,3 +5,6 @@ export const getOrderVolume: (order: Order) => number = (order) =>
 
 export const getOrderDate: (order: Order) => Date = (order) =>
   new Date(order.timestamp);
+
+export const getNumericDateTime: (order: Order) => number = (order) =>
+  getOrderDate(order).getTime();

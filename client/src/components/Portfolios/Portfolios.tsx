@@ -5,6 +5,7 @@ import {
 } from "../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
+import { InvestmentHistoryChart } from "../charts/investmentHistory/InvestmentHistoryChart";
 import Confirmation from "../general/Confirmation/Confirmation";
 import Overlay from "../general/Overlay/Overlay";
 import SelectionHeader from "../general/SelectionHeader";
@@ -77,6 +78,7 @@ function Portfolios({ className }: PortfolioProps) {
         />
       </div>
       <div className={bemElement("content")}>
+        <InvestmentHistoryChart portfolioName={selectedPortfolio} />
         <OpenInventoryList portfolioName={selectedPortfolio} />
         <ClosedInventoryList portfolioName={selectedPortfolio} />
       </div>

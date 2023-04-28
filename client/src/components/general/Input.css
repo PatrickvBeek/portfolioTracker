@@ -5,14 +5,13 @@
 }
 
 .input__field {
-  height: 2rem;
   font-size: 1rem;
   border-width: 1px;
   border-color: rgba(0, 0, 0, 0.25);
   border-style: solid;
   border-radius: var(--default-border-radius);
   width: 100%;
-  padding: 1.5rem;
+  padding: 1rem;
   margin: 0.25em 0px;
   box-sizing: border-box;
 }
