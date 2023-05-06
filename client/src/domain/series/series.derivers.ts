@@ -1,29 +1,24 @@
-import { sort, zip } from "radash";
-import { accumulate } from "../../utility/arrays";
-import {
-  getNumericDateTime,
-  getOrderDate,
-  getOrderVolume,
-} from "../order/order.derivers";
-import { Order } from "../order/order.entities";
+import { sum } from "radash";
 import { getAllOrdersInPortfolioTimeSorted } from "../portfolio/portfolio.derivers";
 import { Portfolio } from "../portfolio/portfolio.entities";
-import { Series } from "./series.entities";
+import {
+  getPositionHistory,
+  getPositionInitialValue,
+} from "../position/position.derivers";
+import { PositionHistoryDataPoint } from "../position/position.entities";
+import { Series, SeriesPoint } from "./series.entities";
 
-export function getInvestedValueSeriesForPortfolio(
+export function getInitialValueSeriesForPortfolio(
   portfolio: Portfolio
-): Series<"invested_value"> {
-  return getInvestedValueSeriesFromOrders(
-    getAllOrdersInPortfolioTimeSorted(portfolio)
+): Series<number> {
+  return getPositionHistory(getAllOrdersInPortfolioTimeSorted(portfolio)).map(
+    positionHistoryDataPointToSeriesPoint
   );
 }
 
-function getInvestedValueSeriesFromOrders(
-  allOrders: Order[]
-): Series<"invested_value"> {
-  const allOrdersSorted = sort(allOrders, getNumericDateTime);
-  const dates = allOrdersSorted.map(getOrderDate);
-  const accumulatedVolumes = accumulate(allOrdersSorted.map(getOrderVolume));
-
-  return { data: zip(dates, accumulatedVolumes), seriesType: "invested_value" };
-}
+const positionHistoryDataPointToSeriesPoint = (
+  point: PositionHistoryDataPoint
+): SeriesPoint<number> => ({
+  timestamp: point.date.getTime(),
+  value: sum(point.positions.open, getPositionInitialValue),
+});

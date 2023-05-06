@@ -230,7 +230,7 @@ describe("the portfolio deriver", () => {
         { asset: "abc", pieces: 1, sharePrice: 20, timestamp: day3 },
       ]);
 
-      expect(getPositionHistory(TEST_ORDERS)).toBeUndefined();
+      expect(getPositionHistory(TEST_ORDERS)).toEqual([]);
     });
   });
 });

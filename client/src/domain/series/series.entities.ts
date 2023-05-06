@@ -1,10 +1,3 @@
-export interface Series<T extends SeriesType> {
-  seriesType: T;
-  data: [Date, SeriesDataTypes[T]][];
-}
+export type Series<T> = SeriesPoint<T>[];
 
-type SeriesDataTypes = {
-  invested_value: number;
-};
-
-type SeriesType = keyof SeriesDataTypes;
+export type SeriesPoint<T> = { timestamp: number; value: T };

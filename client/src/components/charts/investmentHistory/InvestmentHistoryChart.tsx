@@ -1,4 +1,3 @@
-import { sum } from "radash";
 import { ReactElement } from "react";
 import {
   Area,
@@ -9,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getPositionHistory } from "../../../domain/position/position.derivers";
+import { getInitialValueSeriesForPortfolio } from "../../../domain/series/series.derivers";
 import { useGetPortfolios } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
@@ -38,22 +37,15 @@ export function InvestmentHistoryChart({
     return null;
   }
 
-  const data = getPositionHistory(Object.values(portfolio.orders).flat())?.map(
-    (dataPoint) => ({
-      date: dataPoint.date.getTime(),
-      amount: sum(
-        dataPoint.positions.open,
-        (position) => position.buyPrice * position.pieces
-      ),
-    })
-  );
+  const data = getInitialValueSeriesForPortfolio(portfolio);
+
   if (!data) {
     return null;
   }
 
   return (
     <div className={bemBlock(className)}>
-      <div className={bemElement("heading")}>Investment History</div>
+      <div className={bemElement("heading")}>Initial Value History</div>
       <ResponsiveContainer aspect={2.5} width={"100%"}>
         <AreaChart data={data}>
           <defs>
@@ -74,21 +66,15 @@ export function InvestmentHistoryChart({
             type={"stepAfter"}
             stroke="var(--theme-highlight)"
             strokeWidth={3}
-            dataKey={"amount"}
+            dataKey={"value"}
             fill="url(#gradient)"
           />
           <Tooltip />
           <XAxis
-            dataKey={"date"}
-            {...getTimeAxisProps(data.map((p) => p.date))}
+            dataKey={"timestamp"}
+            {...getTimeAxisProps(data.map((p) => p.timestamp))}
           />
-          <YAxis
-            // domain={[0, (dataMax: number) => (1.15 * dataMax).toFixed(0)]}
-            // tickCount={10}
-            // interval={"preserveStart"}
-            dataKey={"amount"}
-            {...getAxisProps(data.map((d) => d.amount))}
-          />
+          <YAxis {...getAxisProps(data.map((d) => d.value))} />
           <CartesianGrid stroke="#ccc" />
         </AreaChart>
       </ResponsiveContainer>
