@@ -6,6 +6,7 @@ import {
   TEST_ORDER_TESLA,
 } from "../testConstants";
 import {
+  getAllOrdersInPortfolio,
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
 } from "./portfolio.derivers";
@@ -20,6 +21,16 @@ const TEST_PORTFOLIO: Portfolio = {
 };
 
 describe("The Portfolio deriver", () => {
+  describe("getAllOrdersInPortfolio", () => {
+    it("returns the correct orders", () => {
+      expect(getAllOrdersInPortfolio(TEST_PORTFOLIO)).toEqual([
+        TEST_ORDER_TESLA,
+        TEST_ORDER_1_GOOGLE,
+        TEST_ORDER_2_GOOGLE,
+      ]);
+    });
+  });
+
   describe("getOrderFeesOfIsinInPortfolio", () => {
     describe("calculates the order fees correctly", () => {
       const testPortfolio = TEST_PORTFOLIO;

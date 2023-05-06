@@ -1,25 +1,8 @@
-import { ValueOf } from "type-fest";
-import { isDeepStrictEqual } from "util";
 import { Asset, Order } from "../general";
-
-const CASH_TRANSACTION_KIND = {
-  WITHDRAW: "WITHDRAW",
-  DEPOSIT: "DEPOSIT",
-};
-
-export type CashTransactionKind = ValueOf<typeof CASH_TRANSACTION_KIND>;
-
-export interface CashTransaction {
-  uuid: string;
-  date: string;
-  amount: number;
-  type: CashTransactionKind;
-}
 
 export interface Portfolio {
   name: string;
   orders: Record<string, Order[]>;
-  transactions: CashTransaction[];
 }
 
 export const getPiecesOfAssetInPortfolio = (
@@ -84,28 +67,5 @@ export const deleteOrderFromPortfolio = (
         (currentOrder) => currentOrder.uuid !== order.uuid
       ),
     },
-  };
-};
-
-export const addTransactionToPortfolio = (
-  portfolio: Portfolio,
-  transaction: CashTransaction
-): Portfolio => {
-  return {
-    ...portfolio,
-    transactions: [...portfolio.transactions, transaction],
-  };
-};
-
-export const deleteTransactionFromPortfolio = (
-  portfolio: Portfolio,
-  transaction: CashTransaction
-): Portfolio => {
-  return {
-    ...portfolio,
-    transactions: portfolio.transactions.filter(
-      (currentTransaction) =>
-        !isDeepStrictEqual(currentTransaction, transaction)
-    ),
   };
 };

@@ -13,6 +13,7 @@ import { getPositionHistory } from "../../../domain/position/position.derivers";
 import { useGetPortfolios } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
+import { getAxisProps, getTimeAxisProps } from "../axisUtils";
 import "./InvestmentHistoryChart.css";
 
 const { bemElement, bemBlock } = bemHelper("investment-history-chart");
@@ -37,25 +38,18 @@ export function InvestmentHistoryChart({
     return null;
   }
 
-  let data = getPositionHistory(Object.values(portfolio.orders).flat())?.map(
+  const data = getPositionHistory(Object.values(portfolio.orders).flat())?.map(
     (dataPoint) => ({
-      date: dataPoint.date.toISOString().slice(0, 10),
+      date: dataPoint.date.getTime(),
       amount: sum(
         dataPoint.positions.open,
         (position) => position.buyPrice * position.pieces
       ),
     })
   );
-
-  console.table(data);
-
-  // data = [
-  //   { date: "1", amount: 1 },
-  //   { date: "2", amount: 3 },
-  //   { date: "3", amount: 10 },
-  //   { date: "4", amount: 30 },
-  //   { date: "5", amount: 100 },
-  // ];
+  if (!data) {
+    return null;
+  }
 
   return (
     <div className={bemBlock(className)}>
@@ -77,18 +71,23 @@ export function InvestmentHistoryChart({
             </linearGradient>
           </defs>
           <Area
-            type={"linear"}
+            type={"stepAfter"}
             stroke="var(--theme-highlight)"
-            strokeWidth={2}
+            strokeWidth={3}
             dataKey={"amount"}
             fill="url(#gradient)"
-            dot={true}
           />
           <Tooltip />
-          <XAxis dataKey={"date"} />
+          <XAxis
+            dataKey={"date"}
+            {...getTimeAxisProps(data.map((p) => p.date))}
+          />
           <YAxis
-            domain={[0, (dataMax: number) => (1.1 * dataMax).toFixed(0)]}
-            tickCount={10}
+            // domain={[0, (dataMax: number) => (1.15 * dataMax).toFixed(0)]}
+            // tickCount={10}
+            // interval={"preserveStart"}
+            dataKey={"amount"}
+            {...getAxisProps(data.map((d) => d.amount))}
           />
           <CartesianGrid stroke="#ccc" />
         </AreaChart>

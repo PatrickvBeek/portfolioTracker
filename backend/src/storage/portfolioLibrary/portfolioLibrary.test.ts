@@ -1,7 +1,6 @@
 import {
   TEST_ORDER_1_GOOGLE,
   TEST_PORTFOLIO,
-  TEST_TRANSACTION,
 } from "../../dataClasses/testUtils";
 import { PortfolioLibrary } from "./portfolioLibrary";
 
@@ -51,33 +50,5 @@ describe("the portfolio library", () => {
     expect(
       lib.portfolios["gambling"].orders[TEST_ORDER_1_GOOGLE.asset.isin]
     ).toEqual([]);
-  });
-
-  it("can add a transaction to a portfolio", () => {
-    lib.createPortfolio("test-portfolio");
-    lib.addTransaction({
-      portfolio: "test-portfolio",
-      transaction: TEST_TRANSACTION,
-    });
-    expect(lib.portfolios["test-portfolio"].transactions).toEqual([
-      TEST_TRANSACTION,
-    ]);
-  });
-
-  it("can delete a transaction from a portfolio", () => {
-    lib.createPortfolio("portfolio");
-    lib.addTransaction({
-      portfolio: "portfolio",
-      transaction: TEST_TRANSACTION,
-    });
-    expect(lib.portfolios["portfolio"].transactions).toEqual([
-      TEST_TRANSACTION,
-    ]);
-
-    lib.deleteTransaction({
-      portfolio: "portfolio",
-      transaction: TEST_TRANSACTION,
-    });
-    expect(lib.portfolios["portfolio"].transactions).toEqual([]);
   });
 });

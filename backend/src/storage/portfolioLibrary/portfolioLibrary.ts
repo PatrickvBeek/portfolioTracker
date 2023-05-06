@@ -1,10 +1,7 @@
 import { Order } from "../../dataClasses/general";
 import {
   addOrderToPortfolio,
-  addTransactionToPortfolio,
-  CashTransaction,
   deleteOrderFromPortfolio,
-  deleteTransactionFromPortfolio,
   Portfolio,
 } from "../../dataClasses/portfolio/portfolio";
 import { JsonWriter } from "../jsonWriter/jsonWriter";
@@ -23,7 +20,7 @@ export class PortfolioLibrary {
   createPortfolio(portfolioName: string) {
     this.portfolios = {
       ...this.portfolios,
-      [portfolioName]: { name: portfolioName, orders: {}, transactions: [] },
+      [portfolioName]: { name: portfolioName, orders: {} },
     };
   }
 
@@ -55,26 +52,6 @@ export class PortfolioLibrary {
       [body.portfolio]: deleteOrderFromPortfolio(
         this.portfolios[body.portfolio],
         body.order
-      ),
-    };
-  }
-
-  addTransaction(body: { portfolio: string; transaction: CashTransaction }) {
-    this.portfolios = {
-      ...this.portfolios,
-      [body.portfolio]: addTransactionToPortfolio(
-        this.portfolios[body.portfolio],
-        body.transaction
-      ),
-    };
-  }
-
-  deleteTransaction(body: { portfolio: string; transaction: CashTransaction }) {
-    this.portfolios = {
-      ...this.portfolios,
-      [body.portfolio]: deleteTransactionFromPortfolio(
-        this.portfolios[body.portfolio],
-        body.transaction
       ),
     };
   }
