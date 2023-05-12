@@ -102,7 +102,7 @@ export function getPositionHistory(orders: Order[]): PositionHistory {
   const history = sort(orders, getNumericDateTime).reduce<PositionHistory>(
     (history, order) => {
       const oldPositions = last(history)?.positions || { open: [], closed: [] };
-      const newPositions = getPositionsFromOrder(oldPositions, order);
+      const newPositions = updatePositionsWithOrder(oldPositions, order);
       if (!newPositions) {
         return history;
       }
@@ -124,7 +124,7 @@ export function getPositionHistory(orders: Order[]): PositionHistory {
 export const getPositionInitialValue = (position: OpenPosition): number =>
   position.pieces * position.buyPrice;
 
-function getPositionsFromOrder(
+function updatePositionsWithOrder(
   positions: Positions | undefined,
   order: Order
 ): Positions | undefined {
