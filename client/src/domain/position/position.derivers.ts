@@ -19,84 +19,11 @@ export function getPositions(orders: Order[]): Positions | undefined {
   );
   const openPositions: OpenPosition[] = buyOrders.map(orderToOpenPosition);
 
-  return sellOrders.reduce<Positions | undefined>(getPositionsFromSell, {
+  return sellOrders.reduce<Positions | undefined>(updatePositionsWithSell, {
     open: openPositions,
     closed: [],
   });
 }
-
-function getPositionsFromSell(
-  positions: Positions | undefined,
-  sell: Order
-): Positions | undefined {
-  if (!positions || sell.pieces > 0 || positions.open.length < 1) {
-    return undefined;
-  }
-
-  const piecesToSell = -sell.pieces;
-  const [firstPosition, ...remaining] = positions.open;
-
-  if (piecesToSell === firstPosition.pieces) {
-    return {
-      open: remaining,
-      closed: [
-        ...positions.closed,
-        {
-          ...firstPosition,
-          sellPrice: sell.sharePrice,
-          sellDate: sell.timestamp,
-          orderFee: firstPosition.orderFee + sell.orderFee,
-        },
-      ],
-    };
-  }
-  if (piecesToSell < firstPosition.pieces) {
-    const newlyClosed: ClosedPosition = {
-      ...firstPosition,
-      pieces: piecesToSell,
-      sellPrice: sell.sharePrice,
-      sellDate: sell.timestamp,
-      orderFee:
-        (piecesToSell / firstPosition.pieces) * firstPosition.orderFee +
-        sell.orderFee,
-    };
-    const reducedPosition: OpenPosition = {
-      ...firstPosition,
-      pieces: firstPosition.pieces - piecesToSell,
-      orderFee:
-        (1 - piecesToSell / firstPosition.pieces) * firstPosition.orderFee,
-    };
-    return {
-      open: [reducedPosition, ...remaining],
-      closed: [...positions.closed, newlyClosed],
-    };
-  } else {
-    const newlyClosed: ClosedPosition = {
-      ...firstPosition,
-      sellPrice: sell.sharePrice,
-      sellDate: sell.timestamp,
-      orderFee:
-        firstPosition.orderFee +
-        (firstPosition.pieces / piecesToSell) * sell.orderFee,
-    };
-    const piecesStillToSell = piecesToSell - firstPosition.pieces;
-    return getPositionsFromSell(
-      { open: remaining, closed: [...positions.closed, newlyClosed] },
-      {
-        ...sell,
-        pieces: -piecesStillToSell,
-        orderFee: (1 - firstPosition.pieces / piecesToSell) * sell.orderFee,
-      }
-    );
-  }
-}
-
-const orderToOpenPosition = (order: Order): OpenPosition => ({
-  pieces: order.pieces,
-  buyDate: order.timestamp,
-  buyPrice: order.sharePrice,
-  orderFee: order.orderFee,
-});
 
 export function getPositionHistory(orders: Order[]): PositionHistory {
   const history = sort(orders, getNumericDateTime).reduce<PositionHistory>(
@@ -121,6 +48,126 @@ export function getPositionHistory(orders: Order[]): PositionHistory {
   return history;
 }
 
+function updatePositionsWithSell(
+  positions: Positions | undefined,
+  sell: Order
+): Positions | undefined {
+  if (!positions || sell.pieces > 0 || positions.open.length < 1) {
+    return undefined;
+  }
+  const piecesToSell = -sell.pieces;
+  const [firstPosition, ...remaining] = positions.open;
+
+  if (piecesToSell === firstPosition.pieces) {
+    return closeEntireFirstPosition(
+      firstPosition,
+      remaining,
+      positions.closed,
+      sell
+    );
+  }
+
+  if (piecesToSell < firstPosition.pieces) {
+    return closePartialFirstPosition(
+      firstPosition,
+      remaining,
+      positions.closed,
+      sell,
+      piecesToSell
+    );
+  }
+
+  return closeFirstPositionAndContinue(
+    firstPosition,
+    remaining,
+    positions.closed,
+    sell,
+    piecesToSell
+  );
+}
+
+function closeEntireFirstPosition(
+  firstPosition: OpenPosition,
+  remaining: OpenPosition[],
+  closedPositions: ClosedPosition[],
+  sell: Order
+): Positions {
+  const newPosition: ClosedPosition = {
+    ...firstPosition,
+    sellPrice: sell.sharePrice,
+    sellDate: sell.timestamp,
+    orderFee: firstPosition.orderFee + sell.orderFee,
+  };
+
+  return {
+    open: remaining,
+    closed: [...closedPositions, newPosition],
+  };
+}
+
+function closePartialFirstPosition(
+  firstPosition: OpenPosition,
+  remaining: OpenPosition[],
+  closedPositions: ClosedPosition[],
+  sell: Order,
+  piecesToSell: number
+): Positions {
+  const newlyClosed: ClosedPosition = {
+    ...firstPosition,
+    pieces: piecesToSell,
+    sellPrice: sell.sharePrice,
+    sellDate: sell.timestamp,
+    orderFee:
+      (piecesToSell / firstPosition.pieces) * firstPosition.orderFee +
+      sell.orderFee,
+  };
+  const reducedPosition: OpenPosition = {
+    ...firstPosition,
+    pieces: firstPosition.pieces - piecesToSell,
+    orderFee:
+      (1 - piecesToSell / firstPosition.pieces) * firstPosition.orderFee,
+  };
+
+  return {
+    open: [reducedPosition, ...remaining],
+    closed: [...closedPositions, newlyClosed],
+  };
+}
+
+function closeFirstPositionAndContinue(
+  firstPosition: OpenPosition,
+  remainingOpen: OpenPosition[],
+  closedPositions: ClosedPosition[],
+  sell: Order,
+  piecesToSell: number
+): Positions | undefined {
+  const newPosition: ClosedPosition = {
+    ...firstPosition,
+    sellPrice: sell.sharePrice,
+    sellDate: sell.timestamp,
+    orderFee:
+      firstPosition.orderFee +
+      (firstPosition.pieces / piecesToSell) * sell.orderFee,
+  };
+  const piecesStillToSell = piecesToSell - firstPosition.pieces;
+
+  return updatePositionsWithSell(
+    { open: remainingOpen, closed: [...closedPositions, newPosition] },
+    {
+      ...sell,
+      pieces: -piecesStillToSell,
+      orderFee: (1 - firstPosition.pieces / piecesToSell) * sell.orderFee,
+    }
+  );
+}
+
+const orderToOpenPosition = (order: Order): OpenPosition => ({
+  pieces: order.pieces,
+  buyDate: order.timestamp,
+  buyPrice: order.sharePrice,
+  orderFee: order.orderFee,
+});
+
 export const getPositionInitialValue = (position: OpenPosition): number =>
   position.pieces * position.buyPrice;
 
@@ -132,11 +179,11 @@ function updatePositionsWithOrder(
     return undefined;
   }
   return order.pieces < 0
-    ? getPositionsFromSell(positions, order)
-    : getPositionsFromBuy(positions, order);
+    ? updatePositionsWithSell(positions, order)
+    : updatePositionsWithBuy(positions, order);
 }
 
-function getPositionsFromBuy(
+function updatePositionsWithBuy(
   positions: Positions,
   buy: Order
 ): Positions | undefined {
