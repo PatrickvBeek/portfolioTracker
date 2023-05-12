@@ -1,3 +1,4 @@
+import moment from "moment";
 import { ReactElement } from "react";
 import {
   Area,
@@ -27,8 +28,16 @@ export function InvestmentHistoryChart({
 }: InvestmentHistoryChartProps): ReactElement | null {
   const portfolioQuery = useGetPortfolios();
 
+  if (portfolioQuery.isLoading || portfolioQuery.isFetching) {
+    return <div>no data is loading...</div>;
+  }
+
+  if (portfolioQuery.isError) {
+    return <div>an error occurred loading the portfolio data</div>;
+  }
+
   if (!portfolioQuery.isSuccess) {
-    return <div>no data</div>;
+    return null;
   }
 
   const portfolio = portfolioQuery.data[portfolioName];
@@ -39,7 +48,7 @@ export function InvestmentHistoryChart({
 
   const data = getInitialValueSeriesForPortfolio(portfolio);
 
-  if (!data) {
+  if (!data.length) {
     return null;
   }
 
@@ -68,8 +77,14 @@ export function InvestmentHistoryChart({
             strokeWidth={3}
             dataKey={"value"}
             fill="url(#gradient)"
+            animationDuration={300}
           />
-          <Tooltip />
+          <Tooltip
+            formatter={(value) => [Number(value).toFixed(2) + " €"]}
+            labelFormatter={(value: number) =>
+              moment(new Date(value)).format("ddd DD.MM.YYYY")
+            }
+          />
           <XAxis
             dataKey={"timestamp"}
             {...getTimeAxisProps(data.map((p) => p.timestamp))}
