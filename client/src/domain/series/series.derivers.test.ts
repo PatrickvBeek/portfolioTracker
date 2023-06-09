@@ -8,7 +8,7 @@ const DAY3 = "2023-01-03";
 
 describe("the series operation", () => {
   describe("getInvestedValueSeries", () => {
-    it("returns the correct series for a portfolio having orders", () => {
+    it("returns the correct series for a portfolio having orders. Selling orders in order of buying", () => {
       const TEST_PORTFOLIO: Portfolio = {
         name: "test-portfolio",
         orders: getTestOrdersGroupedByAsset([
@@ -37,6 +37,38 @@ describe("the series operation", () => {
         { timestamp: new Date(DAY1).getTime(), value: 20 },
         { timestamp: new Date(DAY2).getTime(), value: 25 },
         { timestamp: new Date(DAY3).getTime(), value: 15 },
+      ]);
+    });
+
+    it("returns the correct series for a portfolio having orders. Selling orders out of order of buying", () => {
+      const TEST_PORTFOLIO: Portfolio = {
+        name: "test-portfolio",
+        orders: getTestOrdersGroupedByAsset([
+          {
+            asset: "asset1",
+            timestamp: DAY1,
+            sharePrice: 10,
+            pieces: 2,
+          },
+          {
+            asset: "asset2",
+            timestamp: DAY2,
+            pieces: 1,
+            sharePrice: 5,
+          },
+          {
+            asset: "asset2",
+            timestamp: DAY3,
+            pieces: -1,
+            sharePrice: 6,
+          },
+        ]),
+      };
+
+      expect(getInitialValueSeriesForPortfolio(TEST_PORTFOLIO)).toEqual([
+        { timestamp: new Date(DAY1).getTime(), value: 20 },
+        { timestamp: new Date(DAY2).getTime(), value: 25 },
+        { timestamp: new Date(DAY3).getTime(), value: 20 },
       ]);
     });
   });
