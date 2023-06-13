@@ -1,49 +1,15 @@
 import {
   TEST_ASSET_GOOGLE,
-  TEST_ASSET_TESLA,
   TEST_ORDER_1_GOOGLE,
-  TEST_ORDER_2_GOOGLE,
-  TEST_ORDER_TESLA,
-} from "../testUtils";
+  TEST_PORTFOLIO,
+} from "../testConstants";
+import { Portfolio } from "./portfolio.entities";
 import {
-  Portfolio,
   addOrderToPortfolio,
   deleteOrderFromPortfolio,
-  getPiecesOfAssetInPortfolio,
-} from "./portfolio";
+} from "./portfolio.operations";
 
-const TEST_PORTFOLIO: Portfolio = {
-  name: "test-portfolio",
-  orders: {
-    [TEST_ASSET_TESLA.isin]: [TEST_ORDER_TESLA],
-    [TEST_ASSET_GOOGLE.isin]: [TEST_ORDER_1_GOOGLE, TEST_ORDER_2_GOOGLE],
-  },
-};
-
-describe("The Portfolio utility function", () => {
-  describe("getPiecesOfAssetInPortfolio", () => {
-    it("returns 0 if asset not in Portfolio", () => {
-      expect(
-        getPiecesOfAssetInPortfolio(TEST_PORTFOLIO, {
-          displayName: "invalid",
-          isin: "isin",
-        })
-      ).toEqual(0);
-    });
-
-    it("returns the correct pieces if only one transaction for this asset is in portfolio", () => {
-      expect(
-        getPiecesOfAssetInPortfolio(TEST_PORTFOLIO, TEST_ASSET_TESLA)
-      ).toEqual(TEST_ORDER_TESLA.pieces);
-    });
-
-    it("returns the correct pieces if multiple transactions for this asset are in portfolio", () => {
-      expect(
-        getPiecesOfAssetInPortfolio(TEST_PORTFOLIO, TEST_ASSET_GOOGLE)
-      ).toEqual(TEST_ORDER_1_GOOGLE.pieces + TEST_ORDER_2_GOOGLE.pieces);
-    });
-  });
-
+describe("The portfolio deriver", () => {
   describe("addOrderToPortfolio", () => {
     it("can add order to a portfolio without existing orders of same isin", () => {
       const testPortfolio: Portfolio = { ...TEST_PORTFOLIO, orders: {} };
@@ -51,7 +17,7 @@ describe("The Portfolio utility function", () => {
         testPortfolio,
         TEST_ORDER_1_GOOGLE
       );
-      expect(newPortfolio.orders[TEST_ORDER_1_GOOGLE.asset.isin]).toEqual([
+      expect(newPortfolio.orders[TEST_ORDER_1_GOOGLE.asset]).toEqual([
         TEST_ORDER_1_GOOGLE,
       ]);
     });
@@ -61,8 +27,8 @@ describe("The Portfolio utility function", () => {
         TEST_PORTFOLIO,
         TEST_ORDER_1_GOOGLE
       );
-      expect(newPortfolio.orders[TEST_ORDER_1_GOOGLE.asset.isin]).toEqual([
-        ...TEST_PORTFOLIO.orders[TEST_ORDER_1_GOOGLE.asset.isin],
+      expect(newPortfolio.orders[TEST_ORDER_1_GOOGLE.asset]).toEqual([
+        ...TEST_PORTFOLIO.orders[TEST_ORDER_1_GOOGLE.asset],
         TEST_ORDER_1_GOOGLE,
       ]);
     });

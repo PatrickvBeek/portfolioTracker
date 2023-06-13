@@ -1,14 +1,11 @@
 import { render, screen, within } from "@testing-library/react";
+import { Asset, AssetLibrary } from "../../../../domain/asset/asset.entities";
 import {
   getElementsByIsin,
   getElementsGroupedByAsset,
   getTestOrder,
-} from "../../../..//domain/mockData";
-import {
-  Asset,
-  AssetLibrary,
-  PortfolioLibrary,
-} from "../../../..//domain/types";
+} from "../../../../domain/dataHelpers";
+import { PortfolioLibrary } from "../../../../domain/portfolio/portfolio.entities";
 import { mockUseGetAssets, mockUseGetPortfolios } from "../../../../testUtils";
 import { ClosedInventoryList } from "./ClosedInventoryList";
 
@@ -21,7 +18,6 @@ const testPortfolioName = "testPortfolio";
 const mockPortfolioLib: PortfolioLibrary = {
   [testPortfolioName]: {
     name: testPortfolioName,
-    transactions: [],
     orders: getElementsGroupedByAsset([
       getTestOrder({
         asset: "asset1",

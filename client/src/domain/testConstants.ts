@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { CashTransaction, Portfolio } from "./types";
+import { Portfolio } from "./portfolio/portfolio.entities";
 
 export const TEST_ASSET_TESLA = {
   displayName: "tesla",
@@ -42,18 +42,10 @@ export const TEST_ORDER_2_GOOGLE = {
   timestamp: "2022-04-02",
 };
 
-export const TEST_TRANSACTION: CashTransaction = {
-  uuid: randomUUID(),
-  date: "2022-05-08",
-  amount: 100,
-  type: "deposit",
-};
-
 export const TEST_PORTFOLIO: Portfolio = {
   name: "Test Portfolio",
   orders: {
     [TEST_ASSET_GOOGLE.isin]: [TEST_ORDER_1_GOOGLE, TEST_ORDER_2_GOOGLE],
     [TEST_ASSET_TESLA.isin]: [TEST_ORDER_TESLA],
   },
-  transactions: [TEST_TRANSACTION],
 };

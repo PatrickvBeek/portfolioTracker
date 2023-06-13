@@ -10,14 +10,15 @@ import {
 } from "@mui/material";
 import { sum } from "radash";
 import { useEffect, useState } from "react";
+import { AssetLibrary } from "../../../../domain/asset/asset.entities";
 import {
   getEndValueOfIsinInPortfolio,
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfIsinInPortfolio,
-} from "../../../..//domain/portfolio/portfolio";
-import { getPositions } from "../../../..//domain/portfolio/portfolioPositions";
-import { AssetLibrary, Portfolio } from "../../../..//domain/types";
+} from "../../../../domain/portfolio/portfolio.derivers";
+import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
+import { getPositions } from "../../../../domain/position/position.derivers";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";

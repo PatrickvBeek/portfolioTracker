@@ -1,6 +1,6 @@
 import { uid } from "radash";
 import { v4 } from "uuid";
-import { Order } from "./types";
+import { Order } from "./order/order.entities";
 
 export function getTestOrder(order: Partial<Order>): Order {
   return {
@@ -12,6 +12,12 @@ export function getTestOrder(order: Partial<Order>): Order {
     uuid: v4(),
     ...order,
   };
+}
+
+export function getTestOrdersGroupedByAsset(
+  orderProps: Partial<Order>[]
+): Record<string, Order[]> {
+  return getElementsGroupedByAsset(orderProps.map(getTestOrder));
 }
 
 export function getElementsGroupedByAsset<T extends { asset: string }>(
