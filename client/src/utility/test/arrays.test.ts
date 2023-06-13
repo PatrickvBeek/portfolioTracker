@@ -43,4 +43,15 @@ describe("the updateBy function", () => {
       { label: "ab cd", value: 6 },
     ]);
   });
+
+  it("returns an empty array when input is empty", () => {
+    const objects: { label: string; value: number }[] = [];
+
+    const result = updateBy(objects, (acc, el) => ({
+      ...el,
+      value: el.value + acc.value,
+    }));
+
+    expect(result).toEqual([]);
+  });
 });

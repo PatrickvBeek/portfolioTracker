@@ -14,16 +14,11 @@ import { Series, SeriesPoint } from "./series.entities";
 export function getInitialValueSeriesForPortfolio(
   portfolio: Portfolio
 ): Series<number> {
-  const seriesLists = Object.values(portfolio.orders)
+  const diffs = Object.values(portfolio.orders)
     .map(getPositionHistory)
-    .map(historyToSeries);
-  console.log(seriesLists[0]);
-
-  const seriesDiffs = seriesLists.map(differentiateSeries);
-
-  console.log(seriesDiffs[0]);
-
-  const diffs = seriesDiffs.flat();
+    .map(historyToSeries)
+    .map(differentiateSeries)
+    .flat();
 
   return updateBy(
     sort(diffs, (diff) => diff.timestamp),
@@ -35,6 +30,9 @@ export function getInitialValueSeriesForPortfolio(
 }
 
 const differentiateSeries = (series: Series<number>): Series<number> => {
+  if (series.length < 2) {
+    return series;
+  }
   const [first, ...rest] = series;
   const diff = [first];
   let prevPoint = first;

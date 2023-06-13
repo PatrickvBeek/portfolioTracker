@@ -20,6 +20,9 @@ export function accumulateBy<T, U>(
 }
 
 export function updateBy<T>(array: T[], predicate: (acc: T, el: T) => T): T[] {
+  if (array.length < 2) {
+    return array;
+  }
   const [first, ...rest] = array;
 
   const result = [first];
