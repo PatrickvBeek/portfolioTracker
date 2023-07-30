@@ -1,13 +1,3 @@
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableFooter,
-  TableHead,
-  TableRow,
-} from "@mui/material";
 import { sum } from "radash";
 import { useEffect, useState } from "react";
 import { AssetLibrary } from "../../../../domain/asset/asset.entities";
@@ -24,6 +14,7 @@ import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
 import { toPrice } from "../../../../utility/prices";
 import { Props } from "../../../../utility/types";
+import CustomTable from "../../../general/CustomTable/CustomTable";
 import "../InventoryList.css";
 
 type OpenInventoryListProps = Props<{ portfolioName: string }>;
@@ -54,76 +45,98 @@ export const ClosedInventoryList = ({
 }: OpenInventoryListProps) => {
   const portfolioQuery = useGetPortfolios();
   const assetQuery = useGetAssets();
-  const [rows, setRows] = useState<InventoryItem[]>([]);
+  const [data, setData] = useState<InventoryItem[]>([]);
 
   useEffect(() => {
-    setRows(
+    setData(
       getInventoryRows(portfolioQuery.data?.[portfolioName], assetQuery.data)
     );
   }, [portfolioName, portfolioQuery.data, assetQuery.data]);
 
+  const rows = data.map((item) => [
+    item.asset,
+    item.pieces,
+    toPrice(item.initialValue),
+    toPrice(item.endValue),
+    toPrice(item.orderFees),
+    toPrice(item.profit),
+  ]);
+
+  const footers = [
+    `${data.length} Position${rows.length === 1 ? "" : "s"}`,
+    "",
+    `${toPrice(sum(data, (a) => a.initialValue))}`,
+    `${toPrice(sum(data, (a) => a.endValue))}`,
+    `${toPrice(sum(data, (a) => a.orderFees))}`,
+    `${toPrice(sum(data, (a) => a.profit))}`,
+  ];
+
   return (
     <div className={bemBlock(className)}>
       <div className={bemElement("heading")}>Closed Positions</div>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow
-              sx={{
-                backgroundColor: "var(--theme)",
-              }}
-            >
-              {TABLE_HEADERS.map((header) => (
-                <TableCell
-                  align="center"
-                  key={header}
-                  style={{
-                    color: "white",
-                    fontWeight: "bold",
-                    fontSize: "var(--font-base)",
-                    padding: "0.75em",
-                  }}
-                >
-                  {header}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.asset}>
-                <TableCell align="left">{row.asset}</TableCell>
-                <TableCell align="right">{row.pieces}</TableCell>
-                <TableCell align="right">{toPrice(row.initialValue)}</TableCell>
-                <TableCell align="right">{toPrice(row.endValue)}</TableCell>
-                <TableCell align="right">{toPrice(row.orderFees)}</TableCell>
-                <TableCell align="right">{toPrice(row.profit)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-          <TableFooter>
-            <TableRow sx={{ backgroundColor: "#eee" }}>
-              <TableCell align="left">{`${rows.length} Position${
-                rows.length === 1 ? "" : "s"
-              }`}</TableCell>
-              <TableCell align="right">{""}</TableCell>
-              <TableCell align="right">
-                {`${toPrice(sum(rows, (a) => a.initialValue))}`}
-              </TableCell>
-              <TableCell align="right">
-                {`${toPrice(sum(rows, (a) => a.endValue))}`}
-              </TableCell>
-              <TableCell align="right">
-                {`${toPrice(sum(rows, (a) => a.orderFees))}`}
-              </TableCell>
-              <TableCell align="right">
-                {`${toPrice(sum(rows, (a) => a.profit))}`}
-              </TableCell>
-            </TableRow>
-          </TableFooter>
-        </Table>
-      </TableContainer>
+      <CustomTable headers={TABLE_HEADERS} rows={rows} footers={footers} />
     </div>
+    // <div className={bemBlock(className)}>
+    //   <div className={bemElement("heading")}>Closed Positions</div>
+    //   <TableContainer component={Paper}>
+    //     <Table>
+    //       <TableHead>
+    //         <TableRow
+    //           sx={{
+    //             backgroundColor: "var(--theme)",
+    //           }}
+    //         >
+    //           {TABLE_HEADERS.map((header) => (
+    //             <TableCell
+    //               align="center"
+    //               key={header}
+    //               style={{
+    //                 color: "white",
+    //                 fontWeight: "bold",
+    //                 fontSize: "var(--font-base)",
+    //                 padding: "0.75em",
+    //               }}
+    //             >
+    //               {header}
+    //             </TableCell>
+    //           ))}
+    //         </TableRow>
+    //       </TableHead>
+    //       <TableBody>
+    //         {rows.map((row) => (
+    //           <TableRow key={row.asset}>
+    //             <TableCell align="left">{row.asset}</TableCell>
+    //             <TableCell align="right">{row.pieces}</TableCell>
+    //             <TableCell align="right">{toPrice(row.initialValue)}</TableCell>
+    //             <TableCell align="right">{toPrice(row.endValue)}</TableCell>
+    //             <TableCell align="right">{toPrice(row.orderFees)}</TableCell>
+    //             <TableCell align="right">{toPrice(row.profit)}</TableCell>
+    //           </TableRow>
+    //         ))}
+    //       </TableBody>
+    //       <TableFooter>
+    //         <TableRow sx={{ backgroundColor: "#eee" }}>
+    //           <TableCell align="left">{`${rows.length} Position${
+    //             rows.length === 1 ? "" : "s"
+    //           }`}</TableCell>
+    //           <TableCell align="right">{""}</TableCell>
+    //           <TableCell align="right">
+    //             {`${toPrice(sum(rows, (a) => a.initialValue))}`}
+    //           </TableCell>
+    //           <TableCell align="right">
+    //             {`${toPrice(sum(rows, (a) => a.endValue))}`}
+    //           </TableCell>
+    //           <TableCell align="right">
+    //             {`${toPrice(sum(rows, (a) => a.orderFees))}`}
+    //           </TableCell>
+    //           <TableCell align="right">
+    //             {`${toPrice(sum(rows, (a) => a.profit))}`}
+    //           </TableCell>
+    //         </TableRow>
+    //       </TableFooter>
+    //     </Table>
+    //   </TableContainer>
+    // </div>
   );
 };
 

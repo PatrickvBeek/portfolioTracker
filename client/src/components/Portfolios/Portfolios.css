@@ -1,11 +1,9 @@
 .portfolios {
-  padding-top: var(--double-spacing);
-  padding-left: var(--default-spacing);
-  padding-right: var(--default-spacing);
+  padding: var(--double-spacing);
   width: 100%;
   display: grid;
   grid-template-rows: auto 1fr;
-  grid-template-columns: auto 1fr minmax(12rem 24rem);
+  grid-template-columns: auto 1fr 15rem;
   grid-template-areas:
     "sideBar header header"
     "sideBar content orderSideBar";

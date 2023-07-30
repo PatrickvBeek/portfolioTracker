@@ -15,7 +15,6 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "watch": true
   },
   "include": ["src"]
 }
