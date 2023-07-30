@@ -11,72 +11,84 @@ import {
 } from "@mui/material";
 import { ReactNode } from "react";
 
-type Item = string | number | ReactNode;
+type Disaplayable = string | number | ReactNode;
 
-type TableProps = {
-  headers: Item[];
-  rows: Item[][];
-  footers?: Item[];
-  alignments?: TableCellProps["align"][];
+export type ColDef<T> = {
+  header?: Disaplayable;
+  footerGetter?: (items: T[]) => Disaplayable;
+  alignment?: TableCellProps["align"];
+  valueGetter: (item: T) => Disaplayable;
 };
 
-const CustomTable = ({ headers, rows, footers, alignments }: TableProps) => (
-  <TableContainer component={Paper}>
-    <Table>
-      <TableHead>
-        <TableRow
-          sx={{
-            backgroundColor: "var(--theme)",
-          }}
-        >
-          {headers.map((header) => (
-            <TableCell
-              key={header?.toString()}
-              align="center"
-              style={{
-                color: "white",
-                fontWeight: "bold",
-                fontSize: "var(--font-base)",
-                padding: "0.75em",
-              }}
-            >
-              {header}
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {rows.map((row, i) => (
-          <TableRow key={i}>
-            {row.map((cell, i) => (
-              <TableCell key={i}>{cell}</TableCell>
-            ))}
-          </TableRow>
-        ))}
-      </TableBody>
-      {footers && (
-        <TableFooter>
+type TableProps<T> = {
+  columDefs: ColDef<T>[];
+  rows: T[];
+};
+
+function CustomTable<T>({ rows, columDefs }: TableProps<T>) {
+  return (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
           <TableRow
             sx={{
-              backgroundColor: "#e9e9e9",
+              backgroundColor: "var(--theme)",
             }}
           >
-            {footers.map((content, i) => (
+            {columDefs.map((def, i) => (
               <TableCell
-                key={i}
-                sx={{
-                  color: "black",
+                key={def.header?.toString()}
+                align={def.alignment}
+                style={{
+                  color: "white",
+                  fontWeight: "bold",
                   fontSize: "var(--font-base)",
                 }}
               >
-                {content}
+                {def.header}
               </TableCell>
             ))}
           </TableRow>
-        </TableFooter>
-      )}
-    </Table>
-  </TableContainer>
-);
+        </TableHead>
+        <TableBody>
+          {rows.map((row, i) => (
+            <TableRow key={i}>
+              {columDefs.map((def) => (
+                <TableCell key={def.header?.toString()} align={def.alignment}>
+                  {def.valueGetter(row)}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+        {columDefs.some((def) => def.footerGetter) && (
+          <TableFooter>
+            <TableRow
+              sx={{
+                backgroundColor: "#e9e9e9",
+              }}
+            >
+              {columDefs.map(
+                (def) =>
+                  def.footerGetter && (
+                    <TableCell
+                      key={def.header?.toString()}
+                      align={def.alignment}
+                      sx={{
+                        color: "black",
+                        fontSize: "var(--font-base)",
+                      }}
+                    >
+                      {def.footerGetter(rows)}
+                    </TableCell>
+                  )
+              )}
+            </TableRow>
+          </TableFooter>
+        )}
+      </Table>
+    </TableContainer>
+  );
+}
 
 export default CustomTable;
