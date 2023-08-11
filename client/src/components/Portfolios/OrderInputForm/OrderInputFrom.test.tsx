@@ -7,7 +7,7 @@ import {
 import {
   mockUseAddOrder,
   mockUseGetAssets,
-  mockUseGetPortfolios,
+  mockUseGetPortfolio,
 } from "../../../testUtils";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 
@@ -30,10 +30,10 @@ describe("The OrderInputForm", () => {
   }
 
   beforeEach(() => {
-    mockUseGetPortfolios.mockReturnValue({
+    mockUseGetPortfolio.mockReturnValue({
       isLoading: false,
       isError: false,
-      data: { [portfolioName]: TEST_PORTFOLIO },
+      data: TEST_PORTFOLIO,
     });
 
     mockUseGetAssets.mockReturnValue({
