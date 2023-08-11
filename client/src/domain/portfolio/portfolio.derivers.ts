@@ -1,5 +1,8 @@
 import { sort, sum } from "radash";
-import { getNumericDateTime } from "../order/order.derivers";
+import {
+  areOrdersEqualOnDay,
+  getNumericDateTime,
+} from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import { getPositions } from "../position/position.derivers";
 import { Positions } from "../position/position.entities";
@@ -74,3 +77,12 @@ export const getEndValueOfIsinInPortfolio = (
         (p) => p.sellPrice * p.pieces
       )
     : 0;
+
+export const portfolioContainsOrder = (
+  portfolio: Portfolio,
+  order: Order
+): boolean => {
+  return portfolio.orders[order.asset]?.some(
+    (o) => areOrdersEqualOnDay(o, order) || false
+  );
+};

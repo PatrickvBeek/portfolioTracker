@@ -85,14 +85,12 @@ function Portfolios({ className }: PortfolioProps) {
         <OrderList portfolio={selectedPortfolio} />
       </div>
       <div className={bemElement("order-side-bar")}>
-        <div>
-          <div className={bemElement("form-headline")}>Add Order</div>
-          <OrderInputForm
-            portfolioName={selectedPortfolio}
-            className={bemElement("order-from")}
-            shape={"column"}
-          />
-        </div>
+        <div className={bemElement("form-headline")}>Add Order</div>
+        <OrderInputForm
+          portfolioName={selectedPortfolio}
+          className={bemElement("order-from")}
+          shape={"column"}
+        />
       </div>
       {isAddPortfolioOverlayOpen && (
         <Overlay

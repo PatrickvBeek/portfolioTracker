@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Button } from "../Button";
 import Overlay from "../Overlay/Overlay";
@@ -7,7 +8,7 @@ const { bemBlock, bemElement } = bemHelper("confirmation");
 
 export type ConfirmationProps = {
   title: string;
-  body: string;
+  body: ReactNode;
   confirmLabel: string;
   cancelLabel: string;
   onConfirm: () => void;
