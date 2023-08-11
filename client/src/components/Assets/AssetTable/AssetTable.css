@@ -9,7 +9,3 @@
   font-size: var(--font-small1);
   padding-left: var(--half-spacing);
 }
-
-.delete-button {
-  font-size: var(--font-base);
-}
