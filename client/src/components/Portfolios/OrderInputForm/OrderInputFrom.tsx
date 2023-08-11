@@ -1,15 +1,17 @@
 import { sum } from "radash";
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
+import { portfolioContainsOrder } from "../../../domain/portfolio/portfolio.derivers";
 import { getPositions } from "../../../domain/position/position.derivers";
 import {
   useAddOrderToPortfolio,
-  useGetPortfolios,
+  useGetPortfolio,
 } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props, isNotNil } from "../../../utility/types";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
 import { Button } from "../../general/Button";
+import Confirmation from "../../general/Confirmation/Confirmation";
 import { DateInput, DateInputValue } from "../../general/DateInput";
 import {
   NumberInput,
@@ -37,6 +39,7 @@ export function OrderInputForm({
   portfolioName,
   shape = "regular",
 }: OrderInputFormProps): ReactElement | null {
+  const portfolioResponse = useGetPortfolio(portfolioName);
   const addOrder = useAddOrderToPortfolio(portfolioName).mutate;
   const [isin, setAssetIsin] = useState(DEFAULTS.isin);
   const [pieces, setPieces] = useState<NumberInputValue>(DEFAULTS.pieces);
@@ -45,13 +48,14 @@ export function OrderInputForm({
   );
   const [fees, setFees] = useState<NumberInputValue>(DEFAULTS.fees);
   const [date, setDate] = useState<DateInputValue>(DEFAULTS.date);
-  const portfoliosResponse = useGetPortfolios();
 
-  if (!portfoliosResponse.data) {
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+
+  if (!portfolioResponse.data) {
     return null;
   }
 
-  const portfolio = portfoliosResponse.data[portfolioName];
+  const portfolio = portfolioResponse.data;
 
   const isFormValid = isin && pieces && pieces !== 0 && sharePrice && date;
 
@@ -74,6 +78,17 @@ export function OrderInputForm({
         uuid: uuidV4(),
       }
     : undefined;
+
+  const submitHandler = () => {
+    const isDuplicate = orderToSubmit
+      ? portfolioContainsOrder(portfolio, orderToSubmit)
+      : false;
+    if (isDuplicate) {
+      setIsConfirmationOpen(true);
+    } else {
+      orderToSubmit && addOrder(orderToSubmit);
+    }
+  };
 
   return (
     <div
@@ -126,11 +141,32 @@ export function OrderInputForm({
       </div>
       <Button
         className={bemElement("button")}
-        onClick={() => orderToSubmit && addOrder(orderToSubmit)}
+        onClick={submitHandler}
         label={"Submit"}
         isDisabled={!isFormValid || !isOrderValid}
         isPrimary={true}
       />
+      {isConfirmationOpen && (
+        <Confirmation
+          title={"Duplicate Order Detected!"}
+          body={
+            <>
+              <p>
+                This order seems to be a duplicate of an already registered
+                order for this portfolio. All values are equal.
+              </p>
+              <p>Do you still want to add this order?</p>
+            </>
+          }
+          confirmLabel={"Add anyway"}
+          cancelLabel={"Cancel"}
+          onConfirm={() => {
+            orderToSubmit && addOrder(orderToSubmit);
+            setIsConfirmationOpen(false);
+          }}
+          onCancel={() => setIsConfirmationOpen(false)}
+        />
+      )}
     </div>
   );
 }

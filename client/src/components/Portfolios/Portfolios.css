@@ -45,7 +45,6 @@
   grid-area: orderSideBar;
   display: flex;
   flex-direction: column;
-  gap: 4rem;
 }
 
 .portfolios__form-headline {
