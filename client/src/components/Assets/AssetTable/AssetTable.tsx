@@ -1,27 +1,9 @@
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 import { Asset } from "../../../domain/asset/asset.entities";
 import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
-import Table, { TableRow } from "../../general/Table";
+import Confirmation from "../../general/Confirmation/Confirmation";
+import CustomTable, { ColDef } from "../../general/CustomTable/CustomTable";
 import "./AssetTable.css";
-
-const DeleteButton = (onClick: () => void): ReactElement => {
-  return <i className={"fa fa-trash-can"} onClick={onClick}></i>;
-};
-
-const mapAssetLibraryToTableData = (
-  assets: Record<string, Asset>,
-  deleteAsset: (asset: Asset) => void
-): TableRow[] =>
-  Object.values(assets).map((asset) => [
-    asset.displayName,
-    asset.isin,
-    asset.wkn ?? "",
-    DeleteButton(() => {
-      window.confirm(
-        `Do you really want to delete the asset "${asset.displayName}" from the asset library?`
-      ) && deleteAsset(asset);
-    }),
-  ]);
 
 const AssetTable = () => {
   const assetDeletion = useDeleteAsset();
@@ -36,20 +18,69 @@ const AssetTable = () => {
   }
 
   if (!isSuccess) {
-    return null;
+    return <div>Sorry, somthing unexpected happened.</div>;
   }
 
-  const tableData = mapAssetLibraryToTableData(data, assetDeletion.mutate);
-  if (tableData.length === 0) {
+  const customTableData = Object.values(data);
+  if (customTableData.length === 0) {
     return <div>no assets</div>;
   }
 
+  const defs: ColDef<Asset>[] = [
+    { header: "Name", valueGetter: (a) => a.displayName },
+    { header: "ISIN", valueGetter: (a) => a.isin },
+    { header: "WKN", valueGetter: (a) => a.wkn },
+    {
+      header: "Actions",
+      valueGetter: (a) => (
+        <DeleteAssetButton
+          asset={a}
+          deleteHandler={() => assetDeletion.mutate(a)}
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="asset-table-container">
-      <Table headers={["Name", "ISIN", "WKN", "Actions"]} data={tableData} />
-      <span className="asset-table-footer">{`Total: ${tableData.length} Assets`}</span>
+      <CustomTable columDefs={defs} rows={customTableData} />
+      <span className="asset-table-footer">{`Total: ${customTableData.length} Assets`}</span>
     </div>
   );
 };
+
+type DeleteAssetButtonProps = {
+  asset: Asset;
+  deleteHandler: () => void;
+};
+
+function DeleteAssetButton({
+  asset,
+  deleteHandler,
+}: DeleteAssetButtonProps): ReactElement {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <i
+        className={"fa fa-trash-can delete-button"}
+        onClick={() => setIsOpen(true)}
+      ></i>
+      {isOpen && (
+        <Confirmation
+          title={`Delete asset ${asset.displayName}?`}
+          body={`Do you really want to delete the asset ${asset.displayName} from you library?`}
+          confirmLabel={"Delete"}
+          cancelLabel={"Cancel"}
+          onConfirm={() => {
+            deleteHandler();
+            setIsOpen(false);
+          }}
+          onCancel={() => setIsOpen(false)}
+        />
+      )}
+    </>
+  );
+}
 
 export default AssetTable;
