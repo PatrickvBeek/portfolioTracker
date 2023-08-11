@@ -10,6 +10,18 @@ import {
   deletePortfolioFromLibrary,
 } from "../../domain/portfolio/portfolio.operations";
 
+export function useGetOrders(portfolio: string) {
+  return useQuery("portfolios", fetchPortfolios, {
+    select: (lib) => lib[portfolio]?.orders || [],
+  });
+}
+
+export function useGetPortfolio(name: string) {
+  return useQuery("portfolios", fetchPortfolios, {
+    select: (lib) => lib[name],
+  });
+}
+
 export function useGetPortfolios() {
   return useQuery("portfolios", fetchPortfolios);
 }

@@ -13,6 +13,7 @@ import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
 import { ClosedInventoryList } from "./InventoryList/ClosedInventoryList/ClosedInventoryList";
 import { OpenInventoryList } from "./InventoryList/OpenInventoryList/OpenInventoryList";
 import { OrderInputForm } from "./OrderInputForm/OrderInputFrom";
+import OrderList from "./OrderList/OrderList";
 import PortfolioInputForm from "./PortfolioInputForm/PortfolioInputForm";
 import PortfolioViewSideBar from "./PortfolioViewSideBar/PortfolioViewSideBar";
 import "./Portfolios.css";
@@ -81,6 +82,7 @@ function Portfolios({ className }: PortfolioProps) {
         <InvestmentHistoryChart portfolioName={selectedPortfolio} />
         <OpenInventoryList portfolioName={selectedPortfolio} />
         <ClosedInventoryList portfolioName={selectedPortfolio} />
+        <OrderList portfolio={selectedPortfolio} />
       </div>
       <div className={bemElement("order-side-bar")}>
         <div>
