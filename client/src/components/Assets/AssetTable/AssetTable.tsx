@@ -1,8 +1,7 @@
-import { ReactElement, useState } from "react";
 import { Asset } from "../../../domain/asset/asset.entities";
 import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
-import Confirmation from "../../general/Confirmation/Confirmation";
 import CustomTable, { ColDef } from "../../general/CustomTable/CustomTable";
+import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
 import "./AssetTable.css";
 
 const AssetTable = () => {
@@ -18,7 +17,7 @@ const AssetTable = () => {
   }
 
   if (!isSuccess) {
-    return <div>Sorry, somthing unexpected happened.</div>;
+    return <div>Sorry, something unexpected happened.</div>;
   }
 
   const customTableData = Object.values(data);
@@ -33,9 +32,10 @@ const AssetTable = () => {
     {
       header: "Actions",
       valueGetter: (a) => (
-        <DeleteAssetButton
-          asset={a}
+        <DeleteButtonWithConfirmation
           deleteHandler={() => assetDeletion.mutate(a)}
+          body={`Do you really want to delete the asset '${a.displayName}' from your library?`}
+          title={`Delete Asset '${a.displayName}'?`}
         />
       ),
     },
@@ -48,39 +48,5 @@ const AssetTable = () => {
     </div>
   );
 };
-
-type DeleteAssetButtonProps = {
-  asset: Asset;
-  deleteHandler: () => void;
-};
-
-function DeleteAssetButton({
-  asset,
-  deleteHandler,
-}: DeleteAssetButtonProps): ReactElement {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <>
-      <i
-        className={"fa fa-trash-can delete-button"}
-        onClick={() => setIsOpen(true)}
-      ></i>
-      {isOpen && (
-        <Confirmation
-          title={`Delete asset ${asset.displayName}?`}
-          body={`Do you really want to delete the asset ${asset.displayName} from you library?`}
-          confirmLabel={"Delete"}
-          cancelLabel={"Cancel"}
-          onConfirm={() => {
-            deleteHandler();
-            setIsOpen(false);
-          }}
-          onCancel={() => setIsOpen(false)}
-        />
-      )}
-    </>
-  );
-}
 
 export default AssetTable;

@@ -7,8 +7,21 @@ import {
 import {
   addOrderToPortfolio,
   addPortfolioToLibrary,
+  deleteOrderFromPortfolio,
   deletePortfolioFromLibrary,
 } from "../../domain/portfolio/portfolio.operations";
+
+export function useGetOrders(portfolio: string) {
+  return useQuery("portfolios", fetchPortfolios, {
+    select: (lib) => lib[portfolio]?.orders || [],
+  });
+}
+
+export function useGetPortfolio(name: string) {
+  return useQuery("portfolios", fetchPortfolios, {
+    select: (lib) => lib[name],
+  });
+}
 
 export function useGetPortfolios() {
   return useQuery("portfolios", fetchPortfolios);
@@ -22,6 +35,26 @@ export function useDeletePortfolio() {
   return useUpdatePortfolios(deletePortfolioFromLibrary);
 }
 
+export function useDeleteOrderFromPortfolio(portfolio: string) {
+  const deleteOrder: (
+    library: PortfolioLibrary,
+    order: Order
+  ) => PortfolioLibrary = (lib, order) => {
+    if (!lib[portfolio]) {
+      console.error(
+        "portfolio with name",
+        portfolio,
+        "unexpectedly not found in library:",
+        JSON.stringify(lib, null, 4)
+      );
+      return lib;
+    }
+    const newPortfolio = deleteOrderFromPortfolio(lib[portfolio], order);
+    return addPortfolioToLibrary(lib, newPortfolio);
+  };
+  return useUpdatePortfolios(deleteOrder);
+}
+
 function useUpdatePortfolios<T extends PortfolioUpdate>(
   updater: PortfolioUpdater<T>
 ) {
@@ -33,7 +66,7 @@ function useUpdatePortfolios<T extends PortfolioUpdate>(
       return savePortfoliosOnServer(updater(previousLibrary, update));
     },
     {
-      onSuccess: (data, update) => {
+      onSuccess: (_, update) => {
         queryClient.invalidateQueries("portfolios");
         queryClient.setQueriesData(
           "portfolios",

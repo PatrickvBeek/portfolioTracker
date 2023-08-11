@@ -1,0 +1,5 @@
+.order-list__headline {
+    font-weight: bold;
+    font-size: var(--font-large1);
+    margin-bottom: var(--default-spacing);
+}
