@@ -32,10 +32,6 @@
   gap: var(--triple-spacing);
 }
 
-.portfolios__order-form {
-  grid-area: orderForm;
-}
-
 .portfolios__portfolio-selection {
   font-size: var(--font-large1);
   width: 100%;
@@ -45,6 +41,13 @@
   grid-area: orderSideBar;
   display: flex;
   flex-direction: column;
+}
+
+.portfolios__order-form {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 4rem;
 }
 
 .portfolios__form-headline {

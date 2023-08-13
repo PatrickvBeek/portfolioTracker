@@ -113,7 +113,7 @@ describe("the open inventory list component", () => {
       "55.00 €",
       "71.00 €",
       "3.50 €",
-      "12.50 €",
+      "+12.50 €",
     ]);
   });
 });

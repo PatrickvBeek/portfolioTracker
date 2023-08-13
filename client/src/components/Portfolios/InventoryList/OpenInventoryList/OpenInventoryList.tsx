@@ -71,7 +71,7 @@ export const OpenInventoryList = ({
 
   return (
     <div className={bemBlock(className)}>
-      <div className={bemElement("heading")}>Closed Positions</div>
+      <div className={bemElement("heading")}>Open Positions</div>
       <CustomTable rows={data} columDefs={columDefs} />
     </div>
   );
