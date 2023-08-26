@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import {
   TEST_ASSET_TESLA,
   TEST_PORTFOLIO,
-} from "../../..//domain/testConstants";
+} from "../../../domain/testConstants";
 import {
   mockUseAddOrder,
   mockUseGetAssets,
