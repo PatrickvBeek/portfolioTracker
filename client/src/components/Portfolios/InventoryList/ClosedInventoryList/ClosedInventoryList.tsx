@@ -14,6 +14,7 @@ import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
 import { toPrice } from "../../../../utility/prices";
 import { Props } from "../../../../utility/types";
+import Balance from "../../../general/Balance/Balance";
 import CustomTable, { ColDef } from "../../../general/CustomTable/CustomTable";
 import "../InventoryList.css";
 
@@ -65,7 +66,9 @@ const columDefs: ColDef<InventoryItem>[] = [
   {
     header: "Profit",
     valueGetter: (i) => toPrice(i.profit),
-    footerGetter: (data) => toPrice(sum(data, (el) => el.profit)),
+    footerGetter: (data) => (
+      <Balance value={sum(data, (el) => el.profit)} suffix={"€"} />
+    ),
     alignment: "right",
   },
 ];

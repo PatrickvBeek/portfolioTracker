@@ -66,6 +66,7 @@ function CustomTable<T>({ rows, columDefs }: TableProps<T>) {
             <TableRow
               sx={{
                 backgroundColor: "#e9e9e9",
+                borderTop: "solid",
               }}
             >
               {columDefs.map(
