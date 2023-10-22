@@ -9,6 +9,7 @@ export function getTestOrder(order: Partial<Order>): Order {
     pieces: Math.random() * 100,
     sharePrice: Math.random() * 1000,
     timestamp: new Date().toISOString(),
+    taxes: Math.random() * 100,
     uuid: v4(),
     ...order,
   };

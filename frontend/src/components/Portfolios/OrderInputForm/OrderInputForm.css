@@ -1,15 +1,3 @@
-.order-input-form--regular {
-  display: grid;
-  grid-template-rows: repeat(4, 1fr);
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-areas:
-    "asset asset asset"
-    "pieces price fees"
-    "date date date"
-    "xx xx button";
-  gap: 0.5rem 1rem;
-}
-
 .order-input-form--column {
   display: flex;
   flex-direction: column;
@@ -18,22 +6,6 @@
 .order-input-form__asset {
   grid-area: asset;
   margin-bottom: var(--default-spacing);
-}
-
-.order-input-form__pieces {
-  grid-area: pieces;
-}
-
-.order-input-form__price {
-  grid-area: price;
-}
-
-.order-input-form__fees {
-  grid-area: fees;
-}
-
-.order-input-form__date {
-  grid-area: date;
 }
 
 .order-input-form__button {
