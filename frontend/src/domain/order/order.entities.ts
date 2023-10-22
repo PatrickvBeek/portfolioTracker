@@ -5,4 +5,5 @@ export interface Order {
   sharePrice: number;
   timestamp: string;
   orderFee: number;
+  taxes: number;
 }

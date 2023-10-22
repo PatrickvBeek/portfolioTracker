@@ -22,6 +22,7 @@ export const TEST_ORDER_TESLA = {
   orderFee: 1,
   pieces: 2.4,
   timestamp: "2022-04-02",
+  taxes: 0,
 };
 
 export const TEST_ORDER_1_GOOGLE = {
@@ -31,6 +32,7 @@ export const TEST_ORDER_1_GOOGLE = {
   orderFee: 1,
   pieces: 2,
   timestamp: "2022-04-02",
+  taxes: 0,
 };
 
 export const TEST_ORDER_2_GOOGLE = {
@@ -40,6 +42,7 @@ export const TEST_ORDER_2_GOOGLE = {
   orderFee: 1,
   pieces: -1,
   timestamp: "2022-04-02",
+  taxes: 22,
 };
 
 export const TEST_PORTFOLIO: Portfolio = {

@@ -31,6 +31,7 @@ const DEFAULTS = {
   pieces: undefined,
   sharePrice: undefined,
   fees: 0,
+  taxes: 0,
   date: new Date(),
 };
 
@@ -47,6 +48,7 @@ export function OrderInputForm({
     DEFAULTS.sharePrice
   );
   const [fees, setFees] = useState<NumberInputValue>(DEFAULTS.fees);
+  const [taxes, setTaxes] = useState<NumberInputValue>(DEFAULTS.taxes);
   const [date, setDate] = useState<DateInputValue>(DEFAULTS.date);
 
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
@@ -72,9 +74,10 @@ export function OrderInputForm({
     ? {
         sharePrice: Number(sharePrice),
         asset: isin,
-        orderFee: Number(fees),
+        orderFee: Number(fees) || 0,
         pieces: Number(pieces),
         timestamp: date.toISOString(),
+        taxes: Number(taxes) || 0,
         uuid: uuidV4(),
       }
     : undefined;
@@ -123,6 +126,15 @@ export function OrderInputForm({
         label={"Fees"}
         digits={2}
         defaultValue={DEFAULTS.fees}
+        isMandatory={false}
+        autoComplete={"off"}
+      />
+      <NumberInput
+        className={bemElement("taxes")}
+        onChange={setTaxes}
+        label={"Taxes"}
+        digits={2}
+        defaultValue={DEFAULTS.taxes}
         isMandatory={false}
         autoComplete={"off"}
       />
