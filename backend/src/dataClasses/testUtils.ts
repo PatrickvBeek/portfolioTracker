@@ -1,5 +1,4 @@
 import { randomUUID } from "crypto";
-import { Portfolio } from "./portfolio/portfolio";
 
 export const TEST_ASSET_TESLA = {
   displayName: "tesla",
@@ -42,7 +41,7 @@ export const TEST_ORDER_2_GOOGLE = {
   timestamp: "2022-04-02",
 };
 
-export const TEST_PORTFOLIO: Portfolio = {
+export const TEST_PORTFOLIO = {
   name: "Test Portfolio",
   orders: {
     [TEST_ASSET_GOOGLE.isin]: [TEST_ORDER_1_GOOGLE, TEST_ORDER_2_GOOGLE],
