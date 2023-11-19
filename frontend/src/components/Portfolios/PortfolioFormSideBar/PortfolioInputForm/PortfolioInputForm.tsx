@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { newPortfolioFromName } from "../../../domain/portfolio/portfolio.operations";
-import { useAddPortfolio } from "../../../hooks/portfolios/portfolioHooks";
-import { bemHelper } from "../../../utility/bemHelper";
-import { Button } from "../../general/Button";
-import { TextInput } from "../../general/TextInput";
+import { newPortfolioFromName } from "../../../../domain/portfolio/portfolio.operations";
+import { useAddPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
+import { bemHelper } from "../../../../utility/bemHelper";
+import { Button } from "../../../general/Button";
+import { TextInput } from "../../../general/TextInput";
 import "./PortfolioInputForm.css";
 
 const { bemElement, bemBlock } = bemHelper("portfolio-input-form");
 
-const PortfolioInputForm = () => {
+const PortfolioInputForm = ({ onConfirm }: { onConfirm?: () => void }) => {
   const [fieldContent, setFieldContent] = useState("");
   const addPortfolio = useAddPortfolio().mutate;
   return (
@@ -26,6 +26,7 @@ const PortfolioInputForm = () => {
         onClick={() => {
           fieldContent && addPortfolio(newPortfolioFromName(fieldContent));
           setFieldContent("");
+          onConfirm && onConfirm();
         }}
         label={"Add"}
         isDisabled={fieldContent.length === 0}

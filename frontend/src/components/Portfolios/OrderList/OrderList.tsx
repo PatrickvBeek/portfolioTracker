@@ -1,10 +1,12 @@
 import moment from "moment";
 import { ReactElement } from "react";
+import { DividendPayout } from "../../../domain/dividendPayouts/dividend.entities";
 import { Order } from "../../../domain/order/order.entities";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
+  useDeleteDividendPayoutFromPortfolio,
   useDeleteOrderFromPortfolio,
-  useGetOrders,
+  useGetPortfolioActivity,
 } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { toPrice } from "../../../utility/prices";
@@ -23,49 +25,57 @@ function OrderList({
   className,
   portfolio,
 }: OrderListProps): ReactElement | null {
-  const ordersQuery = useGetOrders(portfolio);
+  const activityQuery = useGetPortfolioActivity(portfolio);
   const assetsQuery = useGetAssets();
-  const deleteOrderMutation = useDeleteOrderFromPortfolio(portfolio);
+  const deleteOrder = useDeleteOrderFromPortfolio(portfolio).mutate;
+  const deleteDividendPayout =
+    useDeleteDividendPayoutFromPortfolio(portfolio).mutate;
 
-  if (!ordersQuery.isSuccess || !assetsQuery.isSuccess) {
+  if (!activityQuery.isSuccess || !assetsQuery.isSuccess) {
     return null;
   }
 
-  const tableData = [...Object.values(ordersQuery.data).flat()].reverse();
+  const tableData = activityQuery.data;
   const assets = assetsQuery.data;
 
-  const defs: ColDef<Order>[] = [
+  const defs: ColDef<Order | DividendPayout>[] = [
     {
       header: "Date",
-      valueGetter: (o) => moment(o.timestamp).format("ll"),
+      valueGetter: (a) => moment(a.timestamp).format("ll"),
     },
     {
       header: "Asset",
-      valueGetter: (o) => assets[o.asset]?.displayName || "asset not found",
+      valueGetter: (a) => assets[a.asset]?.displayName || "asset not found",
     },
-    { header: "Pieces", valueGetter: (o) => o.pieces, alignment: "right" },
+    { header: "Pieces", valueGetter: (a) => a.pieces, alignment: "right" },
     {
-      header: "Price",
-      valueGetter: (o) => toPrice(o.sharePrice),
+      header: "Value per Share",
+      valueGetter: (a) =>
+        isOrder(a) ? toPrice(a.sharePrice) : toPrice(a.dividendPerShare),
       alignment: "right",
     },
     {
       header: "Amount",
-      valueGetter: (o) => toPrice(o.sharePrice * o.pieces),
+      valueGetter: (a) =>
+        isOrder(a)
+          ? toPrice(a.sharePrice * a.pieces)
+          : toPrice(a.dividendPerShare * a.pieces),
       alignment: "right",
     },
     {
       header: "Fees",
-      valueGetter: (o) => toPrice(o.orderFee),
+      valueGetter: (a) => (isOrder(a) ? toPrice(a.orderFee) : toPrice(0)),
       alignment: "right",
     },
     {
       header: "Actions",
-      valueGetter: (o) => (
+      valueGetter: (a) => (
         <DeleteButtonWithConfirmation
-          deleteHandler={() => deleteOrderMutation.mutate(o)}
-          title={"Delete Order?"}
-          body={`Are you sure you want to delete this order?`}
+          deleteHandler={() =>
+            isOrder(a) ? deleteOrder(a) : deleteDividendPayout(a)
+          }
+          title={"Delete Activity?"}
+          body={`Are you sure you want to delete this activity?`}
         />
       ),
     },
@@ -73,10 +83,16 @@ function OrderList({
 
   return (
     <div className={bemBlock(className)}>
-      <div className={bemElement("headline")}>Orders</div>
+      <div className={bemElement("headline")}>Portfolio Activity</div>
       <CustomTable columDefs={defs} rows={tableData} />
     </div>
   );
+}
+
+function isOrder(
+  activityEntry: Order | DividendPayout
+): activityEntry is Order {
+  return (activityEntry as Order).sharePrice !== undefined;
 }
 
 export default OrderList;

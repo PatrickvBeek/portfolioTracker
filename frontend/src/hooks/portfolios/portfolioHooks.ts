@@ -1,3 +1,4 @@
+import { sort } from "radash";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { DividendPayout } from "../../domain/dividendPayouts/dividend.entities";
 import { Order } from "../../domain/order/order.entities";
@@ -9,13 +10,23 @@ import {
   addDividendPayoutToPortfolio,
   addOrderToPortfolio,
   addPortfolioToLibrary,
+  deleteDividendPayoutFromPortfolio,
   deleteOrderFromPortfolio,
   deletePortfolioFromLibrary,
 } from "../../domain/portfolio/portfolio.operations";
 
-export function useGetOrders(portfolio: string) {
+export function useGetPortfolioActivity(portfolio: string) {
   return useQuery("portfolios", fetchPortfolios, {
-    select: (lib) => lib[portfolio]?.orders || [],
+    select: (lib) => {
+      const orders = Object.values(lib[portfolio]?.orders).flat() || [];
+      const dividends =
+        Object.values(lib[portfolio]?.dividendPayouts).flat() || [];
+      return sort(
+        [...orders, ...dividends],
+        (el) => new Date(el.timestamp).getTime(),
+        true
+      );
+    },
   });
 }
 
@@ -64,15 +75,6 @@ export function useAddOrderToPortfolio(portfolio: string) {
     library: PortfolioLibrary,
     order: Order
   ) => PortfolioLibrary = (lib, order) => {
-    if (!lib[portfolio]) {
-      console.error(
-        "portfolio with name",
-        portfolio,
-        "unexpectedly not found in library:",
-        JSON.stringify(lib, null, 4)
-      );
-      return lib;
-    }
     const newPortfolio = addOrderToPortfolio(lib[portfolio], order);
     return addPortfolioToLibrary(lib, newPortfolio);
   };
@@ -84,16 +86,21 @@ export function useDeleteOrderFromPortfolio(portfolio: string) {
     library: PortfolioLibrary,
     order: Order
   ) => PortfolioLibrary = (lib, order) => {
-    if (!lib[portfolio]) {
-      console.error(
-        "portfolio with name",
-        portfolio,
-        "unexpectedly not found in library:",
-        JSON.stringify(lib, null, 4)
-      );
-      return lib;
-    }
     const newPortfolio = deleteOrderFromPortfolio(lib[portfolio], order);
+    return addPortfolioToLibrary(lib, newPortfolio);
+  };
+  return useUpdatePortfolios(deleteOrder);
+}
+
+export function useDeleteDividendPayoutFromPortfolio(portfolio: string) {
+  const deleteOrder: (
+    library: PortfolioLibrary,
+    payout: DividendPayout
+  ) => PortfolioLibrary = (lib, payout) => {
+    const newPortfolio = deleteDividendPayoutFromPortfolio(
+      lib[portfolio],
+      payout
+    );
     return addPortfolioToLibrary(lib, newPortfolio);
   };
   return useUpdatePortfolios(deleteOrder);
@@ -123,7 +130,7 @@ const savePortfoliosOnServer = async (portfolioLib: PortfolioLibrary) => {
   });
 };
 
-type PortfolioUpdate = Portfolio | Order | DividendPayout;
+type PortfolioUpdate = Portfolio | Order | DividendPayout | string;
 
 type PortfolioUpdater<T extends PortfolioUpdate> = (
   lib: PortfolioLibrary,

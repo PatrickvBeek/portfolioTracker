@@ -1,16 +1,16 @@
 import { ReactElement, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { DividendPayout } from "../../../domain/dividendPayouts/dividend.entities";
-import { useAddDividendPayoutToPortfolio } from "../../../hooks/portfolios/portfolioHooks";
-import { bemHelper } from "../../../utility/bemHelper";
-import { Props } from "../../../utility/types";
-import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
-import { Button } from "../../general/Button";
-import { DateInput, DateInputValue } from "../../general/DateInput";
+import { DividendPayout } from "../../../../domain/dividendPayouts/dividend.entities";
+import { useAddDividendPayoutToPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
+import { bemHelper } from "../../../../utility/bemHelper";
+import { Props } from "../../../../utility/types";
+import AssetDropdown from "../../../Assets/AssetDropdown/AssetSelect";
+import { Button } from "../../../general/Button";
+import { DateInput, DateInputValue } from "../../../general/DateInput";
 import {
   NumberInput,
   NumberInputValue,
-} from "../../general/NumberInput/NumberInput";
+} from "../../../general/NumberInput/NumberInput";
 import "./DividendForm.css";
 
 type DividendFormProps = Props<{
@@ -77,12 +77,12 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
         onChange={(dividend) =>
           setFormState({ ...formState, dividendPerShare: dividend })
         }
-        value={formState.dividendPerShare}
+        digits={2}
       />
       <NumberInput
         label={"Total Taxes"}
         onChange={(taxes) => setFormState({ ...formState, taxes })}
-        value={formState.taxes}
+        digits={2}
       />
       <DateInput
         label={"PayoutDate"}

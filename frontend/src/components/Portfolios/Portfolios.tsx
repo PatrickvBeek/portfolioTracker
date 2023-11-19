@@ -1,22 +1,15 @@
 import { useEffect, useState } from "react";
-import {
-  useDeletePortfolio,
-  useGetPortfolios,
-} from "../../hooks/portfolios/portfolioHooks";
+import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
 import { InvestmentHistoryChart } from "../charts/investmentHistory/InvestmentHistoryChart";
-import Confirmation from "../general/Confirmation/Confirmation";
-import Overlay from "../general/Overlay/Overlay";
 import SelectionHeader from "../general/SelectionHeader";
-import DividendForm from "./DividendForm/DividendForm";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
 import { ClosedInventoryList } from "./InventoryList/ClosedInventoryList/ClosedInventoryList";
 import { OpenInventoryList } from "./InventoryList/OpenInventoryList/OpenInventoryList";
-import { OrderInputForm } from "./OrderInputForm/OrderInputFrom";
 import OrderList from "./OrderList/OrderList";
-import PortfolioInputForm from "./PortfolioInputForm/PortfolioInputForm";
-import PortfolioViewSideBar from "./PortfolioViewSideBar/PortfolioViewSideBar";
+import PortfolioActionsBar from "./PortfolioActionsBar/PortfolioActionsBar";
+import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import "./Portfolios.css";
 
 const { bemBlock, bemElement } = bemHelper("portfolios");
@@ -26,10 +19,6 @@ export type PortfolioProps = Props<{}>;
 function Portfolios({ className }: PortfolioProps) {
   const portfoliosQuery = useGetPortfolios();
   const [selectedPortfolio, setSelectedPortfolio] = useState("");
-  const [isAddPortfolioOverlayOpen, setIsAddOverlayOpen] = useState(false);
-  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] =
-    useState(false);
-  const deletePortfolio = useDeletePortfolio().mutate;
 
   useEffect(() => {
     const portfolios = Object.keys(portfoliosQuery.data || {});
@@ -58,19 +47,10 @@ function Portfolios({ className }: PortfolioProps) {
 
   return (
     <div className={bemBlock(className)}>
-      <div className={bemElement("side-bar")}>
-        <PortfolioViewSideBar
-          className={bemElement("side-bar-group")}
-          heading="Actions"
-          entries={[
-            { label: "Add Portfolio", action: () => setIsAddOverlayOpen(true) },
-            {
-              label: "Delete Portfolio",
-              action: () => setIsDeleteConfirmationOpen(true),
-            },
-          ]}
-        />
-      </div>
+      <PortfolioActionsBar
+        className={bemElement("side-bar")}
+        portfolioName={selectedPortfolio}
+      />
       <div className={bemElement("header")}>
         <SelectionHeader
           entries={Object.keys(portfolios)}
@@ -85,37 +65,10 @@ function Portfolios({ className }: PortfolioProps) {
         <ClosedInventoryList portfolioName={selectedPortfolio} />
         <OrderList portfolio={selectedPortfolio} />
       </div>
-      <div className={bemElement("order-side-bar")}>
-        <div className={bemElement("order-form")}>
-          <div className={bemElement("form-headline")}>Add Order</div>
-          <OrderInputForm
-            portfolioName={selectedPortfolio}
-            className={bemElement("order-from")}
-          />
-          <DividendForm portfolioName={selectedPortfolio} />
-        </div>
-      </div>
-      {isAddPortfolioOverlayOpen && (
-        <Overlay
-          title={"Add a new Portfolio"}
-          onClose={() => setIsAddOverlayOpen(false)}
-        >
-          <PortfolioInputForm />
-        </Overlay>
-      )}
-      {isDeleteConfirmationOpen && (
-        <Confirmation
-          title={`Delete ${selectedPortfolio}?`}
-          body={`You are about to delete the portfolio '${selectedPortfolio}'. This will delete also all associated transaction data. Do you want to continue?`}
-          confirmLabel={"Delete"}
-          cancelLabel={"Cancel"}
-          onConfirm={() => {
-            deletePortfolio(portfolios[selectedPortfolio]);
-            setIsDeleteConfirmationOpen(false);
-          }}
-          onCancel={() => setIsDeleteConfirmationOpen(false)}
-        />
-      )}
+      <PortfolioFormSideBar
+        className={bemElement("order-side-bar")}
+        portfolioName={selectedPortfolio}
+      />
     </div>
   );
 }

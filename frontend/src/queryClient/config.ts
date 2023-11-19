@@ -4,7 +4,7 @@ export const queryClientConfig: QueryClientConfig = {
   defaultOptions: {
     queries: {
       retry: 2,
-      refetchOnMount: "always",
+      refetchOnMount: false,
       refetchOnWindowFocus: true,
       refetchOnReconnect: "always",
       cacheTime: 1000 * 60 * 60, //1 hour

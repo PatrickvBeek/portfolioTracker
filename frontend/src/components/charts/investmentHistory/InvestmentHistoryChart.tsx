@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { getInitialValueSeriesForPortfolio } from "../../../domain/series/series.derivers";
-import { useGetPortfolios } from "../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
 import { getAxisProps, getTimeAxisProps } from "../axisUtils";
@@ -26,10 +26,10 @@ export function InvestmentHistoryChart({
   portfolioName,
   className,
 }: InvestmentHistoryChartProps): ReactElement | null {
-  const portfolioQuery = useGetPortfolios();
+  const portfolioQuery = useGetPortfolio(portfolioName);
 
   if (portfolioQuery.isLoading || portfolioQuery.isFetching) {
-    return <div>no data is loading...</div>;
+    return <div>data is loading...</div>;
   }
 
   if (portfolioQuery.isError) {
@@ -40,7 +40,7 @@ export function InvestmentHistoryChart({
     return null;
   }
 
-  const portfolio = portfolioQuery.data[portfolioName];
+  const portfolio = portfolioQuery.data;
 
   if (!portfolio) {
     return null;
