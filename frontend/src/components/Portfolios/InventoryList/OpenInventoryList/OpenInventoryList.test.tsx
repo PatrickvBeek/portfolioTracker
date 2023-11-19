@@ -43,6 +43,7 @@ const mockPortfolio: Portfolio = {
       orderFee: 1,
     }),
   ]),
+  dividendPayouts: {},
 };
 
 const portfolioMock = mockUseGetPortfolio;

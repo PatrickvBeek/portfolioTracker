@@ -9,6 +9,7 @@ import { InvestmentHistoryChart } from "../charts/investmentHistory/InvestmentHi
 import Confirmation from "../general/Confirmation/Confirmation";
 import Overlay from "../general/Overlay/Overlay";
 import SelectionHeader from "../general/SelectionHeader";
+import DividendForm from "./DividendForm/DividendForm";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
 import { ClosedInventoryList } from "./InventoryList/ClosedInventoryList/ClosedInventoryList";
 import { OpenInventoryList } from "./InventoryList/OpenInventoryList/OpenInventoryList";
@@ -90,8 +91,8 @@ function Portfolios({ className }: PortfolioProps) {
           <OrderInputForm
             portfolioName={selectedPortfolio}
             className={bemElement("order-from")}
-            shape={"column"}
           />
+          <DividendForm portfolioName={selectedPortfolio} />
         </div>
       </div>
       {isAddPortfolioOverlayOpen && (

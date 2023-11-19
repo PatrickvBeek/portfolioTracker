@@ -61,6 +61,7 @@ export const NumberInput = ({
         type="text"
         value={display}
         onChange={handleChange}
+        autoComplete="off"
         {...rest}
       ></input>
     </InputWrapper>

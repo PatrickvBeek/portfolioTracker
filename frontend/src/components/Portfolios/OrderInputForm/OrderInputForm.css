@@ -1,4 +1,4 @@
-.order-input-form--column {
+.order-input-form {
   display: flex;
   flex-direction: column;
 }

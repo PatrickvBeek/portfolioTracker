@@ -31,7 +31,7 @@ function OrderList({
     return null;
   }
 
-  const tableData = Object.values(ordersQuery.data).flat();
+  const tableData = [...Object.values(ordersQuery.data).flat()].reverse();
   const assets = assetsQuery.data;
 
   const defs: ColDef<Order>[] = [

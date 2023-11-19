@@ -57,20 +57,6 @@ export function InvestmentHistoryChart({
       <div className={bemElement("heading")}>Initial Value History</div>
       <ResponsiveContainer aspect={2.5} width={"100%"}>
         <AreaChart data={data}>
-          <defs>
-            <linearGradient id="gradient" x1={"0"} y1={"0"} x2={"0"} y2={"1"}>
-              <stop
-                offset={"5%"}
-                stopColor="var(--theme-highlight)"
-                stopOpacity={0.9}
-              />
-              <stop
-                offset={"95%"}
-                stopColor="var(--theme-highlight)"
-                stopOpacity={0.1}
-              />
-            </linearGradient>
-          </defs>
           <Area
             type={"stepAfter"}
             stroke="var(--theme-highlight)"

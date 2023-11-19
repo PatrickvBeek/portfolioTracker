@@ -1,4 +1,5 @@
 import { sort } from "radash";
+import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 import { Portfolio, PortfolioLibrary } from "./portfolio.entities";
 
@@ -58,7 +59,24 @@ export const deleteOrderFromPortfolio = (
   };
 };
 
+export function addDividendPayoutToPortfolio(
+  portfolio: Portfolio,
+  payout: DividendPayout
+) {
+  return {
+    ...portfolio,
+    dividendPayouts: {
+      ...portfolio.dividendPayouts,
+      [payout.asset]: sort(
+        [...(portfolio.dividendPayouts[payout.asset] || []), payout],
+        (payout) => new Date(payout.timestamp).getTime()
+      ),
+    },
+  };
+}
+
 export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
   name: name,
   orders: {},
+  dividendPayouts: {},
 });

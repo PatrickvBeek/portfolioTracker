@@ -51,4 +51,5 @@ export const TEST_PORTFOLIO: Portfolio = {
     [TEST_ASSET_GOOGLE.isin]: [TEST_ORDER_1_GOOGLE, TEST_ORDER_2_GOOGLE],
     [TEST_ASSET_TESLA.isin]: [TEST_ORDER_TESLA],
   },
+  dividendPayouts: {},
 };

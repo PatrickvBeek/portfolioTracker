@@ -1,0 +1,8 @@
+.dividend-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.dividend-form__asset {
+    margin-bottom: var(--default-spacing);
+}
