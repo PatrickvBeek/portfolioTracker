@@ -40,6 +40,16 @@ function OrderList({
 
   const defs: ColDef<Order | DividendPayout>[] = [
     {
+      header: "Type",
+      valueGetter: (a) =>
+        isOrder(a) ? (
+          <i className={`fa fa-${a.pieces > 0 ? "plus" : "minus"}`} />
+        ) : (
+          <i className={"fa fa-euro-sign"} />
+        ),
+      alignment: "center",
+    },
+    {
       header: "Date",
       valueGetter: (a) => moment(a.timestamp).format("ll"),
     },
@@ -78,6 +88,7 @@ function OrderList({
           body={`Are you sure you want to delete this activity?`}
         />
       ),
+      alignment: "center",
     },
   ];
 
