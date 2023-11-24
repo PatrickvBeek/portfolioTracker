@@ -1,6 +1,6 @@
 import express from "express";
 import { config } from "./config";
-import { app } from "./index";
+import app from "./index";
 
 app.use(express.static("../frontend/build"));
 

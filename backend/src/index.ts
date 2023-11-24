@@ -3,7 +3,7 @@ import { config } from "./config";
 import { handleAssets } from "./endpoints/assets";
 import { handlePortfolios } from "./endpoints/portfolios";
 
-export const app: Express = express();
+const app: Express = express();
 app.use(express.json());
 
 const isDev = config.NODE_ENV === "development";
@@ -15,3 +15,5 @@ app.get("/express_backend", (req: Request, res: Response) => {
 
 handleAssets(app, config.NODE_ENV);
 handlePortfolios(app, config.NODE_ENV);
+
+export default app;
