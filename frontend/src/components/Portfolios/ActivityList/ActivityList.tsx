@@ -13,18 +13,18 @@ import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
 import CustomTable, { ColDef } from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
-import "./OrderList.css";
+import "./ActivityList.css";
 
 const { bemBlock, bemElement } = bemHelper("order-list");
 
-type OrderListProps = Props<{
+type ActivityListProps = Props<{
   portfolio: string;
 }>;
 
-function OrderList({
+function ActivityList({
   className,
   portfolio,
-}: OrderListProps): ReactElement | null {
+}: ActivityListProps): ReactElement | null {
   const activityQuery = useGetPortfolioActivity(portfolio);
   const assetsQuery = useGetAssets();
   const deleteOrder = useDeleteOrderFromPortfolio(portfolio).mutate;
@@ -106,4 +106,4 @@ function isOrder(
   return (activityEntry as Order).sharePrice !== undefined;
 }
 
-export default OrderList;
+export default ActivityList;

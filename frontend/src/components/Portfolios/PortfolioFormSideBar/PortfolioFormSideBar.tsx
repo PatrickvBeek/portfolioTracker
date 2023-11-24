@@ -26,7 +26,7 @@ function PortfolioFormSideBar({
     <div className={bemBlock(className)}>
       <div className={bemElement("headline")}>{"Add Data to Portfolio"}</div>
       <Tabs value={tab} onChange={(_, tab) => setTab(tab)} centered>
-        <Tab label={"Order"} value={FORM.ORDER}></Tab>
+        <Tab label={"Order"} value={FORM.ORDER} />
         <Tab label={"Dividend"} value={FORM.DIVIDEND} />
       </Tabs>
 

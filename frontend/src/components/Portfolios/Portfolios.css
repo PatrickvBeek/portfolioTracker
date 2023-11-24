@@ -11,8 +11,6 @@
 }
 
 .portfolios__header {
-  display: flex;
-  justify-content: flex-start;
   grid-area: header;
 }
 

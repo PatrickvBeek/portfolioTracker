@@ -4,10 +4,10 @@ import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
 import { InvestmentHistoryChart } from "../charts/investmentHistory/InvestmentHistoryChart";
 import SelectionHeader from "../general/SelectionHeader";
+import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
 import { ClosedInventoryList } from "./InventoryList/ClosedInventoryList/ClosedInventoryList";
 import { OpenInventoryList } from "./InventoryList/OpenInventoryList/OpenInventoryList";
-import OrderList from "./OrderList/OrderList";
 import PortfolioActionsBar from "./PortfolioActionsBar/PortfolioActionsBar";
 import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import "./Portfolios.css";
@@ -27,7 +27,7 @@ function Portfolios({ className }: PortfolioProps) {
     }
   }, [portfoliosQuery.data, selectedPortfolio]);
 
-  if (portfoliosQuery.isLoading) {
+  if (portfoliosQuery.isLoading || !selectedPortfolio) {
     return <div>portfolios are loading...</div>;
   }
 
@@ -63,7 +63,7 @@ function Portfolios({ className }: PortfolioProps) {
         <InvestmentHistoryChart portfolioName={selectedPortfolio} />
         <OpenInventoryList portfolioName={selectedPortfolio} />
         <ClosedInventoryList portfolioName={selectedPortfolio} />
-        <OrderList portfolio={selectedPortfolio} />
+        <ActivityList portfolio={selectedPortfolio} />
       </div>
       <PortfolioFormSideBar
         className={bemElement("order-side-bar")}

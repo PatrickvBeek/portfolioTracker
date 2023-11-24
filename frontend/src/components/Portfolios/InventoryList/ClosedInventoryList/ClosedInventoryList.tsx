@@ -6,9 +6,9 @@ import {
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfIsinInPortfolio,
+  getProfitForIsinInPortfolio,
 } from "../../../../domain/portfolio/portfolio.derivers";
 import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
-import { getPositions } from "../../../../domain/position/position.derivers";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
@@ -109,11 +109,7 @@ function getInventoryRows(
       initialValue: getInitialValueOfIsinInPortfolio(portfolio, isin, "closed"),
       endValue: getEndValueOfIsinInPortfolio(portfolio, isin),
       orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "closed"),
-      profit: sum(
-        getPositions(portfolio.orders[isin])?.closed || [],
-        ({ pieces, buyPrice, sellPrice, orderFee }) =>
-          pieces * (sellPrice - buyPrice) - orderFee
-      ),
+      profit: getProfitForIsinInPortfolio(portfolio, isin),
     }))
     .filter((pos) => pos.pieces > 0);
 }

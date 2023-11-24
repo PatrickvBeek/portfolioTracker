@@ -78,6 +78,17 @@ export const getEndValueOfIsinInPortfolio = (
       )
     : 0;
 
+export function getProfitForIsinInPortfolio(
+  portfolio: Portfolio,
+  isin: string
+): number {
+  return sum(
+    getPositions(portfolio.orders[isin])?.closed || [],
+    ({ pieces, buyPrice, sellPrice, orderFee }) =>
+      pieces * (sellPrice - buyPrice) - orderFee
+  );
+}
+
 export const portfolioContainsOrder = (
   portfolio: Portfolio,
   order: Order
