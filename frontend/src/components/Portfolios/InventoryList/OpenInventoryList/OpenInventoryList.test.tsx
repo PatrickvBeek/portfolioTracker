@@ -3,6 +3,7 @@ import { Asset, AssetLibrary } from "../../../../domain/asset/asset.entities";
 import {
   getElementsByIsin,
   getElementsGroupedByAsset,
+  getTestDividendPayout,
   getTestOrder,
 } from "../../../../domain/dataHelpers";
 import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
@@ -14,17 +15,23 @@ const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
   { isin: "open-asset", displayName: "Open Asset" },
 ]);
 
+const day1 = "2023-12-08";
+const day2 = "2023-12-09";
+const day3 = "2023-12-10";
+
 const testPortfolioName = "testPortfolio";
 const mockPortfolio: Portfolio = {
   name: testPortfolioName,
   orders: getElementsGroupedByAsset([
     getTestOrder({
+      timestamp: day1,
       asset: "open-asset",
       pieces: 2,
       sharePrice: 10,
       orderFee: 1,
     }),
     getTestOrder({
+      timestamp: day3,
       asset: "open-asset",
       pieces: -1,
       sharePrice: 11,
@@ -43,7 +50,14 @@ const mockPortfolio: Portfolio = {
       orderFee: 1,
     }),
   ]),
-  dividendPayouts: {},
+  dividendPayouts: getElementsGroupedByAsset([
+    getTestDividendPayout({
+      timestamp: day2,
+      pieces: 2,
+      dividendPerShare: 2,
+      asset: "open-asset",
+    }),
+  ]),
 };
 
 const portfolioMock = mockUseGetPortfolio;
@@ -67,7 +81,7 @@ describe("the open inventory list component", () => {
     render(<OpenInventoryList portfolioName={testPortfolioName} />);
     expect(
       screen.getAllByRole("columnheader").map((el) => el.textContent)
-    ).toEqual(["Asset", "Pieces", "Initial Value", "Fees"]);
+    ).toEqual(["Asset", "Pieces", "Initial Value", "Fees", "Dividends"]);
   });
 
   it("renders the correct data", () => {
@@ -77,10 +91,12 @@ describe("the open inventory list component", () => {
       "1",
       "10.00 €",
       "0.50 €",
+      "4.00 €",
       "1 Position",
       "",
       "10.00 €",
       "0.50 €",
+      "4.00 €",
     ]);
   });
 });

@@ -61,10 +61,7 @@ export function OrderInputForm({
 
   const isOrderValid =
     pieces &&
-    (sum(
-      getPositions(portfolio.orders[isin])?.open || [],
-      (pos) => pos.pieces
-    ) || 0) +
+    (sum(getPositions(portfolio, isin)?.open || [], (pos) => pos.pieces) || 0) +
       pieces >=
       0;
 

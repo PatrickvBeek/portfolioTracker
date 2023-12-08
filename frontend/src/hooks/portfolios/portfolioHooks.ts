@@ -1,7 +1,7 @@
-import { sort } from "radash";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { DividendPayout } from "../../domain/dividendPayouts/dividend.entities";
 import { Order } from "../../domain/order/order.entities";
+import { getActivitiesForPortfolio } from "../../domain/portfolio/portfolio.derivers";
 import {
   Portfolio,
   PortfolioLibrary,
@@ -18,14 +18,7 @@ import {
 export function useGetPortfolioActivity(portfolio: string) {
   return useQuery("portfolios", fetchPortfolios, {
     select: (lib) => {
-      const orders = Object.values(lib[portfolio]?.orders).flat() || [];
-      const dividends =
-        Object.values(lib[portfolio]?.dividendPayouts).flat() || [];
-      return sort(
-        [...orders, ...dividends],
-        (el) => new Date(el.timestamp).getTime(),
-        true
-      );
+      return getActivitiesForPortfolio(lib[portfolio]);
     },
   });
 }

@@ -1,6 +1,17 @@
-import { fork, last, sort, sum } from "radash";
-import { getNumericDateTime, getOrderDate } from "../order/order.derivers";
+import { last, sort, sum } from "radash";
+import {
+  getActivityDate,
+  getNumericDateTime,
+  isOrder,
+} from "../activity/activity.derivers";
+import { PortfolioActivity } from "../activity/activity.entities";
+import {
+  getDividendVolume,
+  sumDividendTaxes,
+} from "../dividendPayouts/dividend.derivers";
+import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
+import { Portfolio } from "../portfolio/portfolio.entities";
 import {
   ClosedPosition,
   OpenPosition,
@@ -8,34 +19,53 @@ import {
   Positions,
 } from "./position.entities";
 
-export function getPositions(orders: Order[]): Positions | undefined {
+const EMPTY_POSITIONS: Positions = { open: [], closed: [] };
+
+export const getPositionsDividendSum = (
+  portfolio: Portfolio,
+  isin: string,
+  positionType: keyof Positions
+): number =>
+  sum(
+    (getPositions(portfolio, isin)?.[positionType] || [])
+      .flatMap((position) => position.dividendPayouts)
+      .map(getDividendVolume)
+  );
+
+export const getTotalTaxesForClosedPosition = (
+  portfolio: Portfolio,
+  isin: string
+): number =>
+  sum(
+    getPositions(portfolio, isin)?.closed || [],
+    ({ taxes, dividendPayouts }) => taxes + sumDividendTaxes(dividendPayouts)
+  );
+
+export function getPositions(
+  portfolio: Portfolio,
+  isin: string
+): Positions | undefined {
+  const orders = portfolio.orders[isin] || [];
+  const dividends = portfolio.dividendPayouts[isin] || [];
+  const activity = sort([...orders, ...dividends], getNumericDateTime);
   if (sum(orders, (order) => order.pieces) < 0) {
-    return undefined;
+    return undefined; // you can't sell more pieces than you have (shorting is not supported).
   }
 
-  const [buyOrders, sellOrders] = fork(
-    sort(orders, (order) => new Date(order.timestamp).getTime()),
-    (order) => order.pieces > 0
-  );
-  const openPositions: OpenPosition[] = buyOrders.map(orderToOpenPosition);
-
-  return sellOrders.reduce<Positions | undefined>(updatePositionsWithSell, {
-    open: openPositions,
-    closed: [],
-  });
+  return activity.reduce(updatePositionsWithActivity, EMPTY_POSITIONS);
 }
 
 export function getPositionHistory(orders: Order[]): PositionHistory {
   const history = sort(orders, getNumericDateTime).reduce<PositionHistory>(
     (history, order) => {
-      const oldPositions = last(history)?.positions || { open: [], closed: [] };
+      const oldPositions = last(history)?.positions || EMPTY_POSITIONS;
       const newPositions = updatePositionsWithOrder(oldPositions, order);
       if (!newPositions) {
         return history;
       }
       return [
         ...history,
-        { date: getOrderDate(order), positions: newPositions },
+        { date: getActivityDate(order), positions: newPositions },
       ];
     },
     [] as PositionHistory
@@ -46,6 +76,46 @@ export function getPositionHistory(orders: Order[]): PositionHistory {
   }
 
   return history;
+}
+
+function updatePositionsWithActivity(
+  positions: Positions | undefined,
+  activity: PortfolioActivity
+): Positions | undefined {
+  if (!positions) {
+    return undefined;
+  }
+  return isOrder(activity)
+    ? updatePositionsWithOrder(positions, activity)
+    : updatePositionsWithDividendPayout(positions, activity);
+}
+
+function updatePositionsWithDividendPayout(
+  positions: Positions,
+  payout: DividendPayout
+): Positions {
+  return {
+    closed: positions.closed,
+    open: positions.open.map((pos) => ({
+      ...pos,
+      dividendPayouts: sort(
+        [...pos.dividendPayouts, payout],
+        getNumericDateTime
+      ),
+    })),
+  };
+}
+
+function updatePositionsWithOrder(
+  positions: Positions | undefined,
+  order: Order
+): Positions | undefined {
+  if (!positions) {
+    return undefined;
+  }
+  return order.pieces < 0
+    ? updatePositionsWithSell(positions, order)
+    : updatePositionsWithBuy(positions, order);
 }
 
 function updatePositionsWithSell(
@@ -59,7 +129,7 @@ function updatePositionsWithSell(
   const [firstPosition, ...remaining] = positions.open;
 
   if (piecesToSell === firstPosition.pieces) {
-    return closeEntireFirstPosition(
+    return closeFirstPositionCompletely(
       firstPosition,
       remaining,
       positions.closed,
@@ -68,7 +138,7 @@ function updatePositionsWithSell(
   }
 
   if (piecesToSell < firstPosition.pieces) {
-    return closePartialFirstPosition(
+    return closeFirstPositionPartially(
       firstPosition,
       remaining,
       positions.closed,
@@ -86,7 +156,7 @@ function updatePositionsWithSell(
   );
 }
 
-function closeEntireFirstPosition(
+function closeFirstPositionCompletely(
   firstPosition: OpenPosition,
   remaining: OpenPosition[],
   closedPositions: ClosedPosition[],
@@ -97,6 +167,7 @@ function closeEntireFirstPosition(
     sellPrice: sell.sharePrice,
     sellDate: sell.timestamp,
     orderFee: firstPosition.orderFee + sell.orderFee,
+    taxes: firstPosition.taxes + sell.taxes,
   };
 
   return {
@@ -105,7 +176,7 @@ function closeEntireFirstPosition(
   };
 }
 
-function closePartialFirstPosition(
+function closeFirstPositionPartially(
   firstPosition: OpenPosition,
   remaining: OpenPosition[],
   closedPositions: ClosedPosition[],
@@ -120,12 +191,15 @@ function closePartialFirstPosition(
     orderFee:
       (piecesToSell / firstPosition.pieces) * firstPosition.orderFee +
       sell.orderFee,
+    taxes:
+      (piecesToSell / firstPosition.pieces) * firstPosition.taxes + sell.taxes,
   };
   const reducedPosition: OpenPosition = {
     ...firstPosition,
     pieces: firstPosition.pieces - piecesToSell,
     orderFee:
       (1 - piecesToSell / firstPosition.pieces) * firstPosition.orderFee,
+    taxes: (1 - piecesToSell / firstPosition.pieces) * firstPosition.taxes,
   };
 
   return {
@@ -148,6 +222,8 @@ function closeFirstPositionAndContinue(
     orderFee:
       firstPosition.orderFee +
       (firstPosition.pieces / piecesToSell) * sell.orderFee,
+    taxes:
+      firstPosition.taxes + (firstPosition.pieces / piecesToSell) * sell.taxes,
   };
   const piecesStillToSell = piecesToSell - firstPosition.pieces;
 
@@ -157,6 +233,7 @@ function closeFirstPositionAndContinue(
       ...sell,
       pieces: -piecesStillToSell,
       orderFee: (1 - firstPosition.pieces / piecesToSell) * sell.orderFee,
+      taxes: (1 - firstPosition.taxes / piecesToSell) * sell.taxes,
     }
   );
 }
@@ -166,22 +243,12 @@ const orderToOpenPosition = (order: Order): OpenPosition => ({
   buyDate: order.timestamp,
   buyPrice: order.sharePrice,
   orderFee: order.orderFee,
+  taxes: order.taxes,
+  dividendPayouts: [],
 });
 
 export const getPositionInitialValue = (position: OpenPosition): number =>
   position.pieces * position.buyPrice;
-
-function updatePositionsWithOrder(
-  positions: Positions | undefined,
-  order: Order
-): Positions | undefined {
-  if (!positions) {
-    return undefined;
-  }
-  return order.pieces < 0
-    ? updatePositionsWithSell(positions, order)
-    : updatePositionsWithBuy(positions, order);
-}
 
 function updatePositionsWithBuy(
   positions: Positions,

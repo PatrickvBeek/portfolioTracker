@@ -7,6 +7,7 @@ import {
   getPiecesOfIsinInPortfolio,
 } from "../../../../domain/portfolio/portfolio.derivers";
 import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
+import { getPositionsDividendSum } from "../../../../domain/position/position.derivers";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
@@ -24,6 +25,7 @@ interface InventoryItem {
   pieces: number;
   initialValue: number;
   orderFees: number;
+  dividends: number;
 }
 
 const columDefs: ColDef<InventoryItem>[] = [
@@ -51,6 +53,12 @@ const columDefs: ColDef<InventoryItem>[] = [
     valueGetter: (i) => toPrice(i.orderFees),
     footerGetter: (data) => toPrice(sum(data, (el) => el.orderFees)),
     alignment: "right",
+  },
+  {
+    header: "Dividends",
+    valueGetter: (i) => toPrice(i.dividends),
+    alignment: "right",
+    footerGetter: (data) => toPrice(sum(data, (el) => el.dividends)),
   },
 ];
 
@@ -92,6 +100,7 @@ function getInventoryRows(
       ),
       initialValue: getInitialValueOfIsinInPortfolio(portfolio, isin, "open"),
       orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "open"),
+      dividends: getPositionsDividendSum(portfolio, isin, "open"),
     }))
     .filter((pos) => pos.pieces > 0);
 }

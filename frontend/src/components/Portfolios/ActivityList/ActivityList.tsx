@@ -1,6 +1,9 @@
 import moment from "moment";
 import { ReactElement } from "react";
+import { isOrder } from "../../../domain/activity/activity.derivers";
+import { getDividendVolume } from "../../../domain/dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../../../domain/dividendPayouts/dividend.entities";
+import { getOrderVolume } from "../../../domain/order/order.derivers";
 import { Order } from "../../../domain/order/order.entities";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
@@ -35,7 +38,7 @@ function ActivityList({
     return null;
   }
 
-  const tableData = activityQuery.data;
+  const tableData = activityQuery.data.reverse();
   const assets = assetsQuery.data;
 
   const defs: ColDef<Order | DividendPayout>[] = [
@@ -67,14 +70,17 @@ function ActivityList({
     {
       header: "Amount",
       valueGetter: (a) =>
-        isOrder(a)
-          ? toPrice(a.sharePrice * a.pieces)
-          : toPrice(a.dividendPerShare * a.pieces),
+        isOrder(a) ? toPrice(getOrderVolume(a)) : toPrice(getDividendVolume(a)),
       alignment: "right",
     },
     {
       header: "Fees",
       valueGetter: (a) => (isOrder(a) ? toPrice(a.orderFee) : toPrice(0)),
+      alignment: "right",
+    },
+    {
+      header: "Taxes",
+      valueGetter: (a) => toPrice(a.taxes),
       alignment: "right",
     },
     {
@@ -98,12 +104,6 @@ function ActivityList({
       <CustomTable columDefs={defs} rows={tableData} />
     </div>
   );
-}
-
-function isOrder(
-  activityEntry: Order | DividendPayout
-): activityEntry is Order {
-  return (activityEntry as Order).sharePrice !== undefined;
 }
 
 export default ActivityList;

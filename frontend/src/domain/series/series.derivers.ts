@@ -16,7 +16,7 @@ export function getInitialValueSeriesForPortfolio(
 ): Series<number> {
   const diffs = Object.values(portfolio.orders)
     .map(getPositionHistory)
-    .map(historyToSeries)
+    .map(positionHistoryToSeries)
     .map(differentiateNumberSeries)
     .flat();
 
@@ -49,7 +49,7 @@ const differentiateNumberSeries = (series: Series<number>): Series<number> => {
   return diff;
 };
 
-const historyToSeries = (history: PositionHistory): Series<number> =>
+const positionHistoryToSeries = (history: PositionHistory): Series<number> =>
   history.map(positionHistoryDataPointToSeriesPoint);
 
 const positionHistoryDataPointToSeriesPoint = (
