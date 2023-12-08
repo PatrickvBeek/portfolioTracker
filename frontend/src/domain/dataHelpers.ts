@@ -1,5 +1,6 @@
 import { uid } from "radash";
 import { v4 } from "uuid";
+import { DividendPayout } from "./dividendPayouts/dividend.entities";
 import { Order } from "./order/order.entities";
 
 export function getTestOrder(order: Partial<Order>): Order {
@@ -14,6 +15,18 @@ export function getTestOrder(order: Partial<Order>): Order {
     ...order,
   };
 }
+
+export const getTestDividendPayout = (
+  payout: Partial<DividendPayout>
+): DividendPayout => ({
+  asset: uid(6),
+  dividendPerShare: Math.random() * 100,
+  pieces: Math.random() * 100,
+  taxes: Math.random() * 10,
+  timestamp: new Date().toISOString(),
+  uuid: v4(),
+  ...payout,
+});
 
 export function getTestOrdersGroupedByAsset(
   orderProps: Partial<Order>[]

@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { getInitialValueSeriesForPortfolio } from "../../../domain/series/series.derivers";
-import { useGetPortfolios } from "../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
 import { getAxisProps, getTimeAxisProps } from "../axisUtils";
@@ -26,10 +26,10 @@ export function InvestmentHistoryChart({
   portfolioName,
   className,
 }: InvestmentHistoryChartProps): ReactElement | null {
-  const portfolioQuery = useGetPortfolios();
+  const portfolioQuery = useGetPortfolio(portfolioName);
 
   if (portfolioQuery.isLoading || portfolioQuery.isFetching) {
-    return <div>no data is loading...</div>;
+    return <div>data is loading...</div>;
   }
 
   if (portfolioQuery.isError) {
@@ -40,7 +40,7 @@ export function InvestmentHistoryChart({
     return null;
   }
 
-  const portfolio = portfolioQuery.data[portfolioName];
+  const portfolio = portfolioQuery.data;
 
   if (!portfolio) {
     return null;
@@ -57,20 +57,6 @@ export function InvestmentHistoryChart({
       <div className={bemElement("heading")}>Initial Value History</div>
       <ResponsiveContainer aspect={2.5} width={"100%"}>
         <AreaChart data={data}>
-          <defs>
-            <linearGradient id="gradient" x1={"0"} y1={"0"} x2={"0"} y2={"1"}>
-              <stop
-                offset={"5%"}
-                stopColor="var(--theme-highlight)"
-                stopOpacity={0.9}
-              />
-              <stop
-                offset={"95%"}
-                stopColor="var(--theme-highlight)"
-                stopOpacity={0.1}
-              />
-            </linearGradient>
-          </defs>
           <Area
             type={"stepAfter"}
             stroke="var(--theme-highlight)"

@@ -18,6 +18,7 @@ const TEST_PORTFOLIO: Portfolio = {
     [TEST_ASSET_TESLA.isin]: [TEST_ORDER_TESLA],
     [TEST_ASSET_GOOGLE.isin]: [TEST_ORDER_1_GOOGLE, TEST_ORDER_2_GOOGLE],
   },
+  dividendPayouts: {},
 };
 
 describe("The Portfolio deriver", () => {
@@ -63,6 +64,7 @@ describe("The Portfolio deriver", () => {
 
     it("returns 0 if there are no orders for this isin", () => {
       const testPortfolio: Portfolio = {
+        dividendPayouts: {},
         orders: {},
         name: "test",
       };

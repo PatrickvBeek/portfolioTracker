@@ -23,7 +23,6 @@ const { bemBlock, bemElement } = bemHelper("order-input-form");
 
 export type OrderInputFormProps = Props<{
   portfolioName: string;
-  shape?: "column" | "regular";
 }>;
 
 const DEFAULTS = {
@@ -38,7 +37,6 @@ const DEFAULTS = {
 export function OrderInputForm({
   className,
   portfolioName,
-  shape = "regular",
 }: OrderInputFormProps): ReactElement | null {
   const portfolioResponse = useGetPortfolio(portfolioName);
   const addOrder = useAddOrderToPortfolio(portfolioName).mutate;
@@ -63,10 +61,7 @@ export function OrderInputForm({
 
   const isOrderValid =
     pieces &&
-    (sum(
-      getPositions(portfolio.orders[isin])?.open || [],
-      (pos) => pos.pieces
-    ) || 0) +
+    (sum(getPositions(portfolio, isin)?.open || [], (pos) => pos.pieces) || 0) +
       pieces >=
       0;
 
@@ -94,10 +89,7 @@ export function OrderInputForm({
   };
 
   return (
-    <div
-      className={bemBlock(className, { [shape]: true })}
-      data-testid={"order-input-form"}
-    >
+    <div className={bemBlock(className)} data-testid={"order-input-form"}>
       <AssetDropdown
         className={bemElement("asset")}
         onSelect={setAssetIsin}
@@ -148,7 +140,7 @@ export function OrderInputForm({
       <div className={bemElement("summary")}>
         Summary:
         <div className={bemElement("calculation")} title="Summary Text">
-          {getCalculationText({ pieces, sharePrice, fees })}
+          {getOrderSummaryText({ pieces, sharePrice, fees })}
         </div>
       </div>
       <Button
@@ -183,7 +175,7 @@ export function OrderInputForm({
   );
 }
 
-function getCalculationText({
+function getOrderSummaryText({
   pieces,
   sharePrice,
   fees,

@@ -1,3 +1,4 @@
+import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 
 export interface OpenPosition {
@@ -5,6 +6,8 @@ export interface OpenPosition {
   buyDate: Order["timestamp"];
   buyPrice: Order["sharePrice"];
   orderFee: Order["orderFee"];
+  taxes: Order["taxes"];
+  dividendPayouts: DividendPayout[];
 }
 
 export interface ClosedPosition extends OpenPosition {

@@ -1,4 +1,6 @@
+import { getTestOrdersGroupedByAsset } from "../dataHelpers";
 import { Order } from "../order/order.entities";
+import { Portfolio } from "../portfolio/portfolio.entities";
 import { TEST_ORDER_TESLA } from "../testConstants";
 import { getPositionHistory, getPositions } from "./position.derivers";
 import { ClosedPosition, OpenPosition, Positions } from "./position.entities";
@@ -8,8 +10,16 @@ function getTestOrder(overrides: Partial<Order>): Order {
 }
 
 describe("the portfolio deriver", () => {
-  function getOrders(orderProps: Partial<Order>[]) {
-    return orderProps.map((prop) => getTestOrder(prop));
+  const TEST_ISIN = TEST_ORDER_TESLA.asset;
+
+  function getPortfolioWithOrders(orderProps: Partial<Order>[]): Portfolio {
+    return {
+      name: "not important",
+      orders: getTestOrdersGroupedByAsset(
+        orderProps.map((prop) => getTestOrder(prop))
+      ),
+      dividendPayouts: {},
+    };
   }
 
   describe("getPositions", () => {
@@ -22,6 +32,8 @@ describe("the portfolio deriver", () => {
         buyPrice: TEST_ORDER_TESLA.sharePrice,
         buyDate: TEST_ORDER_TESLA.timestamp,
         orderFee: TEST_ORDER_TESLA.orderFee,
+        dividendPayouts: [],
+        taxes: 0,
       });
 
       return {
@@ -41,12 +53,12 @@ describe("the portfolio deriver", () => {
 
     describe("returns the correct positions when", () => {
       it("buying 1, selling 1", () => {
-        const orders = getOrders([
+        const portfolio = getPortfolioWithOrders([
           { pieces: 1, sharePrice: 50 },
           { pieces: -1, sharePrice: 55 },
         ]);
 
-        expect(getPositions(orders)).toEqual(
+        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
           getExpectPositions({
             open: [],
             closed: [{ pieces: 1, buyPrice: 50, sellPrice: 55 }],
@@ -55,27 +67,35 @@ describe("the portfolio deriver", () => {
       });
 
       it("buying 2, selling 1", () => {
-        const orders = getOrders([
+        const portfolio = getPortfolioWithOrders([
           { pieces: 2, sharePrice: 50 },
-          { pieces: -1, sharePrice: 55 },
+          { pieces: -1, sharePrice: 55, taxes: 0.5 },
         ]);
 
-        expect(getPositions(orders)).toEqual(
+        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
           getExpectPositions({
             open: [{ pieces: 1, buyPrice: 50, orderFee: 0.5 }],
-            closed: [{ pieces: 1, buyPrice: 50, sellPrice: 55, orderFee: 1.5 }],
+            closed: [
+              {
+                pieces: 1,
+                buyPrice: 50,
+                sellPrice: 55,
+                orderFee: 1.5,
+                taxes: 0.5,
+              },
+            ],
           })
         );
       });
 
       it("buying 1,1, selling 2", () => {
-        const orders = getOrders([
+        const portfolio = getPortfolioWithOrders([
           { pieces: 1, sharePrice: 50 },
           { pieces: 1, sharePrice: 55 },
           { pieces: -2, sharePrice: 60 },
         ]);
 
-        expect(getPositions(orders)).toEqual(
+        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
           getExpectPositions({
             open: [],
             closed: [
@@ -87,32 +107,44 @@ describe("the portfolio deriver", () => {
       });
 
       it("buying 2, selling 1,1", () => {
-        const orders = getOrders([
+        const portfolio = getPortfolioWithOrders([
           { pieces: 2, sharePrice: 50 },
-          { pieces: -1, sharePrice: 55 },
-          { pieces: -1, sharePrice: 60 },
+          { pieces: -1, sharePrice: 55, taxes: 0.1 },
+          { pieces: -1, sharePrice: 60, taxes: 0.2 },
         ]);
 
-        expect(getPositions(orders)).toEqual(
+        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
           getExpectPositions({
             open: [],
             closed: [
-              { pieces: 1, buyPrice: 50, sellPrice: 55, orderFee: 1.5 },
-              { pieces: 1, buyPrice: 50, sellPrice: 60, orderFee: 1.5 },
+              {
+                pieces: 1,
+                buyPrice: 50,
+                sellPrice: 55,
+                orderFee: 1.5,
+                taxes: 0.1,
+              },
+              {
+                pieces: 1,
+                buyPrice: 50,
+                sellPrice: 60,
+                orderFee: 1.5,
+                taxes: 0.2,
+              },
             ],
           })
         );
       });
 
       it("buying/selling 4,2,-3,-2", () => {
-        const orders = getOrders([
+        const portfolio = getPortfolioWithOrders([
           { pieces: 4, sharePrice: 50 },
           { pieces: 2, sharePrice: 55 },
           { pieces: -3, sharePrice: 60, orderFee: 3 },
           { pieces: -2, sharePrice: 65 },
         ]);
 
-        expect(getPositions(orders)).toEqual(
+        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
           getExpectPositions({
             open: [{ pieces: 1, buyPrice: 55, orderFee: 0.5 }],
             closed: [
@@ -126,14 +158,14 @@ describe("the portfolio deriver", () => {
     });
 
     it("orders are not given chronologically", () => {
-      const orders = getOrders([
+      const portfolio = getPortfolioWithOrders([
         { pieces: 1, sharePrice: 50, timestamp: "2022-02-01" },
         { pieces: 1, sharePrice: 45, timestamp: "2022-01-15" },
         { pieces: -1, sharePrice: 55, timestamp: "2022-02-15" },
         { pieces: -1, sharePrice: 60, timestamp: "2022-03-01" },
       ]);
 
-      expect(getPositions(orders)).toEqual(
+      expect(getPositions(portfolio, TEST_ISIN)).toEqual(
         getExpectPositions({
           open: [],
           closed: [
@@ -157,12 +189,12 @@ describe("the portfolio deriver", () => {
     });
 
     it("returns undefined if more positions are sold than bought", () => {
-      const orders = getOrders([
+      const portfolio = getPortfolioWithOrders([
         { pieces: 2, sharePrice: 50 },
         { pieces: -3, sharePrice: 55 },
       ]);
 
-      expect(getPositions(orders)).toBeUndefined();
+      expect(getPositions(portfolio, TEST_ISIN)).toBeUndefined();
     });
   });
 
@@ -171,8 +203,11 @@ describe("the portfolio deriver", () => {
     const day2 = "2023-01-02";
     const day3 = "2023-01-03";
 
+    const getTestOrders = (orders: Partial<Order>[]) =>
+      orders.map(getTestOrder);
+
     it("returns a correct history for a buying 1,1 selling 2", () => {
-      const TEST_ORDERS = getOrders([
+      const TEST_ORDERS = getTestOrders([
         { asset: "abc", pieces: 1, sharePrice: 10, timestamp: day1 },
         { asset: "abc", pieces: 1, sharePrice: 15, timestamp: day2 },
         { asset: "abc", pieces: -2, sharePrice: 20, timestamp: day3 },
@@ -182,7 +217,16 @@ describe("the portfolio deriver", () => {
         {
           date: new Date(day1),
           positions: {
-            open: [{ buyDate: day1, buyPrice: 10, pieces: 1, orderFee: 1 }],
+            open: [
+              {
+                buyDate: day1,
+                buyPrice: 10,
+                pieces: 1,
+                orderFee: 1,
+                dividendPayouts: [],
+                taxes: 0,
+              },
+            ],
             closed: [],
           },
         },
@@ -190,8 +234,22 @@ describe("the portfolio deriver", () => {
           date: new Date(day2),
           positions: {
             open: [
-              { buyDate: day1, buyPrice: 10, pieces: 1, orderFee: 1 },
-              { buyDate: day2, buyPrice: 15, pieces: 1, orderFee: 1 },
+              {
+                buyDate: day1,
+                buyPrice: 10,
+                pieces: 1,
+                orderFee: 1,
+                dividendPayouts: [],
+                taxes: 0,
+              },
+              {
+                buyDate: day2,
+                buyPrice: 15,
+                pieces: 1,
+                orderFee: 1,
+                taxes: 0,
+                dividendPayouts: [],
+              },
             ],
             closed: [],
           },
@@ -208,6 +266,8 @@ describe("the portfolio deriver", () => {
                 orderFee: 1.5,
                 sellDate: day3,
                 sellPrice: 20,
+                dividendPayouts: [],
+                taxes: 0,
               },
               {
                 buyDate: day2,
@@ -216,6 +276,8 @@ describe("the portfolio deriver", () => {
                 orderFee: 1.5,
                 sellDate: day3,
                 sellPrice: 20,
+                dividendPayouts: [],
+                taxes: 0,
               },
             ],
           },
@@ -223,8 +285,8 @@ describe("the portfolio deriver", () => {
       ]);
     });
 
-    it("returns undefined if attempting to sell more than available", () => {
-      const TEST_ORDERS = getOrders([
+    it("returns empty array if attempting to sell more than available", () => {
+      const TEST_ORDERS = getTestOrders([
         { asset: "abc", pieces: 1, sharePrice: 10, timestamp: day1 },
         { asset: "abc", pieces: -2, sharePrice: 15, timestamp: day2 },
         { asset: "abc", pieces: 1, sharePrice: 20, timestamp: day3 },

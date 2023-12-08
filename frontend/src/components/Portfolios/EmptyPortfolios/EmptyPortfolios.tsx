@@ -1,6 +1,6 @@
 import { bemHelper } from "../../../utility/bemHelper";
 import Tile from "../../general/Tile";
-import PortfolioInputForm from "../PortfolioInputForm/PortfolioInputForm";
+import PortfolioInputForm from "../PortfolioFormSideBar/PortfolioInputForm/PortfolioInputForm";
 import "./EmptyPortfolios.css";
 
 const { bemBlock, bemElement } = bemHelper("empty-portfolios");

@@ -1,25 +1,25 @@
-.portfolio-view-side-bar {
+.portfolio-actions-bar {
   display: flex;
   flex-direction: column;
 }
 
-.portfolio-view-side-bar__heading {
+.portfolio-actions-bar__heading {
   font-weight: bold;
   font-size: var(--font-large1);
   margin-bottom: var(--half-spacing);
 }
 
-.portfolio-view-side-bar__entry {
+.portfolio-actions-bar__entry {
   color: #555;
   padding: var(--half-spacing);
   border-radius: var(--default-border-radius);
 }
 
-.portfolio-view-side-bar__entry--selected {
+.portfolio-actions-bar__entry--selected {
   background-color: var(--theme-tint-soft);
 }
 
-.portfolio-view-side-bar__entry:hover {
+.portfolio-actions-bar__entry:hover {
   background-color: var(--theme-tint-soft);
   cursor: pointer;
 }

@@ -1,24 +1,33 @@
 import { sort, sum } from "radash";
+import { getNumericDateTime } from "../activity/activity.derivers";
+import { PortfolioActivity } from "../activity/activity.entities";
 import {
-  areOrdersEqualOnDay,
-  getNumericDateTime,
-} from "../order/order.derivers";
+  sumDividendTaxes,
+  sumDividends,
+} from "../dividendPayouts/dividend.derivers";
+import { DividendPayout } from "../dividendPayouts/dividend.entities";
+import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import { getPositions } from "../position/position.derivers";
 import { Positions } from "../position/position.entities";
 import { Portfolio } from "./portfolio.entities";
 
-export const getOrdersForIsinInPortfolio = (
-  isin: string,
-  portfolio: Portfolio
-): Order[] => portfolio.orders[isin];
-
-export const getAllIsinsInPortfolio = (portfolio: Portfolio): string[] =>
-  Object.keys(portfolio.orders);
-
 export const getAllOrdersInPortfolio = (portfolio: Portfolio): Order[] =>
-  getAllIsinsInPortfolio(portfolio).flatMap((isin) =>
-    getOrdersForIsinInPortfolio(isin, portfolio)
+  Object.values(portfolio.orders).flat();
+
+export const getAllDividendPayoutsInPortfolio = (
+  portfolio: Portfolio
+): DividendPayout[] => Object.values(portfolio.dividendPayouts).flat();
+
+export const getActivitiesForPortfolio = (
+  portfolio: Portfolio
+): PortfolioActivity[] =>
+  sort(
+    [
+      ...getAllOrdersInPortfolio(portfolio),
+      ...getAllDividendPayoutsInPortfolio(portfolio),
+    ],
+    getNumericDateTime
   );
 
 export const getAllOrdersInPortfolioTimeSorted = (
@@ -32,7 +41,7 @@ export const getPiecesOfIsinInPortfolio = (
 ): number => {
   return isin in portfolio.orders
     ? sum(
-        getPositions(portfolio.orders[isin])?.[positionType] || [],
+        getPositions(portfolio, isin)?.[positionType] || [],
         (pos) => pos.pieces
       )
     : 0;
@@ -43,7 +52,7 @@ export const getOrderFeesOfIsinInPortfolio = (
   isin: string,
   positionType: keyof Positions | "both"
 ): number => {
-  const positions = getPositions(portfolio.orders[isin] || []);
+  const positions = getPositions(portfolio, isin);
   if (!positions) {
     return 0;
   }
@@ -62,7 +71,7 @@ export const getInitialValueOfIsinInPortfolio = (
 ): number =>
   isin in portfolio.orders
     ? sum(
-        getPositions(portfolio.orders[isin])?.[positionType] || [],
+        getPositions(portfolio, isin)?.[positionType] || [],
         (p) => p.buyPrice * p.pieces
       )
     : 0;
@@ -73,10 +82,25 @@ export const getEndValueOfIsinInPortfolio = (
 ): number =>
   isin in portfolio.orders
     ? sum(
-        getPositions(portfolio.orders[isin])?.closed || [],
+        getPositions(portfolio, isin)?.closed || [],
         (p) => p.sellPrice * p.pieces
       )
     : 0;
+
+export function getProfitForIsinInPortfolio(
+  portfolio: Portfolio,
+  isin: string
+): number {
+  return sum(
+    getPositions(portfolio, isin)?.closed || [],
+    ({ pieces, buyPrice, sellPrice, orderFee, dividendPayouts, taxes }) =>
+      pieces * (sellPrice - buyPrice) -
+      orderFee -
+      taxes +
+      sumDividends(dividendPayouts) -
+      sumDividendTaxes(dividendPayouts)
+  );
+}
 
 export const portfolioContainsOrder = (
   portfolio: Portfolio,

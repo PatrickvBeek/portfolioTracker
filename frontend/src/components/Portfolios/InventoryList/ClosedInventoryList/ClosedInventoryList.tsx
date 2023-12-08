@@ -6,9 +6,13 @@ import {
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfIsinInPortfolio,
+  getProfitForIsinInPortfolio,
 } from "../../../../domain/portfolio/portfolio.derivers";
 import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
-import { getPositions } from "../../../../domain/position/position.derivers";
+import {
+  getPositionsDividendSum,
+  getTotalTaxesForClosedPosition,
+} from "../../../../domain/position/position.derivers";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
@@ -28,7 +32,9 @@ interface InventoryItem {
   initialValue: number;
   endValue: number;
   orderFees: number;
+  dividends: number;
   profit: number;
+  taxes: number;
 }
 
 const columDefs: ColDef<InventoryItem>[] = [
@@ -58,9 +64,21 @@ const columDefs: ColDef<InventoryItem>[] = [
     alignment: "right",
   },
   {
+    header: "Dividends",
+    valueGetter: (i) => toPrice(i.dividends),
+    footerGetter: (data) => toPrice(sum(data, (el) => el.dividends)),
+    alignment: "right",
+  },
+  {
     header: "Fees",
     valueGetter: (i) => toPrice(i.orderFees),
     footerGetter: (data) => toPrice(sum(data, (el) => el.orderFees)),
+    alignment: "right",
+  },
+  {
+    header: "Total Taxes",
+    valueGetter: (i) => toPrice(i.taxes),
+    footerGetter: (data) => toPrice(sum(data, (el) => el.taxes)),
     alignment: "right",
   },
   {
@@ -109,11 +127,9 @@ function getInventoryRows(
       initialValue: getInitialValueOfIsinInPortfolio(portfolio, isin, "closed"),
       endValue: getEndValueOfIsinInPortfolio(portfolio, isin),
       orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "closed"),
-      profit: sum(
-        getPositions(portfolio.orders[isin])?.closed || [],
-        ({ pieces, buyPrice, sellPrice, orderFee }) =>
-          pieces * (sellPrice - buyPrice) - orderFee
-      ),
+      dividends: getPositionsDividendSum(portfolio, isin, "closed"),
+      taxes: getTotalTaxesForClosedPosition(portfolio, isin),
+      profit: getProfitForIsinInPortfolio(portfolio, isin),
     }))
     .filter((pos) => pos.pieces > 0);
 }

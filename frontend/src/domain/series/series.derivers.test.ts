@@ -31,6 +31,7 @@ describe("the series operation", () => {
             sharePrice: 11,
           },
         ]),
+        dividendPayouts: {},
       };
 
       expect(getInitialValueSeriesForPortfolio(TEST_PORTFOLIO)).toEqual([
@@ -63,6 +64,7 @@ describe("the series operation", () => {
             sharePrice: 6,
           },
         ]),
+        dividendPayouts: {},
       };
 
       expect(getInitialValueSeriesForPortfolio(TEST_PORTFOLIO)).toEqual([

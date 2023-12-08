@@ -18,7 +18,7 @@ function DeleteButtonWithConfirmation({
   return (
     <div className={bemBlock("")}>
       <i
-        className={"fa fa-trash-can " + bemElement("button")}
+        className={"fa fa-trash " + bemElement("button")}
         onClick={() => setIsOpen(true)}
       ></i>
       {isOpen && (

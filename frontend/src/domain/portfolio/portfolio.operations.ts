@@ -1,4 +1,5 @@
-import { sort } from "radash";
+import { omit, sort } from "radash";
+import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 import { Portfolio, PortfolioLibrary } from "./portfolio.entities";
 
@@ -14,16 +15,9 @@ export function addPortfolioToLibrary(
 
 export function deletePortfolioFromLibrary(
   previousLibrary: PortfolioLibrary,
-  portfolio: Portfolio
+  portfolioName: string
 ): PortfolioLibrary {
-  return previousLibrary
-    ? Object.keys(previousLibrary)
-        .filter((p) => portfolio.name !== p)
-        .reduce(
-          (lib, name) => Object.assign(lib, { [name]: previousLibrary[name] }),
-          {}
-        )
-    : {};
+  return previousLibrary ? omit(previousLibrary, [portfolioName]) : {};
 }
 
 export const addOrderToPortfolio = (
@@ -58,7 +52,42 @@ export const deleteOrderFromPortfolio = (
   };
 };
 
+export function addDividendPayoutToPortfolio(
+  portfolio: Portfolio,
+  payout: DividendPayout
+) {
+  return {
+    ...portfolio,
+    dividendPayouts: {
+      ...portfolio.dividendPayouts,
+      [payout.asset]: sort(
+        [...(portfolio.dividendPayouts[payout.asset] || []), payout],
+        (payout) => new Date(payout.timestamp).getTime()
+      ),
+    },
+  };
+}
+
+export const deleteDividendPayoutFromPortfolio = (
+  portfolio: Portfolio,
+  payout: DividendPayout
+): Portfolio => {
+  if (!portfolio.orders[payout.asset]) {
+    return portfolio;
+  }
+  return {
+    ...portfolio,
+    dividendPayouts: {
+      ...portfolio.dividendPayouts,
+      [payout.asset]: portfolio.dividendPayouts[payout.asset].filter(
+        (currentOrder) => currentOrder.uuid !== payout.uuid
+      ),
+    },
+  };
+};
+
 export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
   name: name,
   orders: {},
+  dividendPayouts: {},
 });

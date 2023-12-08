@@ -3,6 +3,7 @@ import { Asset, AssetLibrary } from "../../../../domain/asset/asset.entities";
 import {
   getElementsByIsin,
   getElementsGroupedByAsset,
+  getTestDividendPayout,
   getTestOrder,
 } from "../../../../domain/dataHelpers";
 import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
@@ -14,33 +15,60 @@ const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
   { isin: "asset2", displayName: "Asset 2" },
 ]);
 
+const day1 = "2023-12-08";
+const day2 = "2023-12-09";
+const day3 = "2023-12-10";
+
 const testPortfolioName = "testPortfolio";
 const mockPortfolio: Portfolio = {
   name: testPortfolioName,
   orders: getElementsGroupedByAsset([
     getTestOrder({
       asset: "asset1",
+      timestamp: day1,
       pieces: 2,
       sharePrice: 10,
+      taxes: 0,
       orderFee: 1,
     }),
     getTestOrder({
       asset: "asset1",
+      timestamp: day2,
       pieces: -1,
       sharePrice: 11,
+      taxes: 0.1,
       orderFee: 1,
     }),
     getTestOrder({
       asset: "asset2",
+      timestamp: day1,
       pieces: 3,
       sharePrice: 15,
       orderFee: 1,
+      taxes: 0,
     }),
     getTestOrder({
       asset: "asset2",
+      timestamp: day3,
       pieces: -3,
       sharePrice: 20,
       orderFee: 1,
+      taxes: 1.5,
+    }),
+  ]),
+  dividendPayouts: getElementsGroupedByAsset([
+    getTestDividendPayout({
+      asset: "asset1",
+      timestamp: day3, // will have no effect since no position is open on this day
+      dividendPerShare: 100,
+      pieces: 100,
+    }),
+    getTestDividendPayout({
+      asset: "asset2",
+      timestamp: day2,
+      pieces: 3,
+      dividendPerShare: 1,
+      taxes: 2.5,
     }),
   ]),
 };
@@ -77,7 +105,9 @@ describe("the open inventory list component", () => {
       "Pieces",
       "Initial Value",
       "End Value",
+      "Dividends",
       "Fees",
+      "Total Taxes",
       "Profit",
     ]);
   });
@@ -90,16 +120,20 @@ describe("the open inventory list component", () => {
       "1",
       "10.00 €",
       "11.00 €",
+      "0.00 €",
       "1.50 €",
-      "-0.50 €",
+      "0.10 €",
+      "-0.60 €",
     ]);
     expect(getCellTextsForRow(2)).toEqual([
       "Asset 2",
       "3",
       "45.00 €",
       "60.00 €",
+      "3.00 €",
       "2.00 €",
-      "13.00 €",
+      "4.00 €",
+      "12.00 €",
     ]);
   });
 
@@ -112,8 +146,10 @@ describe("the open inventory list component", () => {
       "",
       "55.00 €",
       "71.00 €",
+      "3.00 €",
       "3.50 €",
-      "+12.50 €",
+      "4.10 €",
+      "+11.40 €",
     ]);
   });
 });
