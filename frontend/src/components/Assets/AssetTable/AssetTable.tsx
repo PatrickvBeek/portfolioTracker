@@ -28,7 +28,7 @@ const AssetTable = () => {
   const defs: ColDef<Asset>[] = [
     { header: "Name", valueGetter: (a) => a.displayName },
     { header: "ISIN", valueGetter: (a) => a.isin },
-    { header: "WKN", valueGetter: (a) => a.wkn },
+    { header: "Symbol", valueGetter: (a) => a.symbol },
     {
       header: "Actions",
       valueGetter: (a) => (

@@ -38,7 +38,7 @@ const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
       options={assets}
       onChange={(event, value) => value?.isin && onSelect(value?.isin)}
       getOptionLabel={(asset) =>
-        `${asset.displayName}${asset.isin}${asset.wkn || ""}`
+        `${asset.displayName}${asset.isin}${asset.symbol || ""}`
       }
       renderOption={(props, asset) => (
         <Box
@@ -56,10 +56,10 @@ const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
           <div className={bemElement("option-fine-print")}>
             {`ISIN: ${asset.isin}`}
           </div>
-          {asset.wkn ? (
+          {asset.symbol ? (
             <div
               className={bemElement("option-fine-print")}
-            >{`WKN: ${asset.wkn}`}</div>
+            >{`Symbol: ${asset.symbol}`}</div>
           ) : null}
         </Box>
       )}
