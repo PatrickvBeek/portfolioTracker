@@ -1,7 +1,7 @@
 export interface Asset {
   isin: string;
   displayName: string;
-  wkn?: string;
+  symbol?: string;
 }
 
 export interface AssetLibrary {

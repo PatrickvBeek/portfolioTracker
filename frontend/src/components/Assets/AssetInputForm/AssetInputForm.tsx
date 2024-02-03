@@ -8,23 +8,24 @@ import "./AssetInputForm.css";
 
 const { bemBlock, bemElement } = bemHelper("asset-input-form");
 
-const sanitizeString = (input: string): string => {
+const sanitizeIsin = (input: string): string => {
   return input.replace(/[^0-9a-zA-Z]/gi, "");
+};
+
+const sanitizeSymbol = (input: string): string => {
+  return input.replace(/[^a-zA-Z]/gi, "");
 };
 
 const isValidName = (name: string): boolean => {
   return name.trim().length > 0;
 };
+
 const isValidIsin = (isin: string): boolean => {
   return isin.trim().length === 12;
 };
 
-const isValidWkn = (wkn: string): boolean => {
-  return (
-    !wkn ||
-    (wkn.trim().length === 6 &&
-      !(wkn.toUpperCase().includes("O") || wkn.toUpperCase().includes("I")))
-  );
+const isValidSymbol = (symbol: string): boolean => {
+  return !symbol || /^[a-zA-Z]{1,5}$/.test(symbol);
 };
 
 const isValidInput = (input: { name: string; isin: string }) => {
@@ -34,28 +35,24 @@ const isValidInput = (input: { name: string; isin: string }) => {
 const AssetInputForm = (): ReactElement => {
   let [nameInputText, updateNameInputText] = useState("");
   let [isinInputText, updateIsinInputText] = useState("");
-  let [wknInputText, updateWknInputText] = useState("");
+  let [symbolInputText, updateSymbolInputText] = useState("");
 
   const assetMutation = useAddAsset();
-
-  const allEmpty = (): boolean => {
-    return !(nameInputText || isinInputText || wknInputText);
-  };
 
   const handleButtonClicked = () => {
     updateNameInputText("");
     updateIsinInputText("");
-    updateWknInputText("");
+    updateSymbolInputText("");
     assetMutation.mutate({
       displayName: nameInputText,
       isin: isinInputText,
-      wkn: wknInputText,
+      symbol: symbolInputText,
     });
   };
 
   return (
     <div className={bemBlock("")}>
-      <FormRowFlex className={bemElement("form-row")}>
+      <FormRowFlex>
         <TextInput
           onChange={(element) => {
             updateNameInputText(element.target.value);
@@ -64,38 +61,33 @@ const AssetInputForm = (): ReactElement => {
           label={"Asset Name"}
           placeholder={"Asset Name..."}
           isMandatory={true}
-          isValid={isValidName(nameInputText) || allEmpty()}
+          isValid={isValidName(nameInputText) || !nameInputText}
           errorMessage={"Please enter a non-empty string."}
-          className={"asset-input-name-field"}
         />
         <TextInput
           onChange={(element) => {
             updateIsinInputText(
-              sanitizeString(element.target.value).toUpperCase()
+              sanitizeIsin(element.target.value).toUpperCase()
             );
           }}
           text={isinInputText}
           label={"ISIN"}
           placeholder={"ISIN..."}
           isMandatory={true}
-          isValid={isValidIsin(isinInputText) || allEmpty()}
+          isValid={isValidIsin(isinInputText) || !isinInputText}
           errorMessage={"An ISIN contains exactly 12 characters."}
-          className={"asset-input-isin-field"}
         />
         <TextInput
           onChange={(element) => {
-            updateWknInputText(
-              sanitizeString(element.target.value).toUpperCase()
+            updateSymbolInputText(
+              sanitizeSymbol(element.target.value).toUpperCase()
             );
           }}
-          text={wknInputText}
-          label={"WKN"}
-          placeholder={"WKN..."}
-          isValid={isValidWkn(wknInputText)}
-          errorMessage={
-            "A WKN contains exactly 6 characters and does not include 'O' or 'I'."
-          }
-          className={"asset-input-wkn-field"}
+          text={symbolInputText}
+          label={"Symbol"}
+          placeholder={"Symbol..."}
+          isValid={isValidSymbol(symbolInputText)}
+          errorMessage={"A symbol contains five or fewer letters."}
         />
       </FormRowFlex>
       <Button
