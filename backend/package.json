@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
+    "alphavantage-wrapper-ts": "^3.0.9",
     "express": "^4.17.3",
     "node-fetch": "^3.2.4"
   },
@@ -23,7 +24,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npx tsc",
-    "dev": "concurrently \"npx tsc\" \"nodemon -q dist/server.js\"",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
     "start": "export NODE_ENV=production && node dist/server.js",
     "test": "vitest run"
   }

@@ -3,6 +3,7 @@ import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
 import CustomTable, { ColDef } from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
 import "./AssetTable.css";
+import { SymbolConnectionIndicator } from "./SymbolConnectionIndicator";
 
 const AssetTable = () => {
   const assetDeletion = useDeleteAsset();
@@ -28,7 +29,11 @@ const AssetTable = () => {
   const defs: ColDef<Asset>[] = [
     { header: "Name", valueGetter: (a) => a.displayName },
     { header: "ISIN", valueGetter: (a) => a.isin },
-    { header: "Symbol", valueGetter: (a) => a.symbol },
+    {
+      header: "Symbol",
+      valueGetter: (a) =>
+        a.symbol ? <SymbolConnectionIndicator symbol={a.symbol} /> : null,
+    },
     {
       header: "Actions",
       valueGetter: (a) => (
