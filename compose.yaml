@@ -1,0 +1,15 @@
+services:
+  portfoliotracker:
+    image: node:18-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 127.0.0.1:3000:6060
+    volumes:
+      - pt-persist:/app/data
+    working_dir: /app
+    command: ["node", "backend/dist/server.js"]
+
+volumes:
+  pt-persist:
