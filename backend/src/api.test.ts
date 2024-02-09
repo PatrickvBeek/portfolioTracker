@@ -1,6 +1,6 @@
 import request from "supertest";
 import { TEST_ASSET_LIB, TEST_PORTFOLIO } from "./dataClasses/testUtils";
-import { app } from "./index";
+import app from "./index";
 
 describe("the servers REST api endpoint", () => {
   describe(`/express_backend correctly announces the ${process.env.NODE_ENV} environment`, () => {
