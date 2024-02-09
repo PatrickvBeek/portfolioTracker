@@ -27,7 +27,7 @@ function Portfolios({ className }: PortfolioProps) {
     }
   }, [portfoliosQuery.data, selectedPortfolio]);
 
-  if (portfoliosQuery.isLoading || !selectedPortfolio) {
+  if (portfoliosQuery.isLoading) {
     return <div>portfolios are loading...</div>;
   }
 
