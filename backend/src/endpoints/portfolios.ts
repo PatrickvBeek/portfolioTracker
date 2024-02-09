@@ -1,10 +1,18 @@
 import { Express, Request, Response } from "express";
+import path from "path";
 import { JsonWriter } from "../storage/jsonWriter/jsonWriter";
 
 export const handlePortfolios = (app: Express, env: string): void => {
   const isDev = env === "development";
 
-  const PORTFOLIO_DIR = `../data/${env}/json/portfolios`;
+  const PORTFOLIO_DIR = path.join(
+    __dirname,
+    "../../..",
+    "data",
+    env,
+    "json",
+    "portfolios"
+  );
   const PORTFOLIO_FILE = "PortfolioLibrary";
   const persistance = new JsonWriter(PORTFOLIO_DIR);
 
