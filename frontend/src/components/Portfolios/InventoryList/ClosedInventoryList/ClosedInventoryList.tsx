@@ -97,26 +97,26 @@ export const ClosedInventoryList = ({
 }: OpenInventoryListProps) => {
   const portfolioQuery = useGetPortfolio(portfolioName);
   const assetQuery = useGetAssets();
-  const [data, setData] = useState<InventoryItem[]>([]);
+  const [data, setData] = useState<InventoryItem[] | undefined>(undefined);
 
   useEffect(() => {
     setData(getInventoryRows(portfolioQuery.data, assetQuery.data));
   }, [portfolioName, portfolioQuery.data, assetQuery.data]);
 
-  return (
+  return data ? (
     <div className={bemBlock(className)}>
       <div className={bemElement("heading")}>Closed Positions</div>
       <CustomTable rows={data} columDefs={columDefs} />
     </div>
-  );
+  ) : null;
 };
 
 function getInventoryRows(
   portfolio?: Portfolio,
   assets?: AssetLibrary
-): InventoryItem[] {
+): InventoryItem[] | undefined {
   if (!(assets && portfolio)) {
-    return [];
+    return undefined;
   }
   return Object.keys(portfolio.orders)
     .map((isin) => ({

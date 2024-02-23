@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { Portfolio } from "./portfolio/portfolio.entities";
+import { Portfolio, PortfolioLibrary } from "./portfolio/portfolio.entities";
 
 export const TEST_ASSET_TESLA = {
   displayName: "tesla",
@@ -52,4 +52,8 @@ export const TEST_PORTFOLIO: Portfolio = {
     [TEST_ASSET_TESLA.isin]: [TEST_ORDER_TESLA],
   },
   dividendPayouts: {},
+};
+
+export const TEST_PORTFOLIO_LIB: PortfolioLibrary = {
+  [TEST_PORTFOLIO.name]: TEST_PORTFOLIO,
 };

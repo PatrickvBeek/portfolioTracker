@@ -9,7 +9,15 @@ jobs:
         uses: actions/setup-node@v3.6.0
       - name: Check out repository code
         uses: actions/checkout@v3.3.0
-      - run: cd frontend && npx madge -c --extensions ts,tsx ./ && npm ci && npm run test:no-watch
+      - name: Check architecture
+        working-directory: ./frontend
+        run: npx madge -c --extensions ts,tsx ./
+      - name: Install Dependencies
+        working-directory: ./frontend
+        run: npm ci
+      - name: Run Vitest
+        working-directory: ./frontend
+        run: npm run test:no-watch
   backend-tests:
     runs-on: ubuntu-latest
     steps:

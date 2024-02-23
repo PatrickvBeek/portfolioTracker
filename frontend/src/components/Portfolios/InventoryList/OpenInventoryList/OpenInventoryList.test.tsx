@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { Asset, AssetLibrary } from "../../../../domain/asset/asset.entities";
 import {
   getElementsByIsin,
@@ -7,7 +7,7 @@ import {
   getTestOrder,
 } from "../../../../domain/dataHelpers";
 import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
-import { mockUseGetAssets, mockUseGetPortfolio } from "../../../../testUtils";
+import { getComponentTest } from "../../../../testUtils/componentTestRunner";
 import { OpenInventoryList } from "./OpenInventoryList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
@@ -59,33 +59,28 @@ const mockPortfolio: Portfolio = {
     }),
   ]),
 };
-
-const portfolioMock = mockUseGetPortfolio;
-const assetsMock = mockUseGetAssets;
+const mockPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  beforeEach(() => {
-    portfolioMock.mockReturnValue({
-      data: mockPortfolio,
-      isError: false,
-      isLoading: false,
-    });
-    assetsMock.mockReturnValue({
-      data: testAssetLib,
-      isError: false,
-      isLoading: false,
-    });
+  const test = getComponentTest({
+    element: <OpenInventoryList portfolioName={testPortfolioName} />,
+    mockData: { portfolioLib: mockPortfolioLib, assetLib: testAssetLib },
   });
 
-  it("renders the correct list headers", () => {
-    render(<OpenInventoryList portfolioName={testPortfolioName} />);
+  beforeAll(() => test.server.listen());
+  beforeEach(() => {
+    test.server.resetHandlers();
+    test.render();
+  });
+  afterAll(() => test.server.close());
+
+  it("renders the correct list headers", async () => {
     expect(
-      screen.getAllByRole("columnheader").map((el) => el.textContent)
+      (await screen.findAllByRole("columnheader")).map((el) => el.textContent)
     ).toEqual(["Asset", "Pieces", "Initial Value", "Fees", "Dividends"]);
   });
 
   it("renders the correct data", () => {
-    render(<OpenInventoryList portfolioName={testPortfolioName} />);
     expect(screen.getAllByRole("cell").map((el) => el.textContent)).toEqual([
       "Open Asset",
       "1",

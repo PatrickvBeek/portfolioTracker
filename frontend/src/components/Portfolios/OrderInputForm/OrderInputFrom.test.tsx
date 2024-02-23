@@ -1,19 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { vi } from "vitest";
 import {
+  TEST_ASSET_LIB,
   TEST_ASSET_TESLA,
   TEST_PORTFOLIO,
+  TEST_PORTFOLIO_LIB,
 } from "../../../domain/testConstants";
-import {
-  mockUseAddOrder,
-  mockUseGetAssets,
-  mockUseGetPortfolio,
-} from "../../../testUtils";
+import { getComponentTest } from "../../../testUtils/componentTestRunner";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 
 describe("The OrderInputForm", () => {
-  const portfolioName = "portfolio-name";
+  const portfolioName = TEST_PORTFOLIO.name;
 
   const PROPS: OrderInputFormProps = {
     portfolioName,
@@ -21,8 +18,12 @@ describe("The OrderInputForm", () => {
 
   const TEST_ASSET = TEST_ASSET_TESLA;
 
+  const test = getComponentTest({
+    element: <OrderInputForm {...PROPS} />,
+    mockData: { portfolioLib: TEST_PORTFOLIO_LIB, assetLib: TEST_ASSET_LIB },
+  });
+
   function fillValidOder(): void {
-    render(<OrderInputForm {...PROPS} />);
     userEvent.click(screen.getByLabelText("Asset"));
     userEvent.click(screen.getByText(TEST_ASSET.displayName));
     userEvent.type(screen.getByLabelText("Pieces"), "4");
@@ -30,24 +31,12 @@ describe("The OrderInputForm", () => {
     userEvent.type(screen.getByLabelText("Share Price"), "400");
   }
 
+  beforeAll(() => test.server.listen());
   beforeEach(() => {
-    mockUseGetPortfolio.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: TEST_PORTFOLIO,
-    });
-
-    mockUseGetAssets.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: { [TEST_ASSET.isin]: TEST_ASSET },
-    });
-
-    mockUseAddOrder.mockReturnValue({ mutate: vi.fn() });
+    test.server.resetHandlers();
+    test.render();
   });
-  it("can be instantiated", () => {
-    <OrderInputForm {...PROPS} />;
-  });
+  afterAll(() => test.server.close());
 
   it.each`
     label
@@ -56,22 +45,18 @@ describe("The OrderInputForm", () => {
     ${"Share Price"}
     ${"Fees"}
     ${"Order Date"}
-  `("renders an input element with label $label", ({ label }) => {
-    render(<OrderInputForm {...PROPS} />);
-    const inputElement = screen.getByLabelText(label);
-
-    expect(inputElement).toBeInTheDocument();
+  `("renders an input element with label $label", async ({ label }) => {
+    screen.debug();
+    expect(await screen.findByLabelText(label)).toBeInTheDocument();
   });
 
-  it("renders a button with 'Submit' label", () => {
-    render(<OrderInputForm {...PROPS} />);
+  it("renders a button with 'Submit' label", async () => {
     expect(screen.getByRole("button", { name: "Submit" })).toHaveTextContent(
       "Submit"
     );
   });
 
   it("only accepts an order if all mandatory fields are set", () => {
-    render(<OrderInputForm {...PROPS} />);
     userEvent.click(screen.getByLabelText("Asset"));
     userEvent.click(screen.getByText(TEST_ASSET.displayName));
     userEvent.type(screen.getByLabelText("Pieces"), "4");
@@ -84,7 +69,6 @@ describe("The OrderInputForm", () => {
   });
 
   it("does not accept an order if it would sell more pieces than available", () => {
-    render(<OrderInputForm {...PROPS} />);
     userEvent.click(screen.getByLabelText("Asset"));
     userEvent.click(screen.getByText(TEST_ASSET.displayName));
     userEvent.type(screen.getByLabelText("Share Price"), "400");
