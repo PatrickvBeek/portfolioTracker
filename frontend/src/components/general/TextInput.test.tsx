@@ -1,12 +1,13 @@
 import "@testing-library/jest-dom/extend-expect";
 import { render, screen } from "@testing-library/react";
+import { vi } from "vitest";
 import { TextInput, TextInputProps } from "./TextInput";
 
 const TEST_LABEL = "test-label";
 
 describe("the text TextInput component", () => {
   const errorMessage = "test-error-message";
-  const onChangeMock = jest.fn();
+  const onChangeMock = vi.fn();
   const testProps: TextInputProps = {
     text: "test-text",
     isValid: true,

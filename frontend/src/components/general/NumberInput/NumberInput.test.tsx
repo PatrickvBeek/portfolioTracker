@@ -1,11 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 import { NumberInput, NumberInputProps } from "./NumberInput";
 
 const LABEL = "test label";
 
 describe("the NumberInput component", () => {
-  const onChangeMock = jest.fn();
+  const onChangeMock = vi.fn();
   const PROPS: NumberInputProps = { onChange: onChangeMock, label: LABEL };
   beforeEach(() => {
     onChangeMock.mockClear();

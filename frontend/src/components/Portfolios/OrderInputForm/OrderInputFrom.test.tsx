@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 import {
   TEST_ASSET_TESLA,
   TEST_PORTFOLIO,
@@ -42,7 +43,7 @@ describe("The OrderInputForm", () => {
       data: { [TEST_ASSET.isin]: TEST_ASSET },
     });
 
-    mockUseAddOrder.mockReturnValue({ mutate: jest.fn() });
+    mockUseAddOrder.mockReturnValue({ mutate: vi.fn() });
   });
   it("can be instantiated", () => {
     <OrderInputForm {...PROPS} />;

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 import Confirmation, { ConfirmationProps } from "./Confirmation";
 
 describe("the confirmation component", () => {
@@ -8,8 +9,8 @@ describe("the confirmation component", () => {
     body: "something evil will happen, do you want to continue?",
     confirmLabel: "yeah!",
     cancelLabel: "nooooo!",
-    onConfirm: jest.fn(),
-    onCancel: jest.fn(),
+    onConfirm: vi.fn(),
+    onCancel: vi.fn(),
   };
 
   function getConfirmButton(): HTMLElement | undefined {

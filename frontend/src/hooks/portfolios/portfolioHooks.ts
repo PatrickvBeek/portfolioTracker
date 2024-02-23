@@ -111,12 +111,12 @@ export function useAddDividendPayoutToPortfolio(portfolio: string) {
 }
 
 const fetchPortfolios = async (): Promise<Record<string, Portfolio>> => {
-  const response = await fetch("/portfolios/get-portfolios/");
+  const response = await fetch("/api/portfolios/get-portfolios/");
   return response.json();
 };
 
 const savePortfoliosOnServer = async (portfolioLib: PortfolioLibrary) => {
-  return fetch("/portfolios/save-portfolios", {
+  return fetch("/api/portfolios/save-portfolios", {
     method: "PUT",
     body: JSON.stringify(portfolioLib),
     headers: { "Content-Type": "application/json" },

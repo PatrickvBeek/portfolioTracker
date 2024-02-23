@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ES2021",
+    "lib": ["dom", "dom.iterable", "ES2021"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -17,6 +17,6 @@
     "jsx": "react-jsx"
   },
   "include": ["src"],
-  "types": ["node", "jest", "@testing-library/jest-dom"]
+  "types": ["node", "@testing-library/jest-dom", "vitest/globals"]
 }
 // "exclude": ["**/*.test.*", "**/__mocks__/*", "**/__tests__/*"],

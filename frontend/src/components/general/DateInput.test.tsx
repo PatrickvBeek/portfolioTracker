@@ -1,11 +1,12 @@
 import { render, screen } from "@testing-library/react";
+import { vi } from "vitest";
 import { DateInput, DateInputProps } from "./DateInput";
 
 const LABEL = "label";
 
 describe("the DateInput component", () => {
   const errorMessage = "test-error-message";
-  const onChangeMock = jest.fn();
+  const onChangeMock = vi.fn();
   const testProps: DateInputProps = {
     isValid: true,
     isMandatory: true,
