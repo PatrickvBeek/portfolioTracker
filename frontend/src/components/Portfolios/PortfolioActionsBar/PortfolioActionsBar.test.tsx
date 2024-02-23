@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 import {
   mockUseAddPortfolio,
   mockUseDeletePortfolio,
@@ -12,9 +13,9 @@ describe("the portfolio sidebar", () => {
   };
 
   beforeEach(() => {
-    mockUseDeletePortfolio.mockReturnValue({ mutate: jest.fn() });
+    mockUseDeletePortfolio.mockReturnValue({ mutate: vi.fn() });
     mockUseAddPortfolio.mockReturnValue({
-      mutate: jest.fn(),
+      mutate: vi.fn(),
     });
   });
 

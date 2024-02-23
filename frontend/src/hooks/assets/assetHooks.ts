@@ -37,12 +37,12 @@ export function useDeleteAsset() {
 }
 
 const fetchAssets = async (): Promise<Record<string, Asset>> => {
-  const response = await fetch("/assets/get-assets/");
+  const response = await fetch("/api/assets/get-assets/");
   return response.json();
 };
 
 const saveAssetsOnServer = async (assetLib: Record<string, Asset>) => {
-  return fetch("/assets/save-assets", {
+  return fetch("/api/assets/save-assets", {
     method: "PUT",
     body: JSON.stringify(assetLib),
     headers: {
