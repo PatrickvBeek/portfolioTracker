@@ -18,12 +18,14 @@ export type PortfolioProps = Props<{}>;
 
 function Portfolios({ className }: PortfolioProps) {
   const portfoliosQuery = useGetPortfolios();
-  const [selectedPortfolio, setSelectedPortfolio] = useState("");
+  const [selectedPortfolio, setSelectedPortfolio] = useState<
+    string | undefined
+  >(undefined);
 
   useEffect(() => {
     const portfolios = Object.keys(portfoliosQuery.data || {});
-    if (!portfolios.includes(selectedPortfolio)) {
-      setSelectedPortfolio(portfolios[0] || "");
+    if (!selectedPortfolio) {
+      setSelectedPortfolio(portfolios[0]);
     }
   }, [portfoliosQuery.data, selectedPortfolio]);
 
@@ -43,6 +45,10 @@ function Portfolios({ className }: PortfolioProps) {
 
   if (Object.keys(portfolios).length < 1) {
     return <EmptyPortfolios />;
+  }
+
+  if (!selectedPortfolio) {
+    return null;
   }
 
   return (

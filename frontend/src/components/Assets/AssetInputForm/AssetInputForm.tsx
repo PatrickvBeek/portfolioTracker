@@ -13,7 +13,7 @@ const sanitizeIsin = (input: string): string => {
 };
 
 const sanitizeSymbol = (input: string): string => {
-  return input.replace(/[^a-zA-Z.]/gi, "");
+  return input.replace(/[^a-zA-Z0-9.]/gi, "");
 };
 
 const isValidName = (name: string): boolean => {
@@ -25,7 +25,7 @@ const isValidIsin = (isin: string): boolean => {
 };
 
 const isValidSymbol = (symbol: string): boolean => {
-  return !symbol || /^[a-zA-Z]{1,5}\.?[a-zA-Z]+$/.test(symbol);
+  return !symbol || /^[a-zA-Z0-9]{1,5}\.?[a-zA-Z0-9]+$/.test(symbol);
 };
 
 const isValidInput = (input: { name: string; isin: string }) => {
