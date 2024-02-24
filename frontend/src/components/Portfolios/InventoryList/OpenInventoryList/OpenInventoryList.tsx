@@ -69,13 +69,15 @@ export const OpenInventoryList = ({
   const portfolioQuery = useGetPortfolio(portfolioName);
   const assetQuery = useGetAssets();
   const portfolioData = portfolioQuery.data;
-  const [data, setData] = useState<InventoryItem[]>(
-    getInventoryRows(portfolioData, assetQuery.data)
-  );
+  const [data, setData] = useState<InventoryItem[] | undefined>(undefined);
 
   useEffect(() => {
     setData(getInventoryRows(portfolioQuery.data, assetQuery.data));
   }, [portfolioName, portfolioQuery.data, assetQuery.data]);
+
+  if (!data) {
+    return null;
+  }
 
   return (
     <div className={bemBlock(className)}>
@@ -88,9 +90,9 @@ export const OpenInventoryList = ({
 function getInventoryRows(
   portfolio?: Portfolio,
   assets?: AssetLibrary
-): InventoryItem[] {
+): InventoryItem[] | undefined {
   if (!(assets && portfolio)) {
-    return [];
+    return undefined;
   }
   return Object.keys(portfolio.orders)
     .map((isin) => ({

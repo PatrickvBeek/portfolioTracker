@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { Asset, AssetLibrary } from "../../../../domain/asset/asset.entities";
 import {
   getElementsByIsin,
@@ -7,7 +7,7 @@ import {
   getTestOrder,
 } from "../../../../domain/dataHelpers";
 import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
-import { mockUseGetAssets, mockUseGetPortfolio } from "../../../../testUtils";
+import { getComponentTest } from "../../../../testUtils/componentTestRunner";
 import { ClosedInventoryList } from "./ClosedInventoryList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
@@ -72,23 +72,22 @@ const mockPortfolio: Portfolio = {
     }),
   ]),
 };
-
-const portfolioMock = mockUseGetPortfolio;
-const assetsMock = mockUseGetAssets;
+const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  beforeEach(() => {
-    portfolioMock.mockReturnValue({
-      data: mockPortfolio,
-      isError: false,
-      isLoading: false,
-    });
-    assetsMock.mockReturnValue({
-      data: testAssetLib,
-      isError: false,
-      isLoading: false,
-    });
+  const test = getComponentTest({
+    element: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
+    mockData: { portfolioLib: testPortfolioLib, assetLib: testAssetLib },
   });
+
+  beforeAll(() => {
+    test.server.listen();
+  });
+  beforeEach(() => {
+    test.server.resetHandlers();
+    test.render();
+  });
+  afterAll(() => test.server.close());
 
   function getCellTextsForRow(i: number): (string | null)[] {
     return within(screen.getAllByRole("row")[i])
@@ -96,10 +95,9 @@ describe("the open inventory list component", () => {
       .map((cell) => cell.textContent);
   }
 
-  it("renders the correct list headers", () => {
-    render(<ClosedInventoryList portfolioName={testPortfolioName} />);
+  it("renders the correct list headers", async () => {
     expect(
-      screen.getAllByRole("columnheader").map((el) => el.textContent)
+      (await screen.findAllByRole("columnheader")).map((el) => el.textContent)
     ).toEqual([
       "Asset",
       "Pieces",
@@ -113,7 +111,6 @@ describe("the open inventory list component", () => {
   });
 
   it("renders the correct data", () => {
-    render(<ClosedInventoryList portfolioName={testPortfolioName} />);
     expect(screen.getAllByRole("row")).toHaveLength(4);
     expect(getCellTextsForRow(1)).toEqual([
       "Asset 1",
@@ -138,8 +135,6 @@ describe("the open inventory list component", () => {
   });
 
   it("renders the correct footer", () => {
-    render(<ClosedInventoryList portfolioName={testPortfolioName} />);
-
     expect(screen.getAllByRole("row")).toHaveLength(4);
     expect(getCellTextsForRow(3)).toEqual([
       "2 Positions",

@@ -63,6 +63,7 @@
     "jest-transform-stub": "^2.0.0",
     "jsdom": "^24.0.0",
     "madge": "^6.1.0",
+    "msw": "^2.2.1",
     "ts-jest": "^28.0.4",
     "ts-node": "^10.8.1",
     "vite": "^5.1.4",
