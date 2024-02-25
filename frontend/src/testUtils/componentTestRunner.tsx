@@ -24,10 +24,10 @@ type ComponentTest = {
 
 function getHandlers(mockData: MockBackendData | undefined) {
   return [
-    http.get("/api/portfolios/get-portfolios", () => {
+    http.get("/api/portfolios", () => {
       return HttpResponse.json(mockData?.portfolioLib || {});
     }),
-    http.get("/api/assets/get-assets", () => {
+    http.get("/api/assets", () => {
       return HttpResponse.json(mockData?.assetLib || {});
     }),
   ];
