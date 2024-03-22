@@ -12,6 +12,7 @@ node_modules/
 
 # testing
 /coverage
+domain/coverage
 backend/test_data/
 data/test/json/
 
