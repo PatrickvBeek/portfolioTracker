@@ -1,8 +1,8 @@
 import { sum } from "radash";
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
-import { portfolioContainsOrder } from "../../../domain/portfolio/portfolio.derivers";
-import { getPositions } from "../../../domain/position/position.derivers";
+import { portfolioContainsOrder } from "../../../../../domain/portfolio/portfolio.derivers";
+import { getPositions } from "../../../../../domain/position/position.derivers";
 import {
   useAddOrderToPortfolio,
   useGetPortfolio,
