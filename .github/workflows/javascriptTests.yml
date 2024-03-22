@@ -1,29 +1,30 @@
 name: jest-tests
 on: [push]
 jobs:
-  frontend-tests:
+  unit-tests:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "starting frontend tests"
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3.6.0
-      - name: Check out repository code
-        uses: actions/checkout@v3.3.0
+        uses: actions/setup-node@v4
+
+      - name: Install Dependencies at Root
+        run: yarn install
+
       - name: Check architecture
         working-directory: ./frontend
         run: npx madge -c --extensions ts,tsx ./
-      - name: Install Dependencies
+
+      - name: Frontend Tests
         working-directory: ./frontend
-        run: npm ci
-      - name: Run Vitest
-        working-directory: ./frontend
-        run: npm run test:no-watch
-  backend-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "starting backend tests "
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v3.6.0
-      - name: Check out repository code
-        uses: actions/checkout@v3.3.0
-      - run: cd backend && npm ci && npm run test
+        run: yarn run test:no-watch
+
+      - name: Domain Tests
+        working-directory: ./domain
+        run: npx vitest run
+
+      - name: Backend Tests
+        working-directory: ./backend
+        run: npm run test
