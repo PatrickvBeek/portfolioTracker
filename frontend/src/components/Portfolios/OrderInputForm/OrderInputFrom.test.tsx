@@ -5,7 +5,7 @@ import {
   TEST_ASSET_TESLA,
   TEST_PORTFOLIO,
   TEST_PORTFOLIO_LIB,
-} from "../../../domain/testConstants";
+} from "../../../../../domain/testConstants";
 import { getComponentTest } from "../../../testUtils/componentTestRunner";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 
@@ -46,7 +46,6 @@ describe("The OrderInputForm", () => {
     ${"Fees"}
     ${"Order Date"}
   `("renders an input element with label $label", async ({ label }) => {
-    screen.debug();
     expect(await screen.findByLabelText(label)).toBeInTheDocument();
   });
 

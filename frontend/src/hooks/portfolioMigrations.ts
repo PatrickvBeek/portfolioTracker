@@ -1,8 +1,8 @@
-import { Order } from "../domain/order/order.entities";
+import { Order } from "../../../domain/order/order.entities";
 import {
   Portfolio,
   PortfolioLibrary,
-} from "../domain/portfolio/portfolio.entities";
+} from "../../../domain/portfolio/portfolio.entities";
 
 function mapOrder(order: Omit<Order, "taxes">): Order {
   return { ...order, taxes: 0 };

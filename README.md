@@ -2,21 +2,19 @@
 
 ## Using Docker
 
-- in the project root, run `docker compose up -d`
+### installation
+
+- in project root, run `docker-compose build`
+
+### start the application
+
+- in the project root, run `docker-compose up -d`
 - open `localhost:3000` in a browser
 
 ## Manually via node development setup
 
 - install node.js on your system
-- in the folder `frontend`, run
-  ```
-  npm install
-  ```
-- in the folder `backend`, run
-
-  ```
-  npm install
-  ```
+- run `yarn install` in the project root
 
 - to start up the application:
 

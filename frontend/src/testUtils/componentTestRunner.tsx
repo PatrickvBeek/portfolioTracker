@@ -3,8 +3,8 @@ import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
 import { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { AssetLibrary } from "../domain/asset/asset.entities";
-import { PortfolioLibrary } from "../domain/portfolio/portfolio.entities";
+import { AssetLibrary } from "../../../domain/asset/asset.entities";
+import { PortfolioLibrary } from "../../../domain/portfolio/portfolio.entities";
 import { queryClientConfig } from "../queryClient/config";
 
 type MockBackendData = {

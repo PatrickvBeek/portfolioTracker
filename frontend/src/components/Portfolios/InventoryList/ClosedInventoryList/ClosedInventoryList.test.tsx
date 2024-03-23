@@ -1,12 +1,15 @@
 import { screen, within } from "@testing-library/react";
-import { Asset, AssetLibrary } from "../../../../domain/asset/asset.entities";
+import {
+  Asset,
+  AssetLibrary,
+} from "../../../../../../domain/asset/asset.entities";
 import {
   getElementsByIsin,
   getElementsGroupedByAsset,
   getTestDividendPayout,
   getTestOrder,
-} from "../../../../domain/dataHelpers";
-import { Portfolio } from "../../../../domain/portfolio/portfolio.entities";
+} from "../../../../../../domain/dataHelpers";
+import { Portfolio } from "../../../../../../domain/portfolio/portfolio.entities";
 import { getComponentTest } from "../../../../testUtils/componentTestRunner";
 import { ClosedInventoryList } from "./ClosedInventoryList";
 

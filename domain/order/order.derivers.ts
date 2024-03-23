@@ -1,5 +1,5 @@
 import { isEqual, omit } from "radash";
-import { areDatesOnSameDay } from "../../utility/dateUtils";
+import { areDatesOnSameDay } from "../utils/dateUtils";
 import { Order } from "./order.entities";
 
 export const getOrderVolume: (order: Order) => number = ({

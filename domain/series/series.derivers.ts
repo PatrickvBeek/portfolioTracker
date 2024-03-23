@@ -1,5 +1,4 @@
 import { sort, sum } from "radash";
-import { updateBy } from "../../utility/arrays";
 import { Portfolio } from "../portfolio/portfolio.entities";
 import {
   getPositionHistory,
@@ -9,6 +8,7 @@ import {
   PositionHistory,
   PositionHistoryDataPoint,
 } from "../position/position.entities";
+import { updateBy } from "../utils/arrays";
 import { Series, SeriesPoint } from "./series.entities";
 
 export function getInitialValueSeriesForPortfolio(
