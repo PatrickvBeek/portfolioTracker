@@ -15,6 +15,9 @@ jobs:
       - name: Install Dependencies at Root
         run: yarn install
 
+      - name: Assert synced dependencies
+        run: yarn syncpack list mismatches
+
       - name: Check architecture
         working-directory: ./frontend
         run: npx madge -c --extensions ts,tsx ./
