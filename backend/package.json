@@ -1,23 +1,15 @@
 {
   "name": "backend",
-  "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "vitest run",
-    "build": "npx tsc",
-    "start": "export NODE_ENV=production && node dist/server.js",
-    "dev": "concurrently \"npx tsc\" \"nodemon -q dist/server.js\""
-  },
+  "version": "1.0.0",
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "express": "^4.17.3",
     "node-fetch": "^3.2.4"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
-    "@types/node": "^17.0.25",
+    "@types/node": "^20.11.20",
     "@types/supertest": "^2.0.12",
     "@types/uuid": "^8.3.4",
     "concurrently": "^7.1.0",
@@ -26,5 +18,13 @@
     "typescript": "^5.4.3",
     "vite": "^5.2.4",
     "vitest": "^1.4.0"
+  },
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "dev": "concurrently \"npx tsc\" \"nodemon -q dist/server.js\"",
+    "start": "export NODE_ENV=production && node dist/server.js",
+    "test": "vitest run"
   }
 }
