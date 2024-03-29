@@ -1,4 +1,4 @@
-import { Asset } from "../../../../../domain/asset/asset.entities";
+import { Asset } from "../../../../../domain/src/asset/asset.entities";
 import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
 import CustomTable, { ColDef } from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";

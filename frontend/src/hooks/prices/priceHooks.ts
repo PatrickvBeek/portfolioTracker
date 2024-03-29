@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { Series } from "../../domain/series/series.entities";
+import { Series } from "../../../../domain/src/series/series.entities";
 
 export const PRICE_FREQUENCY = {
   DAILY: "daily",

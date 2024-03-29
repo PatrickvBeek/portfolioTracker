@@ -5,7 +5,7 @@ import {
   TEST_ASSET_TESLA,
   TEST_PORTFOLIO,
   TEST_PORTFOLIO_LIB,
-} from "../../../../../domain/testConstants";
+} from "../../../../../domain/src/testConstants";
 import { getComponentTest } from "../../../testUtils/componentTestRunner";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 

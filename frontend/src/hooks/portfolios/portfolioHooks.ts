@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { DividendPayout } from "../../../../domain/dividendPayouts/dividend.entities";
-import { Order } from "../../../../domain/order/order.entities";
-import { getActivitiesForPortfolio } from "../../../../domain/portfolio/portfolio.derivers";
+import { DividendPayout } from "../../../../domain/src/dividendPayouts/dividend.entities";
+import { Order } from "../../../../domain/src/order/order.entities";
+import { getActivitiesForPortfolio } from "../../../../domain/src/portfolio/portfolio.derivers";
 import {
   Portfolio,
   PortfolioLibrary,
-} from "../../../../domain/portfolio/portfolio.entities";
+} from "../../../../domain/src/portfolio/portfolio.entities";
 import {
   addDividendPayoutToPortfolio,
   addOrderToPortfolio,
@@ -13,7 +13,7 @@ import {
   deleteDividendPayoutFromPortfolio,
   deleteOrderFromPortfolio,
   deletePortfolioFromLibrary,
-} from "../../../../domain/portfolio/portfolio.operations";
+} from "../../../../domain/src/portfolio/portfolio.operations";
 
 export function useGetPortfolioActivity(portfolio: string) {
   return useQuery("portfolios", fetchPortfolios, {

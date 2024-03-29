@@ -19,8 +19,7 @@ jobs:
         run: yarn syncpack list mismatches
 
       - name: Check architecture
-        working-directory: ./frontend
-        run: npx madge -c --extensions ts,tsx ./
+        run: yarn run architecture-tests
 
       - name: Backend Tests
         working-directory: ./backend

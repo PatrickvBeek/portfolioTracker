@@ -1,10 +1,10 @@
 import moment from "moment";
 import { ReactElement } from "react";
-import { isOrder } from "../../../../../domain/activity/activity.derivers";
-import { getDividendVolume } from "../../../../../domain/dividendPayouts/dividend.derivers";
-import { DividendPayout } from "../../../../../domain/dividendPayouts/dividend.entities";
-import { getOrderVolume } from "../../../../../domain/order/order.derivers";
-import { Order } from "../../../../../domain/order/order.entities";
+import { isOrder } from "../../../../../domain/src/activity/activity.derivers";
+import { getDividendVolume } from "../../../../../domain/src/dividendPayouts/dividend.derivers";
+import { DividendPayout } from "../../../../../domain/src/dividendPayouts/dividend.entities";
+import { getOrderVolume } from "../../../../../domain/src/order/order.derivers";
+import { Order } from "../../../../../domain/src/order/order.entities";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
   useDeleteDividendPayoutFromPortfolio,
