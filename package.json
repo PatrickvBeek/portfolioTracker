@@ -1,4 +1,14 @@
 {
- "private": true,
- "workspaces": ["backend", "domain", "frontend"]
+  "private": true,
+  "workspaces": [
+    "backend",
+    "domain",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "yarn workspace frontend build && yarn workspace backend build"
+  },
+  "dependencies": {
+    "syncpack": "^12.3.0"
+  }
 }

@@ -11,23 +11,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
 
       - name: Install Dependencies at Root
         run: yarn install
+
+      - name: Assert synced dependencies
+        run: yarn syncpack list mismatches
 
       - name: Check architecture
         working-directory: ./frontend
         run: npx madge -c --extensions ts,tsx ./
 
-      - name: Frontend Tests
-        working-directory: ./frontend
-        run: yarn run test:no-watch
+      - name: Backend Tests
+        working-directory: ./backend
+        run: npm run test
 
       - name: Domain Tests
         working-directory: ./domain
         run: npx vitest run
 
-      - name: Backend Tests
-        working-directory: ./backend
-        run: npm run test
+      - name: Frontend Tests
+        working-directory: ./frontend
+        run: yarn run test:no-watch
