@@ -70,13 +70,14 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
       <NumberInput
         label={"Pieces"}
         onChange={(pieces) => setFormState({ ...formState, pieces })}
-        value={formState.pieces}
+        isMandatory
       />
       <NumberInput
         label={"Dividend per Share"}
         onChange={(dividend) =>
           setFormState({ ...formState, dividendPerShare: dividend })
         }
+        isMandatory
         digits={2}
       />
       <NumberInput
