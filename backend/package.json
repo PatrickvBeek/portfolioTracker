@@ -23,9 +23,10 @@
   "license": "ISC",
   "main": "index.js",
   "scripts": {
+    "prebuild": "rm -r dist ||:",
     "build": "npx tsc",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
-    "start": "NODE_ENV=production node dist/server.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/backend/src/server.js\"",
+    "start": "NODE_ENV=production node dist/backend/src/server.js",
     "test": "vitest run"
   }
 }

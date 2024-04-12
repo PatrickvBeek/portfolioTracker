@@ -1,8 +1,6 @@
 import { ReactElement } from "react";
-import {
-  PRICE_FREQUENCY,
-  useFetchPrices,
-} from "../../../hooks/prices/priceHooks";
+import { PRICE_FREQUENCY } from "../../../../../api";
+import { useFetchPrices } from "../../../hooks/prices/priceHooks";
 import { Props } from "../../../utility/types";
 import "./SymbolConnectionIndicator.css";
 
@@ -15,7 +13,7 @@ export function SymbolConnectionIndicator({
 }: SymbolConnectionIndicatorProps): ReactElement {
   const priceQuery = useFetchPrices({
     symbol,
-    frequency: PRICE_FREQUENCY.DAILY,
+    frequency: PRICE_FREQUENCY.MONTHLY,
   });
 
   if (priceQuery.isLoading) {
