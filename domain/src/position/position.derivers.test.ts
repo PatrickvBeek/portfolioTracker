@@ -1,8 +1,16 @@
-import { getTestOrdersGroupedByAsset } from "../dataHelpers";
+import {
+  getTestDividendPayoutsGroupedByAsset,
+  getTestOrdersGroupedByAsset,
+  getTestPortfolio,
+} from "../dataHelpers";
 import { Order } from "../order/order.entities";
 import { Portfolio } from "../portfolio/portfolio.entities";
 import { TEST_ORDER_TESLA } from "../testConstants";
-import { getPositionHistory, getPositions } from "./position.derivers";
+import {
+  getPositionHistory,
+  getPositions,
+  getPositionsDividendSum,
+} from "./position.derivers";
 import { ClosedPosition, OpenPosition, Positions } from "./position.entities";
 
 function getTestOrder(overrides: Partial<Order>): Order {
@@ -293,6 +301,83 @@ describe("the portfolio deriver", () => {
       ]);
 
       expect(getPositionHistory(TEST_ORDERS)).toEqual([]);
+    });
+  });
+
+  describe("getPositionDividendSum", () => {
+    const ISIN = "test-isin";
+    const ORDERS = getTestOrdersGroupedByAsset([
+      { timestamp: "2024-01-01", asset: ISIN, pieces: 1, sharePrice: 10 },
+      { timestamp: "2024-01-03", asset: ISIN, pieces: 2, sharePrice: 15 },
+      { timestamp: "2024-01-05", asset: ISIN, pieces: 3, sharePrice: 20 },
+      { timestamp: "2024-01-07", asset: ISIN, pieces: -2, sharePrice: 25 },
+    ]);
+
+    it("returns 0 if no dividends were recorded", () => {
+      const portfolio = getTestPortfolio({
+        orders: ORDERS,
+        dividendPayouts: getTestDividendPayoutsGroupedByAsset([]),
+      });
+
+      expect(getPositionsDividendSum(portfolio, ISIN, "open")).toEqual(0);
+      expect(getPositionsDividendSum(portfolio, ISIN, "closed")).toEqual(0);
+    });
+
+    it("returns the correct sum for a single dividend", () => {
+      const portfolio = getTestPortfolio({
+        orders: ORDERS,
+        dividendPayouts: getTestDividendPayoutsGroupedByAsset([
+          {
+            timestamp: "2024-01-06",
+            asset: ISIN,
+            dividendPerShare: 3,
+            pieces: 6,
+          },
+        ]),
+      });
+
+      expect(getPositionsDividendSum(portfolio, ISIN, "open")).toEqual(12);
+      expect(getPositionsDividendSum(portfolio, ISIN, "closed")).toEqual(6);
+    });
+
+    it("returns the correct sum for multiple payouts", () => {
+      const portfolio = getTestPortfolio({
+        orders: ORDERS,
+        dividendPayouts: getTestDividendPayoutsGroupedByAsset([
+          {
+            timestamp: "2024-01-04",
+            asset: ISIN,
+            dividendPerShare: 2,
+            pieces: 3,
+          },
+          {
+            timestamp: "2024-01-06",
+            asset: ISIN,
+            dividendPerShare: 3,
+            pieces: 6,
+          },
+        ]),
+      });
+
+      expect(getPositionsDividendSum(portfolio, ISIN, "open")).toEqual(14);
+      expect(getPositionsDividendSum(portfolio, ISIN, "closed")).toEqual(10);
+    });
+
+    it("returns 0 if no orders where recorded", () => {
+      const portfolio = getTestPortfolio({
+        orders: {},
+        dividendPayouts: getTestDividendPayoutsGroupedByAsset([
+          { asset: ISIN, dividendPerShare: 2, pieces: 4 },
+        ]),
+      });
+
+      expect(getPositionsDividendSum(portfolio, ISIN, "open")).toEqual(0);
+    });
+
+    it("returns 0 for an empty portfolio", () => {
+      expect(
+        getPositionsDividendSum(getTestPortfolio({}), ISIN, "open")
+      ).toEqual(0);
     });
   });
 });
