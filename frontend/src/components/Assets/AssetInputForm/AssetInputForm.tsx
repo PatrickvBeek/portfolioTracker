@@ -39,7 +39,7 @@ const AssetInputForm = (): ReactElement => {
 
   const assetMutation = useAddAsset();
 
-  const handleButtonClicked = () => {
+  const handleSubmitButton = () => {
     updateNameInputText("");
     updateIsinInputText("");
     updateSymbolInputText("");
@@ -93,7 +93,7 @@ const AssetInputForm = (): ReactElement => {
       <Button
         label="Submit"
         isDisabled={!isValidInput({ name: nameInputText, isin: isinInputText })}
-        onClick={handleButtonClicked}
+        onClick={handleSubmitButton}
         className={bemElement("submit-button")}
         isPrimary={true}
       />

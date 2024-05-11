@@ -6,9 +6,12 @@
     "frontend"
   ],
   "scripts": {
-    "build": "yarn workspace frontend build && yarn workspace backend build"
+    "build": "yarn workspace frontend build && yarn workspace backend build",
+    "architecture-tests": "yarn depcruise domain/src frontend/src backend/src"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "dependency-cruiser": "^16.2.4",
     "syncpack": "^12.3.0"
   }
 }

@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { DividendPayout } from "../../../../../../domain/dividendPayouts/dividend.entities";
+import { DividendPayout } from "../../../../../../domain/src/dividendPayouts/dividend.entities";
 import { useAddDividendPayoutToPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
 import { Props } from "../../../../utility/types";
@@ -70,13 +70,14 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
       <NumberInput
         label={"Pieces"}
         onChange={(pieces) => setFormState({ ...formState, pieces })}
-        value={formState.pieces}
+        isMandatory
       />
       <NumberInput
         label={"Dividend per Share"}
         onChange={(dividend) =>
           setFormState({ ...formState, dividendPerShare: dividend })
         }
+        isMandatory
         digits={2}
       />
       <NumberInput

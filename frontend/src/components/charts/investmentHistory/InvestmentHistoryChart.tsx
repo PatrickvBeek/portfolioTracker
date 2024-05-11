@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getInitialValueSeriesForPortfolio } from "../../../../../domain/series/series.derivers";
+import { getInitialValueSeriesForPortfolio } from "../../../../../domain/src/series/series.derivers";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";

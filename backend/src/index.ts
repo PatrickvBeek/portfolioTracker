@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import { config } from "./config";
 import { handleAssets } from "./endpoints/assets";
 import { handlePortfolios } from "./endpoints/portfolios";
+import { handlePrices } from "./endpoints/prices";
 
 const app: Express = express();
 app.use(express.json());
@@ -15,5 +16,6 @@ app.get("/express_backend", (req: Request, res: Response) => {
 
 handleAssets(app, config.NODE_ENV);
 handlePortfolios(app, config.NODE_ENV);
+handlePrices(app);
 
 export default app;

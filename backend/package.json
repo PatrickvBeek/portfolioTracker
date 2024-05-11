@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
+    "alphavantage-wrapper-ts": "^3.0.9",
     "express": "^4.17.3",
     "node-fetch": "^3.2.4"
   },
@@ -22,9 +23,10 @@
   "license": "ISC",
   "main": "index.js",
   "scripts": {
+    "prebuild": "rm -r dist ||:",
     "build": "npx tsc",
-    "dev": "concurrently \"npx tsc\" \"nodemon -q dist/server.js\"",
-    "start": "export NODE_ENV=production && node dist/server.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/backend/src/server.js\"",
+    "start": "NODE_ENV=production node dist/backend/src/server.js",
     "test": "vitest run"
   }
 }

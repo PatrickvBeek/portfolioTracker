@@ -72,7 +72,7 @@ export const deleteDividendPayoutFromPortfolio = (
   portfolio: Portfolio,
   payout: DividendPayout
 ): Portfolio => {
-  if (!portfolio.orders[payout.asset]) {
+  if (!portfolio.dividendPayouts[payout.asset]) {
     return portfolio;
   }
   return {

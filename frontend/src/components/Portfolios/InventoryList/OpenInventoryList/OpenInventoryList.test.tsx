@@ -2,14 +2,14 @@ import { screen } from "@testing-library/react";
 import {
   Asset,
   AssetLibrary,
-} from "../../../../../../domain/asset/asset.entities";
+} from "../../../../../../domain/src/asset/asset.entities";
 import {
   getElementsByIsin,
   getElementsGroupedByAsset,
   getTestDividendPayout,
   getTestOrder,
-} from "../../../../../../domain/dataHelpers";
-import { Portfolio } from "../../../../../../domain/portfolio/portfolio.entities";
+} from "../../../../../../domain/src/dataHelpers";
+import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
 import { getComponentTest } from "../../../../testUtils/componentTestRunner";
 import { OpenInventoryList } from "./OpenInventoryList";
 
