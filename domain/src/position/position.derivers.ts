@@ -99,7 +99,7 @@ function updatePositionsWithDividendPayout(
     open: positions.open.map((pos) => ({
       ...pos,
       dividendPayouts: sort(
-        [...pos.dividendPayouts, payout],
+        [...pos.dividendPayouts, { ...payout, pieces: pos.pieces }],
         getNumericDateTime
       ),
     })),
@@ -193,6 +193,10 @@ function closeFirstPositionPartially(
       sell.orderFee,
     taxes:
       (piecesToSell / firstPosition.pieces) * firstPosition.taxes + sell.taxes,
+    dividendPayouts: firstPosition.dividendPayouts.map((payout) => ({
+      ...payout,
+      pieces: piecesToSell,
+    })),
   };
   const reducedPosition: OpenPosition = {
     ...firstPosition,
@@ -200,6 +204,10 @@ function closeFirstPositionPartially(
     orderFee:
       (1 - piecesToSell / firstPosition.pieces) * firstPosition.orderFee,
     taxes: (1 - piecesToSell / firstPosition.pieces) * firstPosition.taxes,
+    dividendPayouts: firstPosition.dividendPayouts.map((payout) => ({
+      ...payout,
+      pieces: firstPosition.pieces - piecesToSell,
+    })),
   };
 
   return {

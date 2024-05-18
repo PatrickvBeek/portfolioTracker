@@ -2,6 +2,15 @@ import { uid } from "radash";
 import { v4 } from "uuid";
 import { DividendPayout } from "./dividendPayouts/dividend.entities";
 import { Order } from "./order/order.entities";
+import { Portfolio } from "./portfolio/portfolio.entities";
+import { TEST_PORTFOLIO } from "./testConstants";
+
+export function getTestPortfolio(overrides: Partial<Portfolio>): Portfolio {
+  return {
+    ...TEST_PORTFOLIO,
+    ...overrides,
+  };
+}
 
 export function getTestOrder(order: Partial<Order>): Order {
   return {
@@ -32,6 +41,12 @@ export function getTestOrdersGroupedByAsset(
   orderProps: Partial<Order>[]
 ): Record<string, Order[]> {
   return getElementsGroupedByAsset(orderProps.map(getTestOrder));
+}
+
+export function getTestDividendPayoutsGroupedByAsset(
+  payouts: Partial<DividendPayout>[]
+): Record<string, DividendPayout[]> {
+  return getElementsGroupedByAsset(payouts.map(getTestDividendPayout));
 }
 
 export function getElementsGroupedByAsset<T extends { asset: string }>(
