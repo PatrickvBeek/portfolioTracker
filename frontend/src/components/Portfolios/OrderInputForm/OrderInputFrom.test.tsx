@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import {
   TEST_ASSET_LIB,
   TEST_ASSET_TESLA,
@@ -17,17 +17,16 @@ describe("The OrderInputForm", () => {
 
   const TEST_ASSET = TEST_ASSET_TESLA;
 
-  const test = getComponentTest({
+  const { user, fillNumberInput, selectAsset } = getComponentTest({
     element: <OrderInputForm {...PROPS} />,
     mockData: { portfolioLib: TEST_PORTFOLIO_LIB, assetLib: TEST_ASSET_LIB },
   });
 
   async function fillValidOder(): Promise<void> {
-    await test.user.click(await screen.findByLabelText("Asset"));
-    await test.user.click(await screen.findByText(TEST_ASSET.displayName));
-    await test.user.type(await screen.findByLabelText("Pieces"), "4");
-    await test.user.type(await screen.findByLabelText("Fees"), "1");
-    await test.user.type(await screen.findByLabelText("Share Price"), "400");
+    await selectAsset(TEST_ASSET.displayName);
+    await fillNumberInput({ label: "Pieces", value: "4" });
+    await fillNumberInput({ label: "Fees", value: "1" });
+    await fillNumberInput({ label: "Share Price", value: "400" });
   }
 
   it.each`
@@ -48,30 +47,29 @@ describe("The OrderInputForm", () => {
   });
 
   it("only accepts an order if all mandatory fields are set", async () => {
-    await test.user.click(await screen.findByLabelText("Asset"));
-    await test.user.click(await screen.findByText(TEST_ASSET.displayName));
-    await test.user.type(await screen.findByLabelText("Pieces"), "4");
+    await fillNumberInput({ label: "Pieces", value: "4" });
+    await selectAsset(TEST_ASSET.displayName);
 
     expect(
       await screen.findByRole("button", { name: "Submit" })
     ).toBeDisabled();
 
-    await test.user.type(await screen.findByLabelText("Share Price"), "400");
+    await fillNumberInput({ label: "Share Price", value: "400" });
 
     expect(await screen.findByRole("button", { name: "Submit" })).toBeEnabled();
   });
 
   it("does not accept an order if it would sell more pieces than available", async () => {
-    await test.user.click(await screen.findByLabelText("Asset"));
-    await test.user.click(await screen.findByText(TEST_ASSET.displayName));
-    await test.user.type(await screen.findByLabelText("Share Price"), "400");
-
-    await test.user.type(await screen.findByLabelText("Pieces"), "4");
+    await selectAsset(TEST_ASSET.displayName);
+    await fillNumberInput({ label: "Share Price", value: "400" });
+    await fillNumberInput({ label: "Pieces", value: "4" });
 
     expect(await screen.findByRole("button", { name: "Submit" })).toBeEnabled();
 
-    await test.user.clear(await screen.findByLabelText("Pieces"));
-    await test.user.type(await screen.findByLabelText("Pieces"), "-3");
+    await act(async () => {
+      await user.clear(await screen.findByLabelText("Pieces"));
+    });
+    await fillNumberInput({ label: "Pieces", value: "-4" });
     expect(
       await screen.findByRole("button", { name: "Submit" })
     ).toBeDisabled();

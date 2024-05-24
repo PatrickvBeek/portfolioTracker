@@ -1,5 +1,4 @@
 import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import { getComponentTest } from "../../../testUtils/componentTestBuilder";
 import AssetSelect from "./AssetSelect";
@@ -9,7 +8,7 @@ const TEST_ASSET_NAME = "some asset";
 
 describe("the AssetInputFields component", () => {
   const callback = vi.fn();
-  getComponentTest({
+  const { selectAsset } = getComponentTest({
     element: <AssetSelect onSelect={callback} />,
     mockData: {
       assetLib: {
@@ -23,8 +22,7 @@ describe("the AssetInputFields component", () => {
   });
 
   it("calls the callback when an option is selected", async () => {
-    await userEvent.click(await screen.findByLabelText(/asset/i));
-    await userEvent.click(await screen.findByText(TEST_ASSET_NAME));
+    await selectAsset(TEST_ASSET_NAME);
     expect(callback).toHaveBeenCalledWith(TEST_ASSET_ISIN);
   });
 });
