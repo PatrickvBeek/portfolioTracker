@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
-import { getComponentTest } from "../../../testUtils/componentTestRunner";
+import { getComponentTest } from "../../../testUtils/componentTestBuilder";
 import AssetSelect from "./AssetSelect";
 
 const TEST_ASSET_ISIN = "isin";
@@ -26,9 +26,9 @@ describe("the AssetInputFields component", () => {
     expect(await screen.findByLabelText(/asset/i)).toBeInTheDocument();
   });
 
-  it("calls the callback when an option is selected", () => {
-    userEvent.click(screen.getByLabelText(/asset/i));
-    userEvent.click(screen.getByText(TEST_ASSET_NAME));
+  it("calls the callback when an option is selected", async () => {
+    await userEvent.click(await screen.findByLabelText(/asset/i));
+    await userEvent.click(await screen.findByText(TEST_ASSET_NAME));
     expect(callback).toHaveBeenCalledWith(TEST_ASSET_ISIN);
   });
 });

@@ -10,7 +10,7 @@ import {
   getTestOrder,
 } from "../../../../../../domain/src/dataHelpers";
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
-import { getComponentTest } from "../../../../testUtils/componentTestRunner";
+import { getComponentTest } from "../../../../testUtils/componentTestBuilder";
 import { ClosedInventoryList } from "./ClosedInventoryList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([

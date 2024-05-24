@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import userEvent, { Options, UserEvent } from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
 import { ReactElement } from "react";
@@ -15,11 +16,13 @@ type MockBackendData = {
 type ComponentTestArgs = {
   element: ReactElement;
   mockData?: MockBackendData;
+  userEventOptions?: Options;
 };
 
 type ComponentTest = {
   server: ReturnType<typeof setupServer>;
   render: () => void;
+  user: UserEvent;
 };
 
 function getHandlers(mockData: MockBackendData | undefined) {
@@ -44,5 +47,9 @@ export function getComponentTest(args: ComponentTestArgs): ComponentTest {
     );
   };
 
-  return { server, render: renderComponent };
+  return {
+    server,
+    render: renderComponent,
+    user: userEvent.setup(args.userEventOptions),
+  };
 }

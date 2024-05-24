@@ -52,19 +52,19 @@ describe("the confirmation component", () => {
     expect(cancelButton).toBeInTheDocument();
   });
 
-  it("triggers the onConfirm callback when the user confirms", () => {
+  it("triggers the onConfirm callback when the user confirms", async () => {
     render(<Confirmation {...PROPS} />);
     const confirmButton = getConfirmButton();
     expect(confirmButton).toBeDefined();
-    userEvent.click(confirmButton!);
+    await userEvent.click(confirmButton!);
     expect(PROPS.onConfirm).toHaveBeenCalled();
   });
 
-  it("triggers the onCancel callback when the user aborts via button", () => {
+  it("triggers the onCancel callback when the user aborts via button", async () => {
     render(<Confirmation {...PROPS} />);
     const cancelButton = getCancelButton();
     expect(cancelButton).toBeDefined();
-    userEvent.click(cancelButton!);
+    await userEvent.click(cancelButton!);
     expect(PROPS.onCancel).toHaveBeenCalled();
   });
 });
