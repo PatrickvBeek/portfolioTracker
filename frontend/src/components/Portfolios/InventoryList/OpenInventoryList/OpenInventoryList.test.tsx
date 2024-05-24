@@ -10,7 +10,7 @@ import {
   getTestOrder,
 } from "../../../../../../domain/src/dataHelpers";
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
-import { getComponentTest } from "../../../../testUtils/componentTestRunner";
+import { getComponentTest } from "../../../../testUtils/componentTestBuilder";
 import { OpenInventoryList } from "./OpenInventoryList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
@@ -65,17 +65,10 @@ const mockPortfolio: Portfolio = {
 const mockPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  const test = getComponentTest({
+  getComponentTest({
     element: <OpenInventoryList portfolioName={testPortfolioName} />,
     mockData: { portfolioLib: mockPortfolioLib, assetLib: testAssetLib },
   });
-
-  beforeAll(() => test.server.listen());
-  beforeEach(() => {
-    test.server.resetHandlers();
-    test.render();
-  });
-  afterAll(() => test.server.close());
 
   it("renders the correct list headers", async () => {
     expect(

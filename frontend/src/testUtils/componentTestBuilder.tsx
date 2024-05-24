@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import userEvent, { Options } from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { setupServer } from "msw/node";
 import { ReactElement } from "react";
@@ -6,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { AssetLibrary } from "../../../domain/src/asset/asset.entities";
 import { PortfolioLibrary } from "../../../domain/src/portfolio/portfolio.entities";
 import { queryClientConfig } from "../queryClient/config";
+import { componentHelpers } from "./componentHelper";
 
 type MockBackendData = {
   portfolioLib?: PortfolioLibrary;
@@ -15,11 +17,7 @@ type MockBackendData = {
 type ComponentTestArgs = {
   element: ReactElement;
   mockData?: MockBackendData;
-};
-
-type ComponentTest = {
-  server: ReturnType<typeof setupServer>;
-  render: () => void;
+  userEventOptions?: Options;
 };
 
 function getHandlers(mockData: MockBackendData | undefined) {
@@ -33,7 +31,7 @@ function getHandlers(mockData: MockBackendData | undefined) {
   ];
 }
 
-export function getComponentTest(args: ComponentTestArgs): ComponentTest {
+export function getComponentTest(args: ComponentTestArgs) {
   const server = setupServer(...getHandlers(args.mockData));
   const queryClient = new QueryClient(queryClientConfig);
   const renderComponent = () => {
@@ -44,5 +42,21 @@ export function getComponentTest(args: ComponentTestArgs): ComponentTest {
     );
   };
 
-  return { server, render: renderComponent };
+  beforeAll(() => server.listen());
+  beforeEach(() => {
+    server.resetHandlers();
+    renderComponent();
+  });
+  afterAll(() => server.close());
+
+  const user = userEvent.setup(args.userEventOptions);
+
+  const helpers = componentHelpers(user);
+
+  return {
+    server,
+    render: renderComponent,
+    user,
+    ...helpers,
+  };
 }

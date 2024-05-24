@@ -10,7 +10,7 @@ import {
   getTestOrder,
 } from "../../../../../../domain/src/dataHelpers";
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
-import { getComponentTest } from "../../../../testUtils/componentTestRunner";
+import { getComponentTest } from "../../../../testUtils/componentTestBuilder";
 import { ClosedInventoryList } from "./ClosedInventoryList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
@@ -78,19 +78,10 @@ const mockPortfolio: Portfolio = {
 const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  const test = getComponentTest({
+  getComponentTest({
     element: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
     mockData: { portfolioLib: testPortfolioLib, assetLib: testAssetLib },
   });
-
-  beforeAll(() => {
-    test.server.listen();
-  });
-  beforeEach(() => {
-    test.server.resetHandlers();
-    test.render();
-  });
-  afterAll(() => test.server.close());
 
   function getCellTextsForRow(i: number): (string | null)[] {
     return within(screen.getAllByRole("row")[i])

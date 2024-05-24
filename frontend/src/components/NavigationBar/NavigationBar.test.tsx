@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen } from "@testing-library/react";
 import { vi } from "vitest";
+import { getComponentTest } from "../../testUtils/componentTestBuilder";
 import NavigationBar, { NavigationBarProps } from "./NavigationBar";
 
 describe("the NavigationBar component", () => {
@@ -11,27 +11,22 @@ describe("the NavigationBar component", () => {
     onSelect: onSelectMock,
   };
 
-  beforeEach(() => {
-    onSelectMock.mockClear();
-  });
+  const test = getComponentTest({ element: <NavigationBar {...TEST_PROPS} /> });
 
   it("renders a tablist", () => {
-    render(<NavigationBar {...TEST_PROPS} />);
     expect(screen.getByRole("tablist")).toBeInTheDocument();
   });
 
   it("renders a tab for all tabs specified in the props", () => {
-    render(<NavigationBar {...TEST_PROPS} />);
     expect(
       screen.getAllByRole("tab").map((element) => element.textContent)
     ).toEqual(TEST_PROPS.tabs);
   });
 
-  it("calls the callback when a tab is clicked", () => {
+  it("calls the callback when a tab is clicked", async () => {
     const testTab = TEST_PROPS.tabs[1];
-    render(<NavigationBar {...TEST_PROPS} />);
-    const tab = screen.getByRole("tab", { name: testTab });
-    userEvent.click(tab);
+    const tab = await screen.findByRole("tab", { name: testTab });
+    await test.user.click(tab);
     expect(onSelectMock).toHaveBeenCalledWith(testTab);
   });
 });

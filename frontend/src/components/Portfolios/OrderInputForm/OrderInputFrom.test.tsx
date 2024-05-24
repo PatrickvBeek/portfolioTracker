@@ -1,12 +1,11 @@
-import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { act, screen } from "@testing-library/react";
 import {
   TEST_ASSET_LIB,
   TEST_ASSET_TESLA,
   TEST_PORTFOLIO,
   TEST_PORTFOLIO_LIB,
 } from "../../../../../domain/src/testConstants";
-import { getComponentTest } from "../../../testUtils/componentTestRunner";
+import { getComponentTest } from "../../../testUtils/componentTestBuilder";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 
 describe("The OrderInputForm", () => {
@@ -18,25 +17,17 @@ describe("The OrderInputForm", () => {
 
   const TEST_ASSET = TEST_ASSET_TESLA;
 
-  const test = getComponentTest({
+  const { user, fillNumberInput, selectAsset } = getComponentTest({
     element: <OrderInputForm {...PROPS} />,
     mockData: { portfolioLib: TEST_PORTFOLIO_LIB, assetLib: TEST_ASSET_LIB },
   });
 
-  function fillValidOder(): void {
-    userEvent.click(screen.getByLabelText("Asset"));
-    userEvent.click(screen.getByText(TEST_ASSET.displayName));
-    userEvent.type(screen.getByLabelText("Pieces"), "4");
-    userEvent.type(screen.getByLabelText("Fees"), "1");
-    userEvent.type(screen.getByLabelText("Share Price"), "400");
+  async function fillValidOder(): Promise<void> {
+    await selectAsset(TEST_ASSET.displayName);
+    await fillNumberInput({ label: "Pieces", value: "4" });
+    await fillNumberInput({ label: "Fees", value: "1" });
+    await fillNumberInput({ label: "Share Price", value: "400" });
   }
-
-  beforeAll(() => test.server.listen());
-  beforeEach(() => {
-    test.server.resetHandlers();
-    test.render();
-  });
-  afterAll(() => test.server.close());
 
   it.each`
     label
@@ -50,39 +41,43 @@ describe("The OrderInputForm", () => {
   });
 
   it("renders a button with 'Submit' label", async () => {
-    expect(screen.getByRole("button", { name: "Submit" })).toHaveTextContent(
-      "Submit"
-    );
+    expect(
+      await screen.findByRole("button", { name: "Submit" })
+    ).toHaveTextContent("Submit");
   });
 
-  it("only accepts an order if all mandatory fields are set", () => {
-    userEvent.click(screen.getByLabelText("Asset"));
-    userEvent.click(screen.getByText(TEST_ASSET.displayName));
-    userEvent.type(screen.getByLabelText("Pieces"), "4");
+  it("only accepts an order if all mandatory fields are set", async () => {
+    await fillNumberInput({ label: "Pieces", value: "4" });
+    await selectAsset(TEST_ASSET.displayName);
 
-    expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
+    expect(
+      await screen.findByRole("button", { name: "Submit" })
+    ).toBeDisabled();
 
-    userEvent.type(screen.getByLabelText("Share Price"), "400");
+    await fillNumberInput({ label: "Share Price", value: "400" });
 
-    expect(screen.getByRole("button", { name: "Submit" })).toBeEnabled();
+    expect(await screen.findByRole("button", { name: "Submit" })).toBeEnabled();
   });
 
-  it("does not accept an order if it would sell more pieces than available", () => {
-    userEvent.click(screen.getByLabelText("Asset"));
-    userEvent.click(screen.getByText(TEST_ASSET.displayName));
-    userEvent.type(screen.getByLabelText("Share Price"), "400");
+  it("does not accept an order if it would sell more pieces than available", async () => {
+    await selectAsset(TEST_ASSET.displayName);
+    await fillNumberInput({ label: "Share Price", value: "400" });
+    await fillNumberInput({ label: "Pieces", value: "4" });
 
-    userEvent.type(screen.getByLabelText("Pieces"), "4");
+    expect(await screen.findByRole("button", { name: "Submit" })).toBeEnabled();
 
-    expect(screen.getByRole("button", { name: "Submit" })).toBeEnabled();
-
-    userEvent.clear(screen.getByLabelText("Pieces"));
-    userEvent.type(screen.getByLabelText("Pieces"), "-3");
-    expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
+    await act(async () => {
+      await user.clear(await screen.findByLabelText("Pieces"));
+    });
+    await fillNumberInput({ label: "Pieces", value: "-4" });
+    expect(
+      await screen.findByRole("button", { name: "Submit" })
+    ).toBeDisabled();
   });
 
-  it("renders a summary text", () => {
-    fillValidOder();
+  it("renders a summary text", async () => {
+    await fillValidOder();
+
     expect(screen.getByTitle("Summary Text")).toHaveTextContent(
       "4 x 400 + 1 = 1601.00"
     );
