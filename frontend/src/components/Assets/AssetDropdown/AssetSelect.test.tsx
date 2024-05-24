@@ -9,7 +9,7 @@ const TEST_ASSET_NAME = "some asset";
 
 describe("the AssetInputFields component", () => {
   const callback = vi.fn();
-  const test = getComponentTest({
+  getComponentTest({
     element: <AssetSelect onSelect={callback} />,
     mockData: {
       assetLib: {
@@ -17,10 +17,6 @@ describe("the AssetInputFields component", () => {
       },
     },
   });
-
-  beforeAll(() => test.server.listen());
-  beforeEach(() => test.render());
-  afterAll(() => test.server.close());
 
   it("renders the asset dropdown", async () => {
     expect(await screen.findByLabelText(/asset/i)).toBeInTheDocument();

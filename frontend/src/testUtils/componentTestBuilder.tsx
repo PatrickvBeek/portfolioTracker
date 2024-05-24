@@ -47,6 +47,13 @@ export function getComponentTest(args: ComponentTestArgs): ComponentTest {
     );
   };
 
+  beforeAll(() => server.listen());
+  beforeEach(() => {
+    server.resetHandlers();
+    renderComponent();
+  });
+  afterAll(() => server.close());
+
   return {
     server,
     render: renderComponent,

@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen } from "@testing-library/react";
 import { vi } from "vitest";
+import { getComponentTest } from "../../../testUtils/componentTestBuilder";
 import Confirmation, { ConfirmationProps } from "./Confirmation";
 
 describe("the confirmation component", () => {
@@ -12,6 +12,8 @@ describe("the confirmation component", () => {
     onConfirm: vi.fn(),
     onCancel: vi.fn(),
   };
+
+  const { user } = getComponentTest({ element: <Confirmation {...PROPS} /> });
 
   function getConfirmButton(): HTMLElement | undefined {
     return screen
@@ -26,45 +28,38 @@ describe("the confirmation component", () => {
   }
 
   it("renders an overlay", () => {
-    render(<Confirmation {...PROPS} />);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("renders the title", () => {
-    render(<Confirmation {...PROPS} />);
     expect(screen.getByRole("dialog").textContent).toContain(PROPS.title);
   });
 
   it("renders the dialog description text", () => {
-    render(<Confirmation {...PROPS} />);
     expect(screen.getByRole("dialog").textContent).toContain(PROPS.body);
   });
 
   it("renders a confirmation button with given label", () => {
-    render(<Confirmation {...PROPS} />);
     const confirmButton = getConfirmButton();
     expect(confirmButton).toBeInTheDocument();
   });
 
   it("renders a cancel button with given label", () => {
-    render(<Confirmation {...PROPS} />);
     const cancelButton = getCancelButton();
     expect(cancelButton).toBeInTheDocument();
   });
 
   it("triggers the onConfirm callback when the user confirms", async () => {
-    render(<Confirmation {...PROPS} />);
     const confirmButton = getConfirmButton();
     expect(confirmButton).toBeDefined();
-    await userEvent.click(confirmButton!);
+    await user.click(confirmButton!);
     expect(PROPS.onConfirm).toHaveBeenCalled();
   });
 
   it("triggers the onCancel callback when the user aborts via button", async () => {
-    render(<Confirmation {...PROPS} />);
     const cancelButton = getCancelButton();
     expect(cancelButton).toBeDefined();
-    await userEvent.click(cancelButton!);
+    await user.click(cancelButton!);
     expect(PROPS.onCancel).toHaveBeenCalled();
   });
 });

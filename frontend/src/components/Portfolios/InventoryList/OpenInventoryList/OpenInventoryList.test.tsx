@@ -65,17 +65,10 @@ const mockPortfolio: Portfolio = {
 const mockPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  const test = getComponentTest({
+  getComponentTest({
     element: <OpenInventoryList portfolioName={testPortfolioName} />,
     mockData: { portfolioLib: mockPortfolioLib, assetLib: testAssetLib },
   });
-
-  beforeAll(() => test.server.listen());
-  beforeEach(() => {
-    test.server.resetHandlers();
-    test.render();
-  });
-  afterAll(() => test.server.close());
 
   it("renders the correct list headers", async () => {
     expect(

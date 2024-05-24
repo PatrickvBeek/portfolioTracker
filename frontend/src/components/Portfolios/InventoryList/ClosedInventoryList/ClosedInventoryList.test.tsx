@@ -78,19 +78,10 @@ const mockPortfolio: Portfolio = {
 const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  const test = getComponentTest({
+  getComponentTest({
     element: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
     mockData: { portfolioLib: testPortfolioLib, assetLib: testAssetLib },
   });
-
-  beforeAll(() => {
-    test.server.listen();
-  });
-  beforeEach(() => {
-    test.server.resetHandlers();
-    test.render();
-  });
-  afterAll(() => test.server.close());
 
   function getCellTextsForRow(i: number): (string | null)[] {
     return within(screen.getAllByRole("row")[i])

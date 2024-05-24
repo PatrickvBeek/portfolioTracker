@@ -13,11 +13,6 @@ describe("the NavigationBar component", () => {
 
   const test = getComponentTest({ element: <NavigationBar {...TEST_PROPS} /> });
 
-  beforeEach(() => {
-    onSelectMock.mockClear();
-    test.render();
-  });
-
   it("renders a tablist", () => {
     expect(screen.getByRole("tablist")).toBeInTheDocument();
   });

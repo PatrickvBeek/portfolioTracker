@@ -30,13 +30,6 @@ describe("The OrderInputForm", () => {
     await test.user.type(await screen.findByLabelText("Share Price"), "400");
   }
 
-  beforeAll(() => test.server.listen());
-  beforeEach(() => {
-    test.server.resetHandlers();
-    test.render();
-  });
-  afterAll(() => test.server.close());
-
   it.each`
     label
     ${"Asset"}
