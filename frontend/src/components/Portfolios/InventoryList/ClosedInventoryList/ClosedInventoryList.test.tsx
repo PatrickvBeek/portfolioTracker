@@ -11,6 +11,7 @@ import {
 } from "../../../../../../domain/src/dataHelpers";
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
 import { getComponentTest } from "../../../../testUtils/componentTestBuilder";
+import { mockNetwork } from "../../../../testUtils/networkMock";
 import { ClosedInventoryList } from "./ClosedInventoryList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
@@ -80,8 +81,9 @@ const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 describe("the open inventory list component", () => {
   getComponentTest({
     element: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
-    mockData: { portfolioLib: testPortfolioLib, assetLib: testAssetLib },
   });
+
+  mockNetwork({ portfolioLib: testPortfolioLib, assetLib: testAssetLib });
 
   function getCellTextsForRow(i: number): (string | null)[] {
     return within(screen.getAllByRole("row")[i])

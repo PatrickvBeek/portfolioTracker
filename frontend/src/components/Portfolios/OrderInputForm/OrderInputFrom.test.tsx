@@ -6,21 +6,21 @@ import {
   TEST_PORTFOLIO_LIB,
 } from "../../../../../domain/src/testConstants";
 import { getComponentTest } from "../../../testUtils/componentTestBuilder";
+import { mockNetwork } from "../../../testUtils/networkMock";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 
 describe("The OrderInputForm", () => {
-  const portfolioName = TEST_PORTFOLIO.name;
-
   const PROPS: OrderInputFormProps = {
-    portfolioName,
+    portfolioName: TEST_PORTFOLIO.name,
   };
 
   const TEST_ASSET = TEST_ASSET_TESLA;
 
   const { user, fillNumberInput, selectAsset } = getComponentTest({
     element: <OrderInputForm {...PROPS} />,
-    mockData: { portfolioLib: TEST_PORTFOLIO_LIB, assetLib: TEST_ASSET_LIB },
   });
+
+  mockNetwork({ portfolioLib: TEST_PORTFOLIO_LIB, assetLib: TEST_ASSET_LIB });
 
   async function fillValidOder(): Promise<void> {
     await selectAsset(TEST_ASSET.displayName);

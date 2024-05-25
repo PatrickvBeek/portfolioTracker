@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import { vi } from "vitest";
 import { getComponentTest } from "../../../testUtils/componentTestBuilder";
+import { mockNetwork } from "../../../testUtils/networkMock";
 import AssetSelect from "./AssetSelect";
 
 const TEST_ASSET_ISIN = "isin";
@@ -10,10 +11,11 @@ describe("the AssetInputFields component", () => {
   const callback = vi.fn();
   const { selectAsset } = getComponentTest({
     element: <AssetSelect onSelect={callback} />,
-    mockData: {
-      assetLib: {
-        isin: { displayName: TEST_ASSET_NAME, isin: TEST_ASSET_ISIN },
-      },
+  });
+
+  mockNetwork({
+    assetLib: {
+      isin: { displayName: TEST_ASSET_NAME, isin: TEST_ASSET_ISIN },
     },
   });
 
