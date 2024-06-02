@@ -5,7 +5,7 @@ import {
   TEST_PORTFOLIO,
   TEST_PORTFOLIO_LIB,
 } from "../../../../../domain/src/testConstants";
-import { getComponentTest } from "../../../testUtils/componentTestBuilder";
+import { customRender } from "../../../testUtils/componentHelpers";
 import { mockNetwork } from "../../../testUtils/networkMock";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 
@@ -16,18 +16,7 @@ describe("The OrderInputForm", () => {
 
   const TEST_ASSET = TEST_ASSET_TESLA;
 
-  const { user, fillNumberInput, selectAsset } = getComponentTest({
-    element: <OrderInputForm {...PROPS} />,
-  });
-
   mockNetwork({ portfolioLib: TEST_PORTFOLIO_LIB, assetLib: TEST_ASSET_LIB });
-
-  async function fillValidOder(): Promise<void> {
-    await selectAsset(TEST_ASSET.displayName);
-    await fillNumberInput({ label: "Pieces", value: "4" });
-    await fillNumberInput({ label: "Fees", value: "1" });
-    await fillNumberInput({ label: "Share Price", value: "400" });
-  }
 
   it.each`
     label
@@ -37,16 +26,27 @@ describe("The OrderInputForm", () => {
     ${"Fees"}
     ${"Order Date"}
   `("renders an input element with label $label", async ({ label }) => {
+    customRender({
+      component: <OrderInputForm {...PROPS} />,
+    });
     expect(await screen.findByLabelText(label)).toBeInTheDocument();
   });
 
   it("renders a button with 'Submit' label", async () => {
+    customRender({
+      component: <OrderInputForm {...PROPS} />,
+    });
     expect(
       await screen.findByRole("button", { name: "Submit" })
     ).toHaveTextContent("Submit");
   });
 
   it("only accepts an order if all mandatory fields are set", async () => {
+    const { fillNumberInput, selectAsset } = customRender({
+      component: <OrderInputForm {...PROPS} />,
+    });
+
+    expect(await screen.findByLabelText("Pieces")).toBeInTheDocument();
     await fillNumberInput({ label: "Pieces", value: "4" });
     await selectAsset(TEST_ASSET.displayName);
 
@@ -60,6 +60,9 @@ describe("The OrderInputForm", () => {
   });
 
   it("does not accept an order if it would sell more pieces than available", async () => {
+    const { user, fillNumberInput, selectAsset } = customRender({
+      component: <OrderInputForm {...PROPS} />,
+    });
     await selectAsset(TEST_ASSET.displayName);
     await fillNumberInput({ label: "Share Price", value: "400" });
     await fillNumberInput({ label: "Pieces", value: "4" });
@@ -76,7 +79,14 @@ describe("The OrderInputForm", () => {
   });
 
   it("renders a summary text", async () => {
-    await fillValidOder();
+    const { fillNumberInput, selectAsset } = customRender({
+      component: <OrderInputForm {...PROPS} />,
+    });
+
+    await selectAsset(TEST_ASSET.displayName);
+    await fillNumberInput({ label: "Pieces", value: "4" });
+    await fillNumberInput({ label: "Fees", value: "1" });
+    await fillNumberInput({ label: "Share Price", value: "400" });
 
     expect(screen.getByTitle("Summary Text")).toHaveTextContent(
       "4 x 400 + 1 = 1601.00"

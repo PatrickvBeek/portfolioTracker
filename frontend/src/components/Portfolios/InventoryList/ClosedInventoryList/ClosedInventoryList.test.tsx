@@ -10,7 +10,7 @@ import {
   getTestOrder,
 } from "../../../../../../domain/src/dataHelpers";
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
-import { getComponentTest } from "../../../../testUtils/componentTestBuilder";
+import { customRender } from "../../../../testUtils/componentHelpers";
 import { mockNetwork } from "../../../../testUtils/networkMock";
 import { ClosedInventoryList } from "./ClosedInventoryList";
 
@@ -79,19 +79,19 @@ const mockPortfolio: Portfolio = {
 const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  getComponentTest({
-    element: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
-  });
-
   mockNetwork({ portfolioLib: testPortfolioLib, assetLib: testAssetLib });
 
-  function getCellTextsForRow(i: number): (string | null)[] {
-    return within(screen.getAllByRole("row")[i])
-      .getAllByRole("cell")
-      .map((cell) => cell.textContent);
+  async function getCellTextsForRow(i: number): Promise<(string | null)[]> {
+    const row = (await screen.findAllByRole("row"))[i];
+    const cells = await within(row).findAllByRole("cell");
+    return cells.map((cell) => cell.textContent);
   }
 
   it("renders the correct list headers", async () => {
+    customRender({
+      component: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
+    });
+
     expect(
       (await screen.findAllByRole("columnheader")).map((el) => el.textContent)
     ).toEqual([
@@ -106,9 +106,13 @@ describe("the open inventory list component", () => {
     ]);
   });
 
-  it("renders the correct data", () => {
-    expect(screen.getAllByRole("row")).toHaveLength(4);
-    expect(getCellTextsForRow(1)).toEqual([
+  it("renders the correct data", async () => {
+    customRender({
+      component: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
+    });
+
+    expect(await screen.findAllByRole("row")).toHaveLength(4);
+    expect(await getCellTextsForRow(1)).toEqual([
       "Asset 1",
       "1",
       "10.00 €",
@@ -118,7 +122,8 @@ describe("the open inventory list component", () => {
       "0.10 €",
       "-0.60 €",
     ]);
-    expect(getCellTextsForRow(2)).toEqual([
+
+    expect(await getCellTextsForRow(2)).toEqual([
       "Asset 2",
       "3",
       "45.00 €",
@@ -130,9 +135,13 @@ describe("the open inventory list component", () => {
     ]);
   });
 
-  it("renders the correct footer", () => {
-    expect(screen.getAllByRole("row")).toHaveLength(4);
-    expect(getCellTextsForRow(3)).toEqual([
+  it("renders the correct footer", async () => {
+    customRender({
+      component: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
+    });
+
+    expect(await screen.findAllByRole("row")).toHaveLength(4);
+    expect(await getCellTextsForRow(3)).toEqual([
       "2 Positions",
       "",
       "55.00 €",
