@@ -63,8 +63,8 @@
     "build": "vite build",
     "serve": "vite preview",
     "start": "vite",
-    "test": "vitest watch",
-    "test:no-watch": "vitest run"
+    "test": "vitest run",
+    "test:no-watch": "vitest watch"
   },
   "type": "module"
 }

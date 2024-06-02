@@ -17,8 +17,8 @@
   },
   "private": true,
   "scripts": {
-    "test": "vitest watch",
-    "test:no-watch": "vitest run"
+    "test": "vitest run",
+    "test:watch": "vitest watch"
   },
   "type": "module"
 }
