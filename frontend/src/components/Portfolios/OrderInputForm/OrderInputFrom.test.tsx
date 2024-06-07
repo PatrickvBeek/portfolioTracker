@@ -2,6 +2,7 @@ import { act, screen } from "@testing-library/react";
 import {
   TEST_ASSET_LIB,
   TEST_ASSET_TESLA,
+  TEST_ORDER_TESLA,
   TEST_PORTFOLIO,
   TEST_PORTFOLIO_LIB,
 } from "../../../../../domain/src/testConstants";
@@ -91,5 +92,40 @@ describe("The OrderInputForm", () => {
     expect(screen.getByTitle("Summary Text")).toHaveTextContent(
       "4 x 400 + 1 = 1601.00"
     );
+  });
+
+  it("shows a warning if the user tries to add a duplicate order", async () => {
+    const { selectAsset, fillNumberInput, user } = customRender({
+      component: <OrderInputForm {...PROPS} />,
+    });
+
+    await selectAsset(TEST_ASSET.displayName);
+    await fillNumberInput({
+      label: "Pieces",
+      value: `${TEST_ORDER_TESLA.pieces}`,
+    });
+    await fillNumberInput({
+      label: "Fees",
+      value: `${TEST_ORDER_TESLA.orderFee}`,
+    });
+    await fillNumberInput({
+      label: "Share Price",
+      value: `${TEST_ORDER_TESLA.sharePrice}`,
+    });
+    const dateInput = await screen.findByLabelText("Order Date");
+
+    await user.clear(dateInput);
+
+    await user.type(
+      await screen.findByLabelText("Order Date"),
+      `${TEST_ORDER_TESLA.timestamp}`
+    );
+    await act(async () => {
+      await user.click(await screen.findByRole("button", { name: "Submit" }));
+    });
+
+    expect(
+      await screen.findByText(/duplicate order detected!/i)
+    ).toBeInTheDocument();
   });
 });

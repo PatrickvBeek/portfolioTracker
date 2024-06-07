@@ -78,6 +78,14 @@ export function getPositionHistory(orders: Order[]): PositionHistory {
   return history;
 }
 
+export const getPositionsAtTimeStamp = (
+  orders: Order[],
+  timeStampOfInterest: number
+): Positions =>
+  getPositionHistory(orders).findLast(
+    ({ date }) => date.getTime() <= timeStampOfInterest
+  )?.positions || EMPTY_POSITIONS;
+
 function updatePositionsWithActivity(
   positions: Positions | undefined,
   activity: PortfolioActivity

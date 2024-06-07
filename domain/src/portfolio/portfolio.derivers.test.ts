@@ -1,3 +1,9 @@
+import { it } from "vitest";
+import {
+  getElementsGroupedByAsset,
+  getTestOrder,
+  getTestPortfolio,
+} from "../dataHelpers";
 import {
   TEST_ASSET_GOOGLE,
   TEST_ASSET_TESLA,
@@ -9,6 +15,7 @@ import {
   getAllOrdersInPortfolio,
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
+  isOrderValidForPortfolio,
 } from "./portfolio.derivers";
 import { Portfolio } from "./portfolio.entities";
 
@@ -98,6 +105,132 @@ describe("The Portfolio deriver", () => {
       expect(
         getInitialValueOfIsinInPortfolio(testPortfolio, "not present", "closed")
       ).toEqual(0);
+    });
+  });
+
+  describe("isOrderValidForPortfolio", () => {
+    const earlyDate = new Date("2024-06-01").toISOString();
+    const middleDate = new Date("2024-06-02").toISOString();
+    const laterDate = new Date("2024-06-03").toISOString();
+    describe("for a buy order", () => {
+      it("returns true if teh portfolio is empty", () => {
+        expect(
+          isOrderValidForPortfolio(
+            getTestPortfolio({}),
+            getTestOrder({ pieces: 5 })
+          )
+        ).toBe(true);
+      });
+
+      it("returns true for existing orders when adding a new order before the first existing one", () => {
+        const portfolio = getTestPortfolio({
+          orders: getElementsGroupedByAsset([
+            getTestOrder({ timestamp: laterDate, pieces: 6 }),
+          ]),
+        });
+
+        expect(
+          isOrderValidForPortfolio(
+            portfolio,
+            getTestOrder({ timestamp: earlyDate, pieces: 1 })
+          )
+        ).toBe(true);
+      });
+
+      it("returns true for adding a new order later", () => {
+        const portfolio = getTestPortfolio({
+          orders: getElementsGroupedByAsset([
+            getTestOrder({ timestamp: earlyDate, pieces: 6 }),
+          ]),
+        });
+
+        expect(
+          isOrderValidForPortfolio(
+            portfolio,
+            getTestOrder({ timestamp: laterDate, pieces: 1 })
+          )
+        ).toBe(true);
+      });
+    });
+
+    describe("for a sell order", () => {
+      it("returns false when no positions of this asset are available", () => {
+        const portfolio = getTestPortfolio({
+          orders: getElementsGroupedByAsset([
+            getTestOrder({
+              asset: "unrelated-asset",
+              pieces: 5,
+              timestamp: earlyDate,
+            }),
+          ]),
+        });
+        expect(
+          isOrderValidForPortfolio(
+            portfolio,
+            getTestOrder({
+              asset: "test-asset",
+              pieces: -2,
+              timestamp: laterDate,
+            })
+          )
+        ).toBe(false);
+      });
+
+      it("returns false when trying to sell more than is available", () => {
+        const portfolio = getTestPortfolio({
+          orders: getElementsGroupedByAsset([
+            getTestOrder({
+              asset: "test-asset",
+              pieces: 3,
+              timestamp: earlyDate,
+            }),
+            getTestOrder({
+              asset: "test-asset",
+              pieces: 50,
+              timestamp: laterDate,
+            }),
+          ]),
+        });
+
+        expect(
+          isOrderValidForPortfolio(
+            portfolio,
+            getTestOrder({
+              asset: "test-asset",
+              timestamp: middleDate,
+              pieces: -10,
+            })
+          )
+        ).toBe(false);
+      });
+
+      it("returns true when enough pieces are available", () => {
+        const portfolio = getTestPortfolio({
+          orders: getElementsGroupedByAsset([
+            getTestOrder({
+              asset: "test-asset",
+              pieces: 3,
+              timestamp: earlyDate,
+            }),
+            getTestOrder({
+              asset: "test-asset",
+              pieces: 50,
+              timestamp: middleDate,
+            }),
+          ]),
+        });
+
+        expect(
+          isOrderValidForPortfolio(
+            portfolio,
+            getTestOrder({
+              asset: "test-asset",
+              timestamp: middleDate,
+              pieces: -10,
+            })
+          )
+        ).toBe(true);
+      });
     });
   });
 });
