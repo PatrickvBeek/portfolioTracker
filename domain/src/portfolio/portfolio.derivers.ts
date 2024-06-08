@@ -8,9 +8,15 @@ import {
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
-import { getPositions } from "../position/position.derivers";
+import {
+  getPositions,
+  getPositionsAtTimeStamp,
+} from "../position/position.derivers";
 import { Positions } from "../position/position.entities";
 import { Portfolio } from "./portfolio.entities";
+
+const getOrdersForIsin = (portfolio: Portfolio, isin: string): Order[] =>
+  portfolio.orders[isin] || [];
 
 export const getAllOrdersInPortfolio = (portfolio: Portfolio): Order[] =>
   Object.values(portfolio.orders).flat();
@@ -106,7 +112,20 @@ export const portfolioContainsOrder = (
   portfolio: Portfolio,
   order: Order
 ): boolean => {
-  return portfolio.orders[order.asset]?.some(
-    (o) => areOrdersEqualOnDay(o, order) || false
+  return getOrdersForIsin(portfolio, order.asset).some((o) =>
+    areOrdersEqualOnDay(o, order)
   );
+};
+
+export const isOrderValidForPortfolio = (
+  portfolio: Portfolio,
+  order: Order
+): boolean => {
+  const orders = getOrdersForIsin(portfolio, order.asset);
+  const positionsAtOrderDate = getPositionsAtTimeStamp(
+    orders,
+    getNumericDateTime(order)
+  );
+  const piecesAvailable = sum(positionsAtOrderDate.open, (pos) => pos.pieces);
+  return piecesAvailable + order.pieces >= 0;
 };

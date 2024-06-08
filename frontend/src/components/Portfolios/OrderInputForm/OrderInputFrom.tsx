@@ -1,12 +1,6 @@
-import { sum } from "radash";
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
-import { portfolioContainsOrder } from "../../../../../domain/src/portfolio/portfolio.derivers";
-import { getPositions } from "../../../../../domain/src/position/position.derivers";
-import {
-  useAddOrderToPortfolio,
-  useGetPortfolio,
-} from "../../../hooks/portfolios/portfolioHooks";
+import { useAddOrderToPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props, isNotNil } from "../../../utility/types";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
@@ -18,6 +12,7 @@ import {
   NumberInputValue,
 } from "../../general/NumberInput/NumberInput";
 import "./OrderInputForm.css";
+import { useOrderValidation } from "./OrderInputForm.logic";
 
 const { bemBlock, bemElement } = bemHelper("order-input-form");
 
@@ -38,8 +33,6 @@ export function OrderInputForm({
   className,
   portfolioName,
 }: OrderInputFormProps): ReactElement | null {
-  const portfolioResponse = useGetPortfolio(portfolioName);
-  const addOrder = useAddOrderToPortfolio(portfolioName).mutate;
   const [isin, setAssetIsin] = useState(DEFAULTS.isin);
   const [pieces, setPieces] = useState<NumberInputValue>(DEFAULTS.pieces);
   const [sharePrice, setSharePrice] = useState<NumberInputValue>(
@@ -48,22 +41,16 @@ export function OrderInputForm({
   const [fees, setFees] = useState<NumberInputValue>(DEFAULTS.fees);
   const [taxes, setTaxes] = useState<NumberInputValue>(DEFAULTS.taxes);
   const [date, setDate] = useState<DateInputValue>(DEFAULTS.date);
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
 
-  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const { isReady, isValid, isDuplicate } = useOrderValidation(portfolioName);
+  const addOrder = useAddOrderToPortfolio(portfolioName).mutate;
 
-  if (!portfolioResponse.data) {
+  if (!isReady) {
     return null;
   }
 
-  const portfolio = portfolioResponse.data;
-
   const isFormValid = isin && pieces && pieces !== 0 && sharePrice && date;
-
-  const isOrderValid =
-    pieces &&
-    (sum(getPositions(portfolio, isin)?.open || [], (pos) => pos.pieces) || 0) +
-      pieces >=
-      0;
 
   const orderToSubmit = isFormValid
     ? {
@@ -78,11 +65,8 @@ export function OrderInputForm({
     : undefined;
 
   const submitHandler = () => {
-    const isDuplicate = orderToSubmit
-      ? portfolioContainsOrder(portfolio, orderToSubmit)
-      : false;
-    if (isDuplicate) {
-      setIsConfirmationOpen(true);
+    if (isDuplicate(orderToSubmit)) {
+      setIsWarningOpen(true);
     } else {
       orderToSubmit && addOrder(orderToSubmit);
     }
@@ -147,28 +131,16 @@ export function OrderInputForm({
         className={bemElement("button")}
         onClick={submitHandler}
         label={"Submit"}
-        isDisabled={!isFormValid || !isOrderValid}
+        isDisabled={!isFormValid || !isValid(orderToSubmit)}
         isPrimary={true}
       />
-      {isConfirmationOpen && (
-        <Confirmation
-          title={"Duplicate Order Detected!"}
-          body={
-            <>
-              <p>
-                This order seems to be a duplicate of an already registered
-                order for this portfolio. All values are equal.
-              </p>
-              <p>Do you still want to add this order?</p>
-            </>
-          }
-          confirmLabel={"Add anyway"}
-          cancelLabel={"Cancel"}
+      {isWarningOpen && (
+        <DuplicationWarning
+          onCancel={() => setIsWarningOpen(false)}
           onConfirm={() => {
             orderToSubmit && addOrder(orderToSubmit);
-            setIsConfirmationOpen(false);
+            setIsWarningOpen(false);
           }}
-          onCancel={() => setIsConfirmationOpen(false)}
         />
       )}
     </div>
@@ -191,4 +163,30 @@ function getOrderSummaryText({
     ).toFixed(2)}`;
   }
   return "undetermined";
+}
+
+type DuplicationWarningProps = {
+  onConfirm: () => void;
+  onCancel: () => void;
+};
+
+function DuplicationWarning({ onCancel, onConfirm }: DuplicationWarningProps) {
+  return (
+    <Confirmation
+      title={"Duplicate Order Detected!"}
+      body={
+        <>
+          <p>
+            This order seems to be a duplicate of an already registered order
+            for this portfolio. All values are equal.
+          </p>
+          <p>Do you still want to add this order?</p>
+        </>
+      }
+      confirmLabel={"Add anyway"}
+      cancelLabel={"Cancel"}
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />
+  );
 }
