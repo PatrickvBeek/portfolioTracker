@@ -11,8 +11,8 @@ import {
 } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
-import { Portfolio } from "../portfolio/portfolio.entities";
 import {
+  BatchType,
   Batches,
   BatchesHistory,
   ClosedBatch,
@@ -22,37 +22,43 @@ import {
 const EMPTY_BATCHES: Batches = { open: [], closed: [] };
 
 export const getPositionDividendSum = (
-  portfolio: Portfolio,
-  isin: string,
-  positionType: keyof Batches
+  orders: Order[],
+  dividendPayouts: DividendPayout[],
+  batchType: BatchType
 ): number =>
   sum(
-    (getBatches(portfolio, isin)?.[positionType] || [])
+    getBatchesOfType(orders, dividendPayouts, batchType)
       .flatMap((position) => position.dividendPayouts)
       .map(getDividendVolume)
   );
 
 export const getTotalTaxesForClosedBatches = (
-  portfolio: Portfolio,
-  isin: string
+  orders: Order[],
+  dividendPayouts: DividendPayout[]
 ): number =>
   sum(
-    getBatches(portfolio, isin)?.closed || [],
+    getBatchesOfType(orders, dividendPayouts, "closed"),
     ({ taxes, dividendPayouts }) => taxes + sumDividendTaxes(dividendPayouts)
   );
 
 export function getBatches(
-  portfolio: Portfolio,
-  isin: string
+  orders: Order[],
+  dividendPayouts: DividendPayout[]
 ): Batches | undefined {
-  const orders = portfolio.orders[isin] || [];
-  const dividends = portfolio.dividendPayouts[isin] || [];
-  const activity = sort([...orders, ...dividends], getNumericDateTime);
+  const activity = sort([...orders, ...dividendPayouts], getNumericDateTime);
   if (sum(orders, (order) => order.pieces) < 0) {
     return undefined; // you can't sell more pieces than you have (shorting is not supported).
   }
 
   return activity.reduce(updateBatchesWithActivity, EMPTY_BATCHES);
+}
+
+export function getBatchesOfType<T extends BatchType>(
+  orders: Order[],
+  dividendPayouts: DividendPayout[],
+  batchType: T
+): Batches[T] {
+  return getBatches(orders, dividendPayouts)?.[batchType] || [];
 }
 
 export function getBatchesHistory(orders: Order[]): BatchesHistory {

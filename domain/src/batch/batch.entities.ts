@@ -19,6 +19,7 @@ export interface Batches {
   open: OpenBatch[];
   closed: ClosedBatch[];
 }
+export type BatchType = keyof Batches;
 
 export interface BatchesHistoryDataPoint {
   date: Date;
