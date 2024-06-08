@@ -7,11 +7,11 @@ import { Order } from "../order/order.entities";
 import { Portfolio } from "../portfolio/portfolio.entities";
 import { TEST_ORDER_TESLA } from "../testConstants";
 import {
-  getPositionHistory,
-  getPositions,
-  getPositionsDividendSum,
-} from "./position.derivers";
-import { ClosedPosition, OpenPosition, Positions } from "./position.entities";
+  getBatches,
+  getBatchesHistory,
+  getPositionDividendSum,
+} from "./batch.derivers";
+import { Batches, ClosedBatch, OpenBatch } from "./batch.entities";
 
 function getTestOrder(overrides: Partial<Order>): Order {
   return { ...TEST_ORDER_TESLA, ...overrides };
@@ -30,12 +30,12 @@ describe("the portfolio deriver", () => {
     };
   }
 
-  describe("getPositions", () => {
-    function getExpectPositions(positions: {
-      open: Partial<OpenPosition>[];
-      closed: Partial<ClosedPosition>[];
-    }): Positions {
-      const getDefaultOpenPosition: () => OpenPosition = () => ({
+  describe("getBatches", () => {
+    function getExpectBatches(batches: {
+      open: Partial<OpenBatch>[];
+      closed: Partial<ClosedBatch>[];
+    }): Batches {
+      const getDefaultOpenBatch: () => OpenBatch = () => ({
         pieces: TEST_ORDER_TESLA.pieces,
         buyPrice: TEST_ORDER_TESLA.sharePrice,
         buyDate: TEST_ORDER_TESLA.timestamp,
@@ -45,12 +45,12 @@ describe("the portfolio deriver", () => {
       });
 
       return {
-        open: positions.open.map((o) => ({
-          ...getDefaultOpenPosition(),
+        open: batches.open.map((o) => ({
+          ...getDefaultOpenBatch(),
           ...o,
         })),
-        closed: positions.closed.map((closed) => ({
-          ...getDefaultOpenPosition(),
+        closed: batches.closed.map((closed) => ({
+          ...getDefaultOpenBatch(),
           sellDate: closed.sellDate || TEST_ORDER_TESLA.timestamp,
           sellPrice: closed.sellPrice || TEST_ORDER_TESLA.sharePrice,
           orderFee: closed.orderFee || 2 * TEST_ORDER_TESLA.orderFee,
@@ -59,15 +59,15 @@ describe("the portfolio deriver", () => {
       };
     }
 
-    describe("returns the correct positions when", () => {
+    describe("returns the correct batches when", () => {
       it("buying 1, selling 1", () => {
         const portfolio = getPortfolioWithOrders([
           { pieces: 1, sharePrice: 50 },
           { pieces: -1, sharePrice: 55 },
         ]);
 
-        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
-          getExpectPositions({
+        expect(getBatches(portfolio, TEST_ISIN)).toEqual(
+          getExpectBatches({
             open: [],
             closed: [{ pieces: 1, buyPrice: 50, sellPrice: 55 }],
           })
@@ -80,8 +80,8 @@ describe("the portfolio deriver", () => {
           { pieces: -1, sharePrice: 55, taxes: 0.5 },
         ]);
 
-        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
-          getExpectPositions({
+        expect(getBatches(portfolio, TEST_ISIN)).toEqual(
+          getExpectBatches({
             open: [{ pieces: 1, buyPrice: 50, orderFee: 0.5 }],
             closed: [
               {
@@ -103,8 +103,8 @@ describe("the portfolio deriver", () => {
           { pieces: -2, sharePrice: 60 },
         ]);
 
-        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
-          getExpectPositions({
+        expect(getBatches(portfolio, TEST_ISIN)).toEqual(
+          getExpectBatches({
             open: [],
             closed: [
               { pieces: 1, buyPrice: 50, sellPrice: 60, orderFee: 1.5 },
@@ -121,8 +121,8 @@ describe("the portfolio deriver", () => {
           { pieces: -1, sharePrice: 60, taxes: 0.2 },
         ]);
 
-        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
-          getExpectPositions({
+        expect(getBatches(portfolio, TEST_ISIN)).toEqual(
+          getExpectBatches({
             open: [],
             closed: [
               {
@@ -152,8 +152,8 @@ describe("the portfolio deriver", () => {
           { pieces: -2, sharePrice: 65 },
         ]);
 
-        expect(getPositions(portfolio, TEST_ISIN)).toEqual(
-          getExpectPositions({
+        expect(getBatches(portfolio, TEST_ISIN)).toEqual(
+          getExpectBatches({
             open: [{ pieces: 1, buyPrice: 55, orderFee: 0.5 }],
             closed: [
               { pieces: 3, buyPrice: 50, sellPrice: 60, orderFee: 3.75 },
@@ -173,8 +173,8 @@ describe("the portfolio deriver", () => {
         { pieces: -1, sharePrice: 60, timestamp: "2022-03-01" },
       ]);
 
-      expect(getPositions(portfolio, TEST_ISIN)).toEqual(
-        getExpectPositions({
+      expect(getBatches(portfolio, TEST_ISIN)).toEqual(
+        getExpectBatches({
           open: [],
           closed: [
             {
@@ -196,17 +196,17 @@ describe("the portfolio deriver", () => {
       );
     });
 
-    it("returns undefined if more positions are sold than bought", () => {
+    it("returns undefined if more batches are sold than bought", () => {
       const portfolio = getPortfolioWithOrders([
         { pieces: 2, sharePrice: 50 },
         { pieces: -3, sharePrice: 55 },
       ]);
 
-      expect(getPositions(portfolio, TEST_ISIN)).toBeUndefined();
+      expect(getBatches(portfolio, TEST_ISIN)).toBeUndefined();
     });
   });
 
-  describe("getPositionHistory", () => {
+  describe("getBatchesHistory", () => {
     const day1 = "2023-01-01";
     const day2 = "2023-01-02";
     const day3 = "2023-01-03";
@@ -221,10 +221,10 @@ describe("the portfolio deriver", () => {
         { asset: "abc", pieces: -2, sharePrice: 20, timestamp: day3 },
       ]);
 
-      expect(getPositionHistory(TEST_ORDERS)).toEqual([
+      expect(getBatchesHistory(TEST_ORDERS)).toEqual([
         {
           date: new Date(day1),
-          positions: {
+          batches: {
             open: [
               {
                 buyDate: day1,
@@ -240,7 +240,7 @@ describe("the portfolio deriver", () => {
         },
         {
           date: new Date(day2),
-          positions: {
+          batches: {
             open: [
               {
                 buyDate: day1,
@@ -264,7 +264,7 @@ describe("the portfolio deriver", () => {
         },
         {
           date: new Date(day3),
-          positions: {
+          batches: {
             open: [],
             closed: [
               {
@@ -300,7 +300,7 @@ describe("the portfolio deriver", () => {
         { asset: "abc", pieces: 1, sharePrice: 20, timestamp: day3 },
       ]);
 
-      expect(getPositionHistory(TEST_ORDERS)).toEqual([]);
+      expect(getBatchesHistory(TEST_ORDERS)).toEqual([]);
     });
   });
 
@@ -319,8 +319,8 @@ describe("the portfolio deriver", () => {
         dividendPayouts: getTestDividendPayoutsGroupedByAsset([]),
       });
 
-      expect(getPositionsDividendSum(portfolio, ISIN, "open")).toEqual(0);
-      expect(getPositionsDividendSum(portfolio, ISIN, "closed")).toEqual(0);
+      expect(getPositionDividendSum(portfolio, ISIN, "open")).toEqual(0);
+      expect(getPositionDividendSum(portfolio, ISIN, "closed")).toEqual(0);
     });
 
     it("returns the correct sum for a single dividend", () => {
@@ -336,8 +336,8 @@ describe("the portfolio deriver", () => {
         ]),
       });
 
-      expect(getPositionsDividendSum(portfolio, ISIN, "open")).toEqual(12);
-      expect(getPositionsDividendSum(portfolio, ISIN, "closed")).toEqual(6);
+      expect(getPositionDividendSum(portfolio, ISIN, "open")).toEqual(12);
+      expect(getPositionDividendSum(portfolio, ISIN, "closed")).toEqual(6);
     });
 
     it("returns the correct sum for multiple payouts", () => {
@@ -359,8 +359,8 @@ describe("the portfolio deriver", () => {
         ]),
       });
 
-      expect(getPositionsDividendSum(portfolio, ISIN, "open")).toEqual(14);
-      expect(getPositionsDividendSum(portfolio, ISIN, "closed")).toEqual(10);
+      expect(getPositionDividendSum(portfolio, ISIN, "open")).toEqual(14);
+      expect(getPositionDividendSum(portfolio, ISIN, "closed")).toEqual(10);
     });
 
     it("returns 0 if no orders where recorded", () => {
@@ -371,12 +371,12 @@ describe("the portfolio deriver", () => {
         ]),
       });
 
-      expect(getPositionsDividendSum(portfolio, ISIN, "open")).toEqual(0);
+      expect(getPositionDividendSum(portfolio, ISIN, "open")).toEqual(0);
     });
 
     it("returns 0 for an empty portfolio", () => {
       expect(
-        getPositionsDividendSum(getTestPortfolio({}), ISIN, "open")
+        getPositionDividendSum(getTestPortfolio({}), ISIN, "open")
       ).toEqual(0);
     });
   });

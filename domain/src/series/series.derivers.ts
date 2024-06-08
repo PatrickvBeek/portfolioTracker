@@ -1,13 +1,13 @@
 import { sort, sum } from "radash";
+import {
+  getBatchInitialValue,
+  getBatchesHistory,
+} from "../batch/batch.derivers";
+import {
+  BatchesHistory,
+  BatchesHistoryDataPoint,
+} from "../batch/batch.entities";
 import { Portfolio } from "../portfolio/portfolio.entities";
-import {
-  getPositionHistory,
-  getPositionInitialValue,
-} from "../position/position.derivers";
-import {
-  PositionHistory,
-  PositionHistoryDataPoint,
-} from "../position/position.entities";
 import { updateBy } from "../utils/arrays";
 import { Series, SeriesPoint } from "./series.entities";
 
@@ -15,8 +15,8 @@ export function getInitialValueSeriesForPortfolio(
   portfolio: Portfolio
 ): Series<number> {
   const diffs = Object.values(portfolio.orders)
-    .map(getPositionHistory)
-    .map(positionHistoryToSeries)
+    .map(getBatchesHistory)
+    .map(batchHistoryToSeries)
     .map(differentiateNumberSeries)
     .flat();
 
@@ -49,12 +49,12 @@ const differentiateNumberSeries = (series: Series<number>): Series<number> => {
   return diff;
 };
 
-const positionHistoryToSeries = (history: PositionHistory): Series<number> =>
-  history.map(positionHistoryDataPointToSeriesPoint);
+const batchHistoryToSeries = (history: BatchesHistory): Series<number> =>
+  history.map(batchHistoryDataPointToSeriesPoint);
 
-const positionHistoryDataPointToSeriesPoint = (
-  point: PositionHistoryDataPoint
+const batchHistoryDataPointToSeriesPoint = (
+  point: BatchesHistoryDataPoint
 ): SeriesPoint<number> => ({
   timestamp: point.date.getTime(),
-  value: sum(point.positions.open, getPositionInitialValue),
+  value: sum(point.batches.open, getBatchInitialValue),
 });

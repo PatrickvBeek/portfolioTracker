@@ -1,6 +1,8 @@
 import { sort, sum } from "radash";
 import { getNumericDateTime } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
+import { getBatches, getBatchesAtTimeStamp } from "../batch/batch.derivers";
+import { Batches } from "../batch/batch.entities";
 import {
   sumDividendTaxes,
   sumDividends,
@@ -8,11 +10,6 @@ import {
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
-import {
-  getPositions,
-  getPositionsAtTimeStamp,
-} from "../position/position.derivers";
-import { Positions } from "../position/position.entities";
 import { Portfolio } from "./portfolio.entities";
 
 const getOrdersForIsin = (portfolio: Portfolio, isin: string): Order[] =>
@@ -43,11 +40,11 @@ export const getAllOrdersInPortfolioTimeSorted = (
 export const getPiecesOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  positionType: keyof Positions = "open"
+  positionType: keyof Batches = "open"
 ): number => {
   return isin in portfolio.orders
     ? sum(
-        getPositions(portfolio, isin)?.[positionType] || [],
+        getBatches(portfolio, isin)?.[positionType] || [],
         (pos) => pos.pieces
       )
     : 0;
@@ -56,9 +53,9 @@ export const getPiecesOfIsinInPortfolio = (
 export const getOrderFeesOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  positionType: keyof Positions | "both"
+  positionType: keyof Batches | "both"
 ): number => {
-  const positions = getPositions(portfolio, isin);
+  const positions = getBatches(portfolio, isin);
   if (!positions) {
     return 0;
   }
@@ -73,11 +70,11 @@ export const getOrderFeesOfIsinInPortfolio = (
 export const getInitialValueOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  positionType: keyof Positions = "open"
+  positionType: keyof Batches = "open"
 ): number =>
   isin in portfolio.orders
     ? sum(
-        getPositions(portfolio, isin)?.[positionType] || [],
+        getBatches(portfolio, isin)?.[positionType] || [],
         (p) => p.buyPrice * p.pieces
       )
     : 0;
@@ -88,7 +85,7 @@ export const getEndValueOfIsinInPortfolio = (
 ): number =>
   isin in portfolio.orders
     ? sum(
-        getPositions(portfolio, isin)?.closed || [],
+        getBatches(portfolio, isin)?.closed || [],
         (p) => p.sellPrice * p.pieces
       )
     : 0;
@@ -98,7 +95,7 @@ export function getProfitForIsinInPortfolio(
   isin: string
 ): number {
   return sum(
-    getPositions(portfolio, isin)?.closed || [],
+    getBatches(portfolio, isin)?.closed || [],
     ({ pieces, buyPrice, sellPrice, orderFee, dividendPayouts, taxes }) =>
       pieces * (sellPrice - buyPrice) -
       orderFee -
@@ -122,7 +119,7 @@ export const isOrderValidForPortfolio = (
   order: Order
 ): boolean => {
   const orders = getOrdersForIsin(portfolio, order.asset);
-  const positionsAtOrderDate = getPositionsAtTimeStamp(
+  const positionsAtOrderDate = getBatchesAtTimeStamp(
     orders,
     getNumericDateTime(order)
   );
