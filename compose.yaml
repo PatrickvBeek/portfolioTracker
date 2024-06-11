@@ -9,7 +9,7 @@ services:
     volumes:
       - pt-persist:/app/data
     working_dir: /app
-    command: ["node", "backend/dist/backend/src/server.js"]
+    command: ["yarn", "start"]
 
 volumes:
   pt-persist:

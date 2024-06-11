@@ -9,7 +9,7 @@ app.use(express.json());
 
 const isDev = config.NODE_ENV === "development";
 
-app.get("/express_backend", (req: Request, res: Response) => {
+app.get("/express_backend", (_: Request, res: Response) => {
   isDev && console.log("GET /express_backend");
   res.send({ express: `connected to ${config.NODE_ENV} backend` });
 });

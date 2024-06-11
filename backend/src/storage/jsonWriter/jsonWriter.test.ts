@@ -11,7 +11,7 @@ describe("The jsonWriter", () => {
   };
   let writer = new JsonWriter(path);
   it("can be instantiated", () => {
-    const writer = new JsonWriter("data");
+    new JsonWriter("data");
   });
 
   it("can generate the dataDir if not existent", async () => {

@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "build": "yarn workspace frontend build && yarn workspace backend build",
+    "start": "PT_DATA_DIR=$INIT_CWD/data yarn workspace backend start",
     "architecture-tests": "yarn depcruise domain/src frontend/src backend/src"
   },
   "dependencies": {},
