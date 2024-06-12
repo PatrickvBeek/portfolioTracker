@@ -5,7 +5,7 @@ import {
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfIsinInPortfolio,
-  getProfitForIsinInPortfolio,
+  getProfitForIsin,
   getTotalTaxesForClosedAssetBatches,
 } from "../../../../../../domain/src/portfolio/portfolio.derivers";
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
@@ -48,7 +48,7 @@ function getInventoryRows(
       orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "closed"),
       dividends: getDividendSum(portfolio, isin, "closed"),
       taxes: getTotalTaxesForClosedAssetBatches(portfolio, isin),
-      profit: getProfitForIsinInPortfolio(portfolio, isin),
+      profit: getProfitForIsin(portfolio, isin),
     }))
     .filter((pos) => pos.pieces > 0);
 }

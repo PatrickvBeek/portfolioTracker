@@ -1,9 +1,12 @@
 import { it } from "vitest";
 import {
   getElementsGroupedByAsset,
+  getTestDividendPayout,
   getTestOrder,
   getTestPortfolio,
 } from "../dataHelpers";
+import { DividendPayout } from "../dividendPayouts/dividend.entities";
+import { Order } from "../order/order.entities";
 import {
   TEST_ASSET_GOOGLE,
   TEST_ASSET_TESLA,
@@ -15,6 +18,7 @@ import {
   getAllOrdersInPortfolio,
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
+  getProfitForIsin,
   isOrderValidForPortfolio,
 } from "./portfolio.derivers";
 import { Portfolio } from "./portfolio.entities";
@@ -27,6 +31,17 @@ const TEST_PORTFOLIO: Portfolio = {
   },
   dividendPayouts: {},
 };
+
+const createTestPortfolio = (
+  orders: Partial<Order>[],
+  payouts: Partial<DividendPayout>[]
+): Portfolio =>
+  getTestPortfolio({
+    orders: getElementsGroupedByAsset(orders.map(getTestOrder)),
+    dividendPayouts: getElementsGroupedByAsset(
+      payouts.map(getTestDividendPayout)
+    ),
+  });
 
 describe("The Portfolio deriver", () => {
   describe("getAllOrdersInPortfolio", () => {
@@ -231,6 +246,63 @@ describe("The Portfolio deriver", () => {
           )
         ).toBe(true);
       });
+    });
+  });
+
+  describe("getProfitForIsin", () => {
+    const day1 = "2024-06-01";
+    const day2 = "2024-06-02";
+    const day3 = "2024-06-03";
+    const day4 = "2024-06-04";
+    const day5 = "2024-06-05";
+    it("for a complex scenario", () => {
+      const portfolio = createTestPortfolio(
+        [
+          {
+            asset: "asset",
+            sharePrice: 10,
+            pieces: 10,
+            orderFee: 2,
+            taxes: 0,
+            timestamp: day1,
+          },
+          {
+            asset: "asset",
+            sharePrice: 12,
+            pieces: 10,
+            orderFee: 4,
+            taxes: 0,
+            timestamp: day2,
+          },
+          {
+            asset: "asset",
+            sharePrice: 15,
+            pieces: -15,
+            orderFee: 2,
+            taxes: 3,
+            timestamp: day4,
+          },
+          {
+            asset: "asset",
+            sharePrice: 17,
+            pieces: -5,
+            orderFee: 0,
+            taxes: 0.5,
+            timestamp: day5,
+          },
+        ],
+        [
+          {
+            pieces: 20,
+            dividendPerShare: 0.25,
+            taxes: 1.5,
+            asset: "asset",
+            timestamp: day3,
+          },
+        ]
+      );
+
+      expect(getProfitForIsin(portfolio, "asset")).toEqual(82);
     });
   });
 });

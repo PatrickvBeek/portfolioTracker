@@ -113,7 +113,14 @@ function updateBatchesWithDividendPayout(
     open: batches.open.map((pos) => ({
       ...pos,
       dividendPayouts: sort(
-        [...pos.dividendPayouts, { ...payout, pieces: pos.pieces }],
+        [
+          ...pos.dividendPayouts,
+          {
+            ...payout,
+            pieces: pos.pieces,
+            taxes: payout.taxes * (pos.pieces / payout.pieces),
+          },
+        ],
         getNumericDateTime
       ),
     })),
@@ -208,6 +215,7 @@ function closeFirstBatchPartially(
     dividendPayouts: firstBatch.dividendPayouts.map((payout) => ({
       ...payout,
       pieces: piecesToSell,
+      taxes: (piecesToSell / payout.pieces) * payout.taxes,
     })),
   };
   const reducedBatch: OpenBatch = {
@@ -218,6 +226,7 @@ function closeFirstBatchPartially(
     dividendPayouts: firstBatch.dividendPayouts.map((payout) => ({
       ...payout,
       pieces: firstBatch.pieces - piecesToSell,
+      taxes: (1 - piecesToSell / payout.pieces) * payout.taxes,
     })),
   };
 
@@ -234,7 +243,7 @@ function closeFirstBatchAndContinue(
   sell: Order,
   piecesToSell: number
 ): Batches | undefined {
-  const newBatch: ClosedBatch = {
+  const newlyClosedBatch: ClosedBatch = {
     ...firstBatch,
     sellPrice: sell.sharePrice,
     sellDate: sell.timestamp,
@@ -245,12 +254,12 @@ function closeFirstBatchAndContinue(
   const piecesStillToSell = piecesToSell - firstBatch.pieces;
 
   return updateBatchesWithSell(
-    { open: remainingOpen, closed: [...closedBatch, newBatch] },
+    { open: remainingOpen, closed: [...closedBatch, newlyClosedBatch] },
     {
       ...sell,
       pieces: -piecesStillToSell,
       orderFee: (1 - firstBatch.pieces / piecesToSell) * sell.orderFee,
-      taxes: (1 - firstBatch.taxes / piecesToSell) * sell.taxes,
+      taxes: (1 - firstBatch.pieces / piecesToSell) * sell.taxes,
     }
   );
 }
@@ -268,10 +277,6 @@ export const getBatchInitialValue = (batch: OpenBatch): number =>
   batch.pieces * batch.buyPrice;
 
 function updateBatchesWithBuy(batch: Batches, buy: Order): Batches | undefined {
-  if (buy.pieces < 0) {
-    return undefined;
-  }
-
   return {
     closed: batch.closed,
     open: [...batch.open, orderToOpenBatch(buy)],
