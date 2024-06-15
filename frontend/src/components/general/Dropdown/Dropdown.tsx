@@ -12,7 +12,6 @@ export interface DropdownProps extends InputProps {
   onSelect: (s: string) => void;
   options: DropdownOption[];
   selected: string;
-  placeholder?: string;
 }
 
 const Dropdown = ({
@@ -24,7 +23,6 @@ const Dropdown = ({
   onSelect,
   options,
   selected,
-  placeholder,
 }: DropdownProps) => {
   return (
     <InputWrapper
@@ -35,7 +33,6 @@ const Dropdown = ({
     >
       <select
         onChange={(e) => onSelect(e.target.value)}
-        placeholder={placeholder || ""}
         id={`${label?.replaceAll(" ", "-") || ""}-input`}
         className={bemElement("field", isMandatory ? "mandatory" : "")}
         value={selected}

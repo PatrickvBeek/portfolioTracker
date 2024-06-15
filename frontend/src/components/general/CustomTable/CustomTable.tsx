@@ -35,7 +35,7 @@ function CustomTable<T>({ rows, columDefs }: TableProps<T>) {
               backgroundColor: "var(--theme)",
             }}
           >
-            {columDefs.map((def, i) => (
+            {columDefs.map((def) => (
               <TableCell
                 key={def.header?.toString()}
                 align={def.alignment}

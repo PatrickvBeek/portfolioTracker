@@ -23,7 +23,7 @@ export function useUpdateAssets(
       return saveAssetsOnServer(updater(previousLib, asset));
     },
     {
-      onSuccess: (data, asset) => {
+      onSuccess: (_, asset) => {
         queryClient.invalidateQueries("assets");
         queryClient.setQueriesData("assets", updater(previousLib, asset));
       },

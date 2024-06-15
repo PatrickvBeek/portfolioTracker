@@ -39,7 +39,7 @@ const columDefs: ColDef<InventoryItem>[] = [
   {
     header: "Pieces",
     valueGetter: (i) => i.pieces,
-    footerGetter: (data) => "",
+    footerGetter: () => "",
     alignment: "right",
   },
   {
@@ -68,7 +68,6 @@ export const OpenInventoryList = ({
 }: OpenInventoryListProps) => {
   const portfolioQuery = useGetPortfolio(portfolioName);
   const assetQuery = useGetAssets();
-  const portfolioData = portfolioQuery.data;
   const [data, setData] = useState<InventoryItem[] | undefined>(undefined);
 
   useEffect(() => {

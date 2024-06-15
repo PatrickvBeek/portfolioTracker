@@ -36,7 +36,7 @@ const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
         <TextField {...params} variant="outlined" label="Asset" />
       )}
       options={assets}
-      onChange={(event, value) => value?.isin && onSelect(value?.isin)}
+      onChange={(_, value) => value?.isin && onSelect(value?.isin)}
       getOptionLabel={(asset) =>
         `${asset.displayName}${asset.isin}${asset.symbol || ""}`
       }
