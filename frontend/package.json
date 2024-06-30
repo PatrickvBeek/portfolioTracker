@@ -47,7 +47,7 @@
     "c8": "^9.1.0",
     "jsdom": "^24.0.0",
     "msw": "^2.2.1",
-    "typescript": "^5.4.3",
+    "typescript": "^5.5.2",
     "vite": "^5.2.4",
     "vitest": "^1.4.0"
   },
@@ -64,7 +64,8 @@
     "serve": "vite preview",
     "start": "vite",
     "test": "vitest run",
-    "test:no-watch": "vitest watch"
+    "test:no-watch": "vitest watch", 
+    "tsc": "tsc"
   },
   "type": "module"
 }

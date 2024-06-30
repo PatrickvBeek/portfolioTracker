@@ -48,7 +48,7 @@ function Portfolios({ className }: PortfolioProps) {
   }
 
   if (!selectedPortfolio) {
-    return null;
+    return <></>;
   }
 
   return (

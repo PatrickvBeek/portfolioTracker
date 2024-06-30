@@ -48,7 +48,7 @@ const columDefs: ColDef<InventoryItem>[] = [
   {
     header: "Pieces",
     valueGetter: (i) => i.pieces,
-    footerGetter: (data) => "",
+    footerGetter: () => "",
     alignment: "right",
   },
   {

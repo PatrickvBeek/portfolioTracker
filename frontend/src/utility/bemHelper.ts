@@ -25,7 +25,7 @@ function modify(className: string, modifiers: Modifiers): Modifiers {
     );
   }
 
-  return mapKeys<unknown, string, string>(modifiers, (modifier, enabled) =>
+  return mapKeys<unknown, string, string>(modifiers, (modifier) =>
     withModifier(className, modifier)
   );
 }
