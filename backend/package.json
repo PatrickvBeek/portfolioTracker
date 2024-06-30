@@ -16,7 +16,7 @@
     "concurrently": "^7.1.0",
     "nodemon": "^2.0.15",
     "supertest": "^6.2.3",
-    "typescript": "^5.4.3",
+    "typescript": "^5.5.2",
     "vite": "^5.2.4",
     "vitest": "^1.4.0"
   },
@@ -27,6 +27,7 @@
     "build": "npx tsc",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/backend/src/server.js\"",
     "start": "NODE_ENV=production node dist/backend/src/server.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "tsc": "tsc"
   }
 }

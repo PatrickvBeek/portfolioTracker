@@ -11,14 +11,15 @@
     "@vitest/coverage-v8": "^1.4.0",
     "c8": "^9.1.0",
     "madge": "^6.1.0",
-    "typescript": "^5.4.3",
+    "typescript": "^5.5.2",
     "vite": "^5.2.4",
     "vitest": "^1.4.0"
   },
   "private": true,
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "tsc": "tsc"
   },
   "type": "module"
 }
