@@ -114,12 +114,16 @@ describe("The OrderInputForm", () => {
     });
     const dateInput = await screen.findByLabelText("Order Date");
 
-    await user.clear(dateInput);
+    await act(async () => {
+      await user.clear(dateInput);
+    });
 
-    await user.type(
-      await screen.findByLabelText("Order Date"),
-      `${TEST_ORDER_TESLA.timestamp}`
-    );
+    await act(async () => {
+      await user.type(
+        await screen.findByLabelText("Order Date"),
+        `${TEST_ORDER_TESLA.timestamp}`
+      );
+    });
     await act(async () => {
       await user.click(await screen.findByRole("button", { name: "Submit" }));
     });
