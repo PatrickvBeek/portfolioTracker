@@ -9,46 +9,25 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getInitialValueSeriesForPortfolio } from "../../../../../domain/src/series/series.derivers";
-import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
 import { getAxisProps, getTimeAxisProps } from "../axisUtils";
-import "./InvestmentHistoryChart.css";
+import "./InitialValueHistoryChart.css";
+import { useGetInitialValueSeries } from "./InitialValueHistoryChart.logic";
 
-const { bemElement, bemBlock } = bemHelper("investment-history-chart");
+const { bemElement, bemBlock } = bemHelper("initial-value-history-chart");
 
-export type InvestmentHistoryChartProps = Props<{
+export type InitialValueHistoryChartProps = Props<{
   portfolioName: string;
 }>;
 
-export function InvestmentHistoryChart({
+export function InitialValueHistoryChart({
   portfolioName,
   className,
-}: InvestmentHistoryChartProps): ReactElement | null {
-  const portfolioQuery = useGetPortfolio(portfolioName);
+}: InitialValueHistoryChartProps): ReactElement | null {
+  const initialValueSeries = useGetInitialValueSeries(portfolioName);
 
-  if (portfolioQuery.isLoading || portfolioQuery.isFetching) {
-    return <div>data is loading...</div>;
-  }
-
-  if (portfolioQuery.isError) {
-    return <div>an error occurred loading the portfolio data</div>;
-  }
-
-  if (!portfolioQuery.isSuccess) {
-    return null;
-  }
-
-  const portfolio = portfolioQuery.data;
-
-  if (!portfolio) {
-    return null;
-  }
-
-  const data = getInitialValueSeriesForPortfolio(portfolio);
-
-  if (!data.length) {
+  if (!initialValueSeries?.length) {
     return null;
   }
 
@@ -56,7 +35,7 @@ export function InvestmentHistoryChart({
     <div className={bemBlock(className)}>
       <div className={bemElement("heading")}>Initial Value History</div>
       <ResponsiveContainer aspect={2.5} width={"100%"}>
-        <AreaChart data={data}>
+        <AreaChart data={initialValueSeries}>
           <Area
             type={"stepAfter"}
             stroke="var(--theme-highlight)"
@@ -73,9 +52,9 @@ export function InvestmentHistoryChart({
           />
           <XAxis
             dataKey={"timestamp"}
-            {...getTimeAxisProps(data.map((p) => p.timestamp))}
+            {...getTimeAxisProps(initialValueSeries.map((p) => p.timestamp))}
           />
-          <YAxis {...getAxisProps(data.map((d) => d.value))} />
+          <YAxis {...getAxisProps(initialValueSeries.map((d) => d.value))} />
           <CartesianGrid stroke="#ccc" />
         </AreaChart>
       </ResponsiveContainer>

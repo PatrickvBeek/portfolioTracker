@@ -21,6 +21,9 @@ jobs:
       - name: Check architecture
         run: yarn run architecture-tests
 
+      - name: Prettier
+        run: yarn prettier -c ./
+
       - name: TS Check Backend
         working-directory: ./backend
         run: yarn tsc --noEmit

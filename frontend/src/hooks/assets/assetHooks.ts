@@ -13,7 +13,7 @@ export function useGetAssets() {
 }
 
 export function useUpdateAssets(
-  updater: (assetLib: AssetLibrary, updateData: Asset) => AssetLibrary
+  updater: (assetLib: AssetLibrary, updateData: Asset) => AssetLibrary,
 ) {
   const queryClient = useQueryClient();
   const previousLib =
@@ -27,7 +27,7 @@ export function useUpdateAssets(
         queryClient.invalidateQueries("assets");
         queryClient.setQueriesData("assets", updater(previousLib, asset));
       },
-    }
+    },
   );
 }
 

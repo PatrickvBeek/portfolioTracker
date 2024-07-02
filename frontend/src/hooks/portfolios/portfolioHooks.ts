@@ -42,7 +42,7 @@ export function useDeletePortfolio() {
 }
 
 function useUpdatePortfolios<T extends PortfolioUpdate>(
-  updater: PortfolioUpdater<T>
+  updater: PortfolioUpdater<T>,
 ) {
   const queryClient = useQueryClient();
   const previousLibrary =
@@ -56,17 +56,17 @@ function useUpdatePortfolios<T extends PortfolioUpdate>(
         queryClient.invalidateQueries("portfolios");
         queryClient.setQueriesData(
           "portfolios",
-          updater(previousLibrary, update)
+          updater(previousLibrary, update),
         );
       },
-    }
+    },
   );
 }
 
 export function useAddOrderToPortfolio(portfolio: string) {
   const addOrder: (
     library: PortfolioLibrary,
-    order: Order
+    order: Order,
   ) => PortfolioLibrary = (lib, order) => {
     const newPortfolio = addOrderToPortfolio(lib[portfolio], order);
     return addPortfolioToLibrary(lib, newPortfolio);
@@ -77,7 +77,7 @@ export function useAddOrderToPortfolio(portfolio: string) {
 export function useDeleteOrderFromPortfolio(portfolio: string) {
   const deleteOrder: (
     library: PortfolioLibrary,
-    order: Order
+    order: Order,
   ) => PortfolioLibrary = (lib, order) => {
     const newPortfolio = deleteOrderFromPortfolio(lib[portfolio], order);
     return addPortfolioToLibrary(lib, newPortfolio);
@@ -88,11 +88,11 @@ export function useDeleteOrderFromPortfolio(portfolio: string) {
 export function useDeleteDividendPayoutFromPortfolio(portfolio: string) {
   const deleteOrder: (
     library: PortfolioLibrary,
-    payout: DividendPayout
+    payout: DividendPayout,
   ) => PortfolioLibrary = (lib, payout) => {
     const newPortfolio = deleteDividendPayoutFromPortfolio(
       lib[portfolio],
-      payout
+      payout,
     );
     return addPortfolioToLibrary(lib, newPortfolio);
   };
@@ -102,7 +102,7 @@ export function useDeleteDividendPayoutFromPortfolio(portfolio: string) {
 export function useAddDividendPayoutToPortfolio(portfolio: string) {
   const addDividendPayout: (
     library: PortfolioLibrary,
-    payout: DividendPayout
+    payout: DividendPayout,
   ) => PortfolioLibrary = (lib, payout) => {
     const newPortfolio = addDividendPayoutToPortfolio(lib[portfolio], payout);
     return addPortfolioToLibrary(lib, newPortfolio);
@@ -127,5 +127,5 @@ type PortfolioUpdate = Portfolio | Order | DividendPayout | string;
 
 type PortfolioUpdater<T extends PortfolioUpdate> = (
   lib: PortfolioLibrary,
-  update: T
+  update: T,
 ) => PortfolioLibrary;

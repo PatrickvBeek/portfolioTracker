@@ -26,7 +26,7 @@ export function getTestOrder(order: Partial<Order>): Order {
 }
 
 export const getTestDividendPayout = (
-  payout: Partial<DividendPayout>
+  payout: Partial<DividendPayout>,
 ): DividendPayout => ({
   asset: uid(6),
   dividendPerShare: Math.random() * 100,
@@ -38,51 +38,54 @@ export const getTestDividendPayout = (
 });
 
 export function getTestOrdersGroupedByAsset(
-  orderProps: Partial<Order>[]
+  orderProps: Partial<Order>[],
 ): Record<string, Order[]> {
   return getElementsGroupedByAsset(orderProps.map(getTestOrder));
 }
 
 export function getTestDividendPayoutsGroupedByAsset(
-  payouts: Partial<DividendPayout>[]
+  payouts: Partial<DividendPayout>[],
 ): Record<string, DividendPayout[]> {
   return getElementsGroupedByAsset(payouts.map(getTestDividendPayout));
 }
 
 export function getElementsGroupedByAsset<T extends { asset: string }>(
-  elements: T[]
+  elements: T[],
 ): Record<string, T[]> {
   return getElementsGroupedBy(
     elements,
-    (order: { asset: string }) => order.asset
+    (order: { asset: string }) => order.asset,
   );
 }
 
 export function getElementsByIsin<T extends { isin: string }>(
-  elements: T[]
+  elements: T[],
 ): Record<string, T> {
   return getElementsBy(elements, (order: { isin: string }) => order.isin);
 }
 
 function getElementsGroupedBy<T>(
   elements: T[],
-  predicate: (el: T) => string
+  predicate: (el: T) => string,
 ): Record<string, T[]> {
-  return elements.reduce((map, element) => {
-    const key = predicate(element);
-    const group = map[key] || [];
-    return Object.assign(map, {
-      [key]: [...group, element],
-    });
-  }, {} as Record<string, T[]>);
+  return elements.reduce(
+    (map, element) => {
+      const key = predicate(element);
+      const group = map[key] || [];
+      return Object.assign(map, {
+        [key]: [...group, element],
+      });
+    },
+    {} as Record<string, T[]>,
+  );
 }
 
 function getElementsBy<T>(
   elements: T[],
-  predicate: (el: T) => string
+  predicate: (el: T) => string,
 ): Record<string, T> {
   return elements.reduce(
     (map, element) => Object.assign(map, { [predicate(element)]: element }),
-    {} as Record<string, T>
+    {} as Record<string, T>,
   );
 }

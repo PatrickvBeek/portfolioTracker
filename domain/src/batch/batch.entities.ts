@@ -1,7 +1,7 @@
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 
-export interface OpenPosition {
+export interface OpenBatch {
   pieces: Order["pieces"];
   buyDate: Order["timestamp"];
   buyPrice: Order["sharePrice"];
@@ -10,19 +10,20 @@ export interface OpenPosition {
   dividendPayouts: DividendPayout[];
 }
 
-export interface ClosedPosition extends OpenPosition {
+export interface ClosedBatch extends OpenBatch {
   sellDate: Order["timestamp"];
   sellPrice: Order["sharePrice"];
 }
 
-export interface Positions {
-  open: OpenPosition[];
-  closed: ClosedPosition[];
+export interface Batches {
+  open: OpenBatch[];
+  closed: ClosedBatch[];
 }
+export type BatchType = keyof Batches;
 
-export interface PositionHistoryDataPoint {
+export interface BatchesHistoryDataPoint {
   date: Date;
-  positions: Positions;
+  batches: Batches;
 }
 
-export type PositionHistory = PositionHistoryDataPoint[];
+export type BatchesHistory = BatchesHistoryDataPoint[];

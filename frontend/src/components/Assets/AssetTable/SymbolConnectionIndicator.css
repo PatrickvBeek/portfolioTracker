@@ -1,5 +1,5 @@
 .symbol-connection-indicator {
-    display: flex;
-    gap: var(--half-spacing);
-    align-items: center;
+  display: flex;
+  gap: var(--half-spacing);
+  align-items: center;
 }

@@ -1,10 +1,10 @@
-.investment-history-chart {
+.initial-value-history-chart {
   display: flex;
   flex-direction: column;
   gap: var(--default-spacing);
 }
 
-.investment-history-chart__heading {
+.initial-value-history-chart__heading {
   font-size: var(--font-large1);
   font-weight: bold;
 }

@@ -1,11 +1,11 @@
 .balance {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .balance--positive {
-    color: var(--green);
+  color: var(--green);
 }
 
 .balance--negative {
-    color: var(--red);
+  color: var(--red);
 }

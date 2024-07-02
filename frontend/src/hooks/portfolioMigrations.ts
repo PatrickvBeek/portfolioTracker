@@ -13,7 +13,7 @@ function mapPortfolio(portfolio: Portfolio) {
     Object.entries(portfolio.orders).map(([isin, orders]) => [
       isin,
       orders.map(mapOrder),
-    ])
+    ]),
   );
 
   return {
@@ -27,7 +27,7 @@ function mapLib(library: PortfolioLibrary) {
     Object.entries(library).map(([name, portfolio]) => [
       name,
       mapPortfolio(portfolio),
-    ])
+    ]),
   );
 
   console.log(JSON.stringify(mappedLib, null, 4));

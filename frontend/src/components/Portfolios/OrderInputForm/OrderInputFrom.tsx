@@ -36,7 +36,7 @@ export function OrderInputForm({
   const [isin, setAssetIsin] = useState(DEFAULTS.isin);
   const [pieces, setPieces] = useState<NumberInputValue>(DEFAULTS.pieces);
   const [sharePrice, setSharePrice] = useState<NumberInputValue>(
-    DEFAULTS.sharePrice
+    DEFAULTS.sharePrice,
   );
   const [fees, setFees] = useState<NumberInputValue>(DEFAULTS.fees);
   const [taxes, setTaxes] = useState<NumberInputValue>(DEFAULTS.taxes);

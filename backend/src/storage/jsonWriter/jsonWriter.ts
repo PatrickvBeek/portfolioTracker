@@ -12,7 +12,7 @@ export class JsonWriter implements storage {
     await fs.promises.writeFile(
       `${this.dataDir}/${fileName}.json`,
       fileContent,
-      "utf-8"
+      "utf-8",
     );
   }
   async read(fileName: string): Promise<any> {
