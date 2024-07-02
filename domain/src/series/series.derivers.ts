@@ -1,4 +1,4 @@
-import { sort, sum } from "radash";
+import { sort, sum, unique } from "radash";
 import {
   getBatchInitialValue,
   getBatchesHistory,
@@ -58,3 +58,6 @@ const batchHistoryDataPointToSeriesPoint = (
   timestamp: point.date.getTime(),
   value: sum(point.batches.open, getBatchInitialValue),
 });
+
+export const removeDuplicatesAtSameTimeStamp = <T>(series: Series<T>) =>
+  unique(series.toReversed(), (dataPoint) => dataPoint.timestamp).toReversed();

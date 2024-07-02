@@ -81,10 +81,12 @@ const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 describe("the open inventory list component", () => {
   mockNetwork({ portfolioLib: testPortfolioLib, assetLib: testAssetLib });
 
-  async function getCellTextsForRow(i: number): Promise<(string | null)[]> {
+  async function getCellTextsForRow(
+    i: number
+  ): Promise<(string | undefined)[]> {
     const row = (await screen.findAllByRole("row"))[i];
     const cells = await within(row).findAllByRole("cell");
-    return cells.map((cell) => cell.textContent);
+    return cells.map((cell) => cell.textContent?.replace(/\u00A0/g, " "));
   }
 
   it("renders the correct list headers", async () => {

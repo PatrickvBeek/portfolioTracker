@@ -83,7 +83,9 @@ describe("the open inventory list component", () => {
     });
 
     expect(
-      (await screen.findAllByRole("cell")).map((el) => el.textContent)
+      (await screen.findAllByRole("cell"))
+        .map((el) => el.textContent)
+        .map((s) => s?.replace(/\u00A0/g, " "))
     ).toEqual([
       "Open Asset",
       "1",
