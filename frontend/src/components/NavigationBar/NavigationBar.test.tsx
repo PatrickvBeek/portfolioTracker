@@ -19,7 +19,7 @@ describe("the NavigationBar component", () => {
   it("renders a tab for all tabs specified in the props", () => {
     customRender({ component: <NavigationBar {...TEST_PROPS} /> });
     expect(
-      screen.getAllByRole("tab").map((element) => element.textContent)
+      screen.getAllByRole("tab").map((element) => element.textContent),
     ).toEqual(TEST_PROPS.tabs);
   });
 

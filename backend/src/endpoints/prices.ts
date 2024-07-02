@@ -13,7 +13,7 @@ export const handlePrices = (app: Express): void => {
     "/api/prices",
     async (
       req: Request<{}, {}, {}, PriceQueryParams>,
-      res: Response<PriceResponse>
+      res: Response<PriceResponse>,
     ) => {
       try {
         const series = await getSeriesWithAv(req.query);
@@ -21,12 +21,12 @@ export const handlePrices = (app: Express): void => {
       } catch (error) {
         res.status(404).send();
       }
-    }
+    },
   );
 };
 
 async function getSeriesWithAv(
-  query: PriceQueryParams
+  query: PriceQueryParams,
 ): Promise<Series<number>> {
   return mapAvPricesToSeries(await getAvPrices(query));
 }
@@ -49,7 +49,7 @@ function mapAvPricesToSeries(
   prices:
     | WeeklyAdjustedResponse
     | MonthlyAdjustedResponse
-    | DailyAdjustedResponse
+    | DailyAdjustedResponse,
 ): Series<number> {
   return Object.entries(prices.timeSeries).map(([dateString, price]) => ({
     timestamp: new Date(dateString).getTime(),

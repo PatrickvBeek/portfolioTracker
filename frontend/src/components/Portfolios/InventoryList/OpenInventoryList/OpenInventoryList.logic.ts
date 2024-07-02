@@ -25,7 +25,7 @@ export type OpenInventoryItem = {
 
 function getInventoryRows(
   portfolio?: Portfolio,
-  assets?: AssetLibrary
+  assets?: AssetLibrary,
 ): OpenInventoryItem[] | undefined {
   if (!(assets && portfolio)) {
     return undefined;
@@ -34,7 +34,7 @@ function getInventoryRows(
     .map((isin) => ({
       asset: assets[isin]?.displayName || "asset not found",
       pieces: Number(
-        getPiecesOfIsinInPortfolio(portfolio, isin, "open").toPrecision(4)
+        getPiecesOfIsinInPortfolio(portfolio, isin, "open").toPrecision(4),
       ),
       initialValue: getInitialValueOfIsinInPortfolio(portfolio, isin, "open"),
       orderFees: getOrderFeesOfIsinInPortfolio(portfolio, isin, "open"),

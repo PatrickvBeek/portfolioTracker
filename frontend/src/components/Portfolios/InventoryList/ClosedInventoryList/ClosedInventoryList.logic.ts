@@ -32,7 +32,7 @@ export type ClosedInventoryItem = {
 
 function getInventoryRows(
   portfolio?: Portfolio,
-  assets?: AssetLibrary
+  assets?: AssetLibrary,
 ): ClosedInventoryItem[] | undefined {
   if (!(assets && portfolio)) {
     return undefined;
@@ -41,7 +41,7 @@ function getInventoryRows(
     .map((isin) => ({
       asset: assets[isin]?.displayName || "asset not found",
       pieces: Number(
-        getPiecesOfIsinInPortfolio(portfolio, isin, "closed").toPrecision(4)
+        getPiecesOfIsinInPortfolio(portfolio, isin, "closed").toPrecision(4),
       ),
       initialValue: getInitialValueOfIsinInPortfolio(portfolio, isin, "closed"),
       endValue: getEndValueOfIsinInPortfolio(portfolio, isin),

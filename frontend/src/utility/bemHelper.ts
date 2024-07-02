@@ -21,19 +21,19 @@ function modify(className: string, modifiers: Modifiers): Modifiers {
 
   if (Array.isArray(modifiers)) {
     return modifiers.map((modifier) =>
-      modifier ? withModifier(className, modifier) : null
+      modifier ? withModifier(className, modifier) : null,
     );
   }
 
   return mapKeys<unknown, string, string>(modifiers, (modifier) =>
-    withModifier(className, modifier)
+    withModifier(className, modifier),
   );
 }
 
 export function bemBlock(
   block: string,
   className: string | undefined,
-  modifiers?: Modifiers
+  modifiers?: Modifiers,
 ): string {
   return classNames(block, modify(block, modifiers), className);
 }
@@ -41,7 +41,7 @@ export function bemBlock(
 export function bemElement(
   block: string,
   element: string,
-  modifiers?: Modifiers
+  modifiers?: Modifiers,
 ): string {
   const elementName = `${block}__${element}`;
   return classNames(elementName, modify(elementName, modifiers));

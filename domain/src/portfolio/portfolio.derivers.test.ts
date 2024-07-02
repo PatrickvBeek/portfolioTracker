@@ -34,12 +34,12 @@ const TEST_PORTFOLIO: Portfolio = {
 
 const createTestPortfolio = (
   orders: Partial<Order>[],
-  payouts: Partial<DividendPayout>[]
+  payouts: Partial<DividendPayout>[],
 ): Portfolio =>
   getTestPortfolio({
     orders: getElementsGroupedByAsset(orders.map(getTestOrder)),
     dividendPayouts: getElementsGroupedByAsset(
-      payouts.map(getTestDividendPayout)
+      payouts.map(getTestDividendPayout),
     ),
   });
 
@@ -62,24 +62,24 @@ describe("The Portfolio deriver", () => {
       it("for open", () => {
         expect(
           isins.map((isin) =>
-            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "open")
-          )
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "open"),
+          ),
         ).toEqual([1, 0.5]);
       });
 
       it("for closed", () => {
         expect(
           isins.map((isin) =>
-            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "closed")
-          )
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "closed"),
+          ),
         ).toEqual([0, 1.5]);
       });
 
       it("for both", () => {
         expect(
           isins.map((isin) =>
-            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "both")
-          )
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "both"),
+          ),
         ).toEqual([1, 2]);
       });
     });
@@ -92,7 +92,7 @@ describe("The Portfolio deriver", () => {
       };
 
       expect(
-        getOrderFeesOfIsinInPortfolio(testPortfolio, "not there", "open")
+        getOrderFeesOfIsinInPortfolio(testPortfolio, "not there", "open"),
       ).toBe(0);
     });
   });
@@ -102,7 +102,7 @@ describe("The Portfolio deriver", () => {
 
     it("a single open position", () => {
       expect(
-        getInitialValueOfIsinInPortfolio(testPortfolio, TEST_ASSET_GOOGLE.isin)
+        getInitialValueOfIsinInPortfolio(testPortfolio, TEST_ASSET_GOOGLE.isin),
       ).toEqual(100);
     });
 
@@ -111,14 +111,18 @@ describe("The Portfolio deriver", () => {
         getInitialValueOfIsinInPortfolio(
           testPortfolio,
           TEST_ASSET_GOOGLE.isin,
-          "closed"
-        )
+          "closed",
+        ),
       ).toEqual(100);
     });
 
     it("for an non existing isin", () => {
       expect(
-        getInitialValueOfIsinInPortfolio(testPortfolio, "not present", "closed")
+        getInitialValueOfIsinInPortfolio(
+          testPortfolio,
+          "not present",
+          "closed",
+        ),
       ).toEqual(0);
     });
   });
@@ -132,8 +136,8 @@ describe("The Portfolio deriver", () => {
         expect(
           isOrderValidForPortfolio(
             getTestPortfolio({}),
-            getTestOrder({ pieces: 5 })
-          )
+            getTestOrder({ pieces: 5 }),
+          ),
         ).toBe(true);
       });
 
@@ -147,8 +151,8 @@ describe("The Portfolio deriver", () => {
         expect(
           isOrderValidForPortfolio(
             portfolio,
-            getTestOrder({ timestamp: earlyDate, pieces: 1 })
-          )
+            getTestOrder({ timestamp: earlyDate, pieces: 1 }),
+          ),
         ).toBe(true);
       });
 
@@ -162,8 +166,8 @@ describe("The Portfolio deriver", () => {
         expect(
           isOrderValidForPortfolio(
             portfolio,
-            getTestOrder({ timestamp: laterDate, pieces: 1 })
-          )
+            getTestOrder({ timestamp: laterDate, pieces: 1 }),
+          ),
         ).toBe(true);
       });
     });
@@ -186,8 +190,8 @@ describe("The Portfolio deriver", () => {
               asset: "test-asset",
               pieces: -2,
               timestamp: laterDate,
-            })
-          )
+            }),
+          ),
         ).toBe(false);
       });
 
@@ -214,8 +218,8 @@ describe("The Portfolio deriver", () => {
               asset: "test-asset",
               timestamp: middleDate,
               pieces: -10,
-            })
-          )
+            }),
+          ),
         ).toBe(false);
       });
 
@@ -242,8 +246,8 @@ describe("The Portfolio deriver", () => {
               asset: "test-asset",
               timestamp: middleDate,
               pieces: -10,
-            })
-          )
+            }),
+          ),
         ).toBe(true);
       });
     });
@@ -299,7 +303,7 @@ describe("The Portfolio deriver", () => {
             asset: "asset",
             timestamp: day3,
           },
-        ]
+        ],
       );
 
       expect(getProfitForIsin(portfolio, "asset")).toEqual(82);

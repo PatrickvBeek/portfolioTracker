@@ -5,7 +5,7 @@ describe("the mock data util function", () => {
     it("returns an accumulated object by asset", () => {
       const testOrder = getTestOrder({});
       const orders = ["abc", "def", "abc", "a4se"].map((isin) =>
-        getTestOrder({ ...testOrder, asset: isin })
+        getTestOrder({ ...testOrder, asset: isin }),
       );
 
       expect(getElementsGroupedByAsset(orders)).toEqual({

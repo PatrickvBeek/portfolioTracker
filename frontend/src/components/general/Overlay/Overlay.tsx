@@ -17,7 +17,7 @@ const Overlay = ({ onClose, children, title }: OverlayProps) => {
         onClose();
       }
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {

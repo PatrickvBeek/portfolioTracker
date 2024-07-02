@@ -6,7 +6,7 @@ export function accumulate(array: number[]): number[] {
 export function accumulateBy<T, U>(
   array: T[],
   predicate: (acc: U, el: T) => U,
-  startValue: U
+  startValue: U,
 ): U[] {
   const result = [] as U[];
 

@@ -10,7 +10,9 @@
     "start": "PT_DATA_DIR=$INIT_CWD/data yarn workspace backend start",
     "architecture-tests": "yarn depcruise domain/src frontend/src backend/src"
   },
-  "dependencies": {},
+  "dependencies": {
+    "prettier": "^3.3.2"
+  },
   "devDependencies": {
     "dependency-cruiser": "^16.2.4",
     "syncpack": "^12.3.0"

@@ -82,7 +82,7 @@ function CustomTable<T>({ rows, columDefs }: TableProps<T>) {
                     >
                       {def.footerGetter(rows)}
                     </TableCell>
-                  )
+                  ),
               )}
             </TableRow>
           </TableFooter>
