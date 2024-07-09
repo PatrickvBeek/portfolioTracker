@@ -23,60 +23,60 @@ const getOrdersForIsin = (portfolio: Portfolio, isin: string): Order[] =>
 
 const getDividendPayoutsForIsin = (
   portfolio: Portfolio,
-  isin: string,
+  isin: string
 ): DividendPayout[] => portfolio.dividendPayouts[isin] || [];
 
 const getPortfolioBatchesOfType = <T extends BatchType>(
   portfolio: Portfolio,
   isin: string,
-  batchType: T,
+  batchType: T
 ): Batches[T] =>
   getBatchesOfType(
     getOrdersForIsin(portfolio, isin),
     getDividendPayoutsForIsin(portfolio, isin),
-    batchType,
+    batchType
   );
 
 export const getAllOrdersInPortfolio = (portfolio: Portfolio): Order[] =>
   Object.values(portfolio.orders).flat();
 
 export const getAllDividendPayoutsInPortfolio = (
-  portfolio: Portfolio,
+  portfolio: Portfolio
 ): DividendPayout[] => Object.values(portfolio.dividendPayouts).flat();
 
 export const getActivitiesForPortfolio = (
-  portfolio: Portfolio,
+  portfolio: Portfolio
 ): PortfolioActivity[] =>
   sort(
     [
       ...getAllOrdersInPortfolio(portfolio),
       ...getAllDividendPayoutsInPortfolio(portfolio),
     ],
-    getNumericDateTime,
+    getNumericDateTime
   );
 
 export const getAllOrdersInPortfolioTimeSorted = (
-  portfolio: Portfolio,
+  portfolio: Portfolio
 ): Order[] => sort(getAllOrdersInPortfolio(portfolio), getNumericDateTime);
 
 export const getPiecesOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  batchType: BatchType = "open",
+  batchType: BatchType = "open"
 ): number =>
   sum(
     getPortfolioBatchesOfType(portfolio, isin, batchType),
-    (pos) => pos.pieces,
+    (pos) => pos.pieces
   );
 
 export const getOrderFeesOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  batchType: BatchType | "both",
+  batchType: BatchType | "both"
 ): number => {
   const batches = getBatches(
     getOrdersForIsin(portfolio, isin),
-    getDividendPayoutsForIsin(portfolio, isin),
+    getDividendPayoutsForIsin(portfolio, isin)
   );
   if (!batches) {
     return 0;
@@ -92,20 +92,20 @@ export const getOrderFeesOfIsinInPortfolio = (
 export const getInitialValueOfIsinInPortfolio = (
   portfolio: Portfolio,
   isin: string,
-  batchType: BatchType = "open",
+  batchType: BatchType = "open"
 ): number =>
   sum(
     getPortfolioBatchesOfType(portfolio, isin, batchType),
-    (p) => p.buyPrice * p.pieces,
+    (p) => p.buyPrice * p.pieces
   );
 
 export const getEndValueOfIsinInPortfolio = (
   portfolio: Portfolio,
-  isin: string,
+  isin: string
 ): number =>
   sum(
     getPortfolioBatchesOfType(portfolio, isin, "closed"),
-    (p) => p.sellPrice * p.pieces,
+    (p) => p.sellPrice * p.pieces
   );
 
 const getProfitForClosedBatch = ({
@@ -125,26 +125,26 @@ const getProfitForClosedBatch = ({
 export function getProfitForIsin(portfolio: Portfolio, isin: string): number {
   return sum(
     getPortfolioBatchesOfType(portfolio, isin, "closed"),
-    getProfitForClosedBatch,
+    getProfitForClosedBatch
   );
 }
 
 export const portfolioContainsOrder = (
   portfolio: Portfolio,
-  order: Order,
+  order: Order
 ): boolean => {
   return getOrdersForIsin(portfolio, order.asset).some((o) =>
-    areOrdersEqualOnDay(o, order),
+    areOrdersEqualOnDay(o, order)
   );
 };
 
 export const isOrderValidForPortfolio = (
   portfolio: Portfolio,
-  order: Order,
+  order: Order
 ): boolean => {
   const positionsAtOrderDate = getBatchesAtTimeStamp(
     getOrdersForIsin(portfolio, order.asset),
-    getNumericDateTime(order),
+    getNumericDateTime(order)
   );
   const piecesAvailable = sum(positionsAtOrderDate.open, (pos) => pos.pieces);
   return piecesAvailable + order.pieces >= 0;
@@ -153,21 +153,21 @@ export const isOrderValidForPortfolio = (
 export function getDividendSum(
   portfolio: Portfolio,
   isin: string,
-  batchType: BatchType,
+  batchType: BatchType
 ): number {
   return getPositionDividendSum(
     getOrdersForIsin(portfolio, isin),
     getDividendPayoutsForIsin(portfolio, isin),
-    batchType,
+    batchType
   );
 }
 
 export function getTotalTaxesForClosedAssetBatches(
   portfolio: Portfolio,
-  isin: string,
+  isin: string
 ): number {
   return getTotalTaxesForClosedBatches(
     getOrdersForIsin(portfolio, isin),
-    getDividendPayoutsForIsin(portfolio, isin),
+    getDividendPayoutsForIsin(portfolio, isin)
   );
 }

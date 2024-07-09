@@ -82,7 +82,7 @@ describe("the open inventory list component", () => {
   mockNetwork({ portfolioLib: testPortfolioLib, assetLib: testAssetLib });
 
   async function getCellTextsForRow(
-    i: number,
+    i: number
   ): Promise<(string | undefined)[]> {
     const row = (await screen.findAllByRole("row"))[i];
     const cells = await within(row).findAllByRole("cell");
@@ -95,7 +95,7 @@ describe("the open inventory list component", () => {
     });
 
     expect(
-      (await screen.findAllByRole("columnheader")).map((el) => el.textContent),
+      (await screen.findAllByRole("columnheader")).map((el) => el.textContent)
     ).toEqual([
       "Asset",
       "Pieces",

@@ -21,7 +21,7 @@ export const handleAssets = (app: Express, env: string): void => {
     isDev &&
       console.log(
         "PUT /api/assets/save-assets",
-        JSON.stringify(req.body, null, 4),
+        JSON.stringify(req.body, null, 4)
       );
     await persistance.write(req.body, ASSET_FILE);
     res.status(200);

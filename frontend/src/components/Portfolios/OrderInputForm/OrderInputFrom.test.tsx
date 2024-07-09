@@ -38,7 +38,7 @@ describe("The OrderInputForm", () => {
       component: <OrderInputForm {...PROPS} />,
     });
     expect(
-      await screen.findByRole("button", { name: "Submit" }),
+      await screen.findByRole("button", { name: "Submit" })
     ).toHaveTextContent("Submit");
   });
 
@@ -52,7 +52,7 @@ describe("The OrderInputForm", () => {
     await selectAsset(TEST_ASSET.displayName);
 
     expect(
-      await screen.findByRole("button", { name: "Submit" }),
+      await screen.findByRole("button", { name: "Submit" })
     ).toBeDisabled();
 
     await fillNumberInput({ label: "Share Price", value: "400" });
@@ -75,7 +75,7 @@ describe("The OrderInputForm", () => {
     });
     await fillNumberInput({ label: "Pieces", value: "-4" });
     expect(
-      await screen.findByRole("button", { name: "Submit" }),
+      await screen.findByRole("button", { name: "Submit" })
     ).toBeDisabled();
   });
 
@@ -90,7 +90,7 @@ describe("The OrderInputForm", () => {
     await fillNumberInput({ label: "Share Price", value: "400" });
 
     expect(screen.getByTitle("Summary Text")).toHaveTextContent(
-      "4 x 400 + 1 = 1601.00",
+      "4 x 400 + 1 = 1601.00"
     );
   });
 
@@ -121,7 +121,7 @@ describe("The OrderInputForm", () => {
     await act(async () => {
       await user.type(
         await screen.findByLabelText("Order Date"),
-        `${TEST_ORDER_TESLA.timestamp}`,
+        `${TEST_ORDER_TESLA.timestamp}`
       );
     });
     await act(async () => {
@@ -129,7 +129,7 @@ describe("The OrderInputForm", () => {
     });
 
     expect(
-      await screen.findByText(/duplicate order detected!/i),
+      await screen.findByText(/duplicate order detected!/i)
     ).toBeInTheDocument();
   });
 });

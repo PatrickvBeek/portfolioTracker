@@ -14,7 +14,7 @@ function getTestOrder(overrides: Partial<Order>): Order {
 }
 
 function getTestPayouts(
-  overrides: Partial<DividendPayout>[],
+  overrides: Partial<DividendPayout>[]
 ): DividendPayout[] {
   return overrides.map(getTestDividendPayout);
 }
@@ -64,7 +64,7 @@ describe("the portfolio deriver", () => {
           getExpectBatches({
             open: [],
             closed: [{ pieces: 1, buyPrice: 50, sellPrice: 55 }],
-          }),
+          })
         );
       });
 
@@ -86,7 +86,7 @@ describe("the portfolio deriver", () => {
                 taxes: 0.5,
               },
             ],
-          }),
+          })
         );
       });
 
@@ -104,7 +104,7 @@ describe("the portfolio deriver", () => {
               { pieces: 1, buyPrice: 50, sellPrice: 60, orderFee: 1.5 },
               { pieces: 1, buyPrice: 55, sellPrice: 60, orderFee: 1.5 },
             ],
-          }),
+          })
         );
       });
 
@@ -134,7 +134,7 @@ describe("the portfolio deriver", () => {
                 taxes: 0.2,
               },
             ],
-          }),
+          })
         );
       });
 
@@ -154,7 +154,7 @@ describe("the portfolio deriver", () => {
               { pieces: 1, buyPrice: 50, sellPrice: 65, orderFee: 0.75 },
               { pieces: 1, buyPrice: 55, sellPrice: 65, orderFee: 1 },
             ],
-          }),
+          })
         );
       });
     });
@@ -186,7 +186,7 @@ describe("the portfolio deriver", () => {
               sellDate: "2022-03-01",
             },
           ],
-        }),
+        })
       );
     });
 

@@ -11,13 +11,11 @@ import {
 } from "@mui/material";
 import { ReactNode } from "react";
 
-type Disaplayable = string | number | ReactNode;
-
 export type ColDef<T> = {
-  header?: Disaplayable;
-  footerGetter?: (items: T[]) => Disaplayable;
+  header?: ReactNode;
+  footerGetter?: (items: T[]) => ReactNode;
   alignment?: TableCellProps["align"];
-  valueGetter: (item: T) => Disaplayable;
+  valueGetter: (item: T) => ReactNode;
 };
 
 type TableProps<T> = {
@@ -82,7 +80,7 @@ function CustomTable<T>({ rows, columDefs }: TableProps<T>) {
                     >
                       {def.footerGetter(rows)}
                     </TableCell>
-                  ),
+                  )
               )}
             </TableRow>
           </TableFooter>

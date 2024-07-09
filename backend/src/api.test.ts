@@ -7,7 +7,7 @@ describe("the servers REST api endpoint", () => {
     it("/express_backend returns 'connected to test backend'", async () => {
       const response = await request(app).get("/express_backend");
       expect(response.body.express).toEqual(
-        `connected to ${process.env.NODE_ENV} backend`,
+        `connected to ${process.env.NODE_ENV} backend`
       );
     });
   });
@@ -69,7 +69,7 @@ describe("the servers REST api endpoint", () => {
       const getResponse = await request(app).get("/api/portfolios");
       expect(getResponse.status).toBe(200);
       expect(JSON.stringify(getResponse.body)).toEqual(
-        JSON.stringify(TEST_PORTFOLIO_LIB),
+        JSON.stringify(TEST_PORTFOLIO_LIB)
       );
     });
   });

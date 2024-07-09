@@ -14,7 +14,7 @@ export function customRender({
   const queryClient = new QueryClient(queryClientConfig);
   const user = userEvent.setup(userEventOptions);
   const renderResult = render(
-    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>,
+    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
   );
 
   return {

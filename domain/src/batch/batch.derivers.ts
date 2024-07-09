@@ -24,26 +24,26 @@ const EMPTY_BATCHES: Batches = { open: [], closed: [] };
 export const getPositionDividendSum = (
   orders: Order[],
   dividendPayouts: DividendPayout[],
-  batchType: BatchType,
+  batchType: BatchType
 ): number =>
   sum(
     getBatchesOfType(orders, dividendPayouts, batchType)
       .flatMap((position) => position.dividendPayouts)
-      .map(getDividendVolume),
+      .map(getDividendVolume)
   );
 
 export const getTotalTaxesForClosedBatches = (
   orders: Order[],
-  dividendPayouts: DividendPayout[],
+  dividendPayouts: DividendPayout[]
 ): number =>
   sum(
     getBatchesOfType(orders, dividendPayouts, "closed"),
-    ({ taxes, dividendPayouts }) => taxes + sumDividendTaxes(dividendPayouts),
+    ({ taxes, dividendPayouts }) => taxes + sumDividendTaxes(dividendPayouts)
   );
 
 export function getBatches(
   orders: Order[],
-  dividendPayouts: DividendPayout[],
+  dividendPayouts: DividendPayout[]
 ): Batches | undefined {
   const activity = sort([...orders, ...dividendPayouts], getNumericDateTime);
   if (sum(orders, (order) => order.pieces) < 0) {
@@ -56,7 +56,7 @@ export function getBatches(
 export function getBatchesOfType<T extends BatchType>(
   orders: Order[],
   dividendPayouts: DividendPayout[],
-  batchType: T,
+  batchType: T
 ): Batches[T] {
   return getBatches(orders, dividendPayouts)?.[batchType] || [];
 }
@@ -74,7 +74,7 @@ export function getBatchesHistory(orders: Order[]): BatchesHistory {
         { date: getActivityDate(order), batches: newBatches },
       ];
     },
-    [] as BatchesHistory,
+    [] as BatchesHistory
   );
 
   if (history.length !== orders.length) {
@@ -86,15 +86,15 @@ export function getBatchesHistory(orders: Order[]): BatchesHistory {
 
 export const getBatchesAtTimeStamp = (
   orders: Order[],
-  timeStampOfInterest: number,
+  timeStampOfInterest: number
 ): Batches =>
   getBatchesHistory(orders).findLast(
-    ({ date }) => date.getTime() <= timeStampOfInterest,
+    ({ date }) => date.getTime() <= timeStampOfInterest
   )?.batches || EMPTY_BATCHES;
 
 function updateBatchesWithActivity(
   batches: Batches | undefined,
-  activity: PortfolioActivity,
+  activity: PortfolioActivity
 ): Batches | undefined {
   if (!batches) {
     return undefined;
@@ -106,7 +106,7 @@ function updateBatchesWithActivity(
 
 function updateBatchesWithDividendPayout(
   batches: Batches,
-  payout: DividendPayout,
+  payout: DividendPayout
 ): Batches {
   return {
     closed: batches.closed,
@@ -121,7 +121,7 @@ function updateBatchesWithDividendPayout(
             taxes: payout.taxes * (pos.pieces / payout.pieces),
           },
         ],
-        getNumericDateTime,
+        getNumericDateTime
       ),
     })),
   };
@@ -129,7 +129,7 @@ function updateBatchesWithDividendPayout(
 
 function updateBatchesWithOrder(
   batches: Batches | undefined,
-  order: Order,
+  order: Order
 ): Batches | undefined {
   if (!batches) {
     return undefined;
@@ -141,7 +141,7 @@ function updateBatchesWithOrder(
 
 function updateBatchesWithSell(
   batches: Batches | undefined,
-  sell: Order,
+  sell: Order
 ): Batches | undefined {
   if (!batches || sell.pieces > 0 || batches.open.length < 1) {
     return undefined;
@@ -154,7 +154,7 @@ function updateBatchesWithSell(
       firstBatch,
       remaining,
       batches.closed,
-      sell,
+      sell
     );
   }
 
@@ -164,7 +164,7 @@ function updateBatchesWithSell(
       remaining,
       batches.closed,
       sell,
-      piecesToSell,
+      piecesToSell
     );
   }
 
@@ -173,7 +173,7 @@ function updateBatchesWithSell(
     remaining,
     batches.closed,
     sell,
-    piecesToSell,
+    piecesToSell
   );
 }
 
@@ -181,7 +181,7 @@ function closeFirstBatchCompletely(
   firstBatch: OpenBatch,
   remaining: OpenBatch[],
   closedBatches: ClosedBatch[],
-  sell: Order,
+  sell: Order
 ): Batches {
   const newBatch: ClosedBatch = {
     ...firstBatch,
@@ -202,7 +202,7 @@ function closeFirstBatchPartially(
   remaining: OpenBatch[],
   closedBatches: ClosedBatch[],
   sell: Order,
-  piecesToSell: number,
+  piecesToSell: number
 ): Batches {
   const newlyClosed: ClosedBatch = {
     ...firstBatch,
@@ -241,7 +241,7 @@ function closeFirstBatchAndContinue(
   remainingOpen: OpenBatch[],
   closedBatch: ClosedBatch[],
   sell: Order,
-  piecesToSell: number,
+  piecesToSell: number
 ): Batches | undefined {
   const newlyClosedBatch: ClosedBatch = {
     ...firstBatch,
@@ -260,7 +260,7 @@ function closeFirstBatchAndContinue(
       pieces: -piecesStillToSell,
       orderFee: (1 - firstBatch.pieces / piecesToSell) * sell.orderFee,
       taxes: (1 - firstBatch.pieces / piecesToSell) * sell.taxes,
-    },
+    }
   );
 }
 
