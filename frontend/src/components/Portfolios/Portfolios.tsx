@@ -6,8 +6,8 @@ import { InitialValueHistoryChart } from "../charts/investmentHistory/InitialVal
 import SelectionHeader from "../general/SelectionHeader";
 import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
-import { ClosedInventoryList } from "./InventoryList/ClosedInventoryList/ClosedInventoryList";
-import { OpenInventoryList } from "./InventoryList/OpenInventoryList/OpenInventoryList";
+import { ClosedPositionsList } from "./InventoryList/ClosedPositionsList/ClosedPositionsList";
+import { OpenPositionsList } from "./InventoryList/OpenPositionsList/OpenPositionsList";
 import PortfolioActionsBar from "./PortfolioActionsBar/PortfolioActionsBar";
 import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import "./Portfolios.css";
@@ -67,8 +67,8 @@ function Portfolios({ className }: PortfolioProps) {
       </div>
       <div className={bemElement("content")}>
         <InitialValueHistoryChart portfolioName={selectedPortfolio} />
-        <OpenInventoryList portfolioName={selectedPortfolio} />
-        <ClosedInventoryList portfolioName={selectedPortfolio} />
+        <OpenPositionsList portfolioName={selectedPortfolio} />
+        <ClosedPositionsList portfolioName={selectedPortfolio} />
         <ActivityList portfolio={selectedPortfolio} />
       </div>
       <PortfolioFormSideBar

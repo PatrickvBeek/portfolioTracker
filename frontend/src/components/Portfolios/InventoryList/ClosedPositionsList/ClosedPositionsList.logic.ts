@@ -12,14 +12,14 @@ import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.enti
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 
-export function useGetClosedInventoryRows(portfolio: string) {
+export function useGetClosedPositionRows(portfolio: string) {
   const portfolioQuery = useGetPortfolio(portfolio);
   const assetQuery = useGetAssets();
 
-  return getInventoryRows(portfolioQuery.data, assetQuery.data);
+  return getClosedPositionRows(portfolioQuery.data, assetQuery.data);
 }
 
-export type ClosedInventoryItem = {
+export type ClosedPositionItem = {
   asset: string;
   pieces: number;
   initialValue: number;
@@ -30,10 +30,10 @@ export type ClosedInventoryItem = {
   taxes: number;
 };
 
-function getInventoryRows(
+function getClosedPositionRows(
   portfolio?: Portfolio,
   assets?: AssetLibrary
-): ClosedInventoryItem[] | undefined {
+): ClosedPositionItem[] | undefined {
   if (!(assets && portfolio)) {
     return undefined;
   }

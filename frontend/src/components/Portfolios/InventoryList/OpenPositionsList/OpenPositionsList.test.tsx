@@ -12,7 +12,7 @@ import {
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
 import { customRender } from "../../../../testUtils/componentHelpers";
 import { mockNetwork } from "../../../../testUtils/networkMock";
-import { OpenInventoryList } from "./OpenInventoryList";
+import { OpenPositionsList } from "./OpenPositionsList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
   { isin: "closed-asset", displayName: "Closed Asset" },
@@ -70,7 +70,7 @@ describe("the open inventory list component", () => {
 
   it("renders the correct list headers", async () => {
     customRender({
-      component: <OpenInventoryList portfolioName={testPortfolioName} />,
+      component: <OpenPositionsList portfolioName={testPortfolioName} />,
     });
     expect(
       (await screen.findAllByRole("columnheader")).map((el) => el.textContent)
@@ -79,7 +79,7 @@ describe("the open inventory list component", () => {
 
   it("renders the correct data", async () => {
     customRender({
-      component: <OpenInventoryList portfolioName={testPortfolioName} />,
+      component: <OpenPositionsList portfolioName={testPortfolioName} />,
     });
 
     expect(

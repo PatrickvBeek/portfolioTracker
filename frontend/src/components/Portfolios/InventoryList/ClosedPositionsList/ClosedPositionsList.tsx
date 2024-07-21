@@ -4,17 +4,17 @@ import { toPrice } from "../../../../utility/prices";
 import { Props } from "../../../../utility/types";
 import Balance from "../../../general/Balance/Balance";
 import CustomTable, { ColDef } from "../../../general/CustomTable/CustomTable";
-import "../InventoryList.css";
+import "../PositionList.css";
 import {
-  ClosedInventoryItem,
-  useGetClosedInventoryRows,
-} from "./ClosedInventoryList.logic";
+  ClosedPositionItem,
+  useGetClosedPositionRows,
+} from "./ClosedPositionsList.logic";
 
-type OpenInventoryListProps = Props<{ portfolioName: string }>;
+type OpenPositionsListProps = Props<{ portfolioName: string }>;
 
-const { bemBlock, bemElement } = bemHelper("inventory-list");
+const { bemBlock, bemElement } = bemHelper("position-list");
 
-const columDefs: ColDef<ClosedInventoryItem>[] = [
+const columDefs: ColDef<ClosedPositionItem>[] = [
   {
     header: "Asset",
     valueGetter: (i) => i.asset,
@@ -68,16 +68,16 @@ const columDefs: ColDef<ClosedInventoryItem>[] = [
   },
 ];
 
-export const ClosedInventoryList = ({
+export const ClosedPositionsList = ({
   className,
   portfolioName,
-}: OpenInventoryListProps) => {
-  const inventoryRows = useGetClosedInventoryRows(portfolioName);
+}: OpenPositionsListProps) => {
+  const closedPositions = useGetClosedPositionRows(portfolioName);
 
-  return inventoryRows ? (
+  return closedPositions ? (
     <div className={bemBlock(className)}>
       <div className={bemElement("heading")}>Closed Positions</div>
-      <CustomTable rows={inventoryRows} columDefs={columDefs} />
+      <CustomTable rows={closedPositions} columDefs={columDefs} />
     </div>
   ) : null;
 };

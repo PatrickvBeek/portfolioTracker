@@ -12,7 +12,7 @@ import {
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
 import { customRender } from "../../../../testUtils/componentHelpers";
 import { mockNetwork } from "../../../../testUtils/networkMock";
-import { ClosedInventoryList } from "./ClosedInventoryList";
+import { ClosedPositionsList } from "./ClosedPositionsList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
   { isin: "asset1", displayName: "Asset 1" },
@@ -91,7 +91,7 @@ describe("the open inventory list component", () => {
 
   it("renders the correct list headers", async () => {
     customRender({
-      component: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
+      component: <ClosedPositionsList portfolioName={mockPortfolio.name} />,
     });
 
     expect(
@@ -110,7 +110,7 @@ describe("the open inventory list component", () => {
 
   it("renders the correct data", async () => {
     customRender({
-      component: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
+      component: <ClosedPositionsList portfolioName={mockPortfolio.name} />,
     });
 
     expect(await screen.findAllByRole("row")).toHaveLength(4);
@@ -139,7 +139,7 @@ describe("the open inventory list component", () => {
 
   it("renders the correct footer", async () => {
     customRender({
-      component: <ClosedInventoryList portfolioName={mockPortfolio.name} />,
+      component: <ClosedPositionsList portfolioName={mockPortfolio.name} />,
     });
 
     expect(await screen.findAllByRole("row")).toHaveLength(4);

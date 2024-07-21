@@ -9,13 +9,13 @@ import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.enti
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 
-export function useGetOpenInventoryRows(portfolio: string) {
+export function useGetOpenPositionRows(portfolio: string) {
   const portfolioQuery = useGetPortfolio(portfolio);
   const assetQuery = useGetAssets();
   return getInventoryRows(portfolioQuery.data, assetQuery.data);
 }
 
-export type OpenInventoryItem = {
+export type OpenPositionsItem = {
   asset: string;
   pieces: number;
   initialValue: number;
@@ -26,7 +26,7 @@ export type OpenInventoryItem = {
 function getInventoryRows(
   portfolio?: Portfolio,
   assets?: AssetLibrary
-): OpenInventoryItem[] | undefined {
+): OpenPositionsItem[] | undefined {
   if (!(assets && portfolio)) {
     return undefined;
   }
