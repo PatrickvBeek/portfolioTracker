@@ -1,8 +1,9 @@
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { sum } from "radash";
 import { bemHelper } from "../../../../utility/bemHelper";
 import { toPrice } from "../../../../utility/prices";
 import { Props } from "../../../../utility/types";
-import CustomTable, { ColDef } from "../../../general/CustomTable/CustomTable";
+import CustomTable from "../../../general/CustomTable/CustomTable";
 import "../PositionList.css";
 import {
   OpenPositionsItem,
@@ -13,38 +14,58 @@ type OpenPositionsListProps = Props<{ portfolioName: string }>;
 
 const { bemBlock, bemElement } = bemHelper("position-list");
 
-const columDefs: ColDef<OpenPositionsItem>[] = [
-  {
+const columnHelper = createColumnHelper<OpenPositionsItem>();
+
+const columDefs: ColumnDef<OpenPositionsItem, any>[] = [
+  columnHelper.accessor("asset", {
     header: "Asset",
-    valueGetter: (i) => i.asset,
-    footerGetter: (data) =>
-      `${data.length} Position${data.length === 1 ? "" : "s"}`,
-    alignment: "left",
-  },
-  {
+    footer: (props) =>
+      `${props.table.getRowCount()} Position${props.table.getRowCount() === 1 ? "" : "s"}`,
+  }),
+  columnHelper.accessor("pieces", {
     header: "Pieces",
-    valueGetter: (i) => i.pieces,
-    footerGetter: () => "",
-    alignment: "right",
-  },
-  {
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("initialValue", {
+    id: "initialValue",
     header: "Initial Value",
-    valueGetter: (i) => toPrice(i.initialValue),
-    footerGetter: (data) => toPrice(sum(data, (el) => el.initialValue)),
-    alignment: "right",
-  },
-  {
+    cell: (i) => toPrice(i.getValue()),
+    footer: (props) =>
+      toPrice(
+        sum(props.table.getRowModel().rows, (row) =>
+          row.getValue("initialValue")
+        )
+      ),
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("orderFees", {
+    id: "fees",
     header: "Fees",
-    valueGetter: (i) => toPrice(i.orderFees),
-    footerGetter: (data) => toPrice(sum(data, (el) => el.orderFees)),
-    alignment: "right",
-  },
-  {
+    cell: (fees) => toPrice(fees.getValue()),
+    footer: (props) =>
+      toPrice(
+        sum(props.table.getRowModel().rows, (row) => row.getValue("fees"))
+      ),
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("dividends", {
+    id: "dividends",
     header: "Dividends",
-    valueGetter: (i) => toPrice(i.dividends),
-    alignment: "right",
-    footerGetter: (data) => toPrice(sum(data, (el) => el.dividends)),
-  },
+    cell: (dividends) => toPrice(dividends.getValue()),
+    footer: (props) =>
+      toPrice(
+        sum(props.table.getRowModel().rows, (row) => row.getValue("dividends"))
+      ),
+    meta: {
+      align: "right",
+    },
+  }),
 ];
 
 export const OpenPositionsList = ({
@@ -56,7 +77,7 @@ export const OpenPositionsList = ({
   return positions ? (
     <div className={bemBlock(className)}>
       <div className={bemElement("heading")}>Open Positions</div>
-      <CustomTable rows={positions} columDefs={columDefs} />
+      <CustomTable data={positions} columns={columDefs} />
     </div>
   ) : null;
 };

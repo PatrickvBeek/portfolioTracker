@@ -1,6 +1,7 @@
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { Asset } from "../../../../../domain/src/asset/asset.entities";
 import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
-import CustomTable, { ColDef } from "../../general/CustomTable/CustomTable";
+import CustomTable from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
 import "./AssetTable.css";
 import { SymbolConnectionIndicator } from "./SymbolConnectionIndicator";
@@ -26,29 +27,33 @@ const AssetTable = () => {
     return <div>no assets</div>;
   }
 
-  const defs: ColDef<Asset>[] = [
-    { header: "Name", valueGetter: (a) => a.displayName },
-    { header: "ISIN", valueGetter: (a) => a.isin },
-    {
+  const columnHelper = createColumnHelper<Asset>();
+
+  const defs: ColumnDef<Asset, any>[] = [
+    columnHelper.accessor("displayName", { header: "Name" }),
+    columnHelper.accessor("isin", { header: "ISIN" }),
+    columnHelper.accessor("symbol", {
       header: "Symbol",
-      valueGetter: (a) =>
-        a.symbol ? <SymbolConnectionIndicator symbol={a.symbol} /> : null,
-    },
-    {
+      cell: (s) =>
+        s.getValue() ? (
+          <SymbolConnectionIndicator symbol={s.getValue()} />
+        ) : null,
+    }),
+    columnHelper.accessor((a) => a, {
       header: "Actions",
-      valueGetter: (a) => (
+      cell: (a) => (
         <DeleteButtonWithConfirmation
-          deleteHandler={() => assetDeletion.mutate(a)}
-          body={`Do you really want to delete the asset '${a.displayName}' from your library?`}
-          title={`Delete Asset '${a.displayName}'?`}
+          deleteHandler={() => assetDeletion.mutate(a.getValue())}
+          body={`Do you really want to delete the asset '${a.getValue().displayName}' from your library?`}
+          title={`Delete Asset '${a.getValue().displayName}'?`}
         />
       ),
-    },
+    }),
   ];
 
   return (
     <div className="asset-table-container">
-      <CustomTable columDefs={defs} rows={customTableData} />
+      <CustomTable columns={defs} data={customTableData} />
       <span className="asset-table-footer">{`Total: ${customTableData.length} Assets`}</span>
     </div>
   );

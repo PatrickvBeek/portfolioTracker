@@ -3,91 +3,136 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableCellProps,
   TableContainer,
   TableFooter,
   TableHead,
   TableRow,
 } from "@mui/material";
-import { ReactNode } from "react";
+import {
+  Cell,
+  ColumnDef,
+  Header,
+  Row,
+  flexRender,
+  getCoreRowModel,
+  getExpandedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import React, { Fragment } from "react";
 
-export type ColDef<T> = {
-  header?: ReactNode;
-  footerGetter?: (items: T[]) => ReactNode;
-  alignment?: TableCellProps["align"];
-  valueGetter: (item: T) => ReactNode;
+type TableProps<TData> = {
+  data: TData[];
+  columns: ColumnDef<TData>[];
+  renderSubComponent?: (props: { row: Row<TData> }) => React.ReactElement;
 };
 
-type TableProps<T> = {
-  columDefs: ColDef<T>[];
-  rows: T[];
-};
+function CustomTable<T>({ data, columns, renderSubComponent }: TableProps<T>) {
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+  });
 
-function CustomTable<T>({ rows, columDefs }: TableProps<T>) {
   return (
     <TableContainer component={Paper}>
       <Table>
         <TableHead>
-          <TableRow
-            sx={{
-              backgroundColor: "var(--theme)",
-            }}
-          >
-            {columDefs.map((def) => (
-              <TableCell
-                key={def.header?.toString()}
-                align={def.alignment}
-                style={{
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "var(--font-base)",
-                }}
-              >
-                {def.header}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row, i) => (
-            <TableRow key={i}>
-              {columDefs.map((def) => (
-                <TableCell key={def.header?.toString()} align={def.alignment}>
-                  {def.valueGetter(row)}
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow
+              key={headerGroup.id}
+              sx={{
+                backgroundColor: "var(--theme)",
+              }}
+            >
+              {headerGroup.headers.map((header) => (
+                <TableCell
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  align={getAlignment(header)}
+                  style={{
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "var(--font-base)",
+                  }}
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                 </TableCell>
               ))}
             </TableRow>
           ))}
-        </TableBody>
-        {columDefs.some((def) => def.footerGetter) && (
-          <TableFooter>
-            <TableRow
-              sx={{
-                backgroundColor: "#e9e9e9",
-                borderTop: "solid",
-              }}
-            >
-              {columDefs.map(
-                (def) =>
-                  def.footerGetter && (
-                    <TableCell
-                      key={def.header?.toString()}
-                      align={def.alignment}
-                      sx={{
-                        color: "black",
-                        fontSize: "var(--font-base)",
-                      }}
-                    >
-                      {def.footerGetter(rows)}
-                    </TableCell>
-                  )
+        </TableHead>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => (
+            <Fragment key={row.id}>
+              <TableRow>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell align={getAlignment(cell)} key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+              {renderSubComponent && row.getIsExpanded() && (
+                <TableRow>
+                  <TableCell colSpan={row.getVisibleCells().length}>
+                    {renderSubComponent({ row })}
+                  </TableCell>
+                </TableRow>
               )}
-            </TableRow>
-          </TableFooter>
-        )}
+            </Fragment>
+          ))}
+        </TableBody>
+        <TableFooter>
+          {table
+            .getFooterGroups()
+            .some((footerGroup) =>
+              footerGroup.headers.some(
+                (header) => header.column.columnDef.footer
+              )
+            ) &&
+            table.getFooterGroups().map((footerGroup) => (
+              <TableRow
+                key={footerGroup.id}
+                sx={{
+                  backgroundColor: "#e9e9e9",
+                  borderTop: "solid",
+                }}
+              >
+                {footerGroup.headers.map((header) => (
+                  <TableCell
+                    key={header.id}
+                    align={getAlignment(header)}
+                    sx={{
+                      color: "black",
+                      fontSize: "var(--font-base)",
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.footer,
+                          header.getContext()
+                        )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+        </TableFooter>
       </Table>
     </TableContainer>
   );
+}
+
+function getAlignment<T>(cell: Cell<T, unknown> | Header<T, unknown>) {
+  const meta = cell.column.columnDef.meta as
+    | {
+        align: "right" | "left" | "center" | undefined;
+      }
+    | undefined;
+  return meta && meta.align;
 }
 
 export default CustomTable;

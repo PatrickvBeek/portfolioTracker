@@ -1,10 +1,10 @@
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import moment from "moment";
 import { ReactElement } from "react";
 import { isOrder } from "../../../../../domain/src/activity/activity.derivers";
+import { PortfolioActivity } from "../../../../../domain/src/activity/activity.entities";
 import { getDividendVolume } from "../../../../../domain/src/dividendPayouts/dividend.derivers";
-import { DividendPayout } from "../../../../../domain/src/dividendPayouts/dividend.entities";
 import { getOrderVolume } from "../../../../../domain/src/order/order.derivers";
-import { Order } from "../../../../../domain/src/order/order.entities";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
   useDeleteDividendPayoutFromPortfolio,
@@ -14,7 +14,7 @@ import {
 import { bemHelper } from "../../../utility/bemHelper";
 import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
-import CustomTable, { ColDef } from "../../general/CustomTable/CustomTable";
+import CustomTable from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
 import "./ActivityList.css";
 
@@ -41,67 +41,108 @@ function ActivityList({
   const tableData = activityQuery.data.reverse();
   const assets = assetsQuery.data;
 
-  const defs: ColDef<Order | DividendPayout>[] = [
-    {
+  const columnHelper = createColumnHelper<PortfolioActivity>();
+
+  const defs: ColumnDef<PortfolioActivity, any>[] = [
+    columnHelper.accessor((a) => a, {
+      id: "type",
       header: "Type",
-      valueGetter: (a) =>
-        isOrder(a) ? (
-          <i className={`fa fa-${a.pieces > 0 ? "plus" : "minus"}`} />
+      cell: (activity) =>
+        isOrder(activity.getValue()) ? (
+          <i
+            className={`fa fa-${activity.getValue().pieces > 0 ? "plus" : "minus"}`}
+          />
         ) : (
           <i className={"fa fa-euro-sign"} />
         ),
-      alignment: "center",
-    },
-    {
+      meta: {
+        align: "center",
+      },
+    }),
+    columnHelper.accessor((a) => a.timestamp, {
       header: "Date",
-      valueGetter: (a) => moment(a.timestamp).format("ll"),
-    },
-    {
-      header: "Asset",
-      valueGetter: (a) => assets[a.asset]?.displayName || "asset not found",
-    },
-    { header: "Pieces", valueGetter: (a) => a.pieces, alignment: "right" },
-    {
-      header: "Value per Share",
-      valueGetter: (a) =>
-        isOrder(a) ? toPrice(a.sharePrice) : toPrice(a.dividendPerShare),
-      alignment: "right",
-    },
-    {
-      header: "Amount",
-      valueGetter: (a) =>
-        isOrder(a) ? toPrice(getOrderVolume(a)) : toPrice(getDividendVolume(a)),
-      alignment: "right",
-    },
-    {
-      header: "Fees",
-      valueGetter: (a) => (isOrder(a) ? toPrice(a.orderFee) : toPrice(0)),
-      alignment: "right",
-    },
-    {
-      header: "Taxes",
-      valueGetter: (a) => toPrice(a.taxes),
-      alignment: "right",
-    },
-    {
-      header: "Actions",
-      valueGetter: (a) => (
-        <DeleteButtonWithConfirmation
-          deleteHandler={() =>
-            isOrder(a) ? deleteOrder(a) : deleteDividendPayout(a)
-          }
-          title={"Delete Activity?"}
-          body={`Are you sure you want to delete this activity?`}
-        />
+      cell: (props) => (
+        <span>{moment(props.cell.getValue()).format("ll")}</span>
       ),
-      alignment: "center",
-    },
+    }),
+    columnHelper.accessor("asset", {
+      header: "Asset",
+      cell: (a) => assets[a.getValue()]?.displayName || "asset not found",
+    }),
+    columnHelper.accessor("pieces", {
+      header: "Pieces",
+      cell: (p) => p.getValue(),
+      meta: {
+        align: "right",
+      },
+    }),
+    columnHelper.accessor((a) => a, {
+      header: "Value per Share",
+      cell: (props) => {
+        const activity = props.getValue();
+        return isOrder(activity)
+          ? toPrice(activity.sharePrice)
+          : toPrice(activity.dividendPerShare);
+      },
+      meta: {
+        align: "right",
+      },
+    }),
+    columnHelper.accessor((a) => a, {
+      header: "Amount",
+      cell: (props) => {
+        const activity = props.getValue();
+        return isOrder(activity)
+          ? toPrice(getOrderVolume(activity))
+          : toPrice(getDividendVolume(activity));
+      },
+      meta: {
+        align: "right",
+      },
+    }),
+    columnHelper.accessor((a) => a, {
+      header: "Fees",
+      cell: (a) => {
+        const activity = a.getValue();
+        return isOrder(activity) ? toPrice(activity.orderFee) : toPrice(0);
+      },
+      meta: {
+        align: "right",
+      },
+    }),
+    columnHelper.accessor("taxes", {
+      header: "Taxes",
+      cell: (props) => toPrice(props.getValue()),
+      meta: {
+        align: "right",
+      },
+    }),
+    columnHelper.accessor((a) => a, {
+      header: "Actions",
+      cell: (props) => {
+        const activity = props.getValue();
+        return (
+          <DeleteButtonWithConfirmation
+            deleteHandler={() =>
+              isOrder(activity)
+                ? deleteOrder(activity)
+                : deleteDividendPayout(activity)
+            }
+            title={"Delete Activity?"}
+            body={`Are you sure you want to delete this activity?`}
+          />
+        );
+      },
+      meta: {
+        align: "center",
+      },
+    }),
   ];
 
   return (
     <div className={bemBlock(className)}>
       <div className={bemElement("headline")}>Portfolio Activity</div>
-      <CustomTable columDefs={defs} rows={tableData} />
+      <CustomTable columns={defs} data={tableData} />
     </div>
   );
 }

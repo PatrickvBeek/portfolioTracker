@@ -1,9 +1,10 @@
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { sum } from "radash";
 import { bemHelper } from "../../../../utility/bemHelper";
 import { toPrice } from "../../../../utility/prices";
 import { Props } from "../../../../utility/types";
 import Balance from "../../../general/Balance/Balance";
-import CustomTable, { ColDef } from "../../../general/CustomTable/CustomTable";
+import CustomTable from "../../../general/CustomTable/CustomTable";
 import "../PositionList.css";
 import {
   ClosedPositionItem,
@@ -14,58 +15,100 @@ type OpenPositionsListProps = Props<{ portfolioName: string }>;
 
 const { bemBlock, bemElement } = bemHelper("position-list");
 
-const columDefs: ColDef<ClosedPositionItem>[] = [
-  {
+const columnHelper = createColumnHelper<ClosedPositionItem>();
+
+const columDefs: ColumnDef<ClosedPositionItem, any>[] = [
+  columnHelper.accessor("asset", {
     header: "Asset",
-    valueGetter: (i) => i.asset,
-    footerGetter: (data) =>
-      `${data.length} Position${data.length === 1 ? "" : "s"}`,
-    alignment: "left",
-  },
-  {
+    footer: (props) =>
+      `${props.table.getRowCount()} Position${props.table.getRowCount() === 1 ? "" : "s"}`,
+    meta: {
+      align: "left",
+    },
+  }),
+  columnHelper.accessor("pieces", {
     header: "Pieces",
-    valueGetter: (i) => i.pieces,
-    footerGetter: () => "",
-    alignment: "right",
-  },
-  {
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("initialValue", {
     header: "Initial Value",
-    valueGetter: (i) => toPrice(i.initialValue),
-    footerGetter: (data) => toPrice(sum(data, (el) => el.initialValue)),
-    alignment: "right",
-  },
-  {
+    id: "initialValue",
+    cell: (i) => toPrice(i.getValue()),
+    footer: (props) =>
+      toPrice(
+        sum(props.table.getRowModel().rows, (row) =>
+          row.getValue("initialValue")
+        )
+      ),
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("endValue", {
     header: "End Value",
-    valueGetter: (i) => toPrice(i.endValue),
-    footerGetter: (data) => toPrice(sum(data, (el) => el.endValue)),
-    alignment: "right",
-  },
-  {
+    id: "endValue",
+    cell: (e) => toPrice(e.getValue()),
+    footer: (props) =>
+      toPrice(
+        sum(props.table.getRowModel().rows, (row) => row.getValue("endValue"))
+      ),
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("dividends", {
     header: "Dividends",
-    valueGetter: (i) => toPrice(i.dividends),
-    footerGetter: (data) => toPrice(sum(data, (el) => el.dividends)),
-    alignment: "right",
-  },
-  {
+    id: "dividends",
+    cell: (d) => toPrice(d.getValue()),
+    footer: (props) =>
+      toPrice(
+        sum(props.table.getRowModel().rows, (row) => row.getValue("dividends"))
+      ),
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("orderFees", {
     header: "Fees",
-    valueGetter: (i) => toPrice(i.orderFees),
-    footerGetter: (data) => toPrice(sum(data, (el) => el.orderFees)),
-    alignment: "right",
-  },
-  {
+    id: "orderFees",
+    cell: (i) => toPrice(i.getValue()),
+    footer: (props) =>
+      toPrice(
+        sum(props.table.getRowModel().rows, (row) => row.getValue("orderFees"))
+      ),
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("taxes", {
     header: "Total Taxes",
-    valueGetter: (i) => toPrice(i.taxes),
-    footerGetter: (data) => toPrice(sum(data, (el) => el.taxes)),
-    alignment: "right",
-  },
-  {
+    id: "taxes",
+    cell: (i) => toPrice(i.getValue()),
+    footer: (props) =>
+      toPrice(
+        sum(props.table.getRowModel().rows, (row) => row.getValue("taxes"))
+      ),
+    meta: {
+      align: "right",
+    },
+  }),
+  columnHelper.accessor("profit", {
+    id: "profit",
     header: "Profit",
-    valueGetter: (i) => toPrice(i.profit),
-    footerGetter: (data) => (
-      <Balance value={sum(data, (el) => el.profit)} suffix={"€"} />
+    cell: (p) => toPrice(p.getValue()),
+    footer: (props) => (
+      <Balance
+        value={sum(props.table.getRowModel().rows, (row) =>
+          row.getValue("profit")
+        )}
+      />
     ),
-    alignment: "right",
-  },
+    meta: {
+      align: "right",
+    },
+  }),
 ];
 
 export const ClosedPositionsList = ({
@@ -77,7 +120,7 @@ export const ClosedPositionsList = ({
   return closedPositions ? (
     <div className={bemBlock(className)}>
       <div className={bemElement("heading")}>Closed Positions</div>
-      <CustomTable rows={closedPositions} columDefs={columDefs} />
+      <CustomTable data={closedPositions} columns={columDefs} />
     </div>
   ) : null;
 };
