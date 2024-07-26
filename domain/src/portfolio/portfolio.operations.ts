@@ -1,4 +1,4 @@
-import { omit, sort } from "radash";
+import { omit, shake, sort } from "radash";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 import { Portfolio, PortfolioLibrary } from "./portfolio.entities";
@@ -41,14 +41,15 @@ export const deleteOrderFromPortfolio = (
   if (!portfolio.orders[order.asset]) {
     return portfolio;
   }
+
   return {
     ...portfolio,
-    orders: {
+    orders: purgeEmptyArrays({
       ...portfolio.orders,
       [order.asset]: portfolio.orders[order.asset].filter(
         (currentOrder) => currentOrder.uuid !== order.uuid
       ),
-    },
+    }),
   };
 };
 
@@ -77,12 +78,12 @@ export const deleteDividendPayoutFromPortfolio = (
   }
   return {
     ...portfolio,
-    dividendPayouts: {
+    dividendPayouts: purgeEmptyArrays({
       ...portfolio.dividendPayouts,
       [payout.asset]: portfolio.dividendPayouts[payout.asset].filter(
         (currentOrder) => currentOrder.uuid !== payout.uuid
       ),
-    },
+    }),
   };
 };
 
@@ -91,3 +92,6 @@ export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
   orders: {},
   dividendPayouts: {},
 });
+
+const purgeEmptyArrays = <T>(obj: Record<string, T[]>): Record<string, T[]> =>
+  shake(obj, (value) => !value.length);

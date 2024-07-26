@@ -5,10 +5,7 @@ import {
   isOrder,
 } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
-import {
-  getDividendVolume,
-  sumDividendTaxes,
-} from "../dividendPayouts/dividend.derivers";
+import { sumDividendTaxes } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 import {
@@ -20,17 +17,6 @@ import {
 } from "./batch.entities";
 
 const EMPTY_BATCHES: Batches = { open: [], closed: [] };
-
-export const getPositionDividendSum = (
-  orders: Order[],
-  dividendPayouts: DividendPayout[],
-  batchType: BatchType
-): number =>
-  sum(
-    getBatchesOfType(orders, dividendPayouts, batchType)
-      .flatMap((position) => position.dividendPayouts)
-      .map(getDividendVolume)
-  );
 
 export const getTotalTaxesForClosedBatches = (
   orders: Order[],
@@ -282,3 +268,15 @@ function updateBatchesWithBuy(batch: Batches, buy: Order): Batches | undefined {
     open: [...batch.open, orderToOpenBatch(buy)],
   };
 }
+export const getProfitForClosedBatch = ({
+  pieces,
+  buyPrice,
+  sellPrice,
+  orderFee,
+  taxes,
+}: ClosedBatch): number => pieces * (sellPrice - buyPrice) - orderFee - taxes;
+
+export const getProfitForOpenBatch = (
+  { pieces, buyPrice, orderFee, taxes }: OpenBatch,
+  currentPrice: number
+): number => pieces * (currentPrice - buyPrice) - orderFee - taxes;

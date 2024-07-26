@@ -6,11 +6,11 @@ import { InitialValueHistoryChart } from "../charts/investmentHistory/InitialVal
 import SelectionHeader from "../general/SelectionHeader";
 import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
-import { ClosedPositionsList } from "./InventoryList/ClosedPositionsList/ClosedPositionsList";
-import { OpenPositionsList } from "./InventoryList/OpenPositionsList/OpenPositionsList";
 import PortfolioActionsBar from "./PortfolioActionsBar/PortfolioActionsBar";
 import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import "./Portfolios.css";
+import { ClosedPositionsList } from "./PositionList/ClosedPositionsList/ClosedPositionsList";
+import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPositionsList";
 
 const { bemBlock, bemElement } = bemHelper("portfolios");
 

@@ -18,7 +18,7 @@ import {
   getAllOrdersInPortfolio,
   getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
-  getProfitForIsin,
+  getRealizedGainsForIsin,
   isOrderValidForPortfolio,
 } from "./portfolio.derivers";
 import { Portfolio } from "./portfolio.entities";
@@ -249,7 +249,7 @@ describe("The Portfolio deriver", () => {
     });
   });
 
-  describe("getProfitForIsin", () => {
+  describe("getRealizedGainsForIsin", () => {
     const day1 = "2024-06-01";
     const day2 = "2024-06-02";
     const day3 = "2024-06-03";
@@ -302,7 +302,7 @@ describe("The Portfolio deriver", () => {
         ]
       );
 
-      expect(getProfitForIsin(portfolio, "asset")).toEqual(82);
+      expect(getRealizedGainsForIsin(portfolio, "asset")).toEqual(82);
     });
   });
 });

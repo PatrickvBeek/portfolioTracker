@@ -23,13 +23,20 @@ import React, { Fragment } from "react";
 type TableProps<TData> = {
   data: TData[];
   columns: ColumnDef<TData>[];
+  getRowCanExpand?: (row: Row<TData>) => boolean;
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactElement;
 };
 
-function CustomTable<T>({ data, columns, renderSubComponent }: TableProps<T>) {
+function CustomTable<T>({
+  data,
+  columns,
+  renderSubComponent,
+  getRowCanExpand,
+}: TableProps<T>) {
   const table = useReactTable({
     data,
     columns,
+    getRowCanExpand,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
   });
@@ -108,6 +115,7 @@ function CustomTable<T>({ data, columns, renderSubComponent }: TableProps<T>) {
                     sx={{
                       color: "black",
                       fontSize: "var(--font-base)",
+                      fontWeight: "bold",
                     }}
                   >
                     {header.isPlaceholder

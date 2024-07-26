@@ -11,3 +11,9 @@ export const getDividendVolume = ({
   dividendPerShare,
   pieces,
 }: DividendPayout): number => dividendPerShare * pieces;
+
+export const getDividendNetVolume = ({
+  dividendPerShare,
+  pieces,
+  taxes,
+}: DividendPayout): number => dividendPerShare * pieces - taxes;

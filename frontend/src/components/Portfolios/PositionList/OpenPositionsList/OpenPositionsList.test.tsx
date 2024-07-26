@@ -31,15 +31,17 @@ const mockPortfolio: Portfolio = {
       timestamp: day1,
       asset: "open-asset",
       pieces: 2,
-      sharePrice: 10,
-      orderFee: 1,
+      sharePrice: 6,
+      orderFee: 2,
+      taxes: 0,
     }),
     getTestOrder({
       timestamp: day3,
       asset: "open-asset",
       pieces: -1,
-      sharePrice: 11,
+      sharePrice: 10,
       orderFee: 1,
+      taxes: 0.5,
     }),
     getTestOrder({
       asset: "closed-asset",
@@ -60,6 +62,7 @@ const mockPortfolio: Portfolio = {
       pieces: 2,
       dividendPerShare: 2,
       asset: "open-asset",
+      taxes: 0,
     }),
   ]),
 };
@@ -74,7 +77,14 @@ describe("the open inventory list component", () => {
     });
     expect(
       (await screen.findAllByRole("columnheader")).map((el) => el.textContent)
-    ).toEqual(["Asset", "Pieces", "Initial Value", "Fees", "Dividends"]);
+    ).toEqual([
+      "Asset",
+      "Pieces",
+      "Total Value",
+      "Realized Gains",
+      "Non-Realized Gains",
+      "Profit",
+    ]);
   });
 
   it("renders the correct data", async () => {
@@ -90,13 +100,15 @@ describe("the open inventory list component", () => {
       "Open Asset",
       "1",
       "10.00 €",
-      "0.50 €",
-      "2.00 €",
+      "+5.50 €",
+      "+3.00 €",
+      "+8.50 €",
       "1 Position",
       "",
       "10.00 €",
-      "0.50 €",
-      "2.00 €",
+      "+5.50 €",
+      "+3.00 €",
+      "+8.50 €",
     ]);
   });
 });

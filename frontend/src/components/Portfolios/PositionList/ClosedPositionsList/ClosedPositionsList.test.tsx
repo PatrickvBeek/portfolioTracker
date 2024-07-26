@@ -99,11 +99,9 @@ describe("the open inventory list component", () => {
     ).toEqual([
       "Asset",
       "Pieces",
-      "Initial Value",
-      "End Value",
-      "Dividends",
-      "Fees",
-      "Total Taxes",
+      "Total Value",
+      "Realized Gains",
+      "Non-Realized Gains",
       "Profit",
     ]);
   });
@@ -113,27 +111,14 @@ describe("the open inventory list component", () => {
       component: <ClosedPositionsList portfolioName={mockPortfolio.name} />,
     });
 
-    expect(await screen.findAllByRole("row")).toHaveLength(4);
+    expect(await screen.findAllByRole("row")).toHaveLength(3);
     expect(await getCellTextsForRow(1)).toEqual([
-      "Asset 1",
-      "1",
-      "10.00 €",
-      "11.00 €",
-      "0.00 €",
-      "1.50 €",
-      "0.10 €",
-      "-0.60 €",
-    ]);
-
-    expect(await getCellTextsForRow(2)).toEqual([
       "Asset 2",
       "3",
-      "45.00 €",
       "60.00 €",
-      "3.00 €",
-      "2.00 €",
-      "4.00 €",
-      "12.00 €",
+      "+12.00 €",
+      "0.00 €",
+      "+12.00 €",
     ]);
   });
 
@@ -142,16 +127,14 @@ describe("the open inventory list component", () => {
       component: <ClosedPositionsList portfolioName={mockPortfolio.name} />,
     });
 
-    expect(await screen.findAllByRole("row")).toHaveLength(4);
-    expect(await getCellTextsForRow(3)).toEqual([
-      "2 Positions",
+    expect(await screen.findAllByRole("row")).toHaveLength(3);
+    expect(await getCellTextsForRow(2)).toEqual([
+      "1 Position",
       "",
-      "55.00 €",
-      "71.00 €",
-      "3.00 €",
-      "3.50 €",
-      "4.10 €",
-      "+11.40 €",
+      "60.00 €",
+      "+12.00 €",
+      "0.00 €",
+      "+12.00 €",
     ]);
   });
 });
