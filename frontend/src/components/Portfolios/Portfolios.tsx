@@ -24,7 +24,7 @@ function Portfolios({ className }: PortfolioProps) {
 
   useEffect(() => {
     const portfolios = Object.keys(portfoliosQuery.data || {});
-    if (!selectedPortfolio) {
+    if (!selectedPortfolio || !portfolios.includes(selectedPortfolio)) {
       setSelectedPortfolio(portfolios[0]);
     }
   }, [portfoliosQuery.data, selectedPortfolio]);

@@ -8,7 +8,7 @@ import { Props } from "../../../utility/types";
 import Balance from "../../general/Balance/Balance";
 import CustomTable from "../../general/CustomTable/CustomTable";
 import { PositionBatches } from "./PositionBatches";
-import "./PositionList.css";
+import "./PositionList.less";
 
 const { bemBlock, bemElement } = bemHelper("position-list");
 
@@ -35,7 +35,7 @@ const columDefs: ColumnDef<PositionsListItem, any>[] = [
   columnHelper.accessor("asset", {
     header: "Asset",
     cell: ({ row, getValue }) => (
-      <div>
+      <div className={bemElement("asset-cell")}>
         {row.getCanExpand() && (
           <IconButton
             aria-label="expand row"

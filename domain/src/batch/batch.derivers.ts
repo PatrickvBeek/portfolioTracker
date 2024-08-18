@@ -9,6 +9,11 @@ import { sumDividendTaxes } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 import {
+  areFloatsEqual,
+  isFloatLowerThan,
+  isFloatNegative,
+} from "../utils/floats";
+import {
   BatchType,
   Batches,
   BatchesHistory,
@@ -32,7 +37,7 @@ export function getBatches(
   dividendPayouts: DividendPayout[]
 ): Batches | undefined {
   const activity = sort([...orders, ...dividendPayouts], getNumericDateTime);
-  if (sum(orders, (order) => order.pieces) < 0) {
+  if (isFloatNegative(sum(orders, (order) => order.pieces))) {
     return undefined; // you can't sell more pieces than you have (shorting is not supported).
   }
 
@@ -135,7 +140,7 @@ function updateBatchesWithSell(
   const piecesToSell = -sell.pieces;
   const [firstBatch, ...remaining] = batches.open;
 
-  if (piecesToSell === firstBatch.pieces) {
+  if (areFloatsEqual(piecesToSell, firstBatch.pieces)) {
     return closeFirstBatchCompletely(
       firstBatch,
       remaining,
@@ -144,7 +149,7 @@ function updateBatchesWithSell(
     );
   }
 
-  if (piecesToSell < firstBatch.pieces) {
+  if (isFloatLowerThan(piecesToSell, firstBatch.pieces)) {
     return closeFirstBatchPartially(
       firstBatch,
       remaining,

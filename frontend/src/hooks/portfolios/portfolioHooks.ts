@@ -15,10 +15,11 @@ import {
   deletePortfolioFromLibrary,
 } from "../../../../domain/src/portfolio/portfolio.operations";
 
-export function useGetPortfolioActivity(portfolio: string) {
+export function useGetPortfolioActivity(portfolioName: string) {
   return useQuery("portfolios", fetchPortfolios, {
     select: (lib) => {
-      return getActivitiesForPortfolio(lib[portfolio]);
+      const portfolio = lib[portfolioName];
+      return portfolio ? getActivitiesForPortfolio(portfolio) : [];
     },
   });
 }

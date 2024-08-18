@@ -86,7 +86,7 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
         digits={2}
       />
       <DateInput
-        label={"PayoutDate"}
+        label={"Payout Date"}
         onChange={(date) => setFormState({ ...formState, date })}
         defaultDate={DEFAULTS.date}
       />

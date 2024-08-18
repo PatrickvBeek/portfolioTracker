@@ -10,6 +10,7 @@ import {
   getSoldValueOfClosedBatches,
 } from "../../../../../../domain/src/portfolio/portfolio.derivers";
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
+import { isFloatPositive } from "../../../../../../domain/src/utils/floats";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { PositionsListItem } from "../PositionList";
@@ -68,7 +69,9 @@ const isIsinOfBatchType = (
   isin: string,
   batchType: BatchType
 ): boolean => {
-  const isOpen =
-    Number(getPiecesOfIsinInPortfolio(portfolio, isin, "open")) > 0;
+  const isOpen = isFloatPositive(
+    getPiecesOfIsinInPortfolio(portfolio, isin, "open")
+  );
+
   return batchType === "open" ? isOpen : !isOpen;
 };
