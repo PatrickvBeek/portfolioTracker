@@ -195,7 +195,7 @@ function closeFirstBatchPartially(
   sell: Order,
   piecesToSell: number
 ): Batches {
-  const newlyClosed: ClosedBatch = {
+  const newlyClosed = {
     ...firstBatch,
     pieces: piecesToSell,
     sellPrice: sell.sharePrice,
@@ -209,7 +209,8 @@ function closeFirstBatchPartially(
       taxes: (piecesToSell / payout.pieces) * payout.taxes,
     })),
   };
-  const reducedBatch: OpenBatch = {
+
+  const reducedBatch = {
     ...firstBatch,
     pieces: firstBatch.pieces - piecesToSell,
     orderFee: (1 - piecesToSell / firstBatch.pieces) * firstBatch.orderFee,
@@ -234,7 +235,7 @@ function closeFirstBatchAndContinue(
   sell: Order,
   piecesToSell: number
 ): Batches | undefined {
-  const newlyClosedBatch: ClosedBatch = {
+  const newlyClosedBatch = {
     ...firstBatch,
     sellPrice: sell.sharePrice,
     sellDate: sell.timestamp,
@@ -242,6 +243,7 @@ function closeFirstBatchAndContinue(
       firstBatch.orderFee + (firstBatch.pieces / piecesToSell) * sell.orderFee,
     taxes: firstBatch.taxes + (firstBatch.pieces / piecesToSell) * sell.taxes,
   };
+
   const piecesStillToSell = piecesToSell - firstBatch.pieces;
 
   return updateBatchesWithSell(

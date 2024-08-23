@@ -15,8 +15,6 @@ import {
   TEST_ORDER_TESLA,
 } from "../testConstants";
 import {
-  getAllOrdersInPortfolio,
-  getInitialValueOfIsinInPortfolio,
   getOrderFeesOfIsinInPortfolio,
   getRealizedGainsForIsin,
   isOrderValidForPortfolio,
@@ -44,16 +42,6 @@ const createTestPortfolio = (
   });
 
 describe("The Portfolio deriver", () => {
-  describe("getAllOrdersInPortfolio", () => {
-    it("returns the correct orders", () => {
-      expect(getAllOrdersInPortfolio(TEST_PORTFOLIO)).toEqual([
-        TEST_ORDER_TESLA,
-        TEST_ORDER_1_GOOGLE,
-        TEST_ORDER_2_GOOGLE,
-      ]);
-    });
-  });
-
   describe("getOrderFeesOfIsinInPortfolio", () => {
     describe("calculates the order fees correctly", () => {
       const testPortfolio = TEST_PORTFOLIO;
@@ -94,32 +82,6 @@ describe("The Portfolio deriver", () => {
       expect(
         getOrderFeesOfIsinInPortfolio(testPortfolio, "not there", "open")
       ).toBe(0);
-    });
-  });
-
-  describe("getInvestedValueOfIsinInPortfolio returns the correct value for", () => {
-    const testPortfolio = TEST_PORTFOLIO;
-
-    it("a single open position", () => {
-      expect(
-        getInitialValueOfIsinInPortfolio(testPortfolio, TEST_ASSET_GOOGLE.isin)
-      ).toEqual(100);
-    });
-
-    it("a single closed position", () => {
-      expect(
-        getInitialValueOfIsinInPortfolio(
-          testPortfolio,
-          TEST_ASSET_GOOGLE.isin,
-          "closed"
-        )
-      ).toEqual(100);
-    });
-
-    it("for an non existing isin", () => {
-      expect(
-        getInitialValueOfIsinInPortfolio(testPortfolio, "not present", "closed")
-      ).toEqual(0);
     });
   });
 

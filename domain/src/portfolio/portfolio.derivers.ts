@@ -7,7 +7,6 @@ import {
   getBatchesOfType,
   getProfitForClosedBatch,
   getProfitForOpenBatch,
-  getTotalTaxesForClosedBatches,
 } from "../batch/batch.derivers";
 import { BatchType, Batches } from "../batch/batch.entities";
 import { getDividendNetVolume } from "../dividendPayouts/dividend.derivers";
@@ -44,10 +43,10 @@ export const getBatchesForIsin = (
     getDividendPayoutsForIsin(portfolio, isin)
   );
 
-export const getAllOrdersInPortfolio = (portfolio: Portfolio): Order[] =>
+const getAllOrdersInPortfolio = (portfolio: Portfolio): Order[] =>
   Object.values(portfolio.orders).flat();
 
-export const getAllDividendPayoutsInPortfolio = (
+const getAllDividendPayoutsInPortfolio = (
   portfolio: Portfolio
 ): DividendPayout[] => Object.values(portfolio.dividendPayouts).flat();
 
@@ -61,10 +60,6 @@ export const getActivitiesForPortfolio = (
     ],
     getNumericDateTime
   );
-
-export const getAllOrdersInPortfolioTimeSorted = (
-  portfolio: Portfolio
-): Order[] => sort(getAllOrdersInPortfolio(portfolio), getNumericDateTime);
 
 export const getPiecesOfIsinInPortfolio = (
   portfolio: Portfolio,
@@ -95,16 +90,6 @@ export const getOrderFeesOfIsinInPortfolio = (
 
   return sum(fees[batchType], (pos) => pos.orderFee);
 };
-
-export const getInitialValueOfIsinInPortfolio = (
-  portfolio: Portfolio,
-  isin: string,
-  batchType: BatchType = "open"
-): number =>
-  sum(
-    getPortfolioBatchesOfType(portfolio, isin, batchType),
-    (p) => p.buyPrice * p.pieces
-  );
 
 export const getSoldValueOfClosedBatches = (
   portfolio: Portfolio,
@@ -161,16 +146,6 @@ export const isOrderValidForPortfolio = (
 export function getDividendSum(portfolio: Portfolio, isin: string): number {
   return sum(
     getDividendPayoutsForIsin(portfolio, isin).map(getDividendNetVolume)
-  );
-}
-
-export function getTotalTaxesForClosedAssetBatches(
-  portfolio: Portfolio,
-  isin: string
-): number {
-  return getTotalTaxesForClosedBatches(
-    getOrdersForIsin(portfolio, isin),
-    getDividendPayoutsForIsin(portfolio, isin)
   );
 }
 
