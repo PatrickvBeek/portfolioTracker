@@ -100,17 +100,14 @@ export const getSoldValueOfClosedBatches = (
     (p) => p.sellPrice * p.pieces
   );
 
-export function getRealizedGainsForIsin(
+export const getRealizedGainsForIsin = (
   portfolio: Portfolio,
   isin: string
-): number {
-  return (
-    sum(
-      getPortfolioBatchesOfType(portfolio, isin, "closed"),
-      getProfitForClosedBatch
-    ) + getDividendSum(portfolio, isin)
-  );
-}
+): number =>
+  sum(
+    getPortfolioBatchesOfType(portfolio, isin, "closed"),
+    getProfitForClosedBatch
+  ) + getDividendSum(portfolio, isin);
 
 export function getNonRealizedGainsForIsin(
   portfolio: Portfolio,
@@ -143,26 +140,20 @@ export const isOrderValidForPortfolio = (
   return piecesAvailable + order.pieces >= 0;
 };
 
-export function getDividendSum(portfolio: Portfolio, isin: string): number {
-  return sum(
-    getDividendPayoutsForIsin(portfolio, isin).map(getDividendNetVolume)
-  );
-}
+export const getDividendSum = (portfolio: Portfolio, isin: string): number =>
+  sum(getDividendPayoutsForIsin(portfolio, isin).map(getDividendNetVolume));
 
-export function getLatestPriceFromTransactions(
+export const getLatestPriceFromTransactions = (
   portfolio: Portfolio,
   isin: string
-): number | undefined {
-  return getActivitiesForPortfolio(portfolio)
+): number | undefined =>
+  getActivitiesForPortfolio(portfolio)
     .filter((a) => a.asset === isin)
     .filter((a) => isOrder(a))
     .findLast((a) => a.sharePrice)?.sharePrice;
-}
 
-export function getCurrentValueOfOpenBatches(
+export const getCurrentValueOfOpenBatches = (
   portfolio: Portfolio,
   isin: string,
   currentPrice: number
-): number {
-  return getPiecesOfIsinInPortfolio(portfolio, isin) * currentPrice;
-}
+): number => getPiecesOfIsinInPortfolio(portfolio, isin) * currentPrice;

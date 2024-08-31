@@ -159,12 +159,25 @@ function updateBatchesWithSell(
     );
   }
 
-  return closeFirstBatchAndContinue(
-    firstBatch,
-    remaining,
-    batches.closed,
-    sell,
-    piecesToSell
+  const newlyClosedBatch = {
+    ...firstBatch,
+    sellPrice: sell.sharePrice,
+    sellDate: sell.timestamp,
+    orderFee:
+      firstBatch.orderFee + (firstBatch.pieces / piecesToSell) * sell.orderFee,
+    taxes: firstBatch.taxes + (firstBatch.pieces / piecesToSell) * sell.taxes,
+  };
+
+  const piecesStillToSell = piecesToSell - firstBatch.pieces;
+
+  return updateBatchesWithSell(
+    { open: remaining, closed: [...batches.closed, newlyClosedBatch] },
+    {
+      ...sell,
+      pieces: -piecesStillToSell,
+      orderFee: (1 - firstBatch.pieces / piecesToSell) * sell.orderFee,
+      taxes: (1 - firstBatch.pieces / piecesToSell) * sell.taxes,
+    }
   );
 }
 
@@ -226,35 +239,6 @@ function closeFirstBatchPartially(
     open: [reducedBatch, ...remaining],
     closed: [...closedBatches, newlyClosed],
   };
-}
-
-function closeFirstBatchAndContinue(
-  firstBatch: OpenBatch,
-  remainingOpen: OpenBatch[],
-  closedBatch: ClosedBatch[],
-  sell: Order,
-  piecesToSell: number
-): Batches | undefined {
-  const newlyClosedBatch = {
-    ...firstBatch,
-    sellPrice: sell.sharePrice,
-    sellDate: sell.timestamp,
-    orderFee:
-      firstBatch.orderFee + (firstBatch.pieces / piecesToSell) * sell.orderFee,
-    taxes: firstBatch.taxes + (firstBatch.pieces / piecesToSell) * sell.taxes,
-  };
-
-  const piecesStillToSell = piecesToSell - firstBatch.pieces;
-
-  return updateBatchesWithSell(
-    { open: remainingOpen, closed: [...closedBatch, newlyClosedBatch] },
-    {
-      ...sell,
-      pieces: -piecesStillToSell,
-      orderFee: (1 - firstBatch.pieces / piecesToSell) * sell.orderFee,
-      taxes: (1 - firstBatch.pieces / piecesToSell) * sell.taxes,
-    }
-  );
 }
 
 const orderToOpenBatch = (order: Order): OpenBatch => ({
