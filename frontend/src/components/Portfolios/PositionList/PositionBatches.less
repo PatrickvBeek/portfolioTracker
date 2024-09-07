@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: var(--double-spacing);
 
-  width: 67%;
+  width: 75%;
   margin: 0 auto;
 
   &__headline {
@@ -25,19 +25,16 @@
     border-top: 1px solid black;
     font-weight: bold;
     text-align: right;
+    font-family: monospace;
   }
 
-  &__open-batches-table {
-    display: grid;
-    grid-template-columns: repeat(6, auto);
-  }
-
-  &__closed-batches-table {
-    display: grid;
-    grid-template-columns: repeat(7, auto);
+  &__batches-table {
+    width: 100%;
+    border-collapse: collapse;
   }
 
   &__numeric-column {
     text-align: right;
+    font-family: monospace;
   }
 }

@@ -9,9 +9,10 @@ import {
 } from "../../../../../domain/src/portfolio/portfolio.derivers";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 
-type OpenBatchListItem = {
+export type OpenBatchListItem = {
   buyDate: OpenBatch["buyDate"];
   pieces: number;
+  buyPrice: number;
   buyValue: number;
   currentValue: number;
   fees: OpenBatch["orderFee"];
@@ -35,6 +36,7 @@ export function useGetOpenBatchesListItems(
     ({ buyDate, pieces, buyPrice, orderFee }) => ({
       buyDate,
       pieces,
+      buyPrice,
       buyValue: pieces * buyPrice,
       currentValue: pieces * currentPrice,
       fees: orderFee,
@@ -43,7 +45,7 @@ export function useGetOpenBatchesListItems(
   );
 }
 
-type ClosedBatchListItem = {
+export type ClosedBatchListItem = {
   buyDate: ClosedBatch["buyDate"];
   pieces: number;
   buyValue: number;
