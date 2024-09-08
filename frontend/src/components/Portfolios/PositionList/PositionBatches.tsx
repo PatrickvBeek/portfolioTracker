@@ -61,7 +61,10 @@ const OpenBatchItems = ({
   return (
     <div>
       <div className={bemElement("headline")}>Open Batches</div>
-      <table className={bemElement("batches-table")}>
+      <table
+        className={bemElement("batches-table")}
+        aria-label="open-batches-table"
+      >
         <thead>
           <tr>
             {OPEN_BATCHES_HEADER_LABELS.map((label) => (
@@ -84,13 +87,19 @@ const OpenBatchItems = ({
             </tr>
           ))}
         </tbody>
-        <FooterCell />
-        <FooterCell />
-        <FooterCell>{sumBy(batches, "pieces").toFixed(3)}</FooterCell>
-        <FooterCell>{toPrice(sumBy(batches, "buyValue"))}</FooterCell>
-        <FooterCell>{toPrice(sumBy(batches, "currentValue"))}</FooterCell>
-        <FooterCell>{toPrice(sumBy(batches, "fees"))}</FooterCell>
-        <FooterCell>{toPrice(sumBy(batches, "pendingGrosProfit"))}</FooterCell>
+        <tfoot>
+          <tr>
+            <FooterCell />
+            <FooterCell />
+            <FooterCell>{sumBy(batches, "pieces").toFixed(3)}</FooterCell>
+            <FooterCell>{toPrice(sumBy(batches, "buyValue"))}</FooterCell>
+            <FooterCell>{toPrice(sumBy(batches, "currentValue"))}</FooterCell>
+            <FooterCell>{toPrice(sumBy(batches, "fees"))}</FooterCell>
+            <FooterCell>
+              {toPrice(sumBy(batches, "pendingGrosProfit"))}
+            </FooterCell>
+          </tr>
+        </tfoot>
       </table>
     </div>
   );
@@ -121,7 +130,10 @@ const ClosedBatchItems = ({
   return (
     <div>
       <div className={bemElement("headline")}>Closed Batches</div>
-      <table className={bemElement("batches-table")}>
+      <table
+        className={bemElement("batches-table")}
+        aria-label="closed-batches-table"
+      >
         <thead>
           <tr>
             {CLOSED_BATCHES_HEADER_LABELS.map((label) => (

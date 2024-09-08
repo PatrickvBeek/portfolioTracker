@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import {
   Asset,
   AssetLibrary,
@@ -10,7 +10,10 @@ import {
   getTestOrder,
 } from "../../../../../../domain/src/dataHelpers";
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
-import { customRender } from "../../../../testUtils/componentHelpers";
+import {
+  customRender,
+  getTextWithNonBreakingSpaceReplaced,
+} from "../../../../testUtils/componentHelpers";
 import { mockNetwork } from "../../../../testUtils/networkMock";
 import { OpenPositionsList } from "./OpenPositionsList";
 
@@ -93,9 +96,9 @@ describe("the open inventory list component", () => {
     });
 
     expect(
-      (await screen.findAllByRole("cell"))
-        .map((el) => el.textContent)
-        .map((s) => s?.replace(/\u00A0/g, " "))
+      (await screen.findAllByRole("cell")).map((el) =>
+        getTextWithNonBreakingSpaceReplaced(el)
+      )
     ).toEqual([
       "Open Asset",
       "1",
@@ -109,6 +112,59 @@ describe("the open inventory list component", () => {
       "+5.50 €",
       "+3.00 €",
       "+8.50 €",
+    ]);
+  });
+
+  it("can expand to show batches", async () => {
+    const { user } = customRender({
+      component: <OpenPositionsList portfolioName={mockPortfolio.name} />,
+    });
+
+    const expandButton = await screen.findByRole("button", {
+      name: /expand row/,
+    });
+
+    await user.click(expandButton);
+
+    const batchesTable = screen.getByRole("table", {
+      name: "open-batches-table",
+    });
+
+    expect(batchesTable).toBeInTheDocument();
+
+    const [headerRow, ...dataRows] = within(batchesTable).getAllByRole("row");
+
+    expect(
+      within(headerRow)
+        .getAllByRole("columnheader")
+        .map((cell) => cell.textContent)
+    ).toEqual([
+      "Buy Date",
+      "Buy Price",
+      "Pieces",
+      "Buy Value",
+      "Current Value",
+      "Fees",
+      "Gros Profit",
+    ]);
+
+    expect(
+      dataRows.map((row) =>
+        within(row)
+          .getAllByRole("cell")
+          .map((cell) => getTextWithNonBreakingSpaceReplaced(cell))
+      )
+    ).toEqual([
+      [
+        "Dec 8, 2023",
+        "6.00 €",
+        "1.000",
+        "6.00 €",
+        "10.00 €",
+        "1.00 €",
+        "4.00 €",
+      ],
+      ["", "", "1.000", "6.00 €", "10.00 €", "1.00 €", "4.00 €"],
     ]);
   });
 });
