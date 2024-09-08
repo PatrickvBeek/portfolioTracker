@@ -6,11 +6,11 @@ import { InitialValueHistoryChart } from "../charts/investmentHistory/InitialVal
 import SelectionHeader from "../general/SelectionHeader";
 import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
-import { ClosedInventoryList } from "./InventoryList/ClosedInventoryList/ClosedInventoryList";
-import { OpenInventoryList } from "./InventoryList/OpenInventoryList/OpenInventoryList";
 import PortfolioActionsBar from "./PortfolioActionsBar/PortfolioActionsBar";
 import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import "./Portfolios.css";
+import { ClosedPositionsList } from "./PositionList/ClosedPositionsList/ClosedPositionsList";
+import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPositionsList";
 
 const { bemBlock, bemElement } = bemHelper("portfolios");
 
@@ -24,7 +24,7 @@ function Portfolios({ className }: PortfolioProps) {
 
   useEffect(() => {
     const portfolios = Object.keys(portfoliosQuery.data || {});
-    if (!selectedPortfolio) {
+    if (!selectedPortfolio || !portfolios.includes(selectedPortfolio)) {
       setSelectedPortfolio(portfolios[0]);
     }
   }, [portfoliosQuery.data, selectedPortfolio]);
@@ -67,8 +67,8 @@ function Portfolios({ className }: PortfolioProps) {
       </div>
       <div className={bemElement("content")}>
         <InitialValueHistoryChart portfolioName={selectedPortfolio} />
-        <OpenInventoryList portfolioName={selectedPortfolio} />
-        <ClosedInventoryList portfolioName={selectedPortfolio} />
+        <OpenPositionsList portfolioName={selectedPortfolio} />
+        <ClosedPositionsList portfolioName={selectedPortfolio} />
         <ActivityList portfolio={selectedPortfolio} />
       </div>
       <PortfolioFormSideBar

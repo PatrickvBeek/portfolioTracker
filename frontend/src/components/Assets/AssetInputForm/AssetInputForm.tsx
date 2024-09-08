@@ -67,7 +67,7 @@ const AssetInputForm = (): ReactElement => {
         <TextInput
           onChange={(element) => {
             updateIsinInputText(
-              sanitizeIsin(element.target.value).toUpperCase(),
+              sanitizeIsin(element.target.value).toUpperCase()
             );
           }}
           text={isinInputText}
@@ -80,7 +80,7 @@ const AssetInputForm = (): ReactElement => {
         <TextInput
           onChange={(element) => {
             updateSymbolInputText(
-              sanitizeSymbol(element.target.value).toUpperCase(),
+              sanitizeSymbol(element.target.value).toUpperCase()
             );
           }}
           text={symbolInputText}

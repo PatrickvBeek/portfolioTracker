@@ -1,0 +1,40 @@
+.position-batches {
+  display: flex;
+  flex-direction: column;
+  gap: var(--double-spacing);
+
+  width: 75%;
+  margin: 0 auto;
+
+  &__headline {
+    font-weight: bold;
+    font-size: var(--font-base);
+    margin-bottom: var(--half-spacing);
+  }
+
+  &__column-header {
+    border-bottom: 1px solid black;
+    font-weight: bold;
+
+    &--numeric {
+      text-align: right;
+    }
+  }
+
+  &__column-footer {
+    border-top: 1px solid black;
+    font-weight: bold;
+    text-align: right;
+    font-family: monospace;
+  }
+
+  &__batches-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  &__numeric-column {
+    text-align: right;
+    font-family: monospace;
+  }
+}

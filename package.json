@@ -16,5 +16,8 @@
   "devDependencies": {
     "dependency-cruiser": "^16.2.4",
     "syncpack": "^12.3.0"
+  },
+  "prettier": {
+    "trailingComma": "es5"
   }
 }

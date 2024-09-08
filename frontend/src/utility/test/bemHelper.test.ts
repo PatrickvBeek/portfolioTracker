@@ -15,19 +15,19 @@ describe("bemHelper builds class names", () => {
     describe("with modifiers", () => {
       it("as string", () => {
         expect(bemBlock(undefined, "mod")).toEqual(
-          "my-component my-component--mod",
+          "my-component my-component--mod"
         );
       });
 
       it("as array of strings", () => {
         expect(bemBlock(undefined, ["mod1", "mod2", ""])).toEqual(
-          "my-component my-component--mod1 my-component--mod2",
+          "my-component my-component--mod1 my-component--mod2"
         );
       });
 
       it("as object", () => {
         expect(bemBlock(undefined, { mod1: true, mod2: false })).toEqual(
-          "my-component my-component--mod1",
+          "my-component my-component--mod1"
         );
       });
 
@@ -45,19 +45,19 @@ describe("bemHelper builds class names", () => {
     describe("with modifiers", () => {
       it("as string", () => {
         expect(bemElement("element", "mod")).toEqual(
-          "my-component__element my-component__element--mod",
+          "my-component__element my-component__element--mod"
         );
       });
 
       it("as array of strings", () => {
         expect(bemElement("element", ["mod1", "mod2", ""])).toEqual(
-          "my-component__element my-component__element--mod1 my-component__element--mod2",
+          "my-component__element my-component__element--mod1 my-component__element--mod2"
         );
       });
 
       it("as object", () => {
         expect(bemElement("element", { mod1: true, mod2: false })).toEqual(
-          "my-component__element my-component__element--mod1",
+          "my-component__element my-component__element--mod1"
         );
       });
 

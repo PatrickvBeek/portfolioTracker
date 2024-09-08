@@ -1,22 +1,10 @@
-import { getTestDividendPayout } from "../dataHelpers";
-import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 import { TEST_ORDER_TESLA } from "../testConstants";
-import {
-  getBatches,
-  getBatchesHistory,
-  getPositionDividendSum,
-} from "./batch.derivers";
+import { getBatches, getBatchesHistory } from "./batch.derivers";
 import { Batches, ClosedBatch, OpenBatch } from "./batch.entities";
 
 function getTestOrder(overrides: Partial<Order>): Order {
   return { ...TEST_ORDER_TESLA, ...overrides };
-}
-
-function getTestPayouts(
-  overrides: Partial<DividendPayout>[],
-): DividendPayout[] {
-  return overrides.map(getTestDividendPayout);
 }
 
 describe("the portfolio deriver", () => {
@@ -64,7 +52,7 @@ describe("the portfolio deriver", () => {
           getExpectBatches({
             open: [],
             closed: [{ pieces: 1, buyPrice: 50, sellPrice: 55 }],
-          }),
+          })
         );
       });
 
@@ -86,7 +74,7 @@ describe("the portfolio deriver", () => {
                 taxes: 0.5,
               },
             ],
-          }),
+          })
         );
       });
 
@@ -104,7 +92,7 @@ describe("the portfolio deriver", () => {
               { pieces: 1, buyPrice: 50, sellPrice: 60, orderFee: 1.5 },
               { pieces: 1, buyPrice: 55, sellPrice: 60, orderFee: 1.5 },
             ],
-          }),
+          })
         );
       });
 
@@ -134,7 +122,7 @@ describe("the portfolio deriver", () => {
                 taxes: 0.2,
               },
             ],
-          }),
+          })
         );
       });
 
@@ -154,7 +142,7 @@ describe("the portfolio deriver", () => {
               { pieces: 1, buyPrice: 50, sellPrice: 65, orderFee: 0.75 },
               { pieces: 1, buyPrice: 55, sellPrice: 65, orderFee: 1 },
             ],
-          }),
+          })
         );
       });
     });
@@ -186,7 +174,7 @@ describe("the portfolio deriver", () => {
               sellDate: "2022-03-01",
             },
           ],
-        }),
+        })
       );
     });
 
@@ -295,67 +283,6 @@ describe("the portfolio deriver", () => {
       ]);
 
       expect(getBatchesHistory(TEST_ORDERS)).toEqual([]);
-    });
-  });
-
-  describe("getPositionDividendSum", () => {
-    const ISIN = "test-isin";
-    const ORDERS = getTestOrders([
-      { timestamp: "2024-01-01", asset: ISIN, pieces: 1, sharePrice: 10 },
-      { timestamp: "2024-01-03", asset: ISIN, pieces: 2, sharePrice: 15 },
-      { timestamp: "2024-01-05", asset: ISIN, pieces: 3, sharePrice: 20 },
-      { timestamp: "2024-01-07", asset: ISIN, pieces: -2, sharePrice: 25 },
-    ]);
-
-    it("returns 0 if no dividends were recorded", () => {
-      expect(getPositionDividendSum(ORDERS, [], "open")).toEqual(0);
-      expect(getPositionDividendSum(ORDERS, [], "closed")).toEqual(0);
-    });
-
-    it("returns the correct sum for a single dividend", () => {
-      const payouts = getTestPayouts([
-        {
-          timestamp: "2024-01-06",
-          asset: ISIN,
-          dividendPerShare: 3,
-          pieces: 6,
-        },
-      ]);
-
-      expect(getPositionDividendSum(ORDERS, payouts, "open")).toEqual(12);
-      expect(getPositionDividendSum(ORDERS, payouts, "closed")).toEqual(6);
-    });
-
-    it("returns the correct sum for multiple payouts", () => {
-      const payouts = getTestPayouts([
-        {
-          timestamp: "2024-01-04",
-          asset: ISIN,
-          dividendPerShare: 2,
-          pieces: 3,
-        },
-        {
-          timestamp: "2024-01-06",
-          asset: ISIN,
-          dividendPerShare: 3,
-          pieces: 6,
-        },
-      ]);
-
-      expect(getPositionDividendSum(ORDERS, payouts, "open")).toEqual(14);
-      expect(getPositionDividendSum(ORDERS, payouts, "closed")).toEqual(10);
-    });
-
-    it("returns 0 if no orders where recorded", () => {
-      const payouts = getTestPayouts([
-        { asset: ISIN, dividendPerShare: 2, pieces: 4 },
-      ]);
-
-      expect(getPositionDividendSum([], payouts, "open")).toEqual(0);
-    });
-
-    it("returns 0 for an empty portfolio", () => {
-      expect(getPositionDividendSum([], [], "open")).toEqual(0);
     });
   });
 });

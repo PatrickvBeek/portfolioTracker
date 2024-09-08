@@ -5,12 +5,14 @@ import {
   isOrder,
 } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
-import {
-  getDividendVolume,
-  sumDividendTaxes,
-} from "../dividendPayouts/dividend.derivers";
+import { sumDividendTaxes } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
+import {
+  areFloatsEqual,
+  isFloatLowerThan,
+  isFloatNegative,
+} from "../utils/floats";
 import {
   BatchType,
   Batches,
@@ -21,32 +23,21 @@ import {
 
 const EMPTY_BATCHES: Batches = { open: [], closed: [] };
 
-export const getPositionDividendSum = (
-  orders: Order[],
-  dividendPayouts: DividendPayout[],
-  batchType: BatchType,
-): number =>
-  sum(
-    getBatchesOfType(orders, dividendPayouts, batchType)
-      .flatMap((position) => position.dividendPayouts)
-      .map(getDividendVolume),
-  );
-
 export const getTotalTaxesForClosedBatches = (
   orders: Order[],
-  dividendPayouts: DividendPayout[],
+  dividendPayouts: DividendPayout[]
 ): number =>
   sum(
     getBatchesOfType(orders, dividendPayouts, "closed"),
-    ({ taxes, dividendPayouts }) => taxes + sumDividendTaxes(dividendPayouts),
+    ({ taxes, dividendPayouts }) => taxes + sumDividendTaxes(dividendPayouts)
   );
 
 export function getBatches(
   orders: Order[],
-  dividendPayouts: DividendPayout[],
+  dividendPayouts: DividendPayout[]
 ): Batches | undefined {
   const activity = sort([...orders, ...dividendPayouts], getNumericDateTime);
-  if (sum(orders, (order) => order.pieces) < 0) {
+  if (isFloatNegative(sum(orders, (order) => order.pieces))) {
     return undefined; // you can't sell more pieces than you have (shorting is not supported).
   }
 
@@ -56,7 +47,7 @@ export function getBatches(
 export function getBatchesOfType<T extends BatchType>(
   orders: Order[],
   dividendPayouts: DividendPayout[],
-  batchType: T,
+  batchType: T
 ): Batches[T] {
   return getBatches(orders, dividendPayouts)?.[batchType] || [];
 }
@@ -74,7 +65,7 @@ export function getBatchesHistory(orders: Order[]): BatchesHistory {
         { date: getActivityDate(order), batches: newBatches },
       ];
     },
-    [] as BatchesHistory,
+    [] as BatchesHistory
   );
 
   if (history.length !== orders.length) {
@@ -86,15 +77,15 @@ export function getBatchesHistory(orders: Order[]): BatchesHistory {
 
 export const getBatchesAtTimeStamp = (
   orders: Order[],
-  timeStampOfInterest: number,
+  timeStampOfInterest: number
 ): Batches =>
   getBatchesHistory(orders).findLast(
-    ({ date }) => date.getTime() <= timeStampOfInterest,
+    ({ date }) => date.getTime() <= timeStampOfInterest
   )?.batches || EMPTY_BATCHES;
 
 function updateBatchesWithActivity(
   batches: Batches | undefined,
-  activity: PortfolioActivity,
+  activity: PortfolioActivity
 ): Batches | undefined {
   if (!batches) {
     return undefined;
@@ -106,7 +97,7 @@ function updateBatchesWithActivity(
 
 function updateBatchesWithDividendPayout(
   batches: Batches,
-  payout: DividendPayout,
+  payout: DividendPayout
 ): Batches {
   return {
     closed: batches.closed,
@@ -121,7 +112,7 @@ function updateBatchesWithDividendPayout(
             taxes: payout.taxes * (pos.pieces / payout.pieces),
           },
         ],
-        getNumericDateTime,
+        getNumericDateTime
       ),
     })),
   };
@@ -129,7 +120,7 @@ function updateBatchesWithDividendPayout(
 
 function updateBatchesWithOrder(
   batches: Batches | undefined,
-  order: Order,
+  order: Order
 ): Batches | undefined {
   if (!batches) {
     return undefined;
@@ -141,7 +132,7 @@ function updateBatchesWithOrder(
 
 function updateBatchesWithSell(
   batches: Batches | undefined,
-  sell: Order,
+  sell: Order
 ): Batches | undefined {
   if (!batches || sell.pieces > 0 || batches.open.length < 1) {
     return undefined;
@@ -149,31 +140,44 @@ function updateBatchesWithSell(
   const piecesToSell = -sell.pieces;
   const [firstBatch, ...remaining] = batches.open;
 
-  if (piecesToSell === firstBatch.pieces) {
+  if (areFloatsEqual(piecesToSell, firstBatch.pieces)) {
     return closeFirstBatchCompletely(
       firstBatch,
       remaining,
       batches.closed,
-      sell,
+      sell
     );
   }
 
-  if (piecesToSell < firstBatch.pieces) {
+  if (isFloatLowerThan(piecesToSell, firstBatch.pieces)) {
     return closeFirstBatchPartially(
       firstBatch,
       remaining,
       batches.closed,
       sell,
-      piecesToSell,
+      piecesToSell
     );
   }
 
-  return closeFirstBatchAndContinue(
-    firstBatch,
-    remaining,
-    batches.closed,
-    sell,
-    piecesToSell,
+  const newlyClosedBatch = {
+    ...firstBatch,
+    sellPrice: sell.sharePrice,
+    sellDate: sell.timestamp,
+    orderFee:
+      firstBatch.orderFee + (firstBatch.pieces / piecesToSell) * sell.orderFee,
+    taxes: firstBatch.taxes + (firstBatch.pieces / piecesToSell) * sell.taxes,
+  };
+
+  const piecesStillToSell = piecesToSell - firstBatch.pieces;
+
+  return updateBatchesWithSell(
+    { open: remaining, closed: [...batches.closed, newlyClosedBatch] },
+    {
+      ...sell,
+      pieces: -piecesStillToSell,
+      orderFee: (1 - firstBatch.pieces / piecesToSell) * sell.orderFee,
+      taxes: (1 - firstBatch.pieces / piecesToSell) * sell.taxes,
+    }
   );
 }
 
@@ -181,7 +185,7 @@ function closeFirstBatchCompletely(
   firstBatch: OpenBatch,
   remaining: OpenBatch[],
   closedBatches: ClosedBatch[],
-  sell: Order,
+  sell: Order
 ): Batches {
   const newBatch: ClosedBatch = {
     ...firstBatch,
@@ -202,9 +206,9 @@ function closeFirstBatchPartially(
   remaining: OpenBatch[],
   closedBatches: ClosedBatch[],
   sell: Order,
-  piecesToSell: number,
+  piecesToSell: number
 ): Batches {
-  const newlyClosed: ClosedBatch = {
+  const newlyClosed = {
     ...firstBatch,
     pieces: piecesToSell,
     sellPrice: sell.sharePrice,
@@ -218,7 +222,8 @@ function closeFirstBatchPartially(
       taxes: (piecesToSell / payout.pieces) * payout.taxes,
     })),
   };
-  const reducedBatch: OpenBatch = {
+
+  const reducedBatch = {
     ...firstBatch,
     pieces: firstBatch.pieces - piecesToSell,
     orderFee: (1 - piecesToSell / firstBatch.pieces) * firstBatch.orderFee,
@@ -234,34 +239,6 @@ function closeFirstBatchPartially(
     open: [reducedBatch, ...remaining],
     closed: [...closedBatches, newlyClosed],
   };
-}
-
-function closeFirstBatchAndContinue(
-  firstBatch: OpenBatch,
-  remainingOpen: OpenBatch[],
-  closedBatch: ClosedBatch[],
-  sell: Order,
-  piecesToSell: number,
-): Batches | undefined {
-  const newlyClosedBatch: ClosedBatch = {
-    ...firstBatch,
-    sellPrice: sell.sharePrice,
-    sellDate: sell.timestamp,
-    orderFee:
-      firstBatch.orderFee + (firstBatch.pieces / piecesToSell) * sell.orderFee,
-    taxes: firstBatch.taxes + (firstBatch.pieces / piecesToSell) * sell.taxes,
-  };
-  const piecesStillToSell = piecesToSell - firstBatch.pieces;
-
-  return updateBatchesWithSell(
-    { open: remainingOpen, closed: [...closedBatch, newlyClosedBatch] },
-    {
-      ...sell,
-      pieces: -piecesStillToSell,
-      orderFee: (1 - firstBatch.pieces / piecesToSell) * sell.orderFee,
-      taxes: (1 - firstBatch.pieces / piecesToSell) * sell.taxes,
-    },
-  );
 }
 
 const orderToOpenBatch = (order: Order): OpenBatch => ({
@@ -282,3 +259,15 @@ function updateBatchesWithBuy(batch: Batches, buy: Order): Batches | undefined {
     open: [...batch.open, orderToOpenBatch(buy)],
   };
 }
+export const getProfitForClosedBatch = ({
+  pieces,
+  buyPrice,
+  sellPrice,
+  orderFee,
+  taxes,
+}: ClosedBatch): number => pieces * (sellPrice - buyPrice) - orderFee - taxes;
+
+export const getProfitForOpenBatch = (
+  { pieces, buyPrice, orderFee, taxes }: OpenBatch,
+  currentPrice: number
+): number => pieces * (currentPrice - buyPrice) - orderFee - taxes;

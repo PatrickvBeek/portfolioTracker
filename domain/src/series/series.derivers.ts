@@ -11,9 +11,9 @@ import { Portfolio } from "../portfolio/portfolio.entities";
 import { updateBy } from "../utils/arrays";
 import { Series, SeriesPoint } from "./series.entities";
 
-export function getInitialValueSeriesForPortfolio(
-  portfolio: Portfolio,
-): Series<number> {
+export const getInitialValueSeriesForPortfolio = (
+  portfolio: Portfolio
+): Series<number> => {
   const diffs = Object.values(portfolio.orders)
     .map(getBatchesHistory)
     .map(batchHistoryToSeries)
@@ -25,9 +25,9 @@ export function getInitialValueSeriesForPortfolio(
     (prev, current) => ({
       timestamp: current.timestamp,
       value: prev.value + current.value,
-    }),
+    })
   );
-}
+};
 
 const differentiateNumberSeries = (series: Series<number>): Series<number> => {
   if (series.length < 2) {
@@ -53,7 +53,7 @@ const batchHistoryToSeries = (history: BatchesHistory): Series<number> =>
   history.map(batchHistoryDataPointToSeriesPoint);
 
 const batchHistoryDataPointToSeriesPoint = (
-  point: BatchesHistoryDataPoint,
+  point: BatchesHistoryDataPoint
 ): SeriesPoint<number> => ({
   timestamp: point.date.getTime(),
   value: sum(point.batches.open, getBatchInitialValue),

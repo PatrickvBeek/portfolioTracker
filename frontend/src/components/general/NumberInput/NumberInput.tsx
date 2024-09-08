@@ -25,19 +25,19 @@ export const NumberInput = ({
   ...rest
 }: NumberInputProps): ReactElement => {
   const [display, setDisplay] = useState(
-    getStringOfDefaultValue(defaultValue, digits),
+    getStringOfDefaultValue(defaultValue, digits)
   );
 
   const potentialNumberRegex = new RegExp(
-    `^(-|\\+)?\\d{0,}\\.?\\d{0,${digits || ""}}$`,
+    `^(-|\\+)?\\d{0,}\\.?\\d{0,${digits || ""}}$`
   );
 
   const numberRegex = new RegExp(
-    `^(-|\\+)?\\d{1,}(\\.\\d{0,${digits || ""}})?$`,
+    `^(-|\\+)?\\d{1,}(\\.\\d{0,${digits || ""}})?$`
   );
 
   const handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void = (
-    event,
+    event
   ) => {
     const amount = insertPotentiallyMissingZero(event.target.value);
     if (amount.match(potentialNumberRegex)) {
@@ -70,7 +70,7 @@ export const NumberInput = ({
 
 const getStringOfDefaultValue: (
   value: number | undefined,
-  digits: number | undefined,
+  digits: number | undefined
 ) => string = (value, digits) => {
   if (value === undefined) {
     return "";

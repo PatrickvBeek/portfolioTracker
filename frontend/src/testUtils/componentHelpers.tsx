@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent, { Options, UserEvent } from "@testing-library/user-event";
 import { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -14,7 +14,7 @@ export function customRender({
   const queryClient = new QueryClient(queryClientConfig);
   const user = userEvent.setup(userEventOptions);
   const renderResult = render(
-    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>,
+    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
   );
 
   return {
@@ -32,17 +32,14 @@ export const componentHelpers = (user: UserEvent) => ({
     label: string;
     value: string;
   }) => {
-    await act(async () => {
-      await user.type(await screen.findByLabelText(label), value);
-    });
+    await user.type(await screen.findByLabelText(label), value);
   },
   selectAsset: async (assetName: string) => {
     const assetInput = await screen.findByLabelText("Asset");
-    await act(async () => {
-      await user.click(assetInput);
-    });
-    await act(async () => {
-      await user.click(await screen.findByText(assetName));
-    });
+    await user.click(assetInput);
+    await user.click(await screen.findByText(assetName));
   },
 });
+
+export const getTextWithNonBreakingSpaceReplaced = (element: HTMLElement) =>
+  element.textContent?.replace(/\u00A0/g, " ");

@@ -10,7 +10,7 @@ const frontendBuildPath = path.join(
   "..",
   "..",
   "frontend",
-  "build",
+  "build"
 );
 app.use(express.static(frontendBuildPath));
 

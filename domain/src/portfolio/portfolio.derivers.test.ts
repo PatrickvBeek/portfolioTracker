@@ -2,7 +2,9 @@ import { it } from "vitest";
 import {
   getElementsGroupedByAsset,
   getTestDividendPayout,
+  getTestDividendPayoutsGroupedByAsset,
   getTestOrder,
+  getTestOrdersGroupedByAsset,
   getTestPortfolio,
 } from "../dataHelpers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
@@ -15,11 +17,12 @@ import {
   TEST_ORDER_TESLA,
 } from "../testConstants";
 import {
-  getAllOrdersInPortfolio,
-  getInitialValueOfIsinInPortfolio,
+  getLatestPriceFromTransactions,
+  getNonRealizedGainsForIsin,
   getOrderFeesOfIsinInPortfolio,
-  getProfitForIsin,
+  getRealizedGainsForIsin,
   isOrderValidForPortfolio,
+  portfolioContainsOrder,
 } from "./portfolio.derivers";
 import { Portfolio } from "./portfolio.entities";
 
@@ -34,26 +37,16 @@ const TEST_PORTFOLIO: Portfolio = {
 
 const createTestPortfolio = (
   orders: Partial<Order>[],
-  payouts: Partial<DividendPayout>[],
+  payouts: Partial<DividendPayout>[]
 ): Portfolio =>
   getTestPortfolio({
     orders: getElementsGroupedByAsset(orders.map(getTestOrder)),
     dividendPayouts: getElementsGroupedByAsset(
-      payouts.map(getTestDividendPayout),
+      payouts.map(getTestDividendPayout)
     ),
   });
 
 describe("The Portfolio deriver", () => {
-  describe("getAllOrdersInPortfolio", () => {
-    it("returns the correct orders", () => {
-      expect(getAllOrdersInPortfolio(TEST_PORTFOLIO)).toEqual([
-        TEST_ORDER_TESLA,
-        TEST_ORDER_1_GOOGLE,
-        TEST_ORDER_2_GOOGLE,
-      ]);
-    });
-  });
-
   describe("getOrderFeesOfIsinInPortfolio", () => {
     describe("calculates the order fees correctly", () => {
       const testPortfolio = TEST_PORTFOLIO;
@@ -62,24 +55,24 @@ describe("The Portfolio deriver", () => {
       it("for open", () => {
         expect(
           isins.map((isin) =>
-            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "open"),
-          ),
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "open")
+          )
         ).toEqual([1, 0.5]);
       });
 
       it("for closed", () => {
         expect(
           isins.map((isin) =>
-            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "closed"),
-          ),
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "closed")
+          )
         ).toEqual([0, 1.5]);
       });
 
       it("for both", () => {
         expect(
           isins.map((isin) =>
-            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "both"),
-          ),
+            getOrderFeesOfIsinInPortfolio(testPortfolio, isin, "both")
+          )
         ).toEqual([1, 2]);
       });
     });
@@ -92,38 +85,8 @@ describe("The Portfolio deriver", () => {
       };
 
       expect(
-        getOrderFeesOfIsinInPortfolio(testPortfolio, "not there", "open"),
+        getOrderFeesOfIsinInPortfolio(testPortfolio, "not there", "open")
       ).toBe(0);
-    });
-  });
-
-  describe("getInvestedValueOfIsinInPortfolio returns the correct value for", () => {
-    const testPortfolio = TEST_PORTFOLIO;
-
-    it("a single open position", () => {
-      expect(
-        getInitialValueOfIsinInPortfolio(testPortfolio, TEST_ASSET_GOOGLE.isin),
-      ).toEqual(100);
-    });
-
-    it("a single closed position", () => {
-      expect(
-        getInitialValueOfIsinInPortfolio(
-          testPortfolio,
-          TEST_ASSET_GOOGLE.isin,
-          "closed",
-        ),
-      ).toEqual(100);
-    });
-
-    it("for an non existing isin", () => {
-      expect(
-        getInitialValueOfIsinInPortfolio(
-          testPortfolio,
-          "not present",
-          "closed",
-        ),
-      ).toEqual(0);
     });
   });
 
@@ -136,8 +99,8 @@ describe("The Portfolio deriver", () => {
         expect(
           isOrderValidForPortfolio(
             getTestPortfolio({}),
-            getTestOrder({ pieces: 5 }),
-          ),
+            getTestOrder({ pieces: 5 })
+          )
         ).toBe(true);
       });
 
@@ -151,8 +114,8 @@ describe("The Portfolio deriver", () => {
         expect(
           isOrderValidForPortfolio(
             portfolio,
-            getTestOrder({ timestamp: earlyDate, pieces: 1 }),
-          ),
+            getTestOrder({ timestamp: earlyDate, pieces: 1 })
+          )
         ).toBe(true);
       });
 
@@ -166,8 +129,8 @@ describe("The Portfolio deriver", () => {
         expect(
           isOrderValidForPortfolio(
             portfolio,
-            getTestOrder({ timestamp: laterDate, pieces: 1 }),
-          ),
+            getTestOrder({ timestamp: laterDate, pieces: 1 })
+          )
         ).toBe(true);
       });
     });
@@ -190,8 +153,8 @@ describe("The Portfolio deriver", () => {
               asset: "test-asset",
               pieces: -2,
               timestamp: laterDate,
-            }),
-          ),
+            })
+          )
         ).toBe(false);
       });
 
@@ -218,8 +181,8 @@ describe("The Portfolio deriver", () => {
               asset: "test-asset",
               timestamp: middleDate,
               pieces: -10,
-            }),
-          ),
+            })
+          )
         ).toBe(false);
       });
 
@@ -246,14 +209,14 @@ describe("The Portfolio deriver", () => {
               asset: "test-asset",
               timestamp: middleDate,
               pieces: -10,
-            }),
-          ),
+            })
+          )
         ).toBe(true);
       });
     });
   });
 
-  describe("getProfitForIsin", () => {
+  describe("getRealizedGainsForIsin", () => {
     const day1 = "2024-06-01";
     const day2 = "2024-06-02";
     const day3 = "2024-06-03";
@@ -303,10 +266,139 @@ describe("The Portfolio deriver", () => {
             asset: "asset",
             timestamp: day3,
           },
-        ],
+        ]
       );
 
-      expect(getProfitForIsin(portfolio, "asset")).toEqual(82);
+      expect(getRealizedGainsForIsin(portfolio, "asset")).toEqual(82);
+    });
+  });
+
+  describe("getNonRealizedGainsForIsin", () => {
+    it("calculates the correct value for a complex scenario", () => {
+      const day1 = "2024-06-01";
+      const day2 = "2024-06-02";
+      const day3 = "2024-06-03";
+      const day4 = "2024-06-04";
+      const portfolio = createTestPortfolio(
+        [
+          {
+            asset: "asset",
+            sharePrice: 100,
+            pieces: 10,
+            orderFee: 2,
+            taxes: 0,
+            timestamp: day1,
+          },
+          {
+            asset: "asset",
+            sharePrice: 105,
+            pieces: 10,
+            orderFee: 4,
+            taxes: 0,
+            timestamp: day2,
+          },
+          {
+            asset: "asset",
+            sharePrice: 110,
+            pieces: -15,
+            orderFee: 2,
+            taxes: 3,
+            timestamp: day4,
+          },
+        ],
+        [
+          // should not be used
+          {
+            pieces: 20,
+            dividendPerShare: 0.25,
+            taxes: 0.5,
+            asset: "asset",
+            timestamp: day3,
+          },
+        ]
+      );
+
+      expect(getNonRealizedGainsForIsin(portfolio, "asset", 110)).toEqual(23);
+    });
+  });
+
+  describe("portfolioContainsOrder", () => {
+    const testOrder: Order = {
+      asset: "asset",
+      orderFee: 10,
+      pieces: 11,
+      sharePrice: 12,
+      taxes: 9,
+      timestamp: "2024-03-04T04:03:01",
+      uuid: "unique",
+    };
+    const portfolio = getTestPortfolio({
+      orders: getElementsGroupedByAsset([testOrder]),
+    });
+
+    it("returns true for two identical orders", () => {
+      expect(portfolioContainsOrder(portfolio, testOrder)).toBe(true);
+    });
+
+    it("returns true for two identical orders that only differ in order time on same day", () => {
+      expect(
+        portfolioContainsOrder(portfolio, {
+          ...testOrder,
+          timestamp: "2024-03-04T06:04:11",
+        })
+      ).toBe(true);
+    });
+
+    it("returns false for two orders with same timestamp but different taxes", () => {
+      expect(
+        portfolioContainsOrder(portfolio, {
+          ...testOrder,
+          taxes: 42,
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe("getLatestPriceFromTransactions", () => {
+    it("returns the latest price independent of order of recording, ignoring dividend payouts", () => {
+      const portfolio = getTestPortfolio({
+        orders: getTestOrdersGroupedByAsset([
+          {
+            asset: "asset",
+            pieces: -0.1,
+            sharePrice: 1.1,
+            timestamp: "2024-03-01T00:00:00",
+          },
+          {
+            asset: "asset",
+            pieces: -10,
+            sharePrice: 10.1,
+            timestamp: "2024-04-01T00:00:00",
+          },
+          {
+            asset: "asset",
+            pieces: 11,
+            sharePrice: 11.1,
+            timestamp: "2024-01-01T00:00:00",
+          },
+          {
+            asset: "otherAsset",
+            pieces: 12.12,
+            sharePrice: 12.12,
+            timestamp: "2025-01-01T00:00:00",
+          },
+        ]),
+        dividendPayouts: getTestDividendPayoutsGroupedByAsset([
+          {
+            asset: "asset",
+            dividendPerShare: 3,
+            pieces: 3,
+            timestamp: "2024-04-02T00:00:)0",
+          },
+        ]),
+      });
+
+      expect(getLatestPriceFromTransactions(portfolio, "asset")).toEqual(10.1);
     });
   });
 });

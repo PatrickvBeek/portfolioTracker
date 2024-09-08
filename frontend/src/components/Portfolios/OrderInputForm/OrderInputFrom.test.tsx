@@ -1,4 +1,4 @@
-import { act, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import {
   TEST_ASSET_LIB,
   TEST_ASSET_TESLA,
@@ -38,7 +38,7 @@ describe("The OrderInputForm", () => {
       component: <OrderInputForm {...PROPS} />,
     });
     expect(
-      await screen.findByRole("button", { name: "Submit" }),
+      await screen.findByRole("button", { name: "Submit" })
     ).toHaveTextContent("Submit");
   });
 
@@ -52,7 +52,7 @@ describe("The OrderInputForm", () => {
     await selectAsset(TEST_ASSET.displayName);
 
     expect(
-      await screen.findByRole("button", { name: "Submit" }),
+      await screen.findByRole("button", { name: "Submit" })
     ).toBeDisabled();
 
     await fillNumberInput({ label: "Share Price", value: "400" });
@@ -70,12 +70,10 @@ describe("The OrderInputForm", () => {
 
     expect(await screen.findByRole("button", { name: "Submit" })).toBeEnabled();
 
-    await act(async () => {
-      await user.clear(await screen.findByLabelText("Pieces"));
-    });
+    await user.clear(await screen.findByLabelText("Pieces"));
     await fillNumberInput({ label: "Pieces", value: "-4" });
     expect(
-      await screen.findByRole("button", { name: "Submit" }),
+      await screen.findByRole("button", { name: "Submit" })
     ).toBeDisabled();
   });
 
@@ -90,7 +88,7 @@ describe("The OrderInputForm", () => {
     await fillNumberInput({ label: "Share Price", value: "400" });
 
     expect(screen.getByTitle("Summary Text")).toHaveTextContent(
-      "4 x 400 + 1 = 1601.00",
+      "4 x 400 + 1 = 1601.00"
     );
   });
 
@@ -114,22 +112,16 @@ describe("The OrderInputForm", () => {
     });
     const dateInput = await screen.findByLabelText("Order Date");
 
-    await act(async () => {
-      await user.clear(dateInput);
-    });
+    await user.clear(dateInput);
 
-    await act(async () => {
-      await user.type(
-        await screen.findByLabelText("Order Date"),
-        `${TEST_ORDER_TESLA.timestamp}`,
-      );
-    });
-    await act(async () => {
-      await user.click(await screen.findByRole("button", { name: "Submit" }));
-    });
+    await user.type(
+      screen.getByLabelText("Order Date"),
+      `${TEST_ORDER_TESLA.timestamp}`
+    );
+    await user.click(await screen.findByRole("button", { name: "Submit" }));
 
     expect(
-      await screen.findByText(/duplicate order detected!/i),
+      await screen.findByText(/duplicate order detected!/i)
     ).toBeInTheDocument();
   });
 });
