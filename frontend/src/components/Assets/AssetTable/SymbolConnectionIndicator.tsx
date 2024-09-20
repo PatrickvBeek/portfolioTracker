@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 import { PRICE_FREQUENCY } from "../../../../../api";
 import { useFetchPrices } from "../../../hooks/prices/priceHooks";
 import { Props } from "../../../utility/types";
+import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
 import "./SymbolConnectionIndicator.css";
 
 type SymbolConnectionIndicatorProps = Props<{
@@ -17,7 +18,7 @@ export function SymbolConnectionIndicator({
   });
 
   if (priceQuery.isLoading) {
-    return <i className="fa fa-duotone fa-spinner fa-spin" />;
+    return <LoadingIndicator />;
   }
 
   return (

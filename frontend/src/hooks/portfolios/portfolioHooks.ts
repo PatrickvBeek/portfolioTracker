@@ -15,6 +15,18 @@ import {
   deletePortfolioFromLibrary,
 } from "../../../../domain/src/portfolio/portfolio.operations";
 
+export function usePortfolioQuery<T>(
+  portfolioName: string,
+  selector: (p: Portfolio) => T
+) {
+  return useQuery("portfolios", fetchPortfolios, {
+    select: (lib) => {
+      const portfolio = lib[portfolioName];
+      return portfolio && selector(portfolio);
+    },
+  });
+}
+
 export function useGetPortfolioActivity(portfolioName: string) {
   return useQuery("portfolios", fetchPortfolios, {
     select: (lib) => {

@@ -12,7 +12,10 @@ import {
 import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
 import { isFloatPositive } from "../../../../../../domain/src/utils/floats";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
-import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
+import {
+  useGetPortfolio,
+  usePortfolioQuery,
+} from "../../../../hooks/portfolios/portfolioHooks";
 import { PositionsListItem } from "../PositionList";
 
 export function useGetPositionListItems(
@@ -46,10 +49,6 @@ function getPositionListItems(
       );
 
       return {
-        asset: assets[isin]?.displayName || "asset not found",
-        pieces: Number(
-          getPiecesOfIsinInPortfolio(portfolio, isin, batchType).toPrecision(4)
-        ),
         totalValue:
           batchType === "open"
             ? getCurrentValueOfOpenBatches(portfolio, isin, currentPrice)
@@ -75,3 +74,53 @@ const isIsinOfBatchType = (
 
   return batchType === "open" ? isOpen : !isOpen;
 };
+
+export const useGetPositionPieces = (
+  portfolioName: string,
+  isin: string,
+  batchType: BatchType
+) =>
+  usePortfolioQuery(portfolioName, (p): number =>
+    getPiecesOfIsinInPortfolio(p, isin, batchType)
+  );
+
+export const useGetTotalPositionValue = (
+  portfolioName: string,
+  isin: string,
+  batchType: BatchType
+) =>
+  usePortfolioQuery(portfolioName, (p): number => {
+    const currentPrice = getLatestPriceFromTransactions(p, isin) ?? NaN;
+
+    return batchType === "open"
+      ? getCurrentValueOfOpenBatches(p, isin, currentPrice)
+      : getSoldValueOfClosedBatches(p, isin);
+  });
+
+export const useGetRealizedPositionGains = (
+  portfolioName: string,
+  isin: string
+) =>
+  usePortfolioQuery(portfolioName, (p): number =>
+    getRealizedGainsForIsin(p, isin)
+  );
+
+export const useGetNonRealizedPositionGains = (
+  portfolioName: string,
+  isin: string
+) =>
+  usePortfolioQuery(portfolioName, (p): number => {
+    const currentPrice = getLatestPriceFromTransactions(p, isin) ?? NaN;
+
+    return getNonRealizedGainsForIsin(p, isin, currentPrice);
+  });
+
+export const useGetPositionProfit = (portfolioName: string, isin: string) =>
+  usePortfolioQuery(portfolioName, (p): number => {
+    const currentPrice = getLatestPriceFromTransactions(p, isin) ?? NaN;
+
+    const nonRealizedGains = getNonRealizedGainsForIsin(p, isin, currentPrice);
+    const realizedGains = getRealizedGainsForIsin(p, isin);
+
+    return realizedGains + nonRealizedGains;
+  });

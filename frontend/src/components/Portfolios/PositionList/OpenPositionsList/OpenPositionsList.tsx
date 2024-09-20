@@ -11,6 +11,7 @@ export const OpenPositionsList = ({
   return positions ? (
     <PositionsList
       portfolioName={portfolioName}
+      batchType={"open"}
       items={positions}
       headline={"Open Positions"}
     />

@@ -11,6 +11,7 @@ export const ClosedPositionsList = ({
   return closedPositions ? (
     <PositionsList
       portfolioName={portfolioName}
+      batchType={"closed"}
       items={closedPositions}
       headline={"Closed Positions"}
     />

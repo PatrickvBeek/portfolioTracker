@@ -65,7 +65,7 @@
     "serve": "vite preview",
     "start": "vite",
     "test": "vitest run",
-    "test:no-watch": "vitest watch",
+    "test:watch": "vitest watch",
     "tsc": "tsc"
   },
   "type": "module"
