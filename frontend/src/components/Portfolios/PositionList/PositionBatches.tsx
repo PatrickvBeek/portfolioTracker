@@ -10,7 +10,7 @@ import {
   useGetClosedBatchesListItems,
   useGetOpenBatchesListItems,
 } from "./PositionBatches.logic";
-import { PositionsListItem } from "./PositionList";
+import { PositionsListItem } from "./PositionList.logic";
 
 const { bemBlock, bemElement } = bemHelper("position-batches");
 

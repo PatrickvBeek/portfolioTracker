@@ -1,5 +1,5 @@
 import { PositionsList } from "../PositionList";
-import { useGetPositionListItems } from "./PositionList.logic";
+import { useGetPositionListItems } from "../PositionList.logic";
 
 type OpenPositionsListProps = { portfolioName: string };
 

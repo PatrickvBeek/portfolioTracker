@@ -1,5 +1,8 @@
-import { AssetLibrary } from "../../../../../../domain/src/asset/asset.entities";
-import { BatchType } from "../../../../../../domain/src/batch/batch.entities";
+import { AssetLibrary } from "../../../../../domain/src/asset/asset.entities";
+import {
+  Batches,
+  BatchType,
+} from "../../../../../domain/src/batch/batch.entities";
 import {
   getBatchesForIsin,
   getCurrentValueOfOpenBatches,
@@ -8,15 +11,23 @@ import {
   getPiecesOfIsinInPortfolio,
   getRealizedGainsForIsin,
   getSoldValueOfClosedBatches,
-} from "../../../../../../domain/src/portfolio/portfolio.derivers";
-import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
-import { isFloatPositive } from "../../../../../../domain/src/utils/floats";
-import { useGetAssets } from "../../../../hooks/assets/assetHooks";
+} from "../../../../../domain/src/portfolio/portfolio.derivers";
+import { Portfolio } from "../../../../../domain/src/portfolio/portfolio.entities";
+import { isFloatPositive } from "../../../../../domain/src/utils/floats";
+import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
   useGetPortfolio,
   usePortfolioQuery,
-} from "../../../../hooks/portfolios/portfolioHooks";
-import { PositionsListItem } from "../PositionList";
+} from "../../../hooks/portfolios/portfolioHooks";
+
+export type PositionsListItem = {
+  totalValue: number;
+  realizedGains: number;
+  nonRealizedGains: number;
+  profit: number;
+  batches: Batches | undefined;
+  isin: string;
+};
 
 export function useGetPositionListItems(
   portfolio: string,

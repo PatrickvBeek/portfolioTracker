@@ -37,9 +37,7 @@ const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
       )}
       options={assets}
       onChange={(_, value) => value?.isin && onSelect(value?.isin)}
-      getOptionLabel={(asset) =>
-        `${asset.displayName}${asset.isin}${asset.symbol || ""}`
-      }
+      getOptionLabel={(asset) => `${asset.displayName} (${asset.isin})`}
       renderOption={(props, asset) => (
         <Box
           component={"li"}

@@ -2,10 +2,7 @@ import { IconButton } from "@mui/material";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { sum } from "radash";
 import { UseQueryResult } from "react-query";
-import {
-  Batches,
-  BatchType,
-} from "../../../../../domain/src/batch/batch.entities";
+import { BatchType } from "../../../../../domain/src/batch/batch.entities";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { toPrice } from "../../../utility/prices";
@@ -13,26 +10,18 @@ import { Props } from "../../../utility/types";
 import Balance from "../../general/Balance/Balance";
 import CustomTable from "../../general/CustomTable/CustomTable";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
+import { PositionBatches } from "./PositionBatches";
+import "./PositionList.less";
 import {
+  PositionsListItem,
   useGetNonRealizedPositionGains,
   useGetPositionPieces,
   useGetPositionProfit,
   useGetRealizedPositionGains,
   useGetTotalPositionValue,
-} from "./ClosedPositionsList/PositionList.logic";
-import { PositionBatches } from "./PositionBatches";
-import "./PositionList.less";
+} from "./PositionList.logic";
 
 const { bemBlock, bemElement } = bemHelper("position-list");
-
-export type PositionsListItem = {
-  totalValue: number;
-  realizedGains: number;
-  nonRealizedGains: number;
-  profit: number;
-  batches: Batches | undefined;
-  isin: string;
-};
 
 type PositionsListProps = Props<{
   headline: string;
