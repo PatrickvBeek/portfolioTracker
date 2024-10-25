@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import {
   Asset,
   AssetLibrary,
@@ -15,6 +15,7 @@ import {
   getTextWithNonBreakingSpaceReplaced,
 } from "../../../../testUtils/componentHelpers";
 import { mockNetwork } from "../../../../testUtils/networkMock";
+import { getCellTextsForRow } from "../testUtils";
 import { OpenPositionsList } from "./OpenPositionsList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
@@ -69,6 +70,7 @@ const mockPortfolio: Portfolio = {
     }),
   ]),
 };
+
 const mockPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
@@ -95,24 +97,27 @@ describe("the open inventory list component", () => {
       component: <OpenPositionsList portfolioName={testPortfolioName} />,
     });
 
-    expect(
-      (await screen.findAllByRole("cell")).map((el) =>
-        getTextWithNonBreakingSpaceReplaced(el)
-      )
-    ).toEqual([
-      "Open Asset",
-      "1",
-      "10.00 €",
-      "+5.50 €",
-      "+3.00 €",
-      "+8.50 €",
-      "1 Position",
-      "",
-      "10.00 €",
-      "+5.50 €",
-      "+3.00 €",
-      "+8.50 €",
-    ]);
+    await waitFor(async () =>
+      expect(await getCellTextsForRow(1)).toEqual([
+        "Open Asset",
+        "1",
+        "10.00 €",
+        "+5.50 €",
+        "+3.00 €",
+        "+8.50 €",
+      ])
+    );
+
+    await waitFor(async () =>
+      expect(await getCellTextsForRow(2)).toEqual([
+        "1 Position",
+        "",
+        "10.00 €",
+        "+5.50 €",
+        "+3.00 €",
+        "+8.50 €",
+      ])
+    );
   });
 
   it("can expand to show batches", async () => {

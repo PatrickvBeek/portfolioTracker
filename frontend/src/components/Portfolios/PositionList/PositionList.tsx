@@ -1,6 +1,6 @@
 import { IconButton } from "@mui/material";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { sum } from "radash";
+import { ColumnDef } from "@tanstack/react-table";
+import { isNumber } from "radash";
 import { UseQueryResult } from "react-query";
 import { BatchType } from "../../../../../domain/src/batch/batch.entities";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
@@ -13,34 +13,32 @@ import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicato
 import { PositionBatches } from "./PositionBatches";
 import "./PositionList.less";
 import {
-  PositionsListItem,
   useGetNonRealizedPositionGains,
   useGetPositionPieces,
   useGetPositionProfit,
   useGetRealizedPositionGains,
   useGetTotalPositionValue,
+  usePositionListSum,
 } from "./PositionList.logic";
 
 const { bemBlock, bemElement } = bemHelper("position-list");
 
 type PositionsListProps = Props<{
   headline: string;
-  items: PositionsListItem[];
+  items: string[];
   batchType: BatchType;
   portfolioName: string;
 }>;
 
-const columnHelper = createColumnHelper<PositionsListItem>();
-
 const getColumDefs: (
   portfolioName: string,
   batchType: BatchType
-) => ColumnDef<PositionsListItem, any>[] = (portfolioName, batchType) => [
+) => ColumnDef<string, any>[] = (portfolioName, batchType) => [
   {
     header: "Asset",
     cell: ({ row }) => (
       <AssetName
-        isin={row.original.isin}
+        isin={row.original}
         canExpand={row.getCanExpand()}
         isExpanded={row.getIsExpanded()}
         toggleExpandHandler={row.getToggleExpandedHandler()}
@@ -54,7 +52,7 @@ const getColumDefs: (
     cell: ({ row }) => (
       <PositionPieces
         portfolioName={portfolioName}
-        isin={row.original.isin}
+        isin={row.original}
         batchType={batchType}
       />
     ),
@@ -62,79 +60,76 @@ const getColumDefs: (
       align: "right",
     },
   },
-  columnHelper.accessor("totalValue", {
-    id: "totalValue",
+  {
     header: "Total Value",
     cell: ({ row }) => (
       <TotalPositionValue
         portfolioName={portfolioName}
-        isin={row.original.isin}
+        isin={row.original}
         batchType={batchType}
       />
     ),
-    footer: ({ table }) =>
-      toPrice(
-        sum(table.getRowModel().rows, (row) => row.getValue("totalValue"))
-      ),
+    footer: () => (
+      <TotalValueSum portfolioName={portfolioName} batchType={batchType} />
+    ),
     meta: {
       align: "right",
     },
-  }),
-  columnHelper.accessor("realizedGains", {
-    id: "realizedGains",
+  },
+  {
     header: "Realized Gains",
     cell: ({ row }) => (
       <RealizedPositionGains
-        isin={row.original.isin}
+        isin={row.original}
         portfolioName={portfolioName}
       />
     ),
-    footer: ({ table }) => (
-      <Balance
-        value={sum(table.getRowModel().rows, (row) =>
-          row.getValue("realizedGains")
-        )}
+    footer: () => (
+      <PositionListSumAsBalance
+        portfolioName={portfolioName}
+        batchType={batchType}
+        selector={useGetRealizedPositionGains}
       />
     ),
     meta: {
       align: "right",
     },
-  }),
-  columnHelper.accessor("nonRealizedGains", {
-    id: "nonRealizedGains",
+  },
+  {
     header: "Non-Realized Gains",
     cell: ({ row }) => (
       <NonRealizedPositionGains
-        isin={row.original.isin}
+        isin={row.original}
         portfolioName={portfolioName}
       />
     ),
-    footer: ({ table }) => (
-      <Balance
-        value={sum(table.getRowModel().rows, (row) =>
-          row.getValue("nonRealizedGains")
-        )}
+    footer: () => (
+      <PositionListSumAsBalance
+        portfolioName={portfolioName}
+        batchType={batchType}
+        selector={useGetNonRealizedPositionGains}
       />
     ),
     meta: {
       align: "right",
     },
-  }),
-  columnHelper.accessor("profit", {
-    id: "profit",
+  },
+  {
     header: "Profit",
     cell: ({ row }) => (
-      <PositionProfit isin={row.original.isin} portfolioName={portfolioName} />
+      <PositionProfit isin={row.original} portfolioName={portfolioName} />
     ),
-    footer: ({ table }) => (
-      <Balance
-        value={sum(table.getRowModel().rows, (row) => row.getValue("profit"))}
+    footer: () => (
+      <PositionListSumAsBalance
+        portfolioName={portfolioName}
+        batchType={batchType}
+        selector={useGetPositionProfit}
       />
     ),
     meta: {
       align: "right",
     },
-  }),
+  },
 ];
 
 type PositionItemProps = {
@@ -218,6 +213,18 @@ function TotalPositionValue({
   return <div>{toPrice(value)}</div>;
 }
 
+function TotalValueSum({
+  portfolioName,
+  batchType,
+}: Omit<PositionItemProps, "isin">) {
+  const sum = usePositionListSum(
+    portfolioName,
+    batchType,
+    useGetTotalPositionValue
+  );
+  return isNumber(sum) ? toPrice(sum) : null;
+}
+
 function RealizedPositionGains({
   portfolioName,
   isin,
@@ -243,6 +250,24 @@ function PositionProfit({
   const query = useGetPositionProfit(portfolioName, isin);
 
   return <QueryAsBalance query={query} />;
+}
+
+function PositionListSumAsBalance({
+  portfolioName,
+  batchType,
+  selector,
+}: {
+  portfolioName: string;
+  batchType: BatchType;
+  selector: (
+    portfolioName: string,
+    isin: string,
+    batchType: BatchType
+  ) => UseQueryResult<number>;
+}) {
+  const sum = usePositionListSum(portfolioName, batchType, selector);
+
+  return isNumber(sum) ? <Balance value={sum} /> : null;
 }
 
 function QueryAsBalance({ query }: { query: UseQueryResult<number> }) {

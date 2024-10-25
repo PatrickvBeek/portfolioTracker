@@ -10,7 +10,6 @@ import {
   useGetClosedBatchesListItems,
   useGetOpenBatchesListItems,
 } from "./PositionBatches.logic";
-import { PositionsListItem } from "./PositionList.logic";
 
 const { bemBlock, bemElement } = bemHelper("position-batches");
 
@@ -18,14 +17,10 @@ export function PositionBatches({
   row,
   portfolioName,
 }: {
-  row: Row<PositionsListItem>;
+  row: Row<string>;
   portfolioName: string;
 }): React.ReactElement | null {
-  const { batches } = row.original;
-  if (!batches) {
-    return null;
-  }
-  const { isin } = row.original;
+  const isin = row.original;
 
   return (
     <div className={bemBlock(undefined)}>

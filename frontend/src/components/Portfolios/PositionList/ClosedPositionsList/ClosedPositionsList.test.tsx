@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import {
   Asset,
   AssetLibrary,
@@ -15,6 +15,7 @@ import {
   getTextWithNonBreakingSpaceReplaced,
 } from "../../../../testUtils/componentHelpers";
 import { mockNetwork } from "../../../../testUtils/networkMock";
+import { getCellTextsForRow } from "../testUtils";
 import { ClosedPositionsList } from "./ClosedPositionsList";
 
 const testAssetLib: AssetLibrary = getElementsByIsin<Asset>([
@@ -84,14 +85,6 @@ const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 describe("the ClosedPositionList component", () => {
   mockNetwork({ portfolioLib: testPortfolioLib, assetLib: testAssetLib });
 
-  async function getCellTextsForRow(
-    i: number
-  ): Promise<(string | undefined)[]> {
-    const row = (await screen.findAllByRole("row"))[i];
-    const cells = await within(row).findAllByRole("cell");
-    return cells.map((cell) => getTextWithNonBreakingSpaceReplaced(cell));
-  }
-
   it("renders the correct list headers", async () => {
     customRender({
       component: <ClosedPositionsList portfolioName={mockPortfolio.name} />,
@@ -115,14 +108,16 @@ describe("the ClosedPositionList component", () => {
     });
 
     expect(await screen.findAllByRole("row")).toHaveLength(3);
-    expect(await getCellTextsForRow(1)).toEqual([
-      "Asset 2",
-      "3",
-      "60.00 €",
-      "+12.00 €",
-      "0.00 €",
-      "+12.00 €",
-    ]);
+    await waitFor(async () =>
+      expect(await getCellTextsForRow(1)).toEqual([
+        "Asset 2",
+        "3",
+        "60.00 €",
+        "+12.00 €",
+        "0.00 €",
+        "+12.00 €",
+      ])
+    );
   });
 
   it("renders the correct footer", async () => {

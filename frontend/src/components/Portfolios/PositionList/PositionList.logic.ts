@@ -1,10 +1,8 @@
-import { AssetLibrary } from "../../../../../domain/src/asset/asset.entities";
+import { sort, sum } from "radash";
+import { UseQueryResult } from "react-query";
+import { BatchType } from "../../../../../domain/src/batch/batch.entities";
 import {
-  Batches,
-  BatchType,
-} from "../../../../../domain/src/batch/batch.entities";
-import {
-  getBatchesForIsin,
+  getAssetsForBatchType,
   getCurrentValueOfOpenBatches,
   getLatestPriceFromTransactions,
   getNonRealizedGainsForIsin,
@@ -12,79 +10,42 @@ import {
   getRealizedGainsForIsin,
   getSoldValueOfClosedBatches,
 } from "../../../../../domain/src/portfolio/portfolio.derivers";
-import { Portfolio } from "../../../../../domain/src/portfolio/portfolio.entities";
-import { isFloatPositive } from "../../../../../domain/src/utils/floats";
-import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
   useGetPortfolio,
   usePortfolioQuery,
 } from "../../../hooks/portfolios/portfolioHooks";
 
-export type PositionsListItem = {
-  totalValue: number;
-  realizedGains: number;
-  nonRealizedGains: number;
-  profit: number;
-  batches: Batches | undefined;
-  isin: string;
-};
-
 export function useGetPositionListItems(
-  portfolio: string,
+  portfolioName: string,
   batchType: BatchType
-) {
-  const portfolioQuery = useGetPortfolio(portfolio);
-  const assetQuery = useGetAssets();
+): string[] | undefined {
+  const portfolioQuery = useGetPortfolio(portfolioName);
 
-  return getPositionListItems(portfolioQuery.data, assetQuery.data, batchType);
-}
-
-function getPositionListItems(
-  portfolio: Portfolio | undefined,
-  assets: AssetLibrary | undefined,
-  batchType: BatchType
-): PositionsListItem[] | undefined {
-  if (!(assets && portfolio)) {
+  if (!portfolioQuery.data) {
     return undefined;
   }
-  return Object.keys(portfolio.orders)
-    .filter((isin) => isIsinOfBatchType(portfolio, isin, batchType))
-    .map((isin) => {
+  const portfolio = portfolioQuery.data;
+
+  const isins = getAssetsForBatchType(portfolioQuery.data, batchType);
+
+  return sort(
+    isins,
+    (isin) => {
       const currentPrice =
         getLatestPriceFromTransactions(portfolio, isin) ?? NaN;
-      const realizedGains = getRealizedGainsForIsin(portfolio, isin);
-      const nonRealizedGains = getNonRealizedGainsForIsin(
-        portfolio,
-        isin,
-        currentPrice
-      );
-
-      return {
-        totalValue:
-          batchType === "open"
-            ? getCurrentValueOfOpenBatches(portfolio, isin, currentPrice)
-            : getSoldValueOfClosedBatches(portfolio, isin),
-        realizedGains,
-        nonRealizedGains,
-        profit: nonRealizedGains + realizedGains,
-        batches: getBatchesForIsin(portfolio, isin),
-        isin,
-      };
-    })
-    .toSorted((a, b) => b.totalValue - a.totalValue);
+      return batchType === "open"
+        ? getCurrentValueOfOpenBatches(portfolio, isin, currentPrice)
+        : getSoldValueOfClosedBatches(portfolio, isin);
+    },
+    true
+  );
 }
 
-const isIsinOfBatchType = (
-  portfolio: Portfolio,
-  isin: string,
+const useGetAssetsForBatchType = (
+  portfolioName: string,
   batchType: BatchType
-): boolean => {
-  const isOpen = isFloatPositive(
-    getPiecesOfIsinInPortfolio(portfolio, isin, "open")
-  );
-
-  return batchType === "open" ? isOpen : !isOpen;
-};
+) =>
+  usePortfolioQuery(portfolioName, (p) => getAssetsForBatchType(p, batchType));
 
 export const useGetPositionPieces = (
   portfolioName: string,
@@ -135,3 +96,19 @@ export const useGetPositionProfit = (portfolioName: string, isin: string) =>
 
     return realizedGains + nonRealizedGains;
   });
+
+export const usePositionListSum = (
+  portfolioName: string,
+  batchType: BatchType,
+  selector: (
+    portfolioName: string,
+    isin: string,
+    batchType: BatchType
+  ) => UseQueryResult<number>
+): number | undefined => {
+  const isins = useGetAssetsForBatchType(portfolioName, batchType).data;
+  return (
+    isins &&
+    sum(isins.map((isin) => selector(portfolioName, isin, batchType).data || 0))
+  );
+};
