@@ -1,9 +1,9 @@
 import { IconButton } from "@mui/material";
 import { ColumnDef } from "@tanstack/react-table";
 import { isNumber } from "radash";
-import { UseQueryResult } from "react-query";
 import { BatchType } from "../../../../../domain/src/batch/batch.entities";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
+import { PriceQuery } from "../../../hooks/prices/priceHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
@@ -263,14 +263,14 @@ function PositionListSumAsBalance({
     portfolioName: string,
     isin: string,
     batchType: BatchType
-  ) => UseQueryResult<number>;
+  ) => PriceQuery;
 }) {
   const sum = usePositionListSum(portfolioName, batchType, selector);
 
   return isNumber(sum) ? <Balance value={sum} /> : null;
 }
 
-function QueryAsBalance({ query }: { query: UseQueryResult<number> }) {
+function QueryAsBalance({ query }: { query: PriceQuery }) {
   if (query.isLoading) {
     return <LoadingIndicator />;
   }

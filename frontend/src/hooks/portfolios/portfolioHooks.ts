@@ -17,13 +17,15 @@ import {
 
 export function usePortfolioQuery<T>(
   portfolioName: string,
-  selector: (p: Portfolio) => T
+  selector: (p: Portfolio) => T,
+  enabled?: boolean
 ) {
   return useQuery("portfolios", fetchPortfolios, {
     select: (lib) => {
       const portfolio = lib[portfolioName];
       return portfolio && selector(portfolio);
     },
+    enabled,
   });
 }
 

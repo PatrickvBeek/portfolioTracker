@@ -8,6 +8,7 @@ import {
   getPortfolioBatchesOfType,
 } from "../../../../../domain/src/portfolio/portfolio.derivers";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
+import { useCurrentPriceByIsin } from "../../../hooks/prices/priceHooks";
 
 export type OpenBatchListItem = {
   buyDate: OpenBatch["buyDate"];
@@ -24,13 +25,16 @@ export function useGetOpenBatchesListItems(
   isin: string
 ): OpenBatchListItem[] | undefined {
   const portfolioQuery = useGetPortfolio(portfolioName);
+  const priceQuery = useCurrentPriceByIsin(isin);
 
-  if (!portfolioQuery.data) {
+  if (!portfolioQuery.data || priceQuery.isLoading) {
     return undefined;
   }
 
   const currentPrice =
-    getLatestPriceFromTransactions(portfolioQuery.data, isin) ?? NaN;
+    priceQuery.data ??
+    getLatestPriceFromTransactions(portfolioQuery.data, isin) ??
+    NaN;
 
   return getPortfolioBatchesOfType(portfolioQuery.data, isin, "open").map(
     ({ buyDate, pieces, buyPrice, orderFee }) => ({

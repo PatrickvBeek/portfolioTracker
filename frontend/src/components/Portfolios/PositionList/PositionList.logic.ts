@@ -1,5 +1,4 @@
 import { sort, sum } from "radash";
-import { UseQueryResult } from "react-query";
 import { BatchType } from "../../../../../domain/src/batch/batch.entities";
 import {
   getAssetsForBatchType,
@@ -14,6 +13,10 @@ import {
   useGetPortfolio,
   usePortfolioQuery,
 } from "../../../hooks/portfolios/portfolioHooks";
+import {
+  PriceQuery,
+  useCurrentPriceByIsin,
+} from "../../../hooks/prices/priceHooks";
 
 export function useGetPositionListItems(
   portfolioName: string,
@@ -60,14 +63,27 @@ export const useGetTotalPositionValue = (
   portfolioName: string,
   isin: string,
   batchType: BatchType
-) =>
-  usePortfolioQuery(portfolioName, (p): number => {
-    const currentPrice = getLatestPriceFromTransactions(p, isin) ?? NaN;
+) => {
+  const priceQuery = useCurrentPriceByIsin(isin);
+  const valueQuery = usePortfolioQuery(
+    portfolioName,
+    (p): number => {
+      const currentPrice =
+        priceQuery.data ?? getLatestPriceFromTransactions(p, isin) ?? NaN;
 
-    return batchType === "open"
-      ? getCurrentValueOfOpenBatches(p, isin, currentPrice)
-      : getSoldValueOfClosedBatches(p, isin);
-  });
+      return batchType === "open"
+        ? getCurrentValueOfOpenBatches(p, isin, currentPrice)
+        : getSoldValueOfClosedBatches(p, isin);
+    },
+    !priceQuery.isLoading
+  );
+
+  return {
+    isLoading: priceQuery.isLoading || valueQuery.isLoading,
+    isError: priceQuery.isError || valueQuery.isError,
+    data: valueQuery.data,
+  };
+};
 
 export const useGetRealizedPositionGains = (
   portfolioName: string,
@@ -80,22 +96,54 @@ export const useGetRealizedPositionGains = (
 export const useGetNonRealizedPositionGains = (
   portfolioName: string,
   isin: string
-) =>
-  usePortfolioQuery(portfolioName, (p): number => {
-    const currentPrice = getLatestPriceFromTransactions(p, isin) ?? NaN;
+) => {
+  const onlinePriceQuery = useCurrentPriceByIsin(isin);
+  const gainQuery = usePortfolioQuery(
+    portfolioName,
+    (p): number => {
+      const currentPrice =
+        onlinePriceQuery.data ?? getLatestPriceFromTransactions(p, isin) ?? NaN;
 
-    return getNonRealizedGainsForIsin(p, isin, currentPrice);
-  });
+      return getNonRealizedGainsForIsin(p, isin, currentPrice);
+    },
+    !onlinePriceQuery.isLoading
+  );
 
-export const useGetPositionProfit = (portfolioName: string, isin: string) =>
-  usePortfolioQuery(portfolioName, (p): number => {
-    const currentPrice = getLatestPriceFromTransactions(p, isin) ?? NaN;
+  return {
+    isLoading: onlinePriceQuery.isLoading || gainQuery.isLoading,
+    isError: gainQuery.isError || onlinePriceQuery.isError,
+    data: gainQuery.data,
+  };
+};
 
-    const nonRealizedGains = getNonRealizedGainsForIsin(p, isin, currentPrice);
-    const realizedGains = getRealizedGainsForIsin(p, isin);
+export const useGetPositionProfit = (portfolioName: string, isin: string) => {
+  const currentPriceQuery = useCurrentPriceByIsin(isin);
+  const profitQuery = usePortfolioQuery(
+    portfolioName,
+    (p): number => {
+      const currentPrice =
+        currentPriceQuery.data ??
+        getLatestPriceFromTransactions(p, isin) ??
+        NaN;
 
-    return realizedGains + nonRealizedGains;
-  });
+      const nonRealizedGains = getNonRealizedGainsForIsin(
+        p,
+        isin,
+        currentPrice
+      );
+      const realizedGains = getRealizedGainsForIsin(p, isin);
+
+      return realizedGains + nonRealizedGains;
+    },
+    !currentPriceQuery.isLoading
+  );
+
+  return {
+    isLoading: currentPriceQuery.isLoading || profitQuery.isLoading,
+    isError: currentPriceQuery.isError || profitQuery.isError,
+    data: profitQuery.data,
+  };
+};
 
 export const usePositionListSum = (
   portfolioName: string,
@@ -104,7 +152,7 @@ export const usePositionListSum = (
     portfolioName: string,
     isin: string,
     batchType: BatchType
-  ) => UseQueryResult<number>
+  ) => PriceQuery
 ): number | undefined => {
   const isins = useGetAssetsForBatchType(portfolioName, batchType).data;
   return (
