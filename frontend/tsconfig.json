@@ -18,7 +18,7 @@
     "noUnusedParameters": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "../domain"],
+  "include": ["src", "../domain", "types"],
   "types": ["node", "@testing-library/jest-dom", "vitest/globals"]
 }
 // "exclude": ["**/*.test.*", "**/__mocks__/*", "**/__tests__/*"],

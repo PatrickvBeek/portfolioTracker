@@ -1,12 +1,10 @@
 import { ReactElement, useState } from "react";
 import { useAddAsset } from "../../../hooks/assets/assetHooks";
-import { bemHelper } from "../../../utility/bemHelper";
 import { Button } from "../../general/Button";
 import { FormRowFlex } from "../../general/FormRowFlex/FormRowFlex";
 import { TextInput } from "../../general/TextInput";
-import "./AssetInputForm.css";
-
-const { bemBlock, bemElement } = bemHelper("asset-input-form");
+import CheckSymbolButton from "../CheckSymbolButton/CheckSymbolButton";
+import styles from "./AssetInputForm.module.less";
 
 const sanitizeIsin = (input: string): string => {
   return input.replace(/[^0-9a-zA-Z]/gi, "");
@@ -51,7 +49,7 @@ const AssetInputForm = (): ReactElement => {
   };
 
   return (
-    <div className={bemBlock("")}>
+    <div className={styles.form}>
       <FormRowFlex>
         <TextInput
           onChange={(element) => {
@@ -90,13 +88,17 @@ const AssetInputForm = (): ReactElement => {
           errorMessage={"A symbol contains five or fewer letters."}
         />
       </FormRowFlex>
-      <Button
-        label="Submit"
-        isDisabled={!isValidInput({ name: nameInputText, isin: isinInputText })}
-        onClick={handleSubmitButton}
-        className={bemElement("submit-button")}
-        isPrimary={true}
-      />
+      <div className={styles.buttons}>
+        <CheckSymbolButton symbol={symbolInputText} />
+        <Button
+          label="Submit"
+          isDisabled={
+            !isValidInput({ name: nameInputText, isin: isinInputText })
+          }
+          onClick={handleSubmitButton}
+          isPrimary={true}
+        />
+      </div>
     </div>
   );
 };
