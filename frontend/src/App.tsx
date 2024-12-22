@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
-import "./App.css";
+import "./App.less";
 import Assets from "./components/Assets/Assets";
 import Dashboard from "./components/Dashboard/Dashboard";
 import NavigationBar from "./components/NavigationBar/NavigationBar";
