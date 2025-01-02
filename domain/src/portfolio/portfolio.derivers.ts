@@ -1,4 +1,4 @@
-import { sort, sum } from "radash";
+import { partial, sort, sum } from "radash";
 import { getNumericDateTime, isOrder } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
 import {
@@ -13,6 +13,7 @@ import { getDividendNetVolume } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
+import { isFloatPositive } from "../utils/floats";
 import { Portfolio } from "./portfolio.entities";
 
 const getOrdersForIsin = (portfolio: Portfolio, isin: string): Order[] =>
@@ -45,6 +46,26 @@ export const getBatchesForIsin = (
 
 const getAllOrdersInPortfolio = (portfolio: Portfolio): Order[] =>
   Object.values(portfolio.orders).flat();
+
+export const getAssetsForBatchType = (
+  portfolio: Portfolio,
+  batchType: BatchType
+): string[] =>
+  Object.keys(portfolio.orders).filter(
+    partial(isIsinOfBatchType, portfolio, batchType)
+  );
+
+const isIsinOfBatchType = (
+  portfolio: Portfolio,
+  batchType: BatchType,
+  isin: string
+): boolean => {
+  const isOpen = isFloatPositive(
+    getPiecesOfIsinInPortfolio(portfolio, isin, "open")
+  );
+
+  return batchType === "open" ? isOpen : !isOpen;
+};
 
 const getAllDividendPayoutsInPortfolio = (
   portfolio: Portfolio

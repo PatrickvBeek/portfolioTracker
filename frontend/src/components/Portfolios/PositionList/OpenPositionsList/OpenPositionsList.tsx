@@ -1,5 +1,5 @@
-import { useGetPositionListItems } from "../ClosedPositionsList/PositionList.logic";
 import { PositionsList } from "../PositionList";
+import { useGetPositionListItems } from "../PositionList.logic";
 
 type OpenPositionsListProps = { portfolioName: string };
 
@@ -11,6 +11,7 @@ export const OpenPositionsList = ({
   return positions ? (
     <PositionsList
       portfolioName={portfolioName}
+      batchType={"open"}
       items={positions}
       headline={"Open Positions"}
     />
