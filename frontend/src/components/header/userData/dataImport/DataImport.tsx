@@ -7,9 +7,9 @@ import Overlay from "../../../general/Overlay/Overlay";
 import { parseUserData } from "../userData";
 import styles from "./DataImport.module.less";
 
-export const DataImport: FC<{}> = ({}): ReactElement => {
+export const DataImport: FC = (): ReactElement => {
   const portfoliosMutation = useSetPortfolios();
-  const assetsMutation = useSetAssets();
+  const setAssets = useSetAssets();
   const id = useId();
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
@@ -28,7 +28,7 @@ export const DataImport: FC<{}> = ({}): ReactElement => {
             try {
               const parsedUserData = parseUserData(readingResult);
               portfoliosMutation.mutate(parsedUserData.portfolios);
-              assetsMutation.mutate(parsedUserData.assets);
+              setAssets(parsedUserData.assets);
             } catch (e) {
               console.log(e);
               setIsOverlayOpen(true);

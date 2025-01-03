@@ -1,4 +1,3 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
 import {
   Asset,
   AssetLibrary,
@@ -7,37 +6,31 @@ import {
   addAssetToLibrary,
   deleteAssetFromLib,
 } from "../../../../domain/src/asset/asset.operations";
+import { useUserDataContext } from "../../userDataContext";
 
-export function useGetAssets() {
-  return useQuery("assets", fetchAssets);
+export function useGetAssets(): AssetLibrary | undefined {
+  const { assets } = useUserDataContext();
+  return assets;
 }
 
 export function useSetAssets() {
-  const client = useQueryClient();
-  return useMutation(saveAssetsOnServer, {
-    onSuccess: () => {
-      client.invalidateQueries("assets");
-    },
-  });
+  const { setAssets } = useUserDataContext();
+
+  return (assets: AssetLibrary) => {
+    setAssets(assets);
+    localStorage.setItem("assets", JSON.stringify(assets));
+  };
 }
 
 export function useUpdateAssets(
   updater: (assetLib: AssetLibrary, updateData: Asset) => AssetLibrary
 ) {
-  const queryClient = useQueryClient();
-  const previousLib =
-    queryClient.getQueryData<Record<string, Asset>>("assets") || {};
-  return useMutation(
-    (asset: Asset) => {
-      return saveAssetsOnServer(updater(previousLib, asset));
-    },
-    {
-      onSuccess: (_, asset) => {
-        queryClient.invalidateQueries("assets");
-        queryClient.setQueriesData("assets", updater(previousLib, asset));
-      },
-    }
-  );
+  const { setAssets, assets } = useUserDataContext();
+  return (asset: Asset) => {
+    const newLib = updater(assets, asset);
+    setAssets(newLib);
+    localStorage.setItem("assets", JSON.stringify(newLib));
+  };
 }
 
 export function useAddAsset() {
@@ -47,18 +40,3 @@ export function useAddAsset() {
 export function useDeleteAsset() {
   return useUpdateAssets(deleteAssetFromLib);
 }
-
-const fetchAssets = async (): Promise<Record<string, Asset>> => {
-  const response = await fetch("/api/assets");
-  return response.json();
-};
-
-const saveAssetsOnServer = async (assetLib: Record<string, Asset>) => {
-  return fetch("/api/assets", {
-    method: "PUT",
-    body: JSON.stringify(assetLib),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};

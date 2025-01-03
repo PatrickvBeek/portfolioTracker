@@ -148,16 +148,13 @@ function AssetName({
   isExpanded: boolean;
   toggleExpandHandler: () => void;
 }) {
-  const assetsQuery = useGetAssets();
-  if (assetsQuery.isLoading) {
-    return <LoadingIndicator />;
+  const assetLib = useGetAssets();
+
+  if (!assetLib) {
+    return null;
   }
 
-  if (!assetsQuery.isSuccess) {
-    return <div>An error occurred...</div>;
-  }
-
-  const assetName = assetsQuery.data[isin]?.displayName;
+  const assetName = assetLib[isin]?.displayName;
 
   return (
     <div className={bemElement("asset-cell")}>

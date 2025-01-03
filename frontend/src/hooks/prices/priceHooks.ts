@@ -34,17 +34,11 @@ export const useCurrentPrice = (
   );
 
 export const useCurrentPriceByIsin = (isin: string) => {
-  const assetsQuery = useGetAssets();
-  const symbol = assetsQuery.data?.[isin]?.symbol;
-  const priceQuery = useCurrentPrice(symbol || "", !!assetsQuery.data);
+  const assetLib = useGetAssets();
+  const symbol = assetLib?.[isin]?.symbol;
+  const priceQuery = useCurrentPrice(symbol || "", !!assetLib);
 
-  const onlinePrice = priceQuery ? priceQuery.data : undefined;
-
-  return {
-    isLoading: assetsQuery.isLoading || priceQuery.isLoading,
-    isError: assetsQuery.isError || priceQuery.isError,
-    data: onlinePrice,
-  };
+  return priceQuery;
 };
 
 const fetchPrices = async (

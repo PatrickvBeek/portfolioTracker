@@ -7,22 +7,14 @@ import "./AssetTable.css";
 import { SymbolConnectionIndicator } from "./SymbolConnectionIndicator";
 
 const AssetTable = () => {
-  const assetDeletion = useDeleteAsset();
-  const { data, isLoading, isError, isRefetching, isSuccess } = useGetAssets();
+  const deleteAsset = useDeleteAsset();
+  const assetLibrary = useGetAssets();
 
-  if (isLoading || isRefetching) {
-    return <div>is loading...</div>;
+  if (!assetLibrary) {
+    return null;
   }
 
-  if (isError) {
-    return <div>an error occurred while loading...</div>;
-  }
-
-  if (!isSuccess) {
-    return <div>Sorry, something unexpected happened.</div>;
-  }
-
-  const customTableData = Object.values(data);
+  const customTableData = Object.values(assetLibrary);
   if (customTableData.length === 0) {
     return <div>no assets</div>;
   }
@@ -43,7 +35,7 @@ const AssetTable = () => {
       header: "Actions",
       cell: (a) => (
         <DeleteButtonWithConfirmation
-          deleteHandler={() => assetDeletion.mutate(a.getValue())}
+          deleteHandler={() => deleteAsset(a.getValue())}
           body={`Do you really want to delete the asset '${a.getValue().displayName}' from your library?`}
           title={`Delete Asset '${a.getValue().displayName}'?`}
         />

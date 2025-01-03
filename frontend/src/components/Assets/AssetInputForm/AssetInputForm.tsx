@@ -35,13 +35,13 @@ const AssetInputForm = (): ReactElement => {
   let [isinInputText, updateIsinInputText] = useState("");
   let [symbolInputText, updateSymbolInputText] = useState("");
 
-  const assetMutation = useAddAsset();
+  const addAssets = useAddAsset();
 
   const handleSubmitButton = () => {
     updateNameInputText("");
     updateIsinInputText("");
     updateSymbolInputText("");
-    assetMutation.mutate({
+    addAssets({
       displayName: nameInputText,
       isin: isinInputText,
       symbol: symbolInputText,

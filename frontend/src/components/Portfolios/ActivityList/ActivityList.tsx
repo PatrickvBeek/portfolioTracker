@@ -29,17 +29,17 @@ function ActivityList({
   portfolio,
 }: ActivityListProps): ReactElement | null {
   const activityQuery = useGetPortfolioActivity(portfolio);
-  const assetsQuery = useGetAssets();
+  const assetsLib = useGetAssets();
   const deleteOrder = useDeleteOrderFromPortfolio(portfolio).mutate;
   const deleteDividendPayout =
     useDeleteDividendPayoutFromPortfolio(portfolio).mutate;
 
-  if (!activityQuery.isSuccess || !assetsQuery.isSuccess) {
+  if (!activityQuery.isSuccess || !assetsLib) {
     return null;
   }
 
   const tableData = activityQuery.data.reverse();
-  const assets = assetsQuery.data;
+  const assets = assetsLib;
 
   const columnHelper = createColumnHelper<PortfolioActivity>();
 
