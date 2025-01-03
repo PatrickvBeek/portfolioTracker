@@ -1,7 +1,8 @@
 import { FC, ReactElement } from "react";
-import { DataExport } from "./dataExport/DataExport";
 import styles from "./Header.module.less";
 import { Navigation } from "./navigation/Navigation";
+import { DataExport } from "./userData/dataExport/DataExport";
+import { DataImport } from "./userData/dataImport/DataImport";
 
 export const Header: FC<{
   tabs: string[];
@@ -11,7 +12,10 @@ export const Header: FC<{
   <div className={styles.container}>
     <div className={styles.content}>
       <Navigation tabs={tabs} selectedTab={selectedTab} onSelect={onSelect} />
-      <DataExport />
+      <div className={styles.controls}>
+        <DataExport />
+        <DataImport />
+      </div>
     </div>
   </div>
 );

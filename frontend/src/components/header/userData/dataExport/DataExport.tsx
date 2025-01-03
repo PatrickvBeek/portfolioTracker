@@ -1,19 +1,8 @@
 import { Tooltip } from "@mui/material";
 import { FC, ReactElement } from "react";
-import { AssetLibrary } from "../../../../../domain/src/asset/asset.entities";
-import { PortfolioLibrary } from "../../../../../domain/src/portfolio/portfolio.entities";
-import { useGetAssets } from "../../../hooks/assets/assetHooks";
-import { useGetPortfolios } from "../../../hooks/portfolios/portfolioHooks";
-
-const EXPORT_VERSION = 1;
-
-type ExportedData = {
-  portfolios: PortfolioLibrary;
-  assets: AssetLibrary;
-  meta: {
-    exportVersion: number;
-  };
-};
+import { useGetAssets } from "../../../../hooks/assets/assetHooks";
+import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
+import { EXPORT_VERSION, ExportedData } from "../userData";
 
 export const DataExport: FC<{}> = ({}): ReactElement | null => {
   const portfolioQuery = useGetPortfolios();
