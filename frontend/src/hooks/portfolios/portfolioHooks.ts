@@ -15,6 +15,19 @@ import {
   deletePortfolioFromLibrary,
 } from "../../../../domain/src/portfolio/portfolio.operations";
 
+export function useGetPortfolios() {
+  return useQuery("portfolios", fetchPortfolios);
+}
+
+export function useSetPortfolios() {
+  const client = useQueryClient();
+  return useMutation(savePortfoliosOnServer, {
+    onSuccess: () => {
+      client.invalidateQueries("portfolios");
+    },
+  });
+}
+
 export function usePortfolioQuery<T>(
   portfolioName: string,
   selector: (p: Portfolio) => T,
@@ -42,10 +55,6 @@ export function useGetPortfolio(name: string) {
   return useQuery("portfolios", fetchPortfolios, {
     select: (lib) => lib[name],
   });
-}
-
-export function useGetPortfolios() {
-  return useQuery("portfolios", fetchPortfolios);
 }
 
 export function useAddPortfolio() {

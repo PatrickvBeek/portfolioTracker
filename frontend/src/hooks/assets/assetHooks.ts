@@ -12,6 +12,15 @@ export function useGetAssets() {
   return useQuery("assets", fetchAssets);
 }
 
+export function useSetAssets() {
+  const client = useQueryClient();
+  return useMutation(saveAssetsOnServer, {
+    onSuccess: () => {
+      client.invalidateQueries("assets");
+    },
+  });
+}
+
 export function useUpdateAssets(
   updater: (assetLib: AssetLibrary, updateData: Asset) => AssetLibrary
 ) {
