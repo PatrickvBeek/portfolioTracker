@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import "./App.less";
 import Assets from "./components/Assets/Assets";
 import Dashboard from "./components/Dashboard/Dashboard";
-import NavigationBar from "./components/NavigationBar/NavigationBar";
+import { Header } from "./components/header/Header";
 import Portfolios from "./components/Portfolios/Portfolios";
 import { queryClientConfig } from "./queryClient/config";
 import { bemHelper } from "./utility/bemHelper";
@@ -31,8 +31,7 @@ function App() {
   return (
     <div className={bemBlock("")}>
       <QueryClientProvider client={queryClient}>
-        <NavigationBar
-          className={bemElement("navigation-bar")}
+        <Header
           tabs={TABS}
           selectedTab={selectedTab}
           onSelect={setSelectedTab}

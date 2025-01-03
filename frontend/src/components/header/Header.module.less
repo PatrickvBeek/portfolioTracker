@@ -1,0 +1,25 @@
+@import (reference) "src/definitions.less";
+
+.container {
+  background-color: var(--theme);
+  width: 100%;
+
+  padding: @default-spacing 0;
+  display: flex;
+  justify-content: center;
+
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.content {
+  padding: 0 @double-spacing;
+
+  width: 100%;
+  max-width: @max-layout-width;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
