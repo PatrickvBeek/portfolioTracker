@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useContext } from "react";
 import { DividendPayout } from "../../../../domain/src/dividendPayouts/dividend.entities";
 import { Order } from "../../../../domain/src/order/order.entities";
 import { getActivitiesForPortfolio } from "../../../../domain/src/portfolio/portfolio.derivers";
@@ -14,47 +14,29 @@ import {
   deleteOrderFromPortfolio,
   deletePortfolioFromLibrary,
 } from "../../../../domain/src/portfolio/portfolio.operations";
+import { UserDataContext } from "../../userDataContext";
 
 export function useGetPortfolios() {
-  return useQuery("portfolios", fetchPortfolios);
+  const { portfolios } = useContext(UserDataContext);
+  return portfolios;
 }
 
 export function useSetPortfolios() {
-  const client = useQueryClient();
-  return useMutation(savePortfoliosOnServer, {
-    onSuccess: () => {
-      client.invalidateQueries("portfolios");
-    },
-  });
-}
-
-export function usePortfolioQuery<T>(
-  portfolioName: string,
-  selector: (p: Portfolio) => T,
-  enabled?: boolean
-) {
-  return useQuery("portfolios", fetchPortfolios, {
-    select: (lib) => {
-      const portfolio = lib[portfolioName];
-      return portfolio && selector(portfolio);
-    },
-    enabled,
-  });
-}
-
-export function useGetPortfolioActivity(portfolioName: string) {
-  return useQuery("portfolios", fetchPortfolios, {
-    select: (lib) => {
-      const portfolio = lib[portfolioName];
-      return portfolio ? getActivitiesForPortfolio(portfolio) : [];
-    },
-  });
+  const { setPortfolios } = useContext(UserDataContext);
+  return (portfolios: PortfolioLibrary) => {
+    setPortfolios(portfolios);
+    localStorage.setItem("portfolios", JSON.stringify(portfolios));
+  };
 }
 
 export function useGetPortfolio(name: string) {
-  return useQuery("portfolios", fetchPortfolios, {
-    select: (lib) => lib[name],
-  });
+  const portfolios = useGetPortfolios();
+  return portfolios[name];
+}
+
+export function useGetPortfolioActivity(portfolioName: string) {
+  const portfolio = useGetPortfolio(portfolioName);
+  return portfolio ? getActivitiesForPortfolio(portfolio) : [];
 }
 
 export function useAddPortfolio() {
@@ -68,84 +50,45 @@ export function useDeletePortfolio() {
 function useUpdatePortfolios<T extends PortfolioUpdate>(
   updater: PortfolioUpdater<T>
 ) {
-  const queryClient = useQueryClient();
-  const previousLibrary =
-    queryClient.getQueryData<PortfolioLibrary>("portfolios") || {};
-  return useMutation(
-    (update: T) => {
-      return savePortfoliosOnServer(updater(previousLibrary, update));
-    },
-    {
-      onSuccess: (_, update) => {
-        queryClient.invalidateQueries("portfolios");
-        queryClient.setQueriesData(
-          "portfolios",
-          updater(previousLibrary, update)
-        );
-      },
-    }
-  );
+  const { setPortfolios, portfolios } = useContext(UserDataContext);
+
+  return (update: T) => {
+    const newLib = updater(portfolios, update);
+    setPortfolios(newLib);
+    localStorage.setItem("portfolios", JSON.stringify(newLib));
+  };
 }
 
 export function useAddOrderToPortfolio(portfolio: string) {
-  const addOrder: (
-    library: PortfolioLibrary,
-    order: Order
-  ) => PortfolioLibrary = (lib, order) => {
+  return useUpdatePortfolios<Order>((lib, order) => {
     const newPortfolio = addOrderToPortfolio(lib[portfolio], order);
     return addPortfolioToLibrary(lib, newPortfolio);
-  };
-  return useUpdatePortfolios(addOrder);
+  });
 }
 
 export function useDeleteOrderFromPortfolio(portfolio: string) {
-  const deleteOrder: (
-    library: PortfolioLibrary,
-    order: Order
-  ) => PortfolioLibrary = (lib, order) => {
+  return useUpdatePortfolios<Order>((lib, order) => {
     const newPortfolio = deleteOrderFromPortfolio(lib[portfolio], order);
     return addPortfolioToLibrary(lib, newPortfolio);
-  };
-  return useUpdatePortfolios(deleteOrder);
+  });
 }
 
 export function useDeleteDividendPayoutFromPortfolio(portfolio: string) {
-  const deleteOrder: (
-    library: PortfolioLibrary,
-    payout: DividendPayout
-  ) => PortfolioLibrary = (lib, payout) => {
+  return useUpdatePortfolios<DividendPayout>((lib, payout) => {
     const newPortfolio = deleteDividendPayoutFromPortfolio(
       lib[portfolio],
       payout
     );
     return addPortfolioToLibrary(lib, newPortfolio);
-  };
-  return useUpdatePortfolios(deleteOrder);
+  });
 }
 
 export function useAddDividendPayoutToPortfolio(portfolio: string) {
-  const addDividendPayout: (
-    library: PortfolioLibrary,
-    payout: DividendPayout
-  ) => PortfolioLibrary = (lib, payout) => {
+  return useUpdatePortfolios<DividendPayout>((lib, payout) => {
     const newPortfolio = addDividendPayoutToPortfolio(lib[portfolio], payout);
     return addPortfolioToLibrary(lib, newPortfolio);
-  };
-  return useUpdatePortfolios(addDividendPayout);
-}
-
-const fetchPortfolios = async (): Promise<Record<string, Portfolio>> => {
-  const response = await fetch("/api/portfolios");
-  return response.json();
-};
-
-const savePortfoliosOnServer = async (portfolioLib: PortfolioLibrary) => {
-  return fetch("/api/portfolios", {
-    method: "PUT",
-    body: JSON.stringify(portfolioLib),
-    headers: { "Content-Type": "application/json" },
   });
-};
+}
 
 type PortfolioUpdate = Portfolio | Order | DividendPayout | string;
 

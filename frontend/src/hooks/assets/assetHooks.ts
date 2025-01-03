@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import {
   Asset,
   AssetLibrary,
@@ -6,15 +7,15 @@ import {
   addAssetToLibrary,
   deleteAssetFromLib,
 } from "../../../../domain/src/asset/asset.operations";
-import { useUserDataContext } from "../../userDataContext";
+import { UserDataContext } from "../../userDataContext";
 
 export function useGetAssets(): AssetLibrary | undefined {
-  const { assets } = useUserDataContext();
+  const { assets } = useContext(UserDataContext);
   return assets;
 }
 
 export function useSetAssets() {
-  const { setAssets } = useUserDataContext();
+  const { setAssets } = useContext(UserDataContext);
 
   return (assets: AssetLibrary) => {
     setAssets(assets);
@@ -25,7 +26,7 @@ export function useSetAssets() {
 export function useUpdateAssets(
   updater: (assetLib: AssetLibrary, updateData: Asset) => AssetLibrary
 ) {
-  const { setAssets, assets } = useUserDataContext();
+  const { setAssets, assets } = useContext(UserDataContext);
   return (asset: Asset) => {
     const newLib = updater(assets, asset);
     setAssets(newLib);

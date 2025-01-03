@@ -8,7 +8,7 @@ import { parseUserData } from "../userData";
 import styles from "./DataImport.module.less";
 
 export const DataImport: FC = (): ReactElement => {
-  const portfoliosMutation = useSetPortfolios();
+  const setPortfolios = useSetPortfolios();
   const setAssets = useSetAssets();
   const id = useId();
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -27,7 +27,7 @@ export const DataImport: FC = (): ReactElement => {
           if (typeof readingResult === "string") {
             try {
               const parsedUserData = parseUserData(readingResult);
-              portfoliosMutation.mutate(parsedUserData.portfolios);
+              setPortfolios(parsedUserData.portfolios);
               setAssets(parsedUserData.assets);
             } catch (e) {
               console.log(e);

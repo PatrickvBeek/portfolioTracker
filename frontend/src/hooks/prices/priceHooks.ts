@@ -11,32 +11,26 @@ export type PriceQuery = {
 
 export const usePriceQuery = <T>(
   params: PriceQueryParams,
-  selector?: (prices: Awaited<ReturnType<typeof fetchPrices>>) => T,
-  enabled?: boolean
+  selector?: (prices: Awaited<ReturnType<typeof fetchPrices>>) => T
 ) => {
   return useQuery({
     queryKey: `prices-${params.symbol}-${params.frequency}`,
     queryFn: async () => fetchPrices(params),
     select: selector,
     retry: false,
-    enabled,
   });
 };
 
-export const useCurrentPrice = (
-  symbol: PriceQueryParams["symbol"],
-  enabled?: boolean
-) =>
+export const useCurrentPrice = (symbol: PriceQueryParams["symbol"]) =>
   usePriceQuery(
     { symbol, frequency: PRICE_FREQUENCY.WEEKLY },
-    (prices = []) => prices.at(0)?.value,
-    enabled
+    (prices = []) => prices.at(0)?.value
   );
 
 export const useCurrentPriceByIsin = (isin: string) => {
   const assetLib = useGetAssets();
   const symbol = assetLib?.[isin]?.symbol;
-  const priceQuery = useCurrentPrice(symbol || "", !!assetLib);
+  const priceQuery = useCurrentPrice(symbol || "");
 
   return priceQuery;
 };

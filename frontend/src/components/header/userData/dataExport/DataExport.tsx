@@ -5,15 +5,15 @@ import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
 import { EXPORT_VERSION, ExportedData } from "../userData";
 
 export const DataExport: FC = (): ReactElement | null => {
-  const portfolioQuery = useGetPortfolios();
+  const portfolioLib = useGetPortfolios();
   const assetLib = useGetAssets();
 
-  if (!portfolioQuery.data || !assetLib) {
+  if (!portfolioLib || !assetLib) {
     return null;
   }
 
   const data: ExportedData = {
-    portfolios: portfolioQuery.data,
+    portfolios: portfolioLib,
     assets: assetLib,
     meta: { exportVersion: EXPORT_VERSION },
   };

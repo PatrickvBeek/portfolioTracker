@@ -17,33 +17,19 @@ const { bemBlock, bemElement } = bemHelper("portfolios");
 export type PortfolioProps = Props<{}>;
 
 function Portfolios({ className }: PortfolioProps) {
-  const portfoliosQuery = useGetPortfolios();
+  const portfolioLib = useGetPortfolios();
   const [selectedPortfolio, setSelectedPortfolio] = useState<
     string | undefined
-  >(undefined);
+  >(Object.keys(portfolioLib)[0]);
 
   useEffect(() => {
-    const portfolios = Object.keys(portfoliosQuery.data || {});
+    const portfolios = Object.keys(portfolioLib || {});
     if (!selectedPortfolio || !portfolios.includes(selectedPortfolio)) {
       setSelectedPortfolio(portfolios[0]);
     }
-  }, [portfoliosQuery.data, selectedPortfolio]);
+  }, [portfolioLib, selectedPortfolio]);
 
-  if (portfoliosQuery.isLoading) {
-    return <div>portfolios are loading...</div>;
-  }
-
-  if (portfoliosQuery.isError) {
-    return <div>an error occurred while loading your portfolios...</div>;
-  }
-
-  if (portfoliosQuery.isIdle) {
-    return <div>query is idling</div>;
-  }
-
-  const portfolios = portfoliosQuery.data;
-
-  if (Object.keys(portfolios).length < 1) {
+  if (Object.keys(portfolioLib).length < 1) {
     return <EmptyPortfolios />;
   }
 
@@ -59,7 +45,7 @@ function Portfolios({ className }: PortfolioProps) {
       />
       <div className={bemElement("header")}>
         <SelectionHeader
-          entries={Object.keys(portfolios)}
+          entries={Object.keys(portfolioLib)}
           selectedEntry={selectedPortfolio}
           setSelectedEntry={setSelectedPortfolio}
           className={bemElement("portfolio-selection")}
