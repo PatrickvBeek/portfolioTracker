@@ -1,14 +1,13 @@
 {
   "private": true,
   "workspaces": [
-    "backend",
     "domain",
     "frontend"
   ],
   "scripts": {
-    "build": "yarn workspace frontend build && yarn workspace backend build",
-    "start": "PT_DATA_DIR=$INIT_CWD/data yarn workspace backend start",
-    "architecture-tests": "yarn depcruise domain/src frontend/src backend/src"
+    "build": "yarn workspace frontend build",
+    "start": "yarn workspace frontend start",
+    "architecture-tests": "yarn depcruise domain/src frontend/src"
   },
   "dependencies": {
     "prettier": "^3.3.2"
