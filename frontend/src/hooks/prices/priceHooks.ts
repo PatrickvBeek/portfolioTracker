@@ -11,11 +11,13 @@ export type PriceQuery = {
 
 export const usePriceQuery = <T>(
   params: PriceQueryParams,
-  selector?: (prices: Awaited<ReturnType<typeof fetchPrices>>) => T
+  selector?: (
+    prices: Awaited<ReturnType<typeof getPricesFromAlphaVantage>>
+  ) => T
 ) => {
   return useQuery({
     queryKey: `prices-${params.symbol}-${params.frequency}`,
-    queryFn: async () => fetchPrices(params),
+    queryFn: async () => getPricesFromAlphaVantage(params),
     select: selector,
     retry: false,
   });
@@ -30,19 +32,26 @@ export const useCurrentPrice = (symbol: PriceQueryParams["symbol"]) =>
 export const useCurrentPriceByIsin = (isin: string) => {
   const assetLib = useGetAssets();
   const symbol = assetLib?.[isin]?.symbol;
-  const priceQuery = useCurrentPrice(symbol || "");
 
-  return priceQuery;
+  return useCurrentPrice(symbol || "");
 };
 
-const fetchPrices = async (
+const getPricesFromAlphaVantage = async (
   params: PriceQueryParams
 ): Promise<Series<number> | undefined> => {
   if (!params.symbol) {
     return undefined;
   }
 
-  const query = new URLSearchParams(params);
-  const response = await fetch(`/api/prices?${query.toString()}`).catch();
-  return response.json();
+  const response = await fetch(
+    `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${params.symbol}&outputsize=full&apikey=free_tier`
+  );
+  const prices = await response.json();
+
+  return Object.entries(prices["Time Series (Daily)"]).map(
+    ([dateString, price]) => ({
+      timestamp: new Date(dateString).getTime(),
+      value: parseFloat((price as any)["4. close"]),
+    })
+  );
 };
