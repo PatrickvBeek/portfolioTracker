@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, StrictMode, useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import "./App.less";
 import Assets from "./components/Assets/Assets";
@@ -6,6 +6,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import { Header } from "./components/header/Header";
 import Portfolios from "./components/Portfolios/Portfolios";
 import { queryClientConfig } from "./queryClient/config";
+import { UserDataProvider } from "./userDataContext";
 import { bemHelper } from "./utility/bemHelper";
 import { GeneralComponentProps } from "./utility/types";
 
@@ -30,14 +31,18 @@ function App() {
 
   return (
     <div className={bemBlock("")}>
-      <QueryClientProvider client={queryClient}>
-        <Header
-          tabs={TABS}
-          selectedTab={selectedTab}
-          onSelect={setSelectedTab}
-        />
-        <TabToRender className={bemElement("tab-content")} />
-      </QueryClientProvider>
+      <StrictMode>
+        <UserDataProvider>
+          <QueryClientProvider client={queryClient}>
+            <Header
+              tabs={TABS}
+              selectedTab={selectedTab}
+              onSelect={setSelectedTab}
+            />
+            <TabToRender className={bemElement("tab-content")} />
+          </QueryClientProvider>
+        </UserDataProvider>
+      </StrictMode>
     </div>
   );
 }

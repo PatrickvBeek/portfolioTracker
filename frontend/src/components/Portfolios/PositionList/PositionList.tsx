@@ -107,7 +107,7 @@ const getColumDefs: (
       <PositionListSumAsBalance
         portfolioName={portfolioName}
         batchType={batchType}
-        selector={useGetNonRealizedPositionGains}
+        selector={(p, isin) => useGetNonRealizedPositionGains(p, isin).data}
       />
     ),
     meta: {
@@ -123,7 +123,7 @@ const getColumDefs: (
       <PositionListSumAsBalance
         portfolioName={portfolioName}
         batchType={batchType}
-        selector={useGetPositionProfit}
+        selector={(p, isin) => useGetPositionProfit(p, isin).data}
       />
     ),
     meta: {
@@ -148,16 +148,13 @@ function AssetName({
   isExpanded: boolean;
   toggleExpandHandler: () => void;
 }) {
-  const assetsQuery = useGetAssets();
-  if (assetsQuery.isLoading) {
-    return <LoadingIndicator />;
+  const assetLib = useGetAssets();
+
+  if (!assetLib) {
+    return null;
   }
 
-  if (!assetsQuery.isSuccess) {
-    return <div>An error occurred...</div>;
-  }
-
-  const assetName = assetsQuery.data[isin]?.displayName;
+  const assetName = assetLib[isin]?.displayName;
 
   return (
     <div className={bemElement("asset-cell")}>
@@ -180,17 +177,9 @@ function AssetName({
 }
 
 function PositionPieces({ portfolioName, isin, batchType }: PositionItemProps) {
-  const query = useGetPositionPieces(portfolioName, isin, batchType);
-  if (query.isLoading) {
-    return <LoadingIndicator />;
-  }
-
-  if (!query.isSuccess) {
-    return <div>An error occurred...</div>;
-  }
-
-  const pieces = Number(query.data.toPrecision(4));
-  return <div>{pieces}</div>;
+  const pieces = useGetPositionPieces(portfolioName, isin, batchType);
+  const piecesRounded = Number(pieces.toPrecision(4));
+  return <div>{piecesRounded}</div>;
 }
 
 function TotalPositionValue({
@@ -220,7 +209,7 @@ function TotalValueSum({
   const sum = usePositionListSum(
     portfolioName,
     batchType,
-    useGetTotalPositionValue
+    (p, isin, batchType) => useGetTotalPositionValue(p, isin, batchType).data
   );
   return isNumber(sum) ? toPrice(sum) : null;
 }
@@ -229,9 +218,9 @@ function RealizedPositionGains({
   portfolioName,
   isin,
 }: Pick<PositionItemProps, "portfolioName" | "isin">) {
-  const query = useGetRealizedPositionGains(portfolioName, isin);
+  const gains = useGetRealizedPositionGains(portfolioName, isin);
 
-  return <QueryAsBalance query={query} />;
+  return <Balance value={gains} />;
 }
 
 function NonRealizedPositionGains({
@@ -263,7 +252,7 @@ function PositionListSumAsBalance({
     portfolioName: string,
     isin: string,
     batchType: BatchType
-  ) => PriceQuery;
+  ) => number;
 }) {
   const sum = usePositionListSum(portfolioName, batchType, selector);
 

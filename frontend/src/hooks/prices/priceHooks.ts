@@ -11,40 +11,28 @@ export type PriceQuery = {
 
 export const usePriceQuery = <T>(
   params: PriceQueryParams,
-  selector?: (prices: Awaited<ReturnType<typeof fetchPrices>>) => T,
-  enabled?: boolean
+  selector?: (prices: Awaited<ReturnType<typeof fetchPrices>>) => T
 ) => {
   return useQuery({
     queryKey: `prices-${params.symbol}-${params.frequency}`,
     queryFn: async () => fetchPrices(params),
     select: selector,
     retry: false,
-    enabled,
   });
 };
 
-export const useCurrentPrice = (
-  symbol: PriceQueryParams["symbol"],
-  enabled?: boolean
-) =>
+export const useCurrentPrice = (symbol: PriceQueryParams["symbol"]) =>
   usePriceQuery(
     { symbol, frequency: PRICE_FREQUENCY.WEEKLY },
-    (prices = []) => prices.at(0)?.value,
-    enabled
+    (prices = []) => prices.at(0)?.value
   );
 
 export const useCurrentPriceByIsin = (isin: string) => {
-  const assetsQuery = useGetAssets();
-  const symbol = assetsQuery.data?.[isin]?.symbol;
-  const priceQuery = useCurrentPrice(symbol || "", !!assetsQuery.data);
+  const assetLib = useGetAssets();
+  const symbol = assetLib?.[isin]?.symbol;
+  const priceQuery = useCurrentPrice(symbol || "");
 
-  const onlinePrice = priceQuery ? priceQuery.data : undefined;
-
-  return {
-    isLoading: assetsQuery.isLoading || priceQuery.isLoading,
-    isError: assetsQuery.isError || priceQuery.isError,
-    data: onlinePrice,
-  };
+  return priceQuery;
 };
 
 const fetchPrices = async (

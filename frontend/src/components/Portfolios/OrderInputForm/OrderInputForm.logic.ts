@@ -6,13 +6,13 @@ import {
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 
 export const useOrderValidation = (portfolioName: string) => {
-  const { isSuccess: isReady, data } = useGetPortfolio(portfolioName);
+  const portfolio = useGetPortfolio(portfolioName);
 
   const isValid = (order: Order | undefined) =>
-    isReady && order ? isOrderValidForPortfolio(data, order) : false;
+    order ? isOrderValidForPortfolio(portfolio, order) : false;
 
   const isDuplicate = (order: Order | undefined) =>
-    isReady && order ? portfolioContainsOrder(data, order) : false;
+    order ? portfolioContainsOrder(portfolio, order) : false;
 
-  return { isReady, isValid, isDuplicate };
+  return { isValid, isDuplicate };
 };

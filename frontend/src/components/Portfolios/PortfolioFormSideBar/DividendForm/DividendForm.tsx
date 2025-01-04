@@ -37,8 +37,7 @@ const DEFAULTS: FormState = {
 
 function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
   const [formState, setFormState] = useState(DEFAULTS);
-  const addDividendPayout =
-    useAddDividendPayoutToPortfolio(portfolioName).mutate;
+  const addDividendPayout = useAddDividendPayoutToPortfolio(portfolioName);
 
   const { asset, pieces, taxes, dividendPerShare, date } = formState;
 
