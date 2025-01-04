@@ -1,5 +1,4 @@
 import { useQuery } from "react-query";
-import { PRICE_FREQUENCY, PriceQueryParams } from "../../../../api";
 import { Series } from "../../../../domain/src/series/series.entities";
 import { useGetAssets } from "../assets/assetHooks";
 
@@ -55,3 +54,12 @@ const getPricesFromAlphaVantage = async (
     })
   );
 };
+
+const PRICE_FREQUENCY = {
+  DAILY: "daily",
+  WEEKLY: "weekly",
+  MONTHLY: "monthly",
+} as const;
+type PriceFrequency = (typeof PRICE_FREQUENCY)[keyof typeof PRICE_FREQUENCY];
+
+type PriceQueryParams = { symbol: string; frequency: PriceFrequency };
