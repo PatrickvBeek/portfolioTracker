@@ -1,5 +1,5 @@
-import { AssetLibrary } from "../../../../../domain/src/asset/asset.entities";
-import { PortfolioLibrary } from "../../../../../domain/src/portfolio/portfolio.entities";
+import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
+import { PortfolioLibrary } from "pt-domain/src/portfolio/portfolio.entities";
 
 export const EXPORT_VERSION = 1;
 

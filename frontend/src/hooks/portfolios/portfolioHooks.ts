@@ -1,11 +1,10 @@
-import { useContext } from "react";
-import { DividendPayout } from "../../../../domain/src/dividendPayouts/dividend.entities";
-import { Order } from "../../../../domain/src/order/order.entities";
-import { getActivitiesForPortfolio } from "../../../../domain/src/portfolio/portfolio.derivers";
+import { DividendPayout } from "pt-domain/src/dividendPayouts/dividend.entities";
+import { Order } from "pt-domain/src/order/order.entities";
+import { getActivitiesForPortfolio } from "pt-domain/src/portfolio/portfolio.derivers";
 import {
   Portfolio,
   PortfolioLibrary,
-} from "../../../../domain/src/portfolio/portfolio.entities";
+} from "pt-domain/src/portfolio/portfolio.entities";
 import {
   addDividendPayoutToPortfolio,
   addOrderToPortfolio,
@@ -13,7 +12,8 @@ import {
   deleteDividendPayoutFromPortfolio,
   deleteOrderFromPortfolio,
   deletePortfolioFromLibrary,
-} from "../../../../domain/src/portfolio/portfolio.operations";
+} from "pt-domain/src/portfolio/portfolio.operations";
+import { useContext } from "react";
 import { UserDataContext } from "../../userDataContext";
 
 export function useGetPortfolios() {

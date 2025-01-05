@@ -1,5 +1,5 @@
+import { newPortfolioFromName } from "pt-domain/src/portfolio/portfolio.operations";
 import { useState } from "react";
-import { newPortfolioFromName } from "../../../../../../domain/src/portfolio/portfolio.operations";
 import { useAddPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
 import { Button } from "../../../general/Button";

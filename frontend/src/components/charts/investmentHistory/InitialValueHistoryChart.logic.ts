@@ -1,7 +1,7 @@
 import {
   getInitialValueSeriesForPortfolio,
   removeDuplicatesAtSameTimeStamp,
-} from "../../../../../domain/src/series/series.derivers";
+} from "pt-domain/src/series/series.derivers";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 
 export const useGetInitialValueSeries = (portfolioName: string) => {

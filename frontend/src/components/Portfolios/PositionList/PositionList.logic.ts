@@ -1,5 +1,4 @@
-import { sort, sum } from "radash";
-import { BatchType } from "../../../../../domain/src/batch/batch.entities";
+import { BatchType } from "pt-domain/src/batch/batch.entities";
 import {
   getAssetsForBatchType,
   getCurrentValueOfOpenBatches,
@@ -8,7 +7,8 @@ import {
   getPiecesOfIsinInPortfolio,
   getRealizedGainsForIsin,
   getSoldValueOfClosedBatches,
-} from "../../../../../domain/src/portfolio/portfolio.derivers";
+} from "pt-domain/src/portfolio/portfolio.derivers";
+import { sort, sum } from "radash";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { useCurrentPriceByIsin } from "../../../hooks/prices/priceHooks";
 
