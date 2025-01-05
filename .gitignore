@@ -2,24 +2,17 @@
 
 # dependencies
 frontend/node_modules
-backend/node_modules
 node_modules/
 /.pnp
 .pnp.js
 
-# user data
-/data
-
 # testing
 /coverage
 domain/coverage
-backend/test_data/
-data/test/json/
 
 
 # production
 frontend/build
-backend/dist
 
 # misc
 .DS_Store
@@ -34,4 +27,3 @@ yarn-error.log*
 
 # itelliJ
 .idea
-backend/yarn.lock

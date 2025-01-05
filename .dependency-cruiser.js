@@ -184,7 +184,7 @@ module.exports = {
         "The domain model should be self-contained and not depend on other workspaces",
       severity: "error",
       from: { path: "domain" },
-      to: { path: ["frontend", "backend"] },
+      to: { path: ["frontend"] },
     },
   ],
   options: {

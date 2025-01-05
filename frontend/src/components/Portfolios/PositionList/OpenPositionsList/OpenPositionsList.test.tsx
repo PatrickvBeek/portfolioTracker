@@ -14,7 +14,6 @@ import {
   customRender,
   getTextWithNonBreakingSpaceReplaced,
 } from "../../../../testUtils/componentHelpers";
-import { mockNetwork } from "../../../../testUtils/networkMock";
 import { getCellTextsForRow } from "../testUtils";
 import { OpenPositionsList } from "./OpenPositionsList";
 
@@ -71,10 +70,11 @@ const mockPortfolio: Portfolio = {
   ]),
 };
 
-const mockPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
+const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  mockNetwork({ portfolioLib: mockPortfolioLib, assetLib: testAssetLib });
+  localStorage.setItem("portfolios", JSON.stringify(testPortfolioLib));
+  localStorage.setItem("assets", JSON.stringify(testAssetLib));
 
   it("renders the correct list headers", async () => {
     customRender({

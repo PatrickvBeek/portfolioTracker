@@ -3,6 +3,7 @@ import userEvent, { Options, UserEvent } from "@testing-library/user-event";
 import { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { queryClientConfig } from "../queryClient/config";
+import { UserDataProvider } from "../userDataContext";
 
 export function customRender({
   component,
@@ -14,7 +15,11 @@ export function customRender({
   const queryClient = new QueryClient(queryClientConfig);
   const user = userEvent.setup(userEventOptions);
   const renderResult = render(
-    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
+    <UserDataProvider>
+      <QueryClientProvider client={queryClient}>
+        {component}
+      </QueryClientProvider>
+    </UserDataProvider>
   );
 
   return {

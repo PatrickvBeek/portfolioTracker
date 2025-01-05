@@ -7,7 +7,6 @@ import {
   TEST_PORTFOLIO_LIB,
 } from "../../../../../domain/src/testConstants";
 import { customRender } from "../../../testUtils/componentHelpers";
-import { mockNetwork } from "../../../testUtils/networkMock";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 
 describe("The OrderInputForm", () => {
@@ -17,7 +16,8 @@ describe("The OrderInputForm", () => {
 
   const TEST_ASSET = TEST_ASSET_TESLA;
 
-  mockNetwork({ portfolioLib: TEST_PORTFOLIO_LIB, assetLib: TEST_ASSET_LIB });
+  localStorage.setItem("portfolios", JSON.stringify(TEST_PORTFOLIO_LIB));
+  localStorage.setItem("assets", JSON.stringify(TEST_ASSET_LIB));
 
   it.each`
     label

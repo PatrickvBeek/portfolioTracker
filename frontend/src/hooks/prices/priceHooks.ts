@@ -1,5 +1,4 @@
 import { useQuery } from "react-query";
-import { PRICE_FREQUENCY, PriceQueryParams } from "../../../../api";
 import { Series } from "../../../../domain/src/series/series.entities";
 import { useGetAssets } from "../assets/assetHooks";
 
@@ -11,50 +10,56 @@ export type PriceQuery = {
 
 export const usePriceQuery = <T>(
   params: PriceQueryParams,
-  selector?: (prices: Awaited<ReturnType<typeof fetchPrices>>) => T,
-  enabled?: boolean
+  selector?: (
+    prices: Awaited<ReturnType<typeof getPricesFromAlphaVantage>>
+  ) => T
 ) => {
   return useQuery({
     queryKey: `prices-${params.symbol}-${params.frequency}`,
-    queryFn: async () => fetchPrices(params),
+    queryFn: async () => getPricesFromAlphaVantage(params),
     select: selector,
     retry: false,
-    enabled,
   });
 };
 
-export const useCurrentPrice = (
-  symbol: PriceQueryParams["symbol"],
-  enabled?: boolean
-) =>
+export const useCurrentPrice = (symbol: PriceQueryParams["symbol"]) =>
   usePriceQuery(
     { symbol, frequency: PRICE_FREQUENCY.WEEKLY },
-    (prices = []) => prices.at(0)?.value,
-    enabled
+    (prices = []) => prices.at(0)?.value
   );
 
 export const useCurrentPriceByIsin = (isin: string) => {
-  const assetsQuery = useGetAssets();
-  const symbol = assetsQuery.data?.[isin]?.symbol;
-  const priceQuery = useCurrentPrice(symbol || "", !!assetsQuery.data);
+  const assetLib = useGetAssets();
+  const symbol = assetLib?.[isin]?.symbol;
 
-  const onlinePrice = priceQuery ? priceQuery.data : undefined;
-
-  return {
-    isLoading: assetsQuery.isLoading || priceQuery.isLoading,
-    isError: assetsQuery.isError || priceQuery.isError,
-    data: onlinePrice,
-  };
+  return useCurrentPrice(symbol || "");
 };
 
-const fetchPrices = async (
+const getPricesFromAlphaVantage = async (
   params: PriceQueryParams
 ): Promise<Series<number> | undefined> => {
   if (!params.symbol) {
     return undefined;
   }
 
-  const query = new URLSearchParams(params);
-  const response = await fetch(`/api/prices?${query.toString()}`).catch();
-  return response.json();
+  const response = await fetch(
+    `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${params.symbol}&outputsize=full&apikey=free_tier`
+  );
+  const prices = await response.json();
+
+  return Object.entries(prices["Time Series (Daily)"]).map(
+    ([dateString, price]) => ({
+      timestamp: new Date(dateString).getTime(),
+      value: parseFloat((price as any)["4. close"]),
+    })
+  );
 };
+
+const PRICE_FREQUENCY = {
+  DAILY: "daily",
+  WEEKLY: "weekly",
+  MONTHLY: "monthly",
+} as const;
+type PriceFrequency = (typeof PRICE_FREQUENCY)[keyof typeof PRICE_FREQUENCY];
+
+type PriceQueryParams = { symbol: string; frequency: PriceFrequency };

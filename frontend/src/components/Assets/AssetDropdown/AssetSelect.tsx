@@ -17,16 +17,9 @@ export type AssetDropdownProps = Pick<
   }>;
 
 const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
-  const assetsData = useGetAssets();
+  const assetLib = useGetAssets();
 
-  if (assetsData.isError) {
-    return <span>error loading...</span>;
-  }
-  if (assetsData.isFetching) {
-    return <span>loading...</span>;
-  }
-
-  const assetsMap: Record<string, Asset> = assetsData.data || {};
+  const assetsMap: Record<string, Asset> = assetLib || {};
   const assets = Object.values(assetsMap);
 
   return (

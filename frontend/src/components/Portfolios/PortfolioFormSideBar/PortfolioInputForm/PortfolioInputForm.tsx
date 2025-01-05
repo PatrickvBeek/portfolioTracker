@@ -10,7 +10,7 @@ const { bemElement, bemBlock } = bemHelper("portfolio-input-form");
 
 const PortfolioInputForm = ({ onConfirm }: { onConfirm?: () => void }) => {
   const [fieldContent, setFieldContent] = useState("");
-  const addPortfolio = useAddPortfolio().mutate;
+  const addPortfolio = useAddPortfolio();
   return (
     <div className={bemBlock(undefined)}>
       <TextInput

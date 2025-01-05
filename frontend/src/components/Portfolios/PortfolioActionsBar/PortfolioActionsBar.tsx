@@ -19,7 +19,7 @@ const PortfolioActionsBar = ({
 }: PortfolioViewSideBarProps) => {
   const [isDeleteOverlayOpen, setIsDeleteOverlayOpen] = useState(false);
   const [isAddOverlayOpen, setIsAddOverlayOpen] = useState(false);
-  const deletePortfolio = useDeletePortfolio().mutate;
+  const deletePortfolio = useDeletePortfolio();
 
   return (
     <div className={bemBlock(className)}>

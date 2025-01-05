@@ -4,17 +4,17 @@ import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
 import { EXPORT_VERSION, ExportedData } from "../userData";
 
-export const DataExport: FC<{}> = ({}): ReactElement | null => {
-  const portfolioQuery = useGetPortfolios();
-  const assetsQuery = useGetAssets();
+export const DataExport: FC = (): ReactElement | null => {
+  const portfolioLib = useGetPortfolios();
+  const assetLib = useGetAssets();
 
-  if (!portfolioQuery.data || !assetsQuery.data) {
+  if (!portfolioLib || !assetLib) {
     return null;
   }
 
   const data: ExportedData = {
-    portfolios: portfolioQuery.data,
-    assets: assetsQuery.data,
+    portfolios: portfolioLib,
+    assets: assetLib,
     meta: { exportVersion: EXPORT_VERSION },
   };
   const dataString = JSON.stringify(data, null, 2);

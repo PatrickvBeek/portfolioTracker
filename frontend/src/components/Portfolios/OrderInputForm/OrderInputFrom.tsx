@@ -32,7 +32,7 @@ const DEFAULTS = {
 export function OrderInputForm({
   className,
   portfolioName,
-}: OrderInputFormProps): ReactElement | null {
+}: OrderInputFormProps): ReactElement {
   const [isin, setAssetIsin] = useState(DEFAULTS.isin);
   const [pieces, setPieces] = useState<NumberInputValue>(DEFAULTS.pieces);
   const [sharePrice, setSharePrice] = useState<NumberInputValue>(
@@ -43,12 +43,8 @@ export function OrderInputForm({
   const [date, setDate] = useState<DateInputValue>(DEFAULTS.date);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
 
-  const { isReady, isValid, isDuplicate } = useOrderValidation(portfolioName);
-  const addOrder = useAddOrderToPortfolio(portfolioName).mutate;
-
-  if (!isReady) {
-    return null;
-  }
+  const { isValid, isDuplicate } = useOrderValidation(portfolioName);
+  const addOrder = useAddOrderToPortfolio(portfolioName);
 
   const isFormValid = isin && pieces && pieces !== 0 && sharePrice && date;
 

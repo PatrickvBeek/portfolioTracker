@@ -24,19 +24,17 @@ export function useGetOpenBatchesListItems(
   portfolioName: string,
   isin: string
 ): OpenBatchListItem[] | undefined {
-  const portfolioQuery = useGetPortfolio(portfolioName);
+  const portfolio = useGetPortfolio(portfolioName);
   const priceQuery = useCurrentPriceByIsin(isin);
 
-  if (!portfolioQuery.data || priceQuery.isLoading) {
+  if (!portfolio || priceQuery.isLoading) {
     return undefined;
   }
 
   const currentPrice =
-    priceQuery.data ??
-    getLatestPriceFromTransactions(portfolioQuery.data, isin) ??
-    NaN;
+    priceQuery.data ?? getLatestPriceFromTransactions(portfolio, isin) ?? NaN;
 
-  return getPortfolioBatchesOfType(portfolioQuery.data, isin, "open").map(
+  return getPortfolioBatchesOfType(portfolio, isin, "open").map(
     ({ buyDate, pieces, buyPrice, orderFee }) => ({
       buyDate,
       pieces,
@@ -63,21 +61,19 @@ export function useGetClosedBatchesListItems(
   portfolioName: string,
   isin: string
 ): ClosedBatchListItem[] | undefined {
-  const portfolioQuery = useGetPortfolio(portfolioName);
+  const portfolio = useGetPortfolio(portfolioName);
 
-  if (!portfolioQuery.data) {
+  if (!portfolio) {
     return undefined;
   }
 
-  return getPortfolioBatchesOfType(portfolioQuery.data, isin, "closed").map(
-    (batch) => ({
-      buyDate: batch.buyDate,
-      pieces: batch.pieces,
-      buyValue: batch.pieces * batch.buyPrice,
-      sellValue: batch.pieces * batch.sellPrice,
-      fees: batch.orderFee,
-      taxes: batch.taxes,
-      netProfit: getProfitForClosedBatch(batch),
-    })
-  );
+  return getPortfolioBatchesOfType(portfolio, isin, "closed").map((batch) => ({
+    buyDate: batch.buyDate,
+    pieces: batch.pieces,
+    buyValue: batch.pieces * batch.buyPrice,
+    sellValue: batch.pieces * batch.sellPrice,
+    fees: batch.orderFee,
+    taxes: batch.taxes,
+    netProfit: getProfitForClosedBatch(batch),
+  }));
 }

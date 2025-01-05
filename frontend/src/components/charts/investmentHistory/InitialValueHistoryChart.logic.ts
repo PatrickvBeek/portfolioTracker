@@ -5,13 +5,13 @@ import {
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 
 export const useGetInitialValueSeries = (portfolioName: string) => {
-  const portfolioQuery = useGetPortfolio(portfolioName);
+  const portfolio = useGetPortfolio(portfolioName);
 
-  if (!portfolioQuery.data) {
+  if (!portfolio) {
     return undefined;
   }
 
-  const series = getInitialValueSeriesForPortfolio(portfolioQuery.data);
+  const series = getInitialValueSeriesForPortfolio(portfolio);
 
   return removeDuplicatesAtSameTimeStamp(series);
 };
