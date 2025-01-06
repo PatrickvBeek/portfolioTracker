@@ -1,6 +1,6 @@
+import { DividendPayout } from "pt-domain/src/dividendPayouts/dividend.entities";
 import { ReactElement, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { DividendPayout } from "../../../../../../domain/src/dividendPayouts/dividend.entities";
 import { useAddDividendPayoutToPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../../utility/bemHelper";
 import { Props } from "../../../../utility/types";

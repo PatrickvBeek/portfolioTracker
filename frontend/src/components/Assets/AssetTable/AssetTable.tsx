@@ -1,5 +1,5 @@
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { Asset } from "../../../../../domain/src/asset/asset.entities";
+import { Asset } from "pt-domain/src/asset/asset.entities";
 import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
 import CustomTable from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";

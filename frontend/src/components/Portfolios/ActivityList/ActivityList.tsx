@@ -1,10 +1,10 @@
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import moment from "moment";
+import { isOrder } from "pt-domain/src/activity/activity.derivers";
+import { PortfolioActivity } from "pt-domain/src/activity/activity.entities";
+import { getDividendVolume } from "pt-domain/src/dividendPayouts/dividend.derivers";
+import { getOrderVolume } from "pt-domain/src/order/order.derivers";
 import { ReactElement } from "react";
-import { isOrder } from "../../../../../domain/src/activity/activity.derivers";
-import { PortfolioActivity } from "../../../../../domain/src/activity/activity.entities";
-import { getDividendVolume } from "../../../../../domain/src/dividendPayouts/dividend.derivers";
-import { getOrderVolume } from "../../../../../domain/src/order/order.derivers";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
   useDeleteDividendPayoutFromPortfolio,

@@ -1,12 +1,9 @@
-import { useContext } from "react";
-import {
-  Asset,
-  AssetLibrary,
-} from "../../../../domain/src/asset/asset.entities";
+import { Asset, AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
   addAssetToLibrary,
   deleteAssetFromLib,
-} from "../../../../domain/src/asset/asset.operations";
+} from "pt-domain/src/asset/asset.operations";
+import { useContext } from "react";
 import { UserDataContext } from "../../userDataContext";
 
 export function useGetAssets(): AssetLibrary | undefined {

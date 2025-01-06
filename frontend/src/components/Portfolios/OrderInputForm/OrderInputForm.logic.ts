@@ -1,8 +1,8 @@
-import { Order } from "../../../../../domain/src/order/order.entities";
+import { Order } from "pt-domain/src/order/order.entities";
 import {
   isOrderValidForPortfolio,
   portfolioContainsOrder,
-} from "../../../../../domain/src/portfolio/portfolio.derivers";
+} from "pt-domain/src/portfolio/portfolio.derivers";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 
 export const useOrderValidation = (portfolioName: string) => {

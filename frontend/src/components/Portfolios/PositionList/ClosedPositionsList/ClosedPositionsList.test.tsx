@@ -1,15 +1,12 @@
 import { screen, waitFor, within } from "@testing-library/react";
-import {
-  Asset,
-  AssetLibrary,
-} from "../../../../../../domain/src/asset/asset.entities";
+import { Asset, AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
   getElementsByIsin,
   getElementsGroupedByAsset,
   getTestDividendPayout,
   getTestOrder,
-} from "../../../../../../domain/src/dataHelpers";
-import { Portfolio } from "../../../../../../domain/src/portfolio/portfolio.entities";
+} from "pt-domain/src/dataHelpers";
+import { Portfolio } from "pt-domain/src/portfolio/portfolio.entities";
 import {
   customRender,
   getTextWithNonBreakingSpaceReplaced,

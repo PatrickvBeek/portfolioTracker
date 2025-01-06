@@ -1,5 +1,5 @@
+import { Series } from "pt-domain/src/series/series.entities";
 import { useQuery } from "react-query";
-import { Series } from "../../../../domain/src/series/series.entities";
 import { useGetAssets } from "../assets/assetHooks";
 
 export type PriceQuery = {

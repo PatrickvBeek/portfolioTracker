@@ -1,7 +1,7 @@
 import { IconButton } from "@mui/material";
 import { ColumnDef } from "@tanstack/react-table";
+import { BatchType } from "pt-domain/src/batch/batch.entities";
 import { isNumber } from "radash";
-import { BatchType } from "../../../../../domain/src/batch/batch.entities";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { PriceQuery } from "../../../hooks/prices/priceHooks";
 import { bemHelper } from "../../../utility/bemHelper";

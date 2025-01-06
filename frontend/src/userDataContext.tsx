@@ -1,6 +1,6 @@
+import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
+import { PortfolioLibrary } from "pt-domain/src/portfolio/portfolio.entities";
 import { createContext, FC, PropsWithChildren, useState } from "react";
-import { AssetLibrary } from "../../domain/src/asset/asset.entities";
-import { PortfolioLibrary } from "../../domain/src/portfolio/portfolio.entities";
 
 export const UserDataContext = createContext<{
   assets: AssetLibrary;

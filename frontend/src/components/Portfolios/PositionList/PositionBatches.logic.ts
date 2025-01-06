@@ -1,12 +1,9 @@
-import { getProfitForClosedBatch } from "../../../../../domain/src/batch/batch.derivers";
-import {
-  ClosedBatch,
-  OpenBatch,
-} from "../../../../../domain/src/batch/batch.entities";
+import { getProfitForClosedBatch } from "pt-domain/src/batch/batch.derivers";
+import { ClosedBatch, OpenBatch } from "pt-domain/src/batch/batch.entities";
 import {
   getLatestPriceFromTransactions,
   getPortfolioBatchesOfType,
-} from "../../../../../domain/src/portfolio/portfolio.derivers";
+} from "pt-domain/src/portfolio/portfolio.derivers";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { useCurrentPriceByIsin } from "../../../hooks/prices/priceHooks";
 

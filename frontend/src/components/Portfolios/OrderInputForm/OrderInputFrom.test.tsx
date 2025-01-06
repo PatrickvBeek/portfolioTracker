@@ -5,7 +5,7 @@ import {
   TEST_ORDER_TESLA,
   TEST_PORTFOLIO,
   TEST_PORTFOLIO_LIB,
-} from "../../../../../domain/src/testConstants";
+} from "pt-domain/src/testConstants";
 import { customRender } from "../../../testUtils/componentHelpers";
 import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
 
