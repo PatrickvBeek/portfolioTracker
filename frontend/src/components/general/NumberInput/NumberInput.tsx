@@ -9,7 +9,6 @@ export type NumberInputValue = number | undefined;
 
 export interface NumberInputProps extends InputProps {
   onChange: (value: NumberInputValue) => void;
-  digits?: number;
   defaultValue?: number;
 }
 
@@ -20,32 +19,16 @@ export const NumberInput = ({
   className,
   errorMessage,
   onChange,
-  digits,
   defaultValue,
   ...rest
 }: NumberInputProps): ReactElement => {
-  const [display, setDisplay] = useState(
-    getStringOfDefaultValue(defaultValue, digits)
-  );
+  const [display, setDisplay] = useState(defaultValue?.toString() || "");
 
-  const potentialNumberRegex = new RegExp(
-    `^(-|\\+)?\\d{0,}\\.?\\d{0,${digits || ""}}$`
-  );
-
-  const numberRegex = new RegExp(
-    `^(-|\\+)?\\d{1,}(\\.\\d{0,${digits || ""}})?$`
-  );
-
-  const handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void = (
-    event
-  ) => {
-    const amount = insertPotentiallyMissingZero(event.target.value);
-    if (amount.match(potentialNumberRegex)) {
-      setDisplay(amount);
-      amount.match(numberRegex)
-        ? onChange(parseFloat(amount))
-        : onChange(undefined);
-    }
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newDisplay = event.target.value;
+    setDisplay(newDisplay);
+    const parsedValue = parseFloat(newDisplay);
+    onChange(Number.isNaN(parsedValue) ? undefined : parsedValue);
   };
 
   return (
@@ -58,7 +41,8 @@ export const NumberInput = ({
       <input
         id={`${label?.replaceAll(" ", "-") || ""}-input`}
         className={bemElement("field", isMandatory ? "mandatory" : "")}
-        type="text"
+        type="number"
+        step={0.01}
         value={display}
         onChange={handleChange}
         autoComplete="off"
@@ -67,25 +51,3 @@ export const NumberInput = ({
     </InputWrapper>
   );
 };
-
-const getStringOfDefaultValue: (
-  value: number | undefined,
-  digits: number | undefined
-) => string = (value, digits) => {
-  if (value === undefined) {
-    return "";
-  }
-  if (!digits) {
-    return value.toString();
-  }
-
-  const currentDigits = value.toString().split(".")[1]?.length || 0;
-  return value.toFixed(Math.min(digits, currentDigits)).toString();
-};
-
-function insertPotentiallyMissingZero(number: string): string {
-  if (number.match(/^(-|\+)?\./)) {
-    return number.replace(".", "0.");
-  }
-  return number;
-}
