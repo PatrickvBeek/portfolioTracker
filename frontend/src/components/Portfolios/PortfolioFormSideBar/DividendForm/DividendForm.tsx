@@ -77,12 +77,10 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
           setFormState({ ...formState, dividendPerShare: dividend })
         }
         isMandatory
-        digits={2}
       />
       <NumberInput
         label={"Total Taxes"}
         onChange={(taxes) => setFormState({ ...formState, taxes })}
-        digits={2}
       />
       <DateInput
         label={"Payout Date"}

@@ -87,7 +87,6 @@ export function OrderInputForm({
         className={bemElement("sharePrice")}
         onChange={setSharePrice}
         label={"Share Price"}
-        digits={2}
         defaultValue={DEFAULTS.sharePrice}
         isMandatory={true}
         autoComplete={"off"}
@@ -96,7 +95,6 @@ export function OrderInputForm({
         className={bemElement("fees")}
         onChange={setFees}
         label={"Fees"}
-        digits={2}
         defaultValue={DEFAULTS.fees}
         isMandatory={false}
         autoComplete={"off"}
@@ -105,7 +103,6 @@ export function OrderInputForm({
         className={bemElement("taxes")}
         onChange={setTaxes}
         label={"Taxes"}
-        digits={2}
         defaultValue={DEFAULTS.taxes}
         isMandatory={false}
         autoComplete={"off"}
