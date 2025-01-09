@@ -1,7 +1,7 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import userEvent, { Options, UserEvent } from "@testing-library/user-event";
 import { ReactElement } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { queryClientConfig } from "../queryClient/config";
 import { UserDataProvider } from "../userDataContext";
 

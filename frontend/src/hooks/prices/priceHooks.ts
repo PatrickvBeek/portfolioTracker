@@ -1,5 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
 import { Series } from "pt-domain/src/series/series.entities";
-import { useQuery } from "react-query";
 import { useGetAssets } from "../assets/assetHooks";
 
 export type PriceQuery = {
@@ -15,7 +15,7 @@ export const usePriceQuery = <T>(
   ) => T
 ) => {
   return useQuery({
-    queryKey: `prices-${params.symbol}-${params.frequency}`,
+    queryKey: ["prices", params],
     queryFn: async () => getPricesFromAlphaVantage(params),
     select: selector,
     retry: false,
@@ -37,9 +37,9 @@ export const useCurrentPriceByIsin = (isin: string) => {
 
 const getPricesFromAlphaVantage = async (
   params: PriceQueryParams
-): Promise<Series<number> | undefined> => {
+): Promise<Series<number>> => {
   if (!params.symbol) {
-    return undefined;
+    return Promise.resolve([]);
   }
 
   const response = await fetch(
