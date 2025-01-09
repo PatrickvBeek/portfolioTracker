@@ -31,29 +31,33 @@ const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
       options={assets}
       onChange={(_, value) => value?.isin && onSelect(value?.isin)}
       getOptionLabel={(asset) => `${asset.displayName} (${asset.isin})`}
-      renderOption={(props, asset) => (
-        <Box
-          component={"li"}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-start",
-          }}
-          {...props}
-        >
-          <div className={bemElement("option-main-text")}>
-            {asset.displayName}
-          </div>
-          <div className={bemElement("option-fine-print")}>
-            {`ISIN: ${asset.isin}`}
-          </div>
-          {asset.symbol ? (
-            <div
-              className={bemElement("option-fine-print")}
-            >{`Symbol: ${asset.symbol}`}</div>
-          ) : null}
-        </Box>
-      )}
+      renderOption={(props, asset) => {
+        const { key, ...restProps } = props;
+        return (
+          <Box
+            component={"li"}
+            key={key}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+            }}
+            {...restProps}
+          >
+            <div className={bemElement("option-main-text")}>
+              {asset.displayName}
+            </div>
+            <div className={bemElement("option-fine-print")}>
+              {`ISIN: ${asset.isin}`}
+            </div>
+            {asset.symbol ? (
+              <div
+                className={bemElement("option-fine-print")}
+              >{`Symbol: ${asset.symbol}`}</div>
+            ) : null}
+          </Box>
+        );
+      }}
     />
   );
 };

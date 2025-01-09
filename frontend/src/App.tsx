@@ -1,5 +1,5 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactElement, StrictMode, useState } from "react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import "./App.less";
 import Assets from "./components/Assets/Assets";
 import Dashboard from "./components/Dashboard/Dashboard";
