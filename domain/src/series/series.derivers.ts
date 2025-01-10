@@ -1,22 +1,22 @@
 import { sort, sum, unique } from "radash";
-import {
-  getBatchInitialValue,
-  getBatchesHistory,
-} from "../batch/batch.derivers";
+import { getNumericDateTime } from "../activity/activity.derivers";
+import { getBatchesHistory, getBuyValue } from "../batch/batch.derivers";
 import {
   BatchesHistory,
   BatchesHistoryDataPoint,
 } from "../batch/batch.entities";
+import { getOrderVolume } from "../order/order.derivers";
+import { Order } from "../order/order.entities";
 import { Portfolio } from "../portfolio/portfolio.entities";
 import { updateBy } from "../utils/arrays";
 import { Series, SeriesPoint } from "./series.entities";
 
-export const getInitialValueSeriesForPortfolio = (
+export const geBuyValueSeriesForPortfolio = (
   portfolio: Portfolio
 ): Series<number> => {
   const diffs = Object.values(portfolio.orders)
     .map(getBatchesHistory)
-    .map(batchHistoryToSeries)
+    .map(batchHistoryToBuyValueSeries)
     .map(differentiateNumberSeries)
     .flat();
 
@@ -49,15 +49,28 @@ const differentiateNumberSeries = (series: Series<number>): Series<number> => {
   return diff;
 };
 
-const batchHistoryToSeries = (history: BatchesHistory): Series<number> =>
-  history.map(batchHistoryDataPointToSeriesPoint);
+const batchHistoryToBuyValueSeries = (
+  history: BatchesHistory
+): Series<number> => history.map(batchHistoryDataPointToBuyValueSeriesPoint);
 
-const batchHistoryDataPointToSeriesPoint = (
+const batchHistoryDataPointToBuyValueSeriesPoint = (
   point: BatchesHistoryDataPoint
 ): SeriesPoint<number> => ({
   timestamp: point.date.getTime(),
-  value: sum(point.batches.open, getBatchInitialValue),
+  value: sum(point.batches.open, getBuyValue),
 });
 
 export const removeDuplicatesAtSameTimeStamp = <T>(series: Series<T>) =>
   unique(series.toReversed(), (dataPoint) => dataPoint.timestamp).toReversed();
+
+export const getCashFlowSeriesForOrders = (orders: Order[]): Series<number> =>
+  orders.reduce<Series<number>>(
+    (series, order) => [
+      ...series,
+      {
+        timestamp: getNumericDateTime(order),
+        value: (series.at(-1)?.value || 0) + getOrderVolume(order),
+      },
+    ],
+    []
+  );
