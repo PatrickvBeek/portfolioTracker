@@ -56,11 +56,8 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
               moment(new Date(value)).format("ddd DD.MM.YYYY")
             }
           />
-          <XAxis
-            dataKey={"timestamp"}
-            {...getTimeAxisProps(chartData.map((p) => p.timestamp))}
-          />
-          <YAxis {...getAxisProps(chartData.map((d) => d.buyValue))} />
+          <XAxis {...getTimeAxisProps(chartData)} />
+          <YAxis {...getAxisProps(chartData)} />
           <CartesianGrid stroke="#ccc" />
         </AreaChart>
       </ResponsiveContainer>

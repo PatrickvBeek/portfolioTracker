@@ -3,12 +3,18 @@ import {
   scaleLinear as d3LinearScale,
   scaleTime as d3ScaleTime,
 } from "d3-scale";
+import { isNumber, omit } from "radash";
 import { XAxisProps, YAxisProps } from "recharts";
+import { ChartData } from "./chartTypes";
 
 export function getAxisProps(
-  values: number[],
+  chartData: ChartData<string>,
   nTicks: number = 5
 ): Partial<YAxisProps> {
+  const values = chartData
+    .map((point) => Object.values(omit(point, ["timestamp"])))
+    .flat()
+    .filter(isNumber);
   const domain = d3Extent(values) as [number, number];
   const scale = d3LinearScale(values).domain(domain).range([0, 1]);
 
@@ -21,13 +27,15 @@ export function getAxisProps(
 }
 
 export function getTimeAxisProps(
-  dates: number[],
+  chartData: ChartData<string>,
   nTicks: number = 5
 ): Partial<XAxisProps> {
+  const dates = chartData.map((point) => point.timestamp);
   const domain = d3Extent(dates) as [number, number];
   const tScale = d3ScaleTime().domain(domain).range([0, 1]);
 
   return {
+    dataKey: "timestamp",
     tickFormatter: tScale.tickFormat(nTicks),
     ticks: tScale.ticks(nTicks).map((tick) => tick.getTime()),
     type: "number",
