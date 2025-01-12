@@ -1,14 +1,14 @@
 import { getTestOrdersGroupedByAsset } from "../dataHelpers";
 import { Portfolio } from "../portfolio/portfolio.entities";
-import { geBuyValueSeriesForPortfolio } from "./series.derivers";
+import { geBuyValueHistoryForPortfolio } from "./history.derivers";
 
 const DAY1 = "2023-01-01";
 const DAY2 = "2023-01-02";
 const DAY3 = "2023-01-03";
 
-describe("the series operation", () => {
-  describe("getBuyValueSeries", () => {
-    it("returns the correct series for a portfolio having orders. Selling orders in order of buying", () => {
+describe("the history operation", () => {
+  describe("getBuyValueHistory", () => {
+    it("returns the correct history for a portfolio having orders. Selling orders in order of buying", () => {
       const TEST_PORTFOLIO: Portfolio = {
         name: "test-portfolio",
         orders: getTestOrdersGroupedByAsset([
@@ -34,14 +34,14 @@ describe("the series operation", () => {
         dividendPayouts: {},
       };
 
-      expect(geBuyValueSeriesForPortfolio(TEST_PORTFOLIO)).toEqual([
+      expect(geBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual([
         { timestamp: new Date(DAY1).getTime(), value: 20 },
         { timestamp: new Date(DAY2).getTime(), value: 25 },
         { timestamp: new Date(DAY3).getTime(), value: 15 },
       ]);
     });
 
-    it("returns the correct series for a portfolio having orders. Selling orders out of order of buying", () => {
+    it("returns the correct history for a portfolio having orders. Selling orders out of order of buying", () => {
       const TEST_PORTFOLIO: Portfolio = {
         name: "test-portfolio",
         orders: getTestOrdersGroupedByAsset([
@@ -67,7 +67,7 @@ describe("the series operation", () => {
         dividendPayouts: {},
       };
 
-      expect(geBuyValueSeriesForPortfolio(TEST_PORTFOLIO)).toEqual([
+      expect(geBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual([
         { timestamp: new Date(DAY1).getTime(), value: 20 },
         { timestamp: new Date(DAY2).getTime(), value: 25 },
         { timestamp: new Date(DAY3).getTime(), value: 20 },

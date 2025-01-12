@@ -1,29 +1,29 @@
-import { getCashFlowSeries } from "pt-domain/src/portfolio/portfolio.derivers";
+import { getCashFlowHistory } from "pt-domain/src/portfolio/portfolio.derivers";
 import {
-  geBuyValueSeriesForPortfolio,
+  geBuyValueHistoryForPortfolio,
   removeDuplicatesAtSameTimeStamp,
-} from "pt-domain/src/series/series.derivers";
+} from "pt-domain/src/portfolioHistory/history.derivers";
 import { zip } from "radash";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 
-export const useGetBuyValueSeries = (portfolioName: string) => {
+export const useGetBuyValueHistory = (portfolioName: string) => {
   const portfolio = useGetPortfolio(portfolioName);
 
   return portfolio
-    ? removeDuplicatesAtSameTimeStamp(geBuyValueSeriesForPortfolio(portfolio))
+    ? removeDuplicatesAtSameTimeStamp(geBuyValueHistoryForPortfolio(portfolio))
     : [];
 };
 
-export const useGetCashFlow = (portfolioName: string) => {
+export const useGetCashFlowHistory = (portfolioName: string) => {
   const portfolio = useGetPortfolio(portfolioName);
   return portfolio
-    ? removeDuplicatesAtSameTimeStamp(getCashFlowSeries(portfolio))
+    ? removeDuplicatesAtSameTimeStamp(getCashFlowHistory(portfolio))
     : [];
 };
 
 export const useGetPortfolioHistoryChartData = (portfolioName: string) => {
-  const buyValueSeries = useGetBuyValueSeries(portfolioName);
-  const cashFlowSeries = useGetCashFlow(portfolioName);
+  const buyValueSeries = useGetBuyValueHistory(portfolioName);
+  const cashFlowSeries = useGetCashFlowHistory(portfolioName);
 
   return zip(buyValueSeries, cashFlowSeries).reduce<
     { buyValue: number; cashFlow: number; timestamp: number }[]

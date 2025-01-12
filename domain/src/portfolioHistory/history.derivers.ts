@@ -1,23 +1,20 @@
 import { sort, sum, unique } from "radash";
 import { getNumericDateTime } from "../activity/activity.derivers";
 import { getBatchesHistory, getBuyValue } from "../batch/batch.derivers";
-import {
-  BatchesHistory,
-  BatchesHistoryDataPoint,
-} from "../batch/batch.entities";
+import { BatchesHistory } from "../batch/batch.entities";
 import { getOrderVolume } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import { Portfolio } from "../portfolio/portfolio.entities";
 import { updateBy } from "../utils/arrays";
-import { Series, SeriesPoint } from "./series.entities";
+import { History, HistoryPoint } from "./history.entities";
 
-export const geBuyValueSeriesForPortfolio = (
+export const geBuyValueHistoryForPortfolio = (
   portfolio: Portfolio
-): Series<number> => {
+): History<number> => {
   const diffs = Object.values(portfolio.orders)
     .map(getBatchesHistory)
-    .map(batchHistoryToBuyValueSeries)
-    .map(differentiateNumberSeries)
+    .map(batchHistoryToBuyValueHistory)
+    .map(differentiateNumberHistory)
     .flat();
 
   return updateBy(
@@ -29,16 +26,18 @@ export const geBuyValueSeriesForPortfolio = (
   );
 };
 
-const differentiateNumberSeries = (series: Series<number>): Series<number> => {
-  if (series.length < 2) {
-    return series;
+const differentiateNumberHistory = (
+  history: History<number>
+): History<number> => {
+  if (history.length < 2) {
+    return history;
   }
-  const [first, ...rest] = series;
+  const [first, ...rest] = history;
   const diff = [first];
   let prevPoint = first;
 
   rest.forEach((point) => {
-    const newPoint: SeriesPoint<number> = {
+    const newPoint: HistoryPoint<number> = {
       timestamp: point.timestamp,
       value: point.value - prevPoint.value,
     };
@@ -49,22 +48,19 @@ const differentiateNumberSeries = (series: Series<number>): Series<number> => {
   return diff;
 };
 
-const batchHistoryToBuyValueSeries = (
+const batchHistoryToBuyValueHistory = (
   history: BatchesHistory
-): Series<number> => history.map(batchHistoryDataPointToBuyValueSeriesPoint);
+): History<number> =>
+  history.map((point) => ({
+    timestamp: point.date.getTime(),
+    value: sum(point.batches.open, getBuyValue),
+  }));
 
-const batchHistoryDataPointToBuyValueSeriesPoint = (
-  point: BatchesHistoryDataPoint
-): SeriesPoint<number> => ({
-  timestamp: point.date.getTime(),
-  value: sum(point.batches.open, getBuyValue),
-});
-
-export const removeDuplicatesAtSameTimeStamp = <T>(series: Series<T>) =>
+export const removeDuplicatesAtSameTimeStamp = <T>(series: History<T>) =>
   unique(series.toReversed(), (dataPoint) => dataPoint.timestamp).toReversed();
 
-export const getCashFlowSeriesForOrders = (orders: Order[]): Series<number> =>
-  orders.reduce<Series<number>>(
+export const getCashFlowHistoryForOrders = (orders: Order[]): History<number> =>
+  orders.reduce<History<number>>(
     (series, order) => [
       ...series,
       {
