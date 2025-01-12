@@ -2,7 +2,7 @@ import { sort, sum, unique } from "radash";
 import { getNumericDateTime } from "../activity/activity.derivers";
 import { getBatchesHistory, getBuyValue } from "../batch/batch.derivers";
 import { BatchesHistory } from "../batch/batch.entities";
-import { getOrderVolume } from "../order/order.derivers";
+import { getOrderCashFlow } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import { Portfolio } from "../portfolio/portfolio.entities";
 import { updateBy } from "../utils/arrays";
@@ -65,7 +65,7 @@ export const getCashFlowHistoryForOrders = (orders: Order[]): History<number> =>
       ...series,
       {
         timestamp: getNumericDateTime(order),
-        value: (series.at(-1)?.value || 0) + getOrderVolume(order),
+        value: (series.at(-1)?.value || 0) + getOrderCashFlow(order),
       },
     ],
     []

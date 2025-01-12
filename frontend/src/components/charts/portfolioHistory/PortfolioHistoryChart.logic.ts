@@ -22,10 +22,14 @@ export const useGetCashFlowHistory = (portfolioName: string) => {
 };
 
 export const useGetPortfolioHistoryChartData = (portfolioName: string) => {
-  const buyValueSeries = useGetBuyValueHistory(portfolioName);
-  const cashFlowSeries = useGetCashFlowHistory(portfolioName);
+  const buyValueHistory = useGetBuyValueHistory(portfolioName);
+  const cashFlowHistory = useGetCashFlowHistory(portfolioName);
 
-  return zip(buyValueSeries, cashFlowSeries).reduce<
+  if (buyValueHistory.length !== cashFlowHistory.length) {
+    return [];
+  }
+
+  return zip(buyValueHistory, cashFlowHistory).reduce<
     { buyValue: number; cashFlow: number; timestamp: number }[]
   >(
     (result, [buyValue, cashFlow]) => [

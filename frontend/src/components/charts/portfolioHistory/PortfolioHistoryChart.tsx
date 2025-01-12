@@ -49,6 +49,7 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
             formatter={(value) => [
               Number(value).toLocaleString(undefined, {
                 maximumFractionDigits: 2,
+                minimumFractionDigits: 2,
               }) + " €",
             ]}
             labelFormatter={(value: number) =>

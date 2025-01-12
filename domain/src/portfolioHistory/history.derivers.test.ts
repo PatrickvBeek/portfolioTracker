@@ -1,4 +1,5 @@
-import { getTestOrdersGroupedByAsset } from "../dataHelpers";
+import { getTestOrdersGroupedByAsset, getTestPortfolio } from "../dataHelpers";
+import { getCashFlowHistory } from "../portfolio/portfolio.derivers";
 import { Portfolio } from "../portfolio/portfolio.entities";
 import { geBuyValueHistoryForPortfolio } from "./history.derivers";
 
@@ -17,6 +18,7 @@ describe("the history operation", () => {
             timestamp: DAY1,
             sharePrice: 10,
             pieces: 2,
+            orderFee: 15, // not relevant
           },
           {
             asset: "asset2",
@@ -34,11 +36,13 @@ describe("the history operation", () => {
         dividendPayouts: {},
       };
 
-      expect(geBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual([
-        { timestamp: new Date(DAY1).getTime(), value: 20 },
-        { timestamp: new Date(DAY2).getTime(), value: 25 },
-        { timestamp: new Date(DAY3).getTime(), value: 15 },
-      ]);
+      expect(geBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 20 },
+          { timestamp: DAY2, value: 25 },
+          { timestamp: DAY3, value: 15 },
+        ])
+      );
     });
 
     it("returns the correct history for a portfolio having orders. Selling orders out of order of buying", () => {
@@ -67,11 +71,108 @@ describe("the history operation", () => {
         dividendPayouts: {},
       };
 
-      expect(geBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual([
-        { timestamp: new Date(DAY1).getTime(), value: 20 },
-        { timestamp: new Date(DAY2).getTime(), value: 25 },
-        { timestamp: new Date(DAY3).getTime(), value: 20 },
-      ]);
+      expect(geBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 20 },
+          { timestamp: DAY2, value: 25 },
+          { timestamp: DAY3, value: 20 },
+        ])
+      );
+    });
+  });
+
+  describe("getCashFlowHistory", () => {
+    it("buying and selling without costs", () => {
+      const portfolio = getTestPortfolio({
+        orders: getTestOrdersGroupedByAsset([
+          {
+            asset: "a1",
+            sharePrice: 10,
+            pieces: 8,
+            timestamp: DAY1,
+            orderFee: 0,
+            taxes: 0,
+          },
+          {
+            asset: "a1",
+            sharePrice: 11,
+            pieces: 2,
+            timestamp: DAY1,
+            orderFee: 0,
+            taxes: 0,
+          },
+          {
+            asset: "a1",
+            sharePrice: 12,
+            pieces: -1,
+            timestamp: DAY2,
+            orderFee: 0,
+            taxes: 0,
+          },
+          {
+            asset: "a2",
+            sharePrice: 25,
+            pieces: 1,
+            timestamp: DAY2,
+            orderFee: 0,
+            taxes: 0,
+          },
+        ]),
+      });
+
+      expect(getCashFlowHistory(portfolio)).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 80 },
+          { timestamp: DAY1, value: 102 },
+          { timestamp: DAY2, value: 90 },
+          { timestamp: DAY2, value: 115 },
+        ])
+      );
+    });
+
+    it("buying and selling with costs", () => {
+      const portfolio = getTestPortfolio({
+        orders: getTestOrdersGroupedByAsset([
+          {
+            asset: "a1",
+            sharePrice: 10,
+            pieces: 8,
+            timestamp: DAY1,
+            orderFee: 5,
+            taxes: 0,
+          },
+          {
+            asset: "a1",
+            sharePrice: 12,
+            pieces: -1,
+            timestamp: DAY2,
+            orderFee: 5,
+            taxes: 0.5,
+          },
+          {
+            asset: "a2",
+            sharePrice: 25,
+            pieces: 1,
+            timestamp: DAY2,
+            orderFee: 10,
+            taxes: 0.25,
+          },
+        ]),
+      });
+
+      expect(getCashFlowHistory(portfolio)).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 85 },
+          { timestamp: DAY2, value: 78.5 },
+          { timestamp: DAY2, value: 113.75 },
+        ])
+      );
     });
   });
 });
+
+const getValuesAsHistory = (values: { timestamp: string; value: number }[]) =>
+  values.map(({ timestamp, value }) => ({
+    timestamp: new Date(timestamp).getTime(),
+    value,
+  }));
