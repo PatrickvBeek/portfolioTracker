@@ -4,6 +4,7 @@ import {
   removeDuplicatesAtSameTimeStamp,
 } from "pt-domain/src/portfolioHistory/history.derivers";
 import { History } from "pt-domain/src/portfolioHistory/history.entities";
+import { sort } from "radash";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { ChartDataPoint } from "../chartTypes";
 
@@ -18,11 +19,7 @@ export const useGetPortfolioHistoryChartData = (
   const buyValueHistory = useGetBuyValueHistory(portfolioName);
   const cashFlowHistory = useGetCashFlowHistory(portfolioName);
 
-  if (buyValueHistory.length !== cashFlowHistory.length) {
-    return [];
-  }
-
-  return combineHistories<PortfolioHistoryDataSets>([
+  return historiesToChartData<PortfolioHistoryDataSets>([
     { history: buyValueHistory, newKey: "buyValue" },
     { history: cashFlowHistory, newKey: "cashFlow" },
   ]);
@@ -43,7 +40,7 @@ const useGetCashFlowHistory = (portfolioName: string) => {
     : [];
 };
 
-const combineHistories = <Keys extends string>(
+const historiesToChartData = <Keys extends string>(
   datasets: { history: History<number>; newKey: Keys }[]
 ): ChartDataPoint<Keys>[] => {
   const map = new Map<number, ChartDataPoint<Keys>>();
@@ -60,5 +57,5 @@ const combineHistories = <Keys extends string>(
     });
   });
 
-  return Array.from(map.values());
+  return sort(Array.from(map.values()), (p) => p.timestamp);
 };

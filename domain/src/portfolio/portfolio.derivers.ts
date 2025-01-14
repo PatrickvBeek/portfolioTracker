@@ -182,5 +182,5 @@ export const getCurrentValueOfOpenBatches = (
 
 export const getCashFlowHistory = (p: Portfolio) =>
   getCashFlowHistoryForOrders(
-    sort(getAllOrdersInPortfolio(p), (o) => getNumericDateTime(o))
+    sort(getActivitiesForPortfolio(p), (o) => getNumericDateTime(o))
   );

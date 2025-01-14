@@ -30,27 +30,32 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
         <AreaChart data={chartData}>
           <Legend />
           <Area
+            dataKey={"cashFlow"}
+            name={"Cash Flow"}
             type={"stepAfter"}
+            connectNulls
             stroke="var(--theme-highlight)"
             strokeWidth={3}
-            dataKey={"cashFlow"}
             fill="url(#gradient)"
             animationDuration={300}
           />
           <Area
+            dataKey={"buyValue"}
+            name={"Buy Value"}
             type={"stepAfter"}
+            connectNulls
             stroke="var(--orange)"
             strokeWidth={3}
-            dataKey={"buyValue"}
             fill="url(#gradient)"
             animationDuration={300}
           />
           <Tooltip
-            formatter={(value) => [
+            formatter={(value, name) => [
               Number(value).toLocaleString(undefined, {
                 maximumFractionDigits: 2,
                 minimumFractionDigits: 2,
               }) + " €",
+              name,
             ]}
             labelFormatter={(value: number) =>
               moment(new Date(value)).format("ddd DD.MM.YYYY")
