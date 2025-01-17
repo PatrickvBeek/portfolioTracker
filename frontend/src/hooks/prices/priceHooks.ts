@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Series } from "pt-domain/src/series/series.entities";
+import { History } from "pt-domain/src/portfolioHistory/history.entities";
 import { useGetAssets } from "../assets/assetHooks";
 
 export type PriceQuery = {
@@ -37,7 +37,7 @@ export const useCurrentPriceByIsin = (isin: string) => {
 
 const getPricesFromAlphaVantage = async (
   params: PriceQueryParams
-): Promise<Series<number>> => {
+): Promise<History<number>> => {
   if (!params.symbol) {
     return Promise.resolve([]);
   }

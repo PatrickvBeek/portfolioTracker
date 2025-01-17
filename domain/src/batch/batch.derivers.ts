@@ -250,7 +250,7 @@ const orderToOpenBatch = (order: Order): OpenBatch => ({
   dividendPayouts: [],
 });
 
-export const getBatchInitialValue = (batch: OpenBatch): number =>
+export const getBuyValue = (batch: OpenBatch): number =>
   batch.pieces * batch.buyPrice;
 
 function updateBatchesWithBuy(batch: Batches, buy: Order): Batches | undefined {

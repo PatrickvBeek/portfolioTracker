@@ -7,6 +7,9 @@ export const getOrderVolume: (order: Order) => number = ({
   sharePrice,
 }) => pieces * sharePrice;
 
+export const getOrderCashFlow: (order: Order) => number = (order) =>
+  getOrderVolume(order) + order.orderFee + order.taxes;
+
 export const areOrdersEqualOnDay: (order1: Order, order2: Order) => boolean = (
   o1,
   o2

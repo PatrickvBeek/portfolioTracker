@@ -13,6 +13,7 @@ import { getDividendNetVolume } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
+import { getCashFlowHistoryForOrders } from "../portfolioHistory/history.derivers";
 import { isFloatPositive } from "../utils/floats";
 import { Portfolio } from "./portfolio.entities";
 
@@ -178,3 +179,8 @@ export const getCurrentValueOfOpenBatches = (
   isin: string,
   currentPrice: number
 ): number => getPiecesOfIsinInPortfolio(portfolio, isin) * currentPrice;
+
+export const getCashFlowHistory = (p: Portfolio) =>
+  getCashFlowHistoryForOrders(
+    sort(getActivitiesForPortfolio(p), (o) => getNumericDateTime(o))
+  );

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
-import { InitialValueHistoryChart } from "../charts/investmentHistory/InitialValueHistoryChart";
+import { PortfolioHistoryChart } from "../charts/portfolioHistory/PortfolioHistoryChart";
 import SelectionHeader from "../general/SelectionHeader";
 import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
@@ -52,7 +52,7 @@ function Portfolios({ className }: PortfolioProps) {
         />
       </div>
       <div className={bemElement("content")}>
-        <InitialValueHistoryChart portfolioName={selectedPortfolio} />
+        <PortfolioHistoryChart portfolioName={selectedPortfolio} />
         <OpenPositionsList portfolioName={selectedPortfolio} />
         <ClosedPositionsList portfolioName={selectedPortfolio} />
         <ActivityList portfolio={selectedPortfolio} />
