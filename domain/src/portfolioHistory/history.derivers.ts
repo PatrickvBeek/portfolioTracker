@@ -77,3 +77,12 @@ export const getCashFlowHistoryForOrders = (
     ],
     []
   );
+
+export const pickValueFromHistory = <T>(
+  history: History<T>,
+  t: number,
+  historyOrder: "ascending" | "descending" = "ascending"
+) =>
+  historyOrder === "ascending"
+    ? history.findLast((point) => point.timestamp <= t)
+    : history.find((point) => point.timestamp <= t);

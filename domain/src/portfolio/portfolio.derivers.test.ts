@@ -1,4 +1,4 @@
-import { it } from "vitest";
+import { it, vi } from "vitest";
 import {
   getElementsGroupedByAsset,
   getTestDividendPayout,
@@ -9,6 +9,7 @@ import {
 } from "../dataHelpers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
+import { History } from "../portfolioHistory/history.entities";
 import {
   TEST_ASSET_GOOGLE,
   TEST_ASSET_TESLA,
@@ -18,6 +19,7 @@ import {
 } from "../testConstants";
 import {
   getLatestPriceFromTransactions,
+  getMarketValueHistory,
   getNonRealizedGainsForIsin,
   getOrderFeesOfIsinInPortfolio,
   getRealizedGainsForIsin,
@@ -95,7 +97,7 @@ describe("The Portfolio deriver", () => {
     const middleDate = new Date("2024-06-02").toISOString();
     const laterDate = new Date("2024-06-03").toISOString();
     describe("for a buy order", () => {
-      it("returns true if teh portfolio is empty", () => {
+      it("returns true if the portfolio is empty", () => {
         expect(
           isOrderValidForPortfolio(
             getTestPortfolio({}),
@@ -399,6 +401,80 @@ describe("The Portfolio deriver", () => {
       });
 
       expect(getLatestPriceFromTransactions(portfolio, "asset")).toEqual(10.1);
+    });
+  });
+
+  describe("getMarketValueHistory", () => {
+    const DAY1 = "2020-03-01";
+    const DAY2 = "2020-03-02";
+    const DAY3 = "2020-03-03";
+    const DAY4 = "2020-03-04";
+    const DAY5 = "2020-03-05";
+    const xAxis = [DAY1, DAY2, DAY3, DAY4, DAY5].map((d) =>
+      new Date(d).getTime()
+    );
+    vi.useFakeTimers().setSystemTime(DAY5);
+
+    it("when online prices are available", () => {
+      const orders = getTestOrdersGroupedByAsset([
+        { asset: "a1", pieces: 1, sharePrice: 100, timestamp: DAY1 },
+        { asset: "a2", pieces: 1, sharePrice: 10, timestamp: DAY2 },
+        { asset: "a1", pieces: -1, sharePrice: 103, timestamp: DAY4 },
+      ]);
+
+      const portfolio = getTestPortfolio({ orders });
+      const priceMap: Record<string, History<number>> = {
+        a1: [
+          { timestamp: xAxis[4], value: 104 },
+          { timestamp: xAxis[3], value: 103 },
+          { timestamp: xAxis[2], value: 102 },
+          { timestamp: xAxis[1], value: 101 },
+          { timestamp: xAxis[0], value: 100 },
+        ],
+        a2: [
+          { timestamp: xAxis[4], value: 10.4 },
+          { timestamp: xAxis[3], value: 10.3 },
+          { timestamp: xAxis[2], value: 10.2 },
+          { timestamp: xAxis[1], value: 10.1 },
+          { timestamp: xAxis[0], value: 10.0 },
+        ],
+      };
+
+      expect(getMarketValueHistory(portfolio, priceMap, xAxis)).toEqual([
+        { timestamp: xAxis[0], value: 100 },
+        { timestamp: xAxis[1], value: 101 + 10.1 },
+        { timestamp: xAxis[2], value: 102 + 10.2 },
+        { timestamp: xAxis[3], value: 10.3 },
+        { timestamp: xAxis[4], value: 10.4 },
+      ]);
+    });
+
+    it("when some online prices are missing", () => {
+      const orders = getTestOrdersGroupedByAsset([
+        { asset: "a1", pieces: 1, sharePrice: 100, timestamp: DAY1 },
+        { asset: "a2", pieces: 1, sharePrice: 10, timestamp: DAY2 },
+        { asset: "a1", pieces: -1, sharePrice: 103, timestamp: DAY4 },
+      ]);
+
+      const portfolio = getTestPortfolio({ orders });
+      const priceMap: Record<string, History<number>> = {
+        a1: [],
+        a2: [
+          { timestamp: xAxis[4], value: 10.4 },
+          { timestamp: xAxis[3], value: 10.3 },
+          { timestamp: xAxis[2], value: 10.2 },
+          { timestamp: xAxis[1], value: 10.1 },
+          { timestamp: xAxis[0], value: 10.0 },
+        ],
+      };
+
+      expect(getMarketValueHistory(portfolio, priceMap, xAxis)).toEqual([
+        { timestamp: xAxis[0], value: 100 },
+        { timestamp: xAxis[1], value: 100 + 10.1 },
+        { timestamp: xAxis[2], value: 100 + 10.2 },
+        { timestamp: xAxis[3], value: 10.3 },
+        { timestamp: xAxis[4], value: 10.4 },
+      ]);
     });
   });
 });

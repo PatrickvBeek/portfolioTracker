@@ -32,7 +32,7 @@ export const useCurrentPriceByIsin = (isin: string) =>
   useCurrentPrice(useGetSymbol(isin) || "");
 
 export const useGetPricesForIsins = (isins: string[]) => {
-  const queries = useQueries({
+  return useQueries({
     queries: isins.map((isin) => {
       const symbol = useGetSymbol(isin) || "";
       return {
@@ -45,9 +45,10 @@ export const useGetPricesForIsins = (isins: string[]) => {
     combine: (results) => ({
       isError: results.some((result) => result.isError),
       isLoading: results.some((result) => result.isLoading),
-      data: results.map((result) => result.data),
+      data: zipToObject(
+        isins,
+        results.map((result) => result.data || [])
+      ),
     }),
   });
-
-  return zipToObject(isins, queries);
 };

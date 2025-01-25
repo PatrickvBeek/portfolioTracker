@@ -1,5 +1,5 @@
 import { partial, sort, sum } from "radash";
-import { getNumericDateTime, isOrder } from "../activity/activity.derivers";
+import { getNumericDateTime } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
 import {
   getBatches,
@@ -13,7 +13,11 @@ import { getDividendNetVolume } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
-import { getCashFlowHistoryForOrders } from "../portfolioHistory/history.derivers";
+import {
+  getCashFlowHistoryForOrders,
+  pickValueFromHistory,
+} from "../portfolioHistory/history.derivers";
+import { History } from "../portfolioHistory/history.entities";
 import { isFloatPositive } from "../utils/floats";
 import { Portfolio } from "./portfolio.entities";
 
@@ -150,17 +154,25 @@ export const portfolioContainsOrder = (
   );
 };
 
+const getAvailablePiecesAtTimestamp = (
+  portfolio: Portfolio,
+  isin: string,
+  timestamp: number
+): number =>
+  sum(
+    getBatchesAtTimeStamp(getOrdersForIsin(portfolio, isin), timestamp).open,
+    (pos) => pos.pieces
+  );
+
 export const isOrderValidForPortfolio = (
   portfolio: Portfolio,
   order: Order
-): boolean => {
-  const positionsAtOrderDate = getBatchesAtTimeStamp(
-    getOrdersForIsin(portfolio, order.asset),
+): boolean =>
+  getAvailablePiecesAtTimestamp(
+    portfolio,
+    order.asset,
     getNumericDateTime(order)
-  );
-  const piecesAvailable = sum(positionsAtOrderDate.open, (pos) => pos.pieces);
-  return piecesAvailable + order.pieces >= 0;
-};
+  ) >= -order.pieces;
 
 export const getDividendSum = (portfolio: Portfolio, isin: string): number =>
   sum(getDividendPayoutsForIsin(portfolio, isin).map(getDividendNetVolume));
@@ -169,10 +181,9 @@ export const getLatestPriceFromTransactions = (
   portfolio: Portfolio,
   isin: string
 ): number | undefined =>
-  getActivitiesForPortfolio(portfolio)
-    .filter((a) => a.asset === isin)
-    .filter((a) => isOrder(a))
-    .findLast((a) => a.sharePrice)?.sharePrice;
+  sort(getOrdersForIsin(portfolio, isin), getNumericDateTime).findLast(
+    (a) => a.sharePrice
+  )?.sharePrice;
 
 export const getCurrentValueOfOpenBatches = (
   portfolio: Portfolio,
@@ -180,7 +191,26 @@ export const getCurrentValueOfOpenBatches = (
   currentPrice: number
 ): number => getPiecesOfIsinInPortfolio(portfolio, isin) * currentPrice;
 
-export const getCashFlowHistory = (p: Portfolio) =>
+export const getCashFlowHistory = (portfolio: Portfolio) =>
   getCashFlowHistoryForOrders(
-    sort(getActivitiesForPortfolio(p), (o) => getNumericDateTime(o))
+    sort(getActivitiesForPortfolio(portfolio), (o) => getNumericDateTime(o))
   );
+
+export const getMarketValueHistory = (
+  portfolio: Portfolio,
+  priceMap: Record<string, History<number>>,
+  xAxis: number[]
+): History<number> =>
+  xAxis.map((t) => ({
+    timestamp: t,
+    value: sum(
+      Object.keys(portfolio.orders).map(
+        (isin) =>
+          getAvailablePiecesAtTimestamp(portfolio, isin, t) *
+          (pickValueFromHistory(priceMap[isin], t, "descending")?.value ||
+            (getOrdersForIsin(portfolio, isin).findLast(
+              (o) => getNumericDateTime(o) <= t
+            )?.sharePrice as number))
+      )
+    ),
+  }));
