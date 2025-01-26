@@ -25,18 +25,8 @@ jobs:
       - name: Prettier
         run: yarn prettier -c ./
 
-      - name: TS Check Domain
-        working-directory: ./domain
+      - name: TypeScript Check
         run: yarn tsc
 
-      - name: Domain Tests
-        working-directory: ./domain
+      - name: Unit Tests
         run: yarn test
-
-      - name: TS Check Frontend
-        working-directory: ./frontend
-        run: yarn tsc
-
-      - name: Frontend Tests
-        working-directory: ./frontend
-        run: yarn run test
