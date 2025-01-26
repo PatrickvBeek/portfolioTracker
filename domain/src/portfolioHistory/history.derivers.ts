@@ -86,3 +86,12 @@ export const pickValueFromHistory = <T>(
   historyOrder === "ascending"
     ? history.findLast((point) => point.timestamp <= t)
     : history.find((point) => point.timestamp <= t);
+
+export const getPiecesAtTimeStamp = (
+  batchesHistory: History<Batches>,
+  timeStampOfInterest: number
+): number =>
+  sum(
+    pickValueFromHistory(batchesHistory, timeStampOfInterest)?.value.open || [],
+    (o) => o.pieces
+  );

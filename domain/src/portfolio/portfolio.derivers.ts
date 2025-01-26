@@ -1,9 +1,9 @@
-import { partial, sort, sum } from "radash";
+import { mapValues, min, partial, sort, sum } from "radash";
 import { getNumericDateTime } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
 import {
   getBatches,
-  getBatchesAtTimeStamp,
+  getBatchesHistory,
   getBatchesOfType,
   getProfitForClosedBatch,
   getProfitForOpenBatch,
@@ -15,6 +15,7 @@ import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import {
   getCashFlowHistoryForOrders,
+  getPiecesAtTimeStamp,
   pickValueFromHistory,
 } from "../portfolioHistory/history.derivers";
 import { History } from "../portfolioHistory/history.entities";
@@ -159,9 +160,9 @@ const getAvailablePiecesAtTimestamp = (
   isin: string,
   timestamp: number
 ): number =>
-  sum(
-    getBatchesAtTimeStamp(getOrdersForIsin(portfolio, isin), timestamp).open,
-    (pos) => pos.pieces
+  getPiecesAtTimeStamp(
+    getBatchesHistory(getOrdersForIsin(portfolio, isin)),
+    timestamp
   );
 
 export const isOrderValidForPortfolio = (
@@ -196,21 +197,44 @@ export const getCashFlowHistory = (portfolio: Portfolio) =>
     sort(getActivitiesForPortfolio(portfolio), (o) => getNumericDateTime(o))
   );
 
+export const getFirstOrderTimeStamp = (portfolio: Portfolio) =>
+  min(getAllOrdersInPortfolio(portfolio).map(getNumericDateTime));
+
 export const getMarketValueHistory = (
   portfolio: Portfolio,
   priceMap: Record<string, History<number>>,
   xAxis: number[]
-): History<number> =>
-  xAxis.map((t) => ({
+): History<number> => {
+  const batchesHistories = mapValues(portfolio.orders, getBatchesHistory);
+
+  return xAxis.map((t) => ({
     timestamp: t,
     value: sum(
-      Object.keys(portfolio.orders).map(
-        (isin) =>
-          getAvailablePiecesAtTimestamp(portfolio, isin, t) *
-          (pickValueFromHistory(priceMap[isin], t, "descending")?.value ||
-            (getOrdersForIsin(portfolio, isin).findLast(
-              (o) => getNumericDateTime(o) <= t
-            )?.sharePrice as number))
-      )
+      Object.entries(batchesHistories).map(([isin, batchesHistory]) => {
+        const pieces = getPiecesAtTimeStamp(batchesHistory, t);
+
+        return pieces
+          ? pieces * getPriceAtTimestamp(portfolio, isin, t, priceMap)
+          : 0;
+      })
     ),
   }));
+};
+
+const getPriceAtTimestamp = (
+  portfolio: Portfolio,
+  isin: string,
+  t: number,
+  priceMap: Record<string, History<number>>
+): number =>
+  pickValueFromHistory(priceMap[isin], t, "descending")?.value ||
+  getOrdersForIsin(portfolio, isin).findLast((o) => getNumericDateTime(o) <= t)
+    ?.sharePrice ||
+  returnNullAndLogWarning(isin, t);
+
+const returnNullAndLogWarning = (isin: string, t: number): number => {
+  console.log(
+    `Could not find any price for ${isin} at ${t}. Neither in transactions nor in online price map.`
+  );
+  return 0;
+};

@@ -4,7 +4,6 @@ import { PortfolioActivity } from "../activity/activity.entities";
 import { sumDividendTaxes } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
-import { pickValueFromHistory } from "../portfolioHistory/history.derivers";
 import { History } from "../portfolioHistory/history.entities";
 import {
   areFloatsEqual,
@@ -66,13 +65,6 @@ export function getBatchesHistory(orders: Order[]): History<Batches> {
 
   return history;
 }
-
-export const getBatchesAtTimeStamp = (
-  orders: Order[],
-  timeStampOfInterest: number
-): Batches =>
-  pickValueFromHistory(getBatchesHistory(orders), timeStampOfInterest)?.value ||
-  EMPTY_BATCHES;
 
 function updateBatchesWithActivity(
   batches: Batches | undefined,

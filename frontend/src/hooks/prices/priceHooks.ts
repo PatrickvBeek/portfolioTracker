@@ -1,6 +1,6 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { zipToObject } from "radash";
-import { useGetSymbol } from "../assets/assetHooks";
+import { unique, zipToObject } from "radash";
+import { useGetAssets, useGetSymbol } from "../assets/assetHooks";
 import { getPricesFromAlphaVantage } from "./alphaVantage";
 
 const PRICE_BASE_QUERY_KEY = "prices";
@@ -32,9 +32,13 @@ export const useCurrentPriceByIsin = (isin: string) =>
   useCurrentPrice(useGetSymbol(isin) || "");
 
 export const useGetPricesForIsins = (isins: string[]) => {
+  const assets = useGetAssets() || {};
+  const symbols = unique(
+    isins.map((i) => assets[i]?.symbol || "").filter((s) => s.length > 0)
+  );
+
   return useQueries({
-    queries: isins.map((isin) => {
-      const symbol = useGetSymbol(isin) || "";
+    queries: symbols.map((symbol) => {
       return {
         queryKey: [PRICE_BASE_QUERY_KEY, symbol],
         queryFn: async () => getPricesFromAlphaVantage(symbol),
@@ -42,13 +46,22 @@ export const useGetPricesForIsins = (isins: string[]) => {
         retry: false,
       };
     }),
-    combine: (results) => ({
-      isError: results.some((result) => result.isError),
-      isLoading: results.some((result) => result.isLoading),
-      data: zipToObject(
-        isins,
+    combine: (results) => {
+      const priceResults = zipToObject(
+        symbols,
         results.map((result) => result.data || [])
-      ),
-    }),
+      );
+
+      return {
+        isError: results.some((result) => result.isError),
+        isLoading: results.some((result) => result.isLoading),
+        data: Object.fromEntries(
+          isins.map((isin) => [
+            isin,
+            priceResults[assets[isin].symbol || ""] || [],
+          ])
+        ),
+      };
+    },
   });
 };
