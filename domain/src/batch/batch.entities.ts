@@ -20,10 +20,3 @@ export interface Batches {
   closed: ClosedBatch[];
 }
 export type BatchType = keyof Batches;
-
-export interface BatchesHistoryDataPoint {
-  date: Date;
-  batches: Batches;
-}
-
-export type BatchesHistory = BatchesHistoryDataPoint[];

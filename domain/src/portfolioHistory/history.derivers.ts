@@ -2,7 +2,7 @@ import { sort, sum, unique } from "radash";
 import { getNumericDateTime, isOrder } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
 import { getBatchesHistory, getBuyValue } from "../batch/batch.derivers";
-import { BatchesHistory } from "../batch/batch.entities";
+import { Batches } from "../batch/batch.entities";
 import { getDividendNetVolume } from "../dividendPayouts/dividend.derivers";
 import { getOrderCashFlow } from "../order/order.derivers";
 import { Portfolio } from "../portfolio/portfolio.entities";
@@ -50,11 +50,11 @@ const differentiateNumberHistory = (
 };
 
 const batchHistoryToBuyValueHistory = (
-  history: BatchesHistory
+  history: History<Batches>
 ): History<number> =>
   history.map((point) => ({
-    timestamp: point.date.getTime(),
-    value: sum(point.batches.open, getBuyValue),
+    timestamp: point.timestamp,
+    value: sum(point.value.open, getBuyValue),
   }));
 
 export const removeDuplicatesAtSameTimeStamp = <T>(series: History<T>) =>

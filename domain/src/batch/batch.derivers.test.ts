@@ -205,8 +205,8 @@ describe("the portfolio deriver", () => {
 
       expect(getBatchesHistory(TEST_ORDERS)).toEqual([
         {
-          date: new Date(day1),
-          batches: {
+          timestamp: new Date(day1).getTime(),
+          value: {
             open: [
               {
                 buyDate: day1,
@@ -221,8 +221,8 @@ describe("the portfolio deriver", () => {
           },
         },
         {
-          date: new Date(day2),
-          batches: {
+          timestamp: new Date(day2).getTime(),
+          value: {
             open: [
               {
                 buyDate: day1,
@@ -245,8 +245,8 @@ describe("the portfolio deriver", () => {
           },
         },
         {
-          date: new Date(day3),
-          batches: {
+          timestamp: new Date(day3).getTime(),
+          value: {
             open: [],
             closed: [
               {
