@@ -1,9 +1,22 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, renderHook, screen } from "@testing-library/react";
 import userEvent, { Options, UserEvent } from "@testing-library/user-event";
 import { ReactElement } from "react";
 import { queryClientConfig } from "../queryClient/config";
 import { UserDataProvider } from "../userDataContext";
+
+export function customRenderHook<T>(hookCallback: () => T) {
+  const queryClient = new QueryClient(queryClientConfig);
+  return renderHook(hookCallback, {
+    wrapper: ({ children }) => (
+      <UserDataProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
+      </UserDataProvider>
+    ),
+  });
+}
 
 export function customRender({
   component,

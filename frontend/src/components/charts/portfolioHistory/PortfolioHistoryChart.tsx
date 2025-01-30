@@ -1,17 +1,20 @@
 import moment from "moment";
 import { FC } from "react";
 import {
-  Area,
-  AreaChart,
   CartesianGrid,
   Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { getAxisProps, getTimeAxisProps } from "../axisUtils";
-import { useGetPortfolioHistoryChartData } from "./PortfolioHistoryChart.logic";
+import { getAxisProps, getTimeAxisProps } from "../chartUtils";
+import {
+  PortfolioHistoryDataSets,
+  useGetPortfolioHistoryChartData,
+} from "./PortfolioHistoryChart.logic";
 import styles from "./PortfolioHistoryChart.module.less";
 
 export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
@@ -27,27 +30,26 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
     <div className={styles.container}>
       <div className={styles.heading}>Portfolio History</div>
       <ResponsiveContainer aspect={2.5} width={"100%"}>
-        <AreaChart data={chartData}>
+        <LineChart data={chartData}>
           <Legend />
-          <Area
-            dataKey={"cashFlow"}
+          <Line
+            {...DEFAULT_AREA_PROPS}
+            dataKey={"cashFlow" satisfies PortfolioHistoryDataSets}
             name={"Cash Flow"}
-            type={"stepAfter"}
-            connectNulls
             stroke="var(--theme-highlight)"
-            strokeWidth={3}
-            fill="url(#gradient)"
-            animationDuration={300}
           />
-          <Area
-            dataKey={"buyValue"}
+          <Line
+            {...DEFAULT_AREA_PROPS}
+            dataKey={"buyValue" satisfies PortfolioHistoryDataSets}
             name={"Buy Value"}
-            type={"stepAfter"}
-            connectNulls
             stroke="var(--orange)"
-            strokeWidth={3}
-            fill="url(#gradient)"
-            animationDuration={300}
+          />
+          <Line
+            {...DEFAULT_AREA_PROPS}
+            dataKey={"marketValue" satisfies PortfolioHistoryDataSets}
+            name={"Market Value"}
+            stroke="var(--green)"
+            type={"linear"}
           />
           <Tooltip
             formatter={(value, name) => [
@@ -64,8 +66,16 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis {...getAxisProps(chartData)} />
           <CartesianGrid stroke="#ccc" />
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );
 };
+
+const DEFAULT_AREA_PROPS = {
+  dot: false,
+  type: "stepAfter",
+  connectNulls: true,
+  strokeWidth: 3,
+  animationDuration: 300,
+} as const;

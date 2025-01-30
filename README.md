@@ -7,6 +7,6 @@
 
 - to start up the application:
 
-  - run `yarn run start` in root folder or `frontend`
+  - run `yarn start` in root folder or `frontend`
 
 - open `localhost:5173` in a browser

@@ -1,20 +1,20 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, RequestHandler, http } from "msw";
 import { setupServer } from "msw/node";
-import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
-import { PortfolioLibrary } from "pt-domain/src/portfolio/portfolio.entities";
+import { AlphaVantageDailyResult } from "../hooks/prices/alphaVantage";
 
 type MockBackendData = {
-  portfolioLib?: PortfolioLibrary;
-  assetLib?: AssetLibrary;
+  prices: Record<string, AlphaVantageDailyResult>;
 };
 
-function getHandlers(mockData: MockBackendData | undefined) {
+function getHandlers(mockData: MockBackendData | undefined): RequestHandler[] {
   return [
-    http.get("/api/portfolios", () => {
-      return HttpResponse.json(mockData?.portfolioLib || {});
-    }),
-    http.get("/api/assets", () => {
-      return HttpResponse.json(mockData?.assetLib || {});
+    http.get("https://www.alphavantage.co/*", ({ request }) => {
+      const url = new URL(request.url);
+      const symbol = url.searchParams.get("symbol");
+      if (!symbol) {
+        return new HttpResponse(null, { status: 404 });
+      }
+      return HttpResponse.json(mockData?.prices[symbol]);
     }),
   ];
 }

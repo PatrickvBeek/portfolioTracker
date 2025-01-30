@@ -1,25 +1,16 @@
 import { last, sort, sum } from "radash";
-import {
-  getActivityDate,
-  getNumericDateTime,
-  isOrder,
-} from "../activity/activity.derivers";
+import { getNumericDateTime, isOrder } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
 import { sumDividendTaxes } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
+import { History } from "../portfolioHistory/history.entities";
 import {
   areFloatsEqual,
   isFloatLowerThan,
   isFloatNegative,
 } from "../utils/floats";
-import {
-  BatchType,
-  Batches,
-  BatchesHistory,
-  ClosedBatch,
-  OpenBatch,
-} from "./batch.entities";
+import { BatchType, Batches, ClosedBatch, OpenBatch } from "./batch.entities";
 
 const EMPTY_BATCHES: Batches = { open: [], closed: [] };
 
@@ -52,20 +43,20 @@ export function getBatchesOfType<T extends BatchType>(
   return getBatches(orders, dividendPayouts)?.[batchType] || [];
 }
 
-export function getBatchesHistory(orders: Order[]): BatchesHistory {
-  const history = sort(orders, getNumericDateTime).reduce<BatchesHistory>(
+export function getBatchesHistory(orders: Order[]): History<Batches> {
+  const history = sort(orders, getNumericDateTime).reduce<History<Batches>>(
     (history, order) => {
-      const oldBatches = last(history)?.batches || EMPTY_BATCHES;
+      const oldBatches = last(history)?.value || EMPTY_BATCHES;
       const newBatches = updateBatchesWithOrder(oldBatches, order);
       if (!newBatches) {
         return history;
       }
       return [
         ...history,
-        { date: getActivityDate(order), batches: newBatches },
+        { timestamp: getNumericDateTime(order), value: newBatches },
       ];
     },
-    [] as BatchesHistory
+    [] as History<Batches>
   );
 
   if (history.length !== orders.length) {
@@ -74,14 +65,6 @@ export function getBatchesHistory(orders: Order[]): BatchesHistory {
 
   return history;
 }
-
-export const getBatchesAtTimeStamp = (
-  orders: Order[],
-  timeStampOfInterest: number
-): Batches =>
-  getBatchesHistory(orders).findLast(
-    ({ date }) => date.getTime() <= timeStampOfInterest
-  )?.batches || EMPTY_BATCHES;
 
 function updateBatchesWithActivity(
   batches: Batches | undefined,

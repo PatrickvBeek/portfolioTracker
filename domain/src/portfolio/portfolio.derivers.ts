@@ -1,9 +1,9 @@
-import { partial, sort, sum } from "radash";
-import { getNumericDateTime, isOrder } from "../activity/activity.derivers";
+import { mapValues, min, partial, sort, sum } from "radash";
+import { getNumericDateTime } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
 import {
   getBatches,
-  getBatchesAtTimeStamp,
+  getBatchesHistory,
   getBatchesOfType,
   getProfitForClosedBatch,
   getProfitForOpenBatch,
@@ -13,7 +13,12 @@ import { getDividendNetVolume } from "../dividendPayouts/dividend.derivers";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
-import { getCashFlowHistoryForOrders } from "../portfolioHistory/history.derivers";
+import {
+  getCashFlowHistoryForOrders,
+  getPiecesAtTimeStamp,
+  pickValueFromHistory,
+} from "../portfolioHistory/history.derivers";
+import { History } from "../portfolioHistory/history.entities";
 import { isFloatPositive } from "../utils/floats";
 import { Portfolio } from "./portfolio.entities";
 
@@ -150,17 +155,25 @@ export const portfolioContainsOrder = (
   );
 };
 
+const getAvailablePiecesAtTimestamp = (
+  portfolio: Portfolio,
+  isin: string,
+  timestamp: number
+): number =>
+  getPiecesAtTimeStamp(
+    getBatchesHistory(getOrdersForIsin(portfolio, isin)),
+    timestamp
+  );
+
 export const isOrderValidForPortfolio = (
   portfolio: Portfolio,
   order: Order
-): boolean => {
-  const positionsAtOrderDate = getBatchesAtTimeStamp(
-    getOrdersForIsin(portfolio, order.asset),
+): boolean =>
+  getAvailablePiecesAtTimestamp(
+    portfolio,
+    order.asset,
     getNumericDateTime(order)
-  );
-  const piecesAvailable = sum(positionsAtOrderDate.open, (pos) => pos.pieces);
-  return piecesAvailable + order.pieces >= 0;
-};
+  ) >= -order.pieces;
 
 export const getDividendSum = (portfolio: Portfolio, isin: string): number =>
   sum(getDividendPayoutsForIsin(portfolio, isin).map(getDividendNetVolume));
@@ -169,10 +182,9 @@ export const getLatestPriceFromTransactions = (
   portfolio: Portfolio,
   isin: string
 ): number | undefined =>
-  getActivitiesForPortfolio(portfolio)
-    .filter((a) => a.asset === isin)
-    .filter((a) => isOrder(a))
-    .findLast((a) => a.sharePrice)?.sharePrice;
+  sort(getOrdersForIsin(portfolio, isin), getNumericDateTime).findLast(
+    (a) => a.sharePrice
+  )?.sharePrice;
 
 export const getCurrentValueOfOpenBatches = (
   portfolio: Portfolio,
@@ -180,7 +192,49 @@ export const getCurrentValueOfOpenBatches = (
   currentPrice: number
 ): number => getPiecesOfIsinInPortfolio(portfolio, isin) * currentPrice;
 
-export const getCashFlowHistory = (p: Portfolio) =>
+export const getCashFlowHistory = (portfolio: Portfolio) =>
   getCashFlowHistoryForOrders(
-    sort(getActivitiesForPortfolio(p), (o) => getNumericDateTime(o))
+    sort(getActivitiesForPortfolio(portfolio), (o) => getNumericDateTime(o))
   );
+
+export const getFirstOrderTimeStamp = (portfolio: Portfolio) =>
+  min(getAllOrdersInPortfolio(portfolio).map(getNumericDateTime));
+
+export const getMarketValueHistory = (
+  portfolio: Portfolio,
+  priceMap: Record<string, History<number>>,
+  xAxis: number[]
+): History<number> => {
+  const batchesHistories = mapValues(portfolio.orders, getBatchesHistory);
+
+  return xAxis.map((t) => ({
+    timestamp: t,
+    value: sum(
+      Object.entries(batchesHistories).map(([isin, batchesHistory]) => {
+        const pieces = getPiecesAtTimeStamp(batchesHistory, t);
+
+        return pieces
+          ? pieces * getPriceAtTimestamp(portfolio, isin, t, priceMap)
+          : 0;
+      })
+    ),
+  }));
+};
+
+const getPriceAtTimestamp = (
+  portfolio: Portfolio,
+  isin: string,
+  t: number,
+  priceMap: Record<string, History<number>>
+): number =>
+  pickValueFromHistory(priceMap[isin], t, "descending")?.value ||
+  getOrdersForIsin(portfolio, isin).findLast((o) => getNumericDateTime(o) <= t)
+    ?.sharePrice ||
+  returnNullAndLogWarning(isin, t);
+
+const returnNullAndLogWarning = (isin: string, t: number): number => {
+  console.log(
+    `Could not find any price for ${isin} at ${t}. Neither in transactions nor in online price map.`
+  );
+  return 0;
+};

@@ -1,6 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
-import { History } from "pt-domain/src/portfolioHistory/history.entities";
-import { useGetAssets } from "../assets/assetHooks";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { unique, zipToObject } from "radash";
+import { useGetAssets, useGetSymbol } from "../assets/assetHooks";
+import { getPricesFromAlphaVantage } from "./alphaVantage";
+
+const PRICE_BASE_QUERY_KEY = "prices";
 
 export type PriceQuery = {
   isLoading: boolean;
@@ -9,57 +12,56 @@ export type PriceQuery = {
 };
 
 export const usePriceQuery = <T>(
-  params: PriceQueryParams,
+  symbol: string,
   selector?: (
     prices: Awaited<ReturnType<typeof getPricesFromAlphaVantage>>
   ) => T
 ) => {
   return useQuery({
-    queryKey: ["prices", params],
-    queryFn: async () => getPricesFromAlphaVantage(params),
+    queryKey: [PRICE_BASE_QUERY_KEY, symbol],
+    queryFn: async () => getPricesFromAlphaVantage(symbol),
     select: selector,
     retry: false,
   });
 };
 
-export const useCurrentPrice = (symbol: PriceQueryParams["symbol"]) =>
-  usePriceQuery(
-    { symbol, frequency: PRICE_FREQUENCY.WEEKLY },
-    (prices = []) => prices.at(0)?.value
+export const useCurrentPrice = (symbol: string) =>
+  usePriceQuery(symbol, (prices = []) => prices.at(0)?.value);
+
+export const useCurrentPriceByIsin = (isin: string) =>
+  useCurrentPrice(useGetSymbol(isin) || "");
+
+export const useGetPricesForIsins = (isins: string[]) => {
+  const assets = useGetAssets() || {};
+  const symbols = unique(
+    isins.map((i) => assets[i]?.symbol || "").filter((s) => s.length > 0)
   );
 
-export const useCurrentPriceByIsin = (isin: string) => {
-  const assetLib = useGetAssets();
-  const symbol = assetLib?.[isin]?.symbol;
+  return useQueries({
+    queries: symbols.map((symbol) => {
+      return {
+        queryKey: [PRICE_BASE_QUERY_KEY, symbol],
+        queryFn: async () => getPricesFromAlphaVantage(symbol),
+        staleTime: Infinity,
+        retry: false,
+      };
+    }),
+    combine: (results) => {
+      const priceResults = zipToObject(
+        symbols,
+        results.map((result) => result.data || [])
+      );
 
-  return useCurrentPrice(symbol || "");
+      return {
+        isError: results.some((result) => result.isError),
+        isLoading: results.some((result) => result.isLoading),
+        data: Object.fromEntries(
+          isins.map((isin) => [
+            isin,
+            priceResults[assets[isin].symbol || ""] || [],
+          ])
+        ),
+      };
+    },
+  });
 };
-
-const getPricesFromAlphaVantage = async (
-  params: PriceQueryParams
-): Promise<History<number>> => {
-  if (!params.symbol) {
-    return Promise.resolve([]);
-  }
-
-  const response = await fetch(
-    `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${params.symbol}&outputsize=full&apikey=free_tier`
-  );
-  const prices = await response.json();
-
-  return Object.entries(prices["Time Series (Daily)"]).map(
-    ([dateString, price]) => ({
-      timestamp: new Date(dateString).getTime(),
-      value: parseFloat((price as any)["4. close"]),
-    })
-  );
-};
-
-const PRICE_FREQUENCY = {
-  DAILY: "daily",
-  WEEKLY: "weekly",
-  MONTHLY: "monthly",
-} as const;
-type PriceFrequency = (typeof PRICE_FREQUENCY)[keyof typeof PRICE_FREQUENCY];
-
-type PriceQueryParams = { symbol: string; frequency: PriceFrequency };

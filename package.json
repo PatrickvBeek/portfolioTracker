@@ -7,7 +7,9 @@
   "scripts": {
     "build": "yarn workspace frontend build",
     "start": "yarn workspace frontend start",
-    "architecture-tests": "yarn depcruise domain/src frontend/src"
+    "architecture-tests": "yarn depcruise domain/src frontend/src",
+    "test": "yarn workspace pt-domain test && yarn workspace frontend test",
+    "tsc": "yarn workspace pt-domain tsc && yarn workspace frontend tsc"
   },
   "dependencies": {
     "prettier": "^3.3.2"

@@ -38,3 +38,5 @@ export function useAddAsset() {
 export function useDeleteAsset() {
   return useUpdateAssets(deleteAssetFromLib);
 }
+
+export const useGetSymbol = (isin: string) => useGetAssets()?.[isin].symbol;
