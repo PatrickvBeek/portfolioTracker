@@ -123,6 +123,8 @@ describe("useGetPortfolioHistoryChartData", () => {
         timestamp: TIMESTAMPS[3],
       },
       {
+        buyValue: 232.7,
+        cashFlow: 232.7,
         marketValue: 2 * 110 + 3 * 10.3,
         timestamp: new Date(TODAY).getTime(),
       },

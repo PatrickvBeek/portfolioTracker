@@ -32,8 +32,8 @@ export const useGetPortfolioHistoryChartData = (
   const marketValueHistory = useGetMarketValueHistory(portfolioName);
 
   return historiesToChartData<PortfolioHistoryDataSets>([
-    { history: buyValueHistory, newKey: "buyValue" },
-    { history: cashFlowHistory, newKey: "cashFlow" },
+    { history: extendToToday(buyValueHistory), newKey: "buyValue" },
+    { history: extendToToday(cashFlowHistory), newKey: "cashFlow" },
     { history: marketValueHistory, newKey: "marketValue" },
   ]);
 };
@@ -95,4 +95,11 @@ const historiesToChartData = <Keys extends string>(
   });
 
   return sort(Array.from(map.values()), (p) => p.timestamp);
+};
+
+const extendToToday = (history: History<number>): History<number> => {
+  const lastValue = history.at(-1);
+  return history.concat(
+    lastValue ? [{ timestamp: Date.now(), value: lastValue.value }] : []
+  );
 };
