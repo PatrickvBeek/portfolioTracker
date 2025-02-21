@@ -14,7 +14,7 @@ import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPosition
 
 const { bemBlock, bemElement } = bemHelper("portfolios");
 
-export type PortfolioProps = Props<{}>;
+export type PortfolioProps = Props;
 
 function Portfolios({ className }: PortfolioProps) {
   const portfolioLib = useGetPortfolios();

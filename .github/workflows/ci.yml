@@ -25,6 +25,10 @@ jobs:
       - name: Prettier
         run: yarn prettier -c ./
 
+      - name: ESLint
+        working-directory: frontend
+        run: yarn eslint src
+
       - name: TypeScript Check
         run: yarn tsc
 

@@ -8,8 +8,8 @@ const { bemBlock, bemElement } = bemHelper("empty-portfolios");
 const Message = ({ className }: { className?: string }) => {
   return (
     <div className={className}>
-      It appears that you don't have any portfolios registered yet. Let's get
-      started by adding one!
+      {`It appears that you don't have any portfolios registered yet. Let's get
+      started by adding one!`}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import { Order } from "pt-domain/src/order/order.entities";
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
 import { useAddOrderToPortfolio } from "../../../hooks/portfolios/portfolioHooks";
@@ -44,7 +45,13 @@ export function OrderInputForm({
   const [isWarningOpen, setIsWarningOpen] = useState(false);
 
   const { isValid, isDuplicate } = useOrderValidation(portfolioName);
-  const addOrder = useAddOrderToPortfolio(portfolioName);
+  const addOrderHandler = useAddOrderToPortfolio(portfolioName);
+
+  const addOrder = (order: Order | undefined) => {
+    if (order) {
+      addOrderHandler(order);
+    }
+  };
 
   const isFormValid = isin && pieces && pieces !== 0 && sharePrice && date;
 
@@ -64,7 +71,7 @@ export function OrderInputForm({
     if (isDuplicate(orderToSubmit)) {
       setIsWarningOpen(true);
     } else {
-      orderToSubmit && addOrder(orderToSubmit);
+      addOrder(orderToSubmit);
     }
   };
 
@@ -131,7 +138,7 @@ export function OrderInputForm({
         <DuplicationWarning
           onCancel={() => setIsWarningOpen(false)}
           onConfirm={() => {
-            orderToSubmit && addOrder(orderToSubmit);
+            addOrder(orderToSubmit);
             setIsWarningOpen(false);
           }}
         />

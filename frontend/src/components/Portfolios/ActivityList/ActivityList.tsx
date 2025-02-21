@@ -42,6 +42,7 @@ function ActivityList({
 
   const columnHelper = createColumnHelper<PortfolioActivity>();
 
+  //eslint-disable-next-line @typescript-eslint/no-explicit-any
   const defs: ColumnDef<PortfolioActivity, any>[] = [
     columnHelper.accessor((a) => a, {
       id: "type",

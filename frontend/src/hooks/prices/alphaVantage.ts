@@ -15,20 +15,19 @@ export const getPricesFromAlphaVantage = async (
   return Object.entries(prices["Time Series (Daily)"]).map(
     ([dateString, price]) => ({
       timestamp: new Date(dateString).getTime(),
-      value: parseFloat((price as any)["4. close"]),
+      value: parseFloat((price as AlphaVantagePrice)["4. close"]),
     })
   );
 };
 
+type AlphaVantagePrice = {
+  "1. open": string;
+  "2. high": string;
+  "3. low": string;
+  "4. close": string;
+  "5. volume": string;
+};
+
 export type AlphaVantageDailyResult = {
-  "Time Series (Daily)": Record<
-    string,
-    {
-      "1. open": string;
-      "2. high": string;
-      "3. low": string;
-      "4. close": string;
-      "5. volume": string;
-    }
-  >;
+  "Time Series (Daily)": Record<string, AlphaVantagePrice>;
 };

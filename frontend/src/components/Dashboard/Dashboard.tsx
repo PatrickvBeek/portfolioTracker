@@ -3,7 +3,7 @@ import { Props } from "../../utility/types";
 
 const { bemBlock } = bemHelper("dashboard");
 
-export type DashboardProps = Props<{}>;
+export type DashboardProps = Props;
 
 function Dashboard({ className }: DashboardProps) {
   return (

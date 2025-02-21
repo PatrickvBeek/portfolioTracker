@@ -33,6 +33,7 @@ type PositionsListProps = Props<{
 const getColumDefs: (
   portfolioName: string,
   batchType: BatchType
+  //eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) => ColumnDef<string, any>[] = (portfolioName, batchType) => [
   {
     header: "Asset",

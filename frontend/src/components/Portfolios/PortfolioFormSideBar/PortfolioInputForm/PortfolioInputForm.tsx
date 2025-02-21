@@ -1,3 +1,4 @@
+import { Portfolio } from "pt-domain/src/portfolio/portfolio.entities";
 import { newPortfolioFromName } from "pt-domain/src/portfolio/portfolio.operations";
 import { useState } from "react";
 import { useAddPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
@@ -10,7 +11,13 @@ const { bemElement, bemBlock } = bemHelper("portfolio-input-form");
 
 const PortfolioInputForm = ({ onConfirm }: { onConfirm?: () => void }) => {
   const [fieldContent, setFieldContent] = useState("");
-  const addPortfolio = useAddPortfolio();
+  const addPortfolioHandler = useAddPortfolio();
+  const addPortfolio = (portfolio: Portfolio | undefined) => {
+    if (portfolio) {
+      addPortfolioHandler(portfolio);
+    }
+  };
+
   return (
     <div className={bemBlock(undefined)}>
       <TextInput
@@ -24,9 +31,11 @@ const PortfolioInputForm = ({ onConfirm }: { onConfirm?: () => void }) => {
       <Button
         className={bemElement("add-button")}
         onClick={() => {
-          fieldContent && addPortfolio(newPortfolioFromName(fieldContent));
+          addPortfolio(newPortfolioFromName(fieldContent));
           setFieldContent("");
-          onConfirm && onConfirm();
+          if (onConfirm) {
+            onConfirm();
+          }
         }}
         label={"Add"}
         isDisabled={fieldContent.length === 0}

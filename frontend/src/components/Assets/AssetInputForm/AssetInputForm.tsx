@@ -31,9 +31,9 @@ const isValidInput = (input: { name: string; isin: string }) => {
 };
 
 const AssetInputForm = (): ReactElement => {
-  let [nameInputText, updateNameInputText] = useState("");
-  let [isinInputText, updateIsinInputText] = useState("");
-  let [symbolInputText, updateSymbolInputText] = useState("");
+  const [nameInputText, updateNameInputText] = useState("");
+  const [isinInputText, updateIsinInputText] = useState("");
+  const [symbolInputText, updateSymbolInputText] = useState("");
 
   const addAssets = useAddAsset();
 
