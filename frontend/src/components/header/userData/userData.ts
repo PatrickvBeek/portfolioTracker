@@ -1,21 +1,56 @@
 import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import { PortfolioLibrary } from "pt-domain/src/portfolio/portfolio.entities";
 
-export const EXPORT_VERSION = 1;
+export const EXPORT_VERSION = 2;
 
-export type ExportedData = {
+export type ApiKeys = {
+  yahoo: string;
+};
+
+export type UserData = {
   portfolios: PortfolioLibrary;
   assets: AssetLibrary;
+  apiKeys: ApiKeys;
   meta: {
-    exportVersion: number;
+    exportVersion: typeof EXPORT_VERSION;
   };
 };
 
-export const parseUserData = (jsonString: string): ExportedData => {
-  const parsedObject = JSON.parse(jsonString) as ExportedData;
+export const parseUserData = (jsonString: string): UserData => {
+  const parsedObject = JSON.parse(jsonString) as UserDataOfAnyVersion;
   if (!(parsedObject.assets && parsedObject.meta && parsedObject.portfolios)) {
     throw new Error(`cannot parse user data ${jsonString}`);
   }
 
-  return parsedObject;
+  return doMigration(parsedObject);
+};
+
+/*
+ * Data Migrations
+ */
+
+const doMigration = (data: UserDataOfAnyVersion): UserData =>
+  // @ts-expect-error
+  [getV2].reduce((result, reducer, i) => {
+    // @ts-expect-error
+    return result.meta.exportVersion <= i + 1 ? reducer(data) : data;
+  }, data);
+
+type UserDataOfAnyVersion = UserData | UserDataV1;
+
+const getV2 = (userData: UserDataV1): UserData => ({
+  ...userData,
+  apiKeys: { yahoo: "" },
+  meta: {
+    exportVersion: 2,
+  },
+});
+
+type UserDataV1 = {
+  portfolios: PortfolioLibrary;
+  assets: AssetLibrary;
+  apiKeys: ApiKeys;
+  meta: {
+    exportVersion: 1;
+  };
 };
