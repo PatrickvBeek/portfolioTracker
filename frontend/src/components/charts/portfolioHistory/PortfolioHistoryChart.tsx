@@ -64,7 +64,11 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
             }
           />
           <XAxis {...getTimeAxisProps(chartData)} />
-          <YAxis {...getAxisProps(chartData)} />
+          <YAxis
+            {...getAxisProps(chartData)}
+            tickFormatter={(value) => Number(value / 1000).toString()}
+            unit={" k€"}
+          />
           <CartesianGrid stroke="#ccc" />
         </LineChart>
       </ResponsiveContainer>

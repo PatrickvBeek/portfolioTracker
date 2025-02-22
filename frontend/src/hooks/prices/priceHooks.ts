@@ -1,7 +1,10 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { History } from "pt-domain/src/portfolioHistory/history.entities";
 import { unique, zipToObject } from "radash";
+import { useGetApiKeys } from "../apiKeys/apiKeyHooks";
 import { useGetAssets, useGetSymbol } from "../assets/assetHooks";
 import { getPricesFromAlphaVantage } from "./alphaVantage";
+import { getPricesFromYahooFinance } from "./yahooFinance";
 
 const PRICE_BASE_QUERY_KEY = "prices";
 
@@ -11,15 +14,19 @@ export type PriceQuery = {
   data: number | undefined;
 };
 
+const useGetPriceProvider = () => {
+  const yhKey = useGetApiKeys()?.yahoo;
+
+  return yhKey ? getPricesFromYahooFinance(yhKey) : getPricesFromAlphaVantage;
+};
+
 export const usePriceQuery = <T>(
   symbol: string,
-  selector?: (
-    prices: Awaited<ReturnType<typeof getPricesFromAlphaVantage>>
-  ) => T
+  selector?: (prices: History<number>) => T
 ) => {
   return useQuery({
     queryKey: [PRICE_BASE_QUERY_KEY, symbol],
-    queryFn: async () => getPricesFromAlphaVantage(symbol),
+    queryFn: async () => useGetPriceProvider()(symbol),
     select: selector,
     retry: false,
   });
@@ -33,6 +40,7 @@ export const useCurrentPriceByIsin = (isin: string) =>
 
 export const useGetPricesForIsins = (isins: string[]) => {
   const assets = useGetAssets() || {};
+  const fetchingFunction = useGetPriceProvider();
   const symbols = unique(
     isins.map((i) => assets[i]?.symbol || "").filter((s) => s.length > 0)
   );
@@ -41,7 +49,7 @@ export const useGetPricesForIsins = (isins: string[]) => {
     queries: symbols.map((symbol) => {
       return {
         queryKey: [PRICE_BASE_QUERY_KEY, symbol],
-        queryFn: async () => getPricesFromAlphaVantage(symbol),
+        queryFn: async () => fetchingFunction(symbol),
         staleTime: Infinity,
         retry: false,
       };

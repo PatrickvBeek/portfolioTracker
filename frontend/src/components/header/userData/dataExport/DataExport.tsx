@@ -1,20 +1,23 @@
 import { Tooltip } from "@mui/material";
 import { FC, ReactElement } from "react";
+import { useGetApiKeys } from "../../../../hooks/apiKeys/apiKeyHooks";
 import { useGetAssets } from "../../../../hooks/assets/assetHooks";
 import { useGetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
-import { EXPORT_VERSION, ExportedData } from "../userData";
+import { EXPORT_VERSION, UserData } from "../userData";
 
 export const DataExport: FC = (): ReactElement | null => {
   const portfolioLib = useGetPortfolios();
   const assetLib = useGetAssets();
+  const apiKeys = useGetApiKeys();
 
-  if (!portfolioLib || !assetLib) {
+  if (!portfolioLib || !assetLib || !apiKeys) {
     return null;
   }
 
-  const data: ExportedData = {
+  const data: UserData = {
     portfolios: portfolioLib,
     assets: assetLib,
+    apiKeys: apiKeys,
     meta: { exportVersion: EXPORT_VERSION },
   };
   const dataString = JSON.stringify(data, null, 2);

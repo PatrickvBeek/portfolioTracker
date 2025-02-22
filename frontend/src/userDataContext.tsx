@@ -1,17 +1,22 @@
 import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import { PortfolioLibrary } from "pt-domain/src/portfolio/portfolio.entities";
 import { createContext, FC, PropsWithChildren, useState } from "react";
+import { ApiKeys } from "./components/header/userData/userData";
 
 export const UserDataContext = createContext<{
   assets: AssetLibrary;
   setAssets: (a: AssetLibrary) => void;
   portfolios: PortfolioLibrary;
   setPortfolios: (p: PortfolioLibrary) => void;
+  apiKeys: ApiKeys;
+  setApiKeys: (a: ApiKeys) => void;
 }>({
   assets: {},
   setAssets: () => {},
   portfolios: {},
   setPortfolios: () => {},
+  apiKeys: { yahoo: "" },
+  setApiKeys: () => {},
 });
 
 export const UserDataProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -21,6 +26,7 @@ export const UserDataProvider: FC<PropsWithChildren> = ({ children }) => {
   const [portfolios, setPortfolios] = useState<PortfolioLibrary>(
     readPortfoliosFromLocalStorage
   );
+  const [apiKeys, setApiKeys] = useState<ApiKeys>(readApiKeysFromLocalStorage);
 
   return (
     <UserDataContext.Provider
@@ -29,6 +35,8 @@ export const UserDataProvider: FC<PropsWithChildren> = ({ children }) => {
         setAssets,
         portfolios,
         setPortfolios,
+        apiKeys,
+        setApiKeys,
       }}
     >
       {children}
@@ -46,4 +54,9 @@ function readPortfoliosFromLocalStorage(): PortfolioLibrary {
   return savedPortfolios
     ? (JSON.parse(savedPortfolios) as PortfolioLibrary)
     : {};
+}
+
+function readApiKeysFromLocalStorage(): ApiKeys {
+  const savedApiKeys = localStorage.getItem("apiKeys");
+  return savedApiKeys ? (JSON.parse(savedApiKeys) as ApiKeys) : { yahoo: "" };
 }

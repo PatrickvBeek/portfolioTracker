@@ -1,5 +1,6 @@
 import { Tooltip } from "@mui/material";
 import { FC, ReactElement, useId, useState } from "react";
+import { useSetApiKeys } from "../../../../hooks/apiKeys/apiKeyHooks";
 import { useSetAssets } from "../../../../hooks/assets/assetHooks";
 import { useSetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
 import { Button } from "../../../general/Button";
@@ -10,6 +11,8 @@ import styles from "./DataImport.module.less";
 export const DataImport: FC = (): ReactElement => {
   const setPortfolios = useSetPortfolios();
   const setAssets = useSetAssets();
+  const setApiKeys = useSetApiKeys();
+
   const id = useId();
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
@@ -29,6 +32,7 @@ export const DataImport: FC = (): ReactElement => {
               const parsedUserData = parseUserData(readingResult);
               setPortfolios(parsedUserData.portfolios);
               setAssets(parsedUserData.assets);
+              setApiKeys(parsedUserData.apiKeys);
             } catch (e) {
               console.log(e);
               setIsOverlayOpen(true);

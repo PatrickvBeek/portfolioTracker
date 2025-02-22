@@ -1,4 +1,5 @@
 import { FC, ReactElement } from "react";
+import { ApiKeys } from "./apiKeys/ApiKeys";
 import styles from "./Header.module.less";
 import { Navigation } from "./navigation/Navigation";
 import { DataExport } from "./userData/dataExport/DataExport";
@@ -13,6 +14,7 @@ export const Header: FC<{
     <div className={styles.content}>
       <Navigation tabs={tabs} selectedTab={selectedTab} onSelect={onSelect} />
       <div className={styles.controls}>
+        <ApiKeys />
         <DataExport />
         <DataImport />
       </div>
