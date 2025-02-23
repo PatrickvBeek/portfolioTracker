@@ -5,7 +5,7 @@ import {
   getMarketValueHistory,
 } from "pt-domain/src/portfolio/portfolio.derivers";
 import {
-  geBuyValueHistoryForPortfolio,
+  getBuyValueHistoryForPortfolio,
   removeDuplicatesAtSameTimeStamp,
 } from "pt-domain/src/portfolioHistory/history.derivers";
 import { History } from "pt-domain/src/portfolioHistory/history.entities";
@@ -42,7 +42,7 @@ const useGetBuyValueHistory = (portfolioName: string) => {
   const portfolio = useGetPortfolio(portfolioName);
 
   return portfolio
-    ? removeDuplicatesAtSameTimeStamp(geBuyValueHistoryForPortfolio(portfolio))
+    ? removeDuplicatesAtSameTimeStamp(getBuyValueHistoryForPortfolio(portfolio))
     : [];
 };
 

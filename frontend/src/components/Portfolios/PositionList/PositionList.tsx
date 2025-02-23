@@ -9,6 +9,7 @@ import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
 import Balance from "../../general/Balance/Balance";
 import CustomTable from "../../general/CustomTable/CustomTable";
+import { Headline } from "../../general/headline/Headline";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
 import { PositionBatches } from "./PositionBatches";
 import "./PositionList.less";
@@ -282,7 +283,7 @@ export const PositionsList = ({
 }: PositionsListProps) => {
   return (
     <div className={bemBlock(className)}>
-      <div className={bemElement("heading")}>{headline}</div>
+      <Headline text={headline} />
       <CustomTable
         key={portfolioName}
         data={items}

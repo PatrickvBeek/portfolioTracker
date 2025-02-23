@@ -12,7 +12,7 @@ import {
 } from "../utils/floats";
 import { BatchType, Batches, ClosedBatch, OpenBatch } from "./batch.entities";
 
-const EMPTY_BATCHES: Batches = { open: [], closed: [] };
+export const EMPTY_BATCHES: Batches = { open: [], closed: [] };
 
 export const getTotalTaxesForClosedBatches = (
   orders: Order[],

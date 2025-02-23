@@ -1,15 +1,16 @@
 import { sort, sum, unique } from "radash";
-import { getNumericDateTime, isOrder } from "../activity/activity.derivers";
+import {
+  getActivityCashFlow,
+  getNumericDateTime,
+} from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
 import { getBatchesHistory, getBuyValue } from "../batch/batch.derivers";
 import { Batches } from "../batch/batch.entities";
-import { getDividendNetVolume } from "../dividendPayouts/dividend.derivers";
-import { getOrderCashFlow } from "../order/order.derivers";
 import { Portfolio } from "../portfolio/portfolio.entities";
 import { updateBy } from "../utils/arrays";
 import { History, HistoryPoint } from "./history.entities";
 
-export const geBuyValueHistoryForPortfolio = (
+export const getBuyValueHistoryForPortfolio = (
   portfolio: Portfolio
 ): History<number> => {
   const diffs = Object.values(portfolio.orders)
@@ -60,23 +61,16 @@ const batchHistoryToBuyValueHistory = (
 export const removeDuplicatesAtSameTimeStamp = <T>(series: History<T>) =>
   unique(series.toReversed(), (dataPoint) => dataPoint.timestamp).toReversed();
 
-export const getCashFlowHistoryForOrders = (
-  orders: PortfolioActivity[]
+export const getCashFlowHistoryForActivities = (
+  activities: PortfolioActivity[]
 ): History<number> =>
-  orders.reduce<History<number>>(
-    (series, activity) => [
-      ...series,
-      {
-        timestamp: getNumericDateTime(activity),
-        value:
-          (series.at(-1)?.value || 0) +
-          (isOrder(activity)
-            ? getOrderCashFlow(activity)
-            : -1 * getDividendNetVolume(activity)),
-      },
-    ],
-    []
-  );
+  activities.reduce<History<number>>((series, activity) => {
+    series.push({
+      timestamp: getNumericDateTime(activity),
+      value: (series.at(-1)?.value || 0) + getActivityCashFlow(activity),
+    });
+    return series;
+  }, []);
 
 export const pickValueFromHistory = <T>(
   history: History<T>,

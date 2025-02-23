@@ -1,0 +1,31 @@
+@import (reference) "/src/definitions.less";
+
+@line-spacing: @half-spacing;
+
+.tiles {
+  display: flex;
+  gap: @triple-spacing;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: @line-spacing;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: @double-spacing;
+}
+
+.sum_row {
+  padding-top: @line-spacing;
+  border-top: 1px solid;
+}
+
+.row_value {
+  font-family: monospace;
+  font-size: @font-base;
+}

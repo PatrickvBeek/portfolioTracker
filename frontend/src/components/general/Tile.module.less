@@ -1,15 +1,18 @@
+@import (reference) "src/definitions.less";
+
 .tile {
   background-color: white;
   width: fit-content;
-  box-shadow: -1px 3px 5px rgb(50, 50, 50, 0.25);
+  box-shadow: -1px 3px 5px rgba(50, 50, 50, 0.25);
   border-radius: var(--default-border-radius);
+  outline: 1px solid rgba(50, 50, 50, 0.25);
 }
 
-.tile__element {
-  padding: 1rem;
+.element {
+  padding: @default-spacing;
 }
 
-.tile__element--header {
+.header_element {
   background-color: var(--theme);
   color: white;
   font-size: var(--font-large1);

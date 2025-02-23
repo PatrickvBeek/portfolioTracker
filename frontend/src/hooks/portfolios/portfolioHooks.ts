@@ -16,6 +16,14 @@ import {
 import { useContext } from "react";
 import { UserDataContext } from "../../userDataContext";
 
+export const usePortfolioSelector = <T>(
+  portfolioName: string,
+  selector: (p: Portfolio) => T
+): T | undefined => {
+  const portfolio = useGetPortfolio(portfolioName);
+  return portfolio && selector(portfolio);
+};
+
 export function useGetPortfolios() {
   const { portfolios } = useContext(UserDataContext);
   return portfolios;

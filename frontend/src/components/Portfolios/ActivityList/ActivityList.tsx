@@ -11,23 +11,17 @@ import {
   useDeleteOrderFromPortfolio,
   useGetPortfolioActivity,
 } from "../../../hooks/portfolios/portfolioHooks";
-import { bemHelper } from "../../../utility/bemHelper";
 import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
 import CustomTable from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
-import "./ActivityList.css";
-
-const { bemBlock, bemElement } = bemHelper("order-list");
+import { Headline } from "../../general/headline/Headline";
 
 type ActivityListProps = Props<{
   portfolio: string;
 }>;
 
-function ActivityList({
-  className,
-  portfolio,
-}: ActivityListProps): ReactElement | null {
+function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
   const activity = useGetPortfolioActivity(portfolio);
   const assetsLib = useGetAssets();
   const deleteOrder = useDeleteOrderFromPortfolio(portfolio);
@@ -139,8 +133,8 @@ function ActivityList({
   ];
 
   return (
-    <div className={bemBlock(className)}>
-      <div className={bemElement("headline")}>Portfolio Activity</div>
+    <div>
+      <Headline text={"Portfolio Activity"} />
       <CustomTable columns={defs} data={tableData} />
     </div>
   );

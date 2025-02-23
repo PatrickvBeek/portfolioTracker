@@ -5,7 +5,7 @@ import {
 } from "../dataHelpers";
 import { getCashFlowHistory } from "../portfolio/portfolio.derivers";
 import { Portfolio } from "../portfolio/portfolio.entities";
-import { geBuyValueHistoryForPortfolio } from "./history.derivers";
+import { getBuyValueHistoryForPortfolio } from "./history.derivers";
 
 const DAY1 = "2023-01-01";
 const DAY2 = "2023-01-02";
@@ -40,7 +40,7 @@ describe("the history operation", () => {
         dividendPayouts: {},
       };
 
-      expect(geBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
+      expect(getBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 20 },
           { timestamp: DAY2, value: 25 },
@@ -75,7 +75,7 @@ describe("the history operation", () => {
         dividendPayouts: {},
       };
 
-      expect(geBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
+      expect(getBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 20 },
           { timestamp: DAY2, value: 25 },

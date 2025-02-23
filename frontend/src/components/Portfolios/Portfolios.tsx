@@ -11,6 +11,7 @@ import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import "./Portfolios.css";
 import { ClosedPositionsList } from "./PositionList/ClosedPositionsList/ClosedPositionsList";
 import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPositionsList";
+import { PortfolioSummaryTiles } from "./summaryTiles/PortfolioSummaryTiles";
 
 const { bemBlock, bemElement } = bemHelper("portfolios");
 
@@ -52,6 +53,7 @@ function Portfolios({ className }: PortfolioProps) {
         />
       </div>
       <div className={bemElement("content")}>
+        <PortfolioSummaryTiles portfolioName={selectedPortfolio} />
         <PortfolioHistoryChart portfolioName={selectedPortfolio} />
         <OpenPositionsList portfolioName={selectedPortfolio} />
         <ClosedPositionsList portfolioName={selectedPortfolio} />
