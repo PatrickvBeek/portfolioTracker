@@ -17,7 +17,9 @@ import {
   useGetPricesForIsins,
 } from "../../../hooks/prices/priceHooks";
 
-const toYear = (ms: number): number => ms / (1000 * 60 * 60 * 24 * 365);
+const toYear = (ms: number): number => {
+  return ms / (1000 * 60 * 60 * 24 * 365);
+};
 
 export const useCashFlow = (portfolioName: string) =>
   usePortfolioSelector(
@@ -66,7 +68,7 @@ export const useMarketValue = (portfolioName: string): PriceQuery | undefined =>
 export const usePortfolioAge = (portfolioName: string) => {
   const startDate = useGetPortfolioActivity(portfolioName).at(0)?.timestamp;
 
-  return startDate ? toYear(Date.now() - new Date(startDate).getTime()) : 0;
+  return startDate ? toYear(Date.now() - new Date(startDate).getTime()) : NaN;
 };
 
 export const useTimeWeightedReturn = (

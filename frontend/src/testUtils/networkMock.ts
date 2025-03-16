@@ -1,5 +1,6 @@
 import { HttpResponse, RequestHandler, http } from "msw";
 import { setupServer } from "msw/node";
+import { sort } from "radash";
 import { AlphaVantageDailyResult } from "../hooks/prices/alphaVantage";
 
 type MockBackendData = {
@@ -30,3 +31,28 @@ export function mockNetwork(backendData: MockBackendData) {
 
   return server;
 }
+
+export const getPriceResponse = (
+  symbol: string,
+  dailyPrices: [Date, number][]
+) => ({
+  [symbol]: {
+    "Time Series (Daily)": Object.fromEntries(
+      sort(dailyPrices, ([date]) => date.getTime(), true).map(
+        ([date, price]) => [date, getDailyPriceResponse(price)]
+      )
+    ),
+  },
+});
+
+const getDailyPriceResponse = (
+  price: number
+): AlphaVantageDailyResult["Time Series (Daily)"][string] => {
+  return {
+    "1. open": price.toString(),
+    "2. high": price.toString(),
+    "3. low": price.toString(),
+    "4. close": price.toString(),
+    "5. volume": price.toString(),
+  };
+};

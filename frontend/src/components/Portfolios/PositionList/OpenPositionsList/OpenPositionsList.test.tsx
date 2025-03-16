@@ -11,6 +11,7 @@ import {
   customRender,
   getTextWithNonBreakingSpaceReplaced,
 } from "../../../../testUtils/componentHelpers";
+import { setUserData } from "../../../../testUtils/localStorage";
 import { getCellTextsForRow } from "../testUtils";
 import { OpenPositionsList } from "./OpenPositionsList";
 
@@ -70,8 +71,10 @@ const mockPortfolio: Portfolio = {
 const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the open inventory list component", () => {
-  localStorage.setItem("portfolios", JSON.stringify(testPortfolioLib));
-  localStorage.setItem("assets", JSON.stringify(testAssetLib));
+  setUserData({
+    portfolios: testPortfolioLib,
+    assets: testAssetLib,
+  });
 
   it("renders the correct list headers", async () => {
     customRender({

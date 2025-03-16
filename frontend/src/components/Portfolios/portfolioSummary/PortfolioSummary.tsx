@@ -11,10 +11,10 @@ import {
   usePortfolioAge,
   useRealizedGains,
   useTimeWeightedReturn,
-} from "./PortfolioSummaryTiles.logic";
-import styles from "./PortfolioSummaryTiles.module.less";
+} from "./PortfolioSummary.logic";
+import styles from "./PortfolioSummary.module.less";
 
-export const PortfolioSummaryTiles: FC<{ portfolioName: string }> = ({
+export const PortfolioSummary: FC<{ portfolioName: string }> = ({
   portfolioName,
 }) => {
   const cashFlow = useCashFlow(portfolioName);

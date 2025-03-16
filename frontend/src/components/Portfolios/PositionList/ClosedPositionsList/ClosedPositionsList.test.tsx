@@ -11,6 +11,7 @@ import {
   customRender,
   getTextWithNonBreakingSpaceReplaced,
 } from "../../../../testUtils/componentHelpers";
+import { setUserData } from "../../../../testUtils/localStorage";
 import { getCellTextsForRow } from "../testUtils";
 import { ClosedPositionsList } from "./ClosedPositionsList";
 
@@ -79,8 +80,10 @@ const mockPortfolio: Portfolio = {
 const testPortfolioLib = { [mockPortfolio.name]: mockPortfolio };
 
 describe("the ClosedPositionList component", () => {
-  localStorage.setItem("portfolios", JSON.stringify(testPortfolioLib));
-  localStorage.setItem("assets", JSON.stringify(testAssetLib));
+  setUserData({
+    portfolios: testPortfolioLib,
+    assets: testAssetLib,
+  });
 
   it("renders the correct list headers", async () => {
     customRender({
