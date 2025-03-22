@@ -1,3 +1,5 @@
+import { getDividendNetVolume } from "../dividendPayouts/dividend.derivers";
+import { getOrderCashFlow } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import { PortfolioActivity } from "./activity.entities";
 
@@ -10,3 +12,6 @@ export const getNumericDateTime: (activity: PortfolioActivity) => number = (
 
 export const isOrder = (activity: PortfolioActivity): activity is Order =>
   "orderFee" in activity;
+
+export const getActivityCashFlow = (a: PortfolioActivity): number =>
+  isOrder(a) ? getOrderCashFlow(a) : -1 * getDividendNetVolume(a);

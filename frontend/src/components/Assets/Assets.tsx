@@ -12,16 +12,12 @@ export type AssetsProps = Props<{}>;
 function Assets({ className }: AssetsProps) {
   return (
     <div className={bemBlock(className)}>
-      <Tile
-        className={bemElement("library")}
-        header={<span>Asset Library</span>}
-        body={
-          <div className={bemElement("library-body")}>
-            <AssetInputForm />
-            <AssetTable />
-          </div>
-        }
-      />
+      <Tile className={bemElement("library")} header={"Asset Library"}>
+        <div className={bemElement("library-body")}>
+          <AssetInputForm />
+          <AssetTable />
+        </div>
+      </Tile>
     </div>
   );
 }

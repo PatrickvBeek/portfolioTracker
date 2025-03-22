@@ -24,9 +24,10 @@ export const usePriceQuery = <T>(
   symbol: string,
   selector?: (prices: History<number>) => T
 ) => {
+  const fetchingFunction = useGetPriceProvider();
   return useQuery({
     queryKey: [PRICE_BASE_QUERY_KEY, symbol],
-    queryFn: async () => useGetPriceProvider()(symbol),
+    queryFn: async () => fetchingFunction(symbol),
     select: selector,
     retry: false,
   });

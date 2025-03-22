@@ -1,22 +1,21 @@
-import { ReactElement } from "react";
-import { bemHelper } from "../../utility/bemHelper";
-import "./Tile.css";
+import classNames from "classnames";
+import { FC, PropsWithChildren, ReactNode } from "react";
+import styles from "./Tile.module.less";
 
-const { bemElement, bemBlock } = bemHelper("tile");
-
-interface TileProps {
-  body: ReactElement;
-  header?: ReactElement;
-  className?: string;
-}
-
-const Tile = ({ header, body, className }: TileProps) => {
+const Tile: FC<
+  PropsWithChildren<{
+    header?: ReactNode;
+    className?: string;
+  }>
+> = ({ header, children, className }) => {
   return (
-    <div className={bemBlock(className)}>
+    <div className={classNames(styles.tile, className)}>
       {header && (
-        <div className={bemElement("element", "header")}>{header}</div>
+        <div className={classNames(styles.header_element, styles.element)}>
+          {header}
+        </div>
       )}
-      <div className={bemElement("element", "body")}>{body}</div>
+      <div className={styles.element}>{children}</div>
     </div>
   );
 };

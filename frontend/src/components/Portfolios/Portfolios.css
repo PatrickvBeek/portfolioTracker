@@ -7,7 +7,7 @@
   grid-template-areas:
     "sideBar header header"
     "sideBar content orderSideBar";
-  gap: 4rem 4rem;
+  gap: 3rem 4rem;
 }
 
 .portfolios__header {

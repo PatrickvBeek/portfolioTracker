@@ -5,9 +5,8 @@ import {
   getTestPortfolio,
 } from "pt-domain/src/dataHelpers";
 import { vi } from "vitest";
-import { AlphaVantageDailyResult } from "../../../hooks/prices/alphaVantage";
 import { customRenderHook } from "../../../testUtils/componentHelpers";
-import { mockNetwork } from "../../../testUtils/networkMock";
+import { getPriceResponse, mockNetwork } from "../../../testUtils/networkMock";
 import { useGetPortfolioHistoryChartData } from "./PortfolioHistoryChart.logic";
 
 describe("useGetPortfolioHistoryChartData", () => {
@@ -17,22 +16,18 @@ describe("useGetPortfolioHistoryChartData", () => {
   const DAY4 = "2020-03-04";
   const TODAY = "2020-03-05";
 
-  vi.useFakeTimers().setSystemTime(TODAY);
+  vi.setSystemTime(TODAY);
 
   const TIMESTAMPS = [DAY1, DAY2, DAY3, DAY4].map((d) => new Date(d).getTime());
 
   mockNetwork({
-    prices: {
-      ABC: {
-        "Time Series (Daily)": {
-          [TODAY]: getPriceResponse(110),
-          [DAY4]: getPriceResponse(103),
-          [DAY3]: getPriceResponse(102),
-          [DAY2]: getPriceResponse(101),
-          [DAY1]: getPriceResponse(100),
-        },
-      },
-    },
+    prices: getPriceResponse("ABC", [
+      [new Date(DAY1), 100],
+      [new Date(DAY2), 101],
+      [new Date(DAY3), 102],
+      [new Date(DAY4), 103],
+      [new Date(TODAY), 110],
+    ]),
   });
 
   it("retrieves and merges data correctly", async () => {
@@ -91,8 +86,6 @@ describe("useGetPortfolioHistoryChartData", () => {
       useGetPortfolioHistoryChartData("p1")
     );
 
-    vi.runOnlyPendingTimersAsync();
-
     await waitFor(() => {
       expect(result.current[0]).toHaveProperty("marketValue");
     });
@@ -131,15 +124,3 @@ describe("useGetPortfolioHistoryChartData", () => {
     ]);
   });
 });
-
-const getPriceResponse = (
-  price: number
-): AlphaVantageDailyResult["Time Series (Daily)"][string] => {
-  return {
-    "1. open": price.toString(),
-    "2. high": price.toString(),
-    "3. low": price.toString(),
-    "4. close": price.toString(),
-    "5. volume": price.toString(),
-  };
-};
