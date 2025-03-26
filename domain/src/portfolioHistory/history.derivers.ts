@@ -1,6 +1,6 @@
-import { sum, unique } from "radash";
+import { group, sum, unique } from "radash";
 import { Batches } from "../batch/batch.entities";
-import { History } from "./history.entities";
+import { History, HistoryPoint } from "./history.entities";
 
 export const differentiateNumberHistory = (
   history: History<number>
@@ -24,13 +24,17 @@ export const differentiateNumberHistory = (
   return diff;
 };
 
+export const getHistoryPointMapper =
+  <T, U>(valueMapper: (el: T) => U) =>
+  (point: HistoryPoint<T>): HistoryPoint<U> => ({
+    timestamp: point.timestamp,
+    value: valueMapper(point.value),
+  });
+
 export const getHistoryMapper =
   <T, U>(mapper: (el: T) => U) =>
   (history: History<T>): History<U> =>
-    history.map((point) => ({
-      timestamp: point.timestamp,
-      value: mapper(point.value),
-    }));
+    history.map(getHistoryPointMapper(mapper));
 
 export const removeDuplicatesAtSameTimeStamp = <T>(series: History<T>) =>
   unique(series.toReversed(), (dataPoint) => dataPoint.timestamp).toReversed();
@@ -52,3 +56,14 @@ export const getPiecesAtTimeStamp = (
     pickValueFromHistory(batchesHistory, timeStampOfInterest)?.value.open || [],
     (o) => o.pieces
   );
+
+export const mergePointsAtSameTimestamp = (
+  history: History<number>
+): History<number> => {
+  return Object.entries(group(history, (point) => point.timestamp)).map(
+    ([timestamp, values]) => ({
+      timestamp: parseInt(timestamp),
+      value: sum(values || [], (values) => values.value),
+    })
+  );
+};

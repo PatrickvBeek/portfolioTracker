@@ -1,11 +1,11 @@
 import {
-  getCashFlowHistory,
   getIsins,
   getNonRealizedGains,
   getPiecesOfIsinInPortfolio,
   getPriceAtTimestamp,
   getRealizedGains,
   getTimeWeightedReturn,
+  getTotalCashFlowHistory,
 } from "pt-domain/src/portfolio/portfolio.derivers";
 import { sum } from "radash";
 import {
@@ -13,7 +13,7 @@ import {
   usePortfolioSelector,
 } from "../../../hooks/portfolios/portfolioHooks";
 import {
-  PriceQuery,
+  CustomQuery,
   useGetPricesForIsins,
 } from "../../../hooks/prices/priceHooks";
 
@@ -24,7 +24,7 @@ const toYear = (ms: number): number => {
 export const useCashFlow = (portfolioName: string) =>
   usePortfolioSelector(
     portfolioName,
-    (p) => getCashFlowHistory(p).at(-1)?.value
+    (p) => getTotalCashFlowHistory(p).at(-1)?.value
   );
 
 export const useRealizedGains = (portfolioName: string) =>
@@ -32,7 +32,7 @@ export const useRealizedGains = (portfolioName: string) =>
 
 export const useNonRealizedGains = (
   portfolioName: string
-): PriceQuery | undefined =>
+): CustomQuery | undefined =>
   usePortfolioSelector(portfolioName, (portfolio) => {
     const priceMap = useGetPricesForIsins(getIsins(portfolio));
     return {
@@ -42,7 +42,9 @@ export const useNonRealizedGains = (
     };
   });
 
-export const useMarketValue = (portfolioName: string): PriceQuery | undefined =>
+export const useMarketValue = (
+  portfolioName: string
+): CustomQuery | undefined =>
   usePortfolioSelector(portfolioName, (portfolio) => {
     const isins = getIsins(portfolio);
     const priceMapQuery = useGetPricesForIsins(isins);
@@ -73,7 +75,7 @@ export const usePortfolioAge = (portfolioName: string) => {
 
 export const useTimeWeightedReturn = (
   portfolioName: string
-): PriceQuery | undefined =>
+): CustomQuery | undefined =>
   usePortfolioSelector(portfolioName, (portfolio) => {
     const isins = getIsins(portfolio);
     const priceMapQuery = useGetPricesForIsins(isins);

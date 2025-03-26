@@ -48,7 +48,7 @@ describe("with online prices", () => {
 
   mockNetwork({
     prices: getPriceResponse("a", [
-      [new Date("2000-06-01"), 116.2],
+      [new Date("2000-06-01"), 115.2], // on purpose not the same as in the transaction
       [new Date("2000-12-31"), 109.75],
     ]),
   });

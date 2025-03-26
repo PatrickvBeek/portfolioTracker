@@ -3,7 +3,7 @@ import {
   getTestOrdersGroupedByAsset,
   getTestPortfolio,
 } from "../dataHelpers";
-import { getCashFlowHistory } from "../portfolio/portfolio.derivers";
+import { getTotalCashFlowHistory } from "../portfolio/portfolio.derivers";
 
 const DAY1 = "2023-01-01";
 const DAY2 = "2023-01-02";
@@ -49,7 +49,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 80 },
           { timestamp: DAY1, value: 102 },
@@ -89,7 +89,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 85 },
           { timestamp: DAY2, value: 78.5 },
@@ -129,7 +129,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 85 },
           { timestamp: DAY2, value: 78.5 },

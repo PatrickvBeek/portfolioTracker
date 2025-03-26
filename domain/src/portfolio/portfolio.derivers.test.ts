@@ -443,7 +443,7 @@ describe("The Portfolio deriver", () => {
 
       expect(getMarketValueHistory(portfolio, priceMap, xAxis)).toEqual([
         { timestamp: xAxis[0], value: 100 },
-        { timestamp: xAxis[1], value: 101 + 10.1 },
+        { timestamp: xAxis[1], value: 101 + 10 }, // transaction price has priority over online price
         { timestamp: xAxis[2], value: 102 + 10.2 },
         { timestamp: xAxis[3], value: 10.3 },
         { timestamp: xAxis[4], value: 10.4 },
@@ -471,7 +471,7 @@ describe("The Portfolio deriver", () => {
 
       expect(getMarketValueHistory(portfolio, priceMap, xAxis)).toEqual([
         { timestamp: xAxis[0], value: 100 },
-        { timestamp: xAxis[1], value: 100 + 10.1 },
+        { timestamp: xAxis[1], value: 100 + 10 },
         { timestamp: xAxis[2], value: 100 + 10.2 },
         { timestamp: xAxis[3], value: 10.3 },
         { timestamp: xAxis[4], value: 10.4 },

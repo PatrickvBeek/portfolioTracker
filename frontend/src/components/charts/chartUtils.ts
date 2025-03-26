@@ -3,13 +3,17 @@ import {
   scaleLinear as d3LinearScale,
   scaleTime as d3ScaleTime,
 } from "d3-scale";
-import { isNumber, omit } from "radash";
+import { History } from "pt-domain/src/portfolioHistory/history.entities";
+import { isNumber, omit, range, sort, unique } from "radash";
 import { XAxisProps, YAxisProps } from "recharts";
-import { ChartData } from "./chartTypes";
+import { ChartData, ChartDataPoint } from "./chartTypes";
+
+const MARGIN = 0.05;
 
 export function getAxisProps(
   chartData: ChartData<string>,
-  nTicks: number = 5
+  nTicks: number = 5,
+  zeroBased = true
 ): Partial<YAxisProps> {
   const values = chartData
     .map((point) => Object.values(omit(point, ["timestamp"])))
@@ -18,11 +22,14 @@ export function getAxisProps(
   const domain = d3Extent(values) as [number, number];
   const scale = d3LinearScale(values).domain(domain).range([0, 1]);
 
+  const [yMin, yMax] = domain;
+  const diff = yMax - yMin;
+
   return {
     tickFormatter: scale.tickFormat(nTicks),
     ticks: scale.ticks(nTicks),
     type: "number",
-    domain: [0, (m: number) => 1.05 * m],
+    domain: [zeroBased ? 0 : yMin - MARGIN * diff, yMax + MARGIN * diff],
   };
 }
 
@@ -46,4 +53,41 @@ export function getTimeAxisProps(
 const defaultDateDomain = ([dataMin, dataMax]: [number, number]): [
   number,
   number,
-] => [dataMin, dataMax + 0.05 * (dataMax - dataMin)];
+] => [dataMin, dataMax + MARGIN * (dataMax - dataMin)];
+
+export const historiesToChartData = <Keys extends string>(
+  datasets: { history: History<number>; newKey: Keys }[]
+): ChartDataPoint<Keys>[] => {
+  const map = new Map<number, ChartDataPoint<Keys>>();
+
+  datasets.forEach((dataset) => {
+    dataset.history.forEach((point) => {
+      if (!map.has(point.timestamp)) {
+        map.set(point.timestamp, {
+          timestamp: point.timestamp,
+        } as ChartDataPoint<Keys>);
+      }
+      map.get(point.timestamp)![dataset.newKey] =
+        point.value as ChartDataPoint<Keys>[Keys];
+    });
+  });
+
+  return sort(Array.from(map.values()), (p) => p.timestamp);
+};
+
+export const DEFAULT_AREA_PROPS = {
+  dot: false,
+  type: "stepAfter",
+  connectNulls: true,
+  strokeWidth: 3,
+  animationDuration: 300,
+} as const;
+
+const DAY_IN_MS = 1000 * 60 * 60 * 24;
+
+export const getDefaultTimeAxis = (xMin: number) =>
+  unique(
+    Array.from(range(xMin, Date.now(), (i) => i, 7 * DAY_IN_MS)).concat(
+      Date.now()
+    )
+  );

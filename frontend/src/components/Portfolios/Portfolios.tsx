@@ -3,6 +3,7 @@ import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
 import { PortfolioHistoryChart } from "../charts/portfolioHistory/PortfolioHistoryChart";
+import { TimeWeightedReturnHistory } from "../charts/timeWeightedReturnHistory/TimeWeightedReturnHistory";
 import SelectionHeader from "../general/SelectionHeader";
 import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
@@ -55,6 +56,7 @@ function Portfolios({ className }: PortfolioProps) {
       <div className={bemElement("content")}>
         <PortfolioSummary portfolioName={selectedPortfolio} />
         <PortfolioHistoryChart portfolioName={selectedPortfolio} />
+        <TimeWeightedReturnHistory portfolioName={selectedPortfolio} />
         <OpenPositionsList portfolioName={selectedPortfolio} />
         <ClosedPositionsList portfolioName={selectedPortfolio} />
         <ActivityList portfolio={selectedPortfolio} />
