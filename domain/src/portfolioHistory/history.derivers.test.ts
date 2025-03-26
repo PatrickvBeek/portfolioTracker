@@ -5,7 +5,7 @@ import {
 } from "../dataHelpers";
 import {
   getBuyValueHistoryForPortfolio,
-  getCashFlowHistory,
+  getTotalCashFlowHistory,
 } from "../portfolio/portfolio.derivers";
 import { Portfolio } from "../portfolio/portfolio.entities";
 
@@ -126,7 +126,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 80 },
           { timestamp: DAY1, value: 102 },
@@ -166,7 +166,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 85 },
           { timestamp: DAY2, value: 78.5 },
@@ -206,7 +206,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 85 },
           { timestamp: DAY2, value: 78.5 },

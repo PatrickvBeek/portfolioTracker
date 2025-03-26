@@ -8,10 +8,10 @@ import { getPricesFromYahooFinance } from "./yahooFinance";
 
 const PRICE_BASE_QUERY_KEY = "prices";
 
-export type PriceQuery = {
+export type CustomQuery<T = number> = {
   isLoading: boolean;
   isError: boolean;
-  data: number | undefined;
+  data: T | undefined;
 };
 
 const useGetPriceProvider = () => {

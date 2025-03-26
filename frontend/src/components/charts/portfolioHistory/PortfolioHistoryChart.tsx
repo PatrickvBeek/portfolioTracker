@@ -10,7 +10,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getAxisProps, getTimeAxisProps } from "../chartUtils";
+import {
+  DEFAULT_AREA_PROPS,
+  getAxisProps,
+  getTimeAxisProps,
+} from "../chartUtils";
 import {
   PortfolioHistoryDataSets,
   useGetPortfolioHistoryChartData,
@@ -75,11 +79,3 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
     </div>
   );
 };
-
-const DEFAULT_AREA_PROPS = {
-  dot: false,
-  type: "stepAfter",
-  connectNulls: true,
-  strokeWidth: 3,
-  animationDuration: 300,
-} as const;

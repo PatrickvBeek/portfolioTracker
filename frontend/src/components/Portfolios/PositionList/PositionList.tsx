@@ -3,7 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { BatchType } from "pt-domain/src/batch/batch.entities";
 import { isNumber } from "radash";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
-import { PriceQuery } from "../../../hooks/prices/priceHooks";
+import { CustomQuery } from "../../../hooks/prices/priceHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
@@ -260,7 +260,7 @@ function PositionListSumAsBalance({
   return isNumber(sum) ? <Balance value={sum} /> : null;
 }
 
-function QueryAsBalance({ query }: { query: PriceQuery }) {
+function QueryAsBalance({ query }: { query: CustomQuery }) {
   if (query.isLoading) {
     return <LoadingIndicator />;
   }
