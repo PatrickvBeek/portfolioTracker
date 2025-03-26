@@ -1,13 +1,11 @@
 import { getNumericDateTime } from "pt-domain/src/activity/activity.derivers";
 import {
+  getBuyValueHistoryForPortfolio,
   getCashFlowHistory,
   getFirstOrderTimeStamp,
   getMarketValueHistory,
 } from "pt-domain/src/portfolio/portfolio.derivers";
-import {
-  getBuyValueHistoryForPortfolio,
-  removeDuplicatesAtSameTimeStamp,
-} from "pt-domain/src/portfolioHistory/history.derivers";
+import { removeDuplicatesAtSameTimeStamp } from "pt-domain/src/portfolioHistory/history.derivers";
 import { History } from "pt-domain/src/portfolioHistory/history.entities";
 import { range, sort, unique } from "radash";
 import {

@@ -18,6 +18,7 @@ import {
   TEST_ORDER_TESLA,
 } from "../testConstants";
 import {
+  getBuyValueHistoryForPortfolio,
   getLatestPriceFromTransactions,
   getMarketValueHistory,
   getNonRealizedGainsForIsin,
@@ -477,4 +478,87 @@ describe("The Portfolio deriver", () => {
       ]);
     });
   });
+
+  describe("getBuyValueHistory", () => {
+    const DAY1 = "2023-01-01";
+    const DAY2 = "2023-01-02";
+    const DAY3 = "2023-01-03";
+
+    it("returns the correct history for a portfolio having orders. Selling orders in order of buying", () => {
+      const TEST_PORTFOLIO: Portfolio = {
+        name: "test-portfolio",
+        orders: getTestOrdersGroupedByAsset([
+          {
+            asset: "asset1",
+            timestamp: DAY1,
+            sharePrice: 10,
+            pieces: 2,
+            orderFee: 15, // not relevant
+          },
+          {
+            asset: "asset2",
+            timestamp: DAY2,
+            pieces: 1,
+            sharePrice: 5,
+          },
+          {
+            asset: "asset1",
+            timestamp: DAY3,
+            pieces: -1,
+            sharePrice: 11,
+          },
+        ]),
+        dividendPayouts: {},
+      };
+
+      expect(getBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 20 },
+          { timestamp: DAY2, value: 25 },
+          { timestamp: DAY3, value: 15 },
+        ])
+      );
+    });
+
+    it("returns the correct history for a portfolio having orders. Selling orders out of order of buying", () => {
+      const TEST_PORTFOLIO: Portfolio = {
+        name: "test-portfolio",
+        orders: getTestOrdersGroupedByAsset([
+          {
+            asset: "asset1",
+            timestamp: DAY1,
+            sharePrice: 10,
+            pieces: 2,
+          },
+          {
+            asset: "asset2",
+            timestamp: DAY2,
+            pieces: 1,
+            sharePrice: 5,
+          },
+          {
+            asset: "asset2",
+            timestamp: DAY3,
+            pieces: -1,
+            sharePrice: 6,
+          },
+        ]),
+        dividendPayouts: {},
+      };
+
+      expect(getBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 20 },
+          { timestamp: DAY2, value: 25 },
+          { timestamp: DAY3, value: 20 },
+        ])
+      );
+    });
+  });
 });
+
+const getValuesAsHistory = (values: { timestamp: string; value: number }[]) =>
+  values.map(({ timestamp, value }) => ({
+    timestamp: new Date(timestamp).getTime(),
+    value,
+  }));

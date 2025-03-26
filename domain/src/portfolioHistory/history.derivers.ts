@@ -1,34 +1,8 @@
-import { sort, sum, unique } from "radash";
-import {
-  getActivityCashFlow,
-  getNumericDateTime,
-} from "../activity/activity.derivers";
-import { PortfolioActivity } from "../activity/activity.entities";
-import { getBatchesHistory, getBuyValue } from "../batch/batch.derivers";
+import { sum, unique } from "radash";
 import { Batches } from "../batch/batch.entities";
-import { Portfolio } from "../portfolio/portfolio.entities";
-import { updateBy } from "../utils/arrays";
-import { History, HistoryPoint } from "./history.entities";
+import { History } from "./history.entities";
 
-export const getBuyValueHistoryForPortfolio = (
-  portfolio: Portfolio
-): History<number> => {
-  const diffs = Object.values(portfolio.orders)
-    .map(getBatchesHistory)
-    .map(batchHistoryToBuyValueHistory)
-    .map(differentiateNumberHistory)
-    .flat();
-
-  return updateBy(
-    sort(diffs, (diff) => diff.timestamp),
-    (prev, current) => ({
-      timestamp: current.timestamp,
-      value: prev.value + current.value,
-    })
-  );
-};
-
-const differentiateNumberHistory = (
+export const differentiateNumberHistory = (
   history: History<number>
 ): History<number> => {
   if (history.length < 2) {
@@ -38,39 +12,28 @@ const differentiateNumberHistory = (
   const diff = [first];
   let prevPoint = first;
 
-  rest.forEach((point) => {
-    const newPoint: HistoryPoint<number> = {
+  for (const point of rest) {
+    const newPoint = {
       timestamp: point.timestamp,
       value: point.value - prevPoint.value,
     };
     prevPoint = point;
     diff.push(newPoint);
-  });
+  }
 
   return diff;
 };
 
-const batchHistoryToBuyValueHistory = (
-  history: History<Batches>
-): History<number> =>
-  history.map((point) => ({
-    timestamp: point.timestamp,
-    value: sum(point.value.open, getBuyValue),
-  }));
+export const getHistoryMapper =
+  <T, U>(mapper: (el: T) => U) =>
+  (history: History<T>): History<U> =>
+    history.map((point) => ({
+      timestamp: point.timestamp,
+      value: mapper(point.value),
+    }));
 
 export const removeDuplicatesAtSameTimeStamp = <T>(series: History<T>) =>
   unique(series.toReversed(), (dataPoint) => dataPoint.timestamp).toReversed();
-
-export const getCashFlowHistoryForActivities = (
-  activities: PortfolioActivity[]
-): History<number> =>
-  activities.reduce<History<number>>((series, activity) => {
-    series.push({
-      timestamp: getNumericDateTime(activity),
-      value: (series.at(-1)?.value || 0) + getActivityCashFlow(activity),
-    });
-    return series;
-  }, []);
 
 export const pickValueFromHistory = <T>(
   history: History<T>,
