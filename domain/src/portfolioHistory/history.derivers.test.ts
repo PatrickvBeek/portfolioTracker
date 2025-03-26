@@ -3,9 +3,11 @@ import {
   getTestOrdersGroupedByAsset,
   getTestPortfolio,
 } from "../dataHelpers";
-import { getCashFlowHistory } from "../portfolio/portfolio.derivers";
+import {
+  getBuyValueHistoryForPortfolio,
+  getCashFlowHistory,
+} from "../portfolio/portfolio.derivers";
 import { Portfolio } from "../portfolio/portfolio.entities";
-import { getBuyValueHistoryForPortfolio } from "./history.derivers";
 
 const DAY1 = "2023-01-01";
 const DAY2 = "2023-01-02";
