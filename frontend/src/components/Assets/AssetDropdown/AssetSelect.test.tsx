@@ -21,14 +21,14 @@ describe("the AssetInputFields component", () => {
 
   it("renders the asset dropdown", async () => {
     customRender({
-      component: <AssetSelect onSelect={callback} />,
+      component: <AssetSelect onChange={callback} />,
     });
     expect(await screen.findByLabelText(/asset/i)).toBeInTheDocument();
   });
 
   it("calls the callback when an option is selected", async () => {
     const { selectAsset } = customRender({
-      component: <AssetSelect onSelect={callback} />,
+      component: <AssetSelect onChange={callback} />,
     });
     await selectAsset(TEST_ASSET_NAME);
     expect(callback).toHaveBeenCalledWith(TEST_ASSET_ISIN);

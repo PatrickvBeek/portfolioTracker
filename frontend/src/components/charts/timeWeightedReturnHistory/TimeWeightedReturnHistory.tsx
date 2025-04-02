@@ -1,6 +1,5 @@
 import moment from "moment";
-import { getHistoryPointMapper } from "pt-domain/src/portfolioHistory/history.derivers";
-import { FC } from "react";
+import { FC, useState } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -11,53 +10,76 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
+import { Headline } from "../../general/headline/Headline";
 import {
-  DEFAULT_AREA_PROPS,
+  DEFAULT_LINE_PROPS,
   getAxisProps,
   getTimeAxisProps,
 } from "../chartUtils";
-import { useTimeWeightedReturnHistory } from "./TimeWeightedReturn.logic";
-
+import {
+  PerformanceChartDataSets,
+  usePerformanceChartData,
+} from "./TimeWeightedReturn.logic";
+import styles from "./TimeWeightedReturnHistory.module.less";
 export const TimeWeightedReturnHistory: FC<{ portfolioName: string }> = ({
   portfolioName,
 }) => {
-  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioName);
-  const chartData = (twrHistoryQuery?.data || []).map(
-    getHistoryPointMapper((value) => (value - 1) * 100)
-  );
+  const [benchmark, setBenchmark] = useState("");
+  const chartData = usePerformanceChartData(portfolioName, benchmark) || [];
 
   return (
-    <ResponsiveContainer aspect={2.5} width={"100%"}>
-      <LineChart data={chartData}>
-        <Legend />
-        <Line
-          {...DEFAULT_AREA_PROPS}
-          type={"linear"}
-          dataKey={"value"}
-          name={"Time Weighted Return"}
-          stroke="var(--theme-highlight)"
+    <div>
+      <div className={styles.header}>
+        <Headline text={"Performance: Time Weighted Return"} />
+        <AssetDropdown
+          onChange={(isin) => setBenchmark(isin || "")}
+          label="Benchmark"
+          className={styles.benchmark_select}
+          filterAssets={(a) => !!a.symbol}
         />
-
-        <Tooltip
-          formatter={(value, name) => [
-            Number(value).toLocaleString(undefined, {
-              maximumFractionDigits: 1,
-              minimumFractionDigits: 1,
-            }) + " %",
-            name,
-          ]}
-          labelFormatter={(value: number) =>
-            moment(new Date(value)).format("ddd DD.MM.YYYY")
-          }
-        />
-        <XAxis {...getTimeAxisProps(chartData)} />
-        <YAxis
-          {...getAxisProps(chartData, 5, false)}
-          tickFormatter={(value) => Number(value).toFixed(0)}
-          unit={" %"}
-        />
-        <CartesianGrid stroke="#ccc" />
-      </LineChart>
-    </ResponsiveContainer>
+      </div>
+      <ResponsiveContainer aspect={2.5} width={"100%"}>
+        <LineChart data={chartData}>
+          <Legend />
+          <XAxis {...getTimeAxisProps(chartData)} />
+          <YAxis
+            {...getAxisProps(chartData, 5, false)}
+            tickFormatter={(value) => Number(value).toFixed(0)}
+            unit={" %"}
+          />
+          <CartesianGrid stroke="#ccc" />
+          <Line
+            {...DEFAULT_LINE_PROPS}
+            type={"linear"}
+            dataKey={"portfolio" satisfies PerformanceChartDataSets}
+            name={"Your Portfolio"}
+            stroke="var(--theme-highlight)"
+          />
+          {benchmark ? (
+            <Line
+              {...DEFAULT_LINE_PROPS}
+              type={"linear"}
+              dataKey={"benchmark" satisfies PerformanceChartDataSets}
+              name={"Benchmark"}
+              strokeOpacity={0.55}
+              stroke="grey"
+            />
+          ) : null}
+          <Tooltip
+            formatter={(value, name) => [
+              Number(value).toLocaleString(undefined, {
+                maximumFractionDigits: 1,
+                minimumFractionDigits: 1,
+              }) + " %",
+              name,
+            ]}
+            labelFormatter={(value: number) =>
+              moment(new Date(value)).format("ddd DD.MM.YYYY")
+            }
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 };

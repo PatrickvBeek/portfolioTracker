@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
@@ -23,13 +23,6 @@ function Portfolios({ className }: PortfolioProps) {
   const [selectedPortfolio, setSelectedPortfolio] = useState<
     string | undefined
   >(Object.keys(portfolioLib)[0]);
-
-  useEffect(() => {
-    const portfolios = Object.keys(portfolioLib || {});
-    if (!selectedPortfolio || !portfolios.includes(selectedPortfolio)) {
-      setSelectedPortfolio(portfolios[0]);
-    }
-  }, [portfolioLib, selectedPortfolio]);
 
   if (Object.keys(portfolioLib).length < 1) {
     return <EmptyPortfolios />;

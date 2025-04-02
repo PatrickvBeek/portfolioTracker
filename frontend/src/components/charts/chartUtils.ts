@@ -3,6 +3,7 @@ import {
   scaleLinear as d3LinearScale,
   scaleTime as d3ScaleTime,
 } from "d3-scale";
+import moment from "moment";
 import { History } from "pt-domain/src/portfolioHistory/history.entities";
 import { isNumber, omit, range, sort, unique } from "radash";
 import { XAxisProps, YAxisProps } from "recharts";
@@ -53,7 +54,10 @@ export function getTimeAxisProps(
 const defaultDateDomain = ([dataMin, dataMax]: [number, number]): [
   number,
   number,
-] => [dataMin, dataMax + MARGIN * (dataMax - dataMin)];
+] => [
+  dataMin - 0.5 * MARGIN * (dataMax - dataMin),
+  dataMax + 0.5 * MARGIN * (dataMax - dataMin),
+];
 
 export const historiesToChartData = <Keys extends string>(
   datasets: { history: History<number>; newKey: Keys }[]
@@ -62,12 +66,16 @@ export const historiesToChartData = <Keys extends string>(
 
   datasets.forEach((dataset) => {
     dataset.history.forEach((point) => {
-      if (!map.has(point.timestamp)) {
-        map.set(point.timestamp, {
-          timestamp: point.timestamp,
+      const startOfDayTimestamp = moment(point.timestamp)
+        .startOf("day")
+        .valueOf();
+
+      if (!map.has(startOfDayTimestamp)) {
+        map.set(startOfDayTimestamp, {
+          timestamp: startOfDayTimestamp,
         } as ChartDataPoint<Keys>);
       }
-      map.get(point.timestamp)![dataset.newKey] =
+      map.get(startOfDayTimestamp)![dataset.newKey] =
         point.value as ChartDataPoint<Keys>[Keys];
     });
   });
@@ -75,7 +83,7 @@ export const historiesToChartData = <Keys extends string>(
   return sort(Array.from(map.values()), (p) => p.timestamp);
 };
 
-export const DEFAULT_AREA_PROPS = {
+export const DEFAULT_LINE_PROPS = {
   dot: false,
   type: "stepAfter",
   connectNulls: true,

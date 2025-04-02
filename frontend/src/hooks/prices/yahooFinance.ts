@@ -20,12 +20,16 @@ export const getPricesFromYahooFinance =
     );
     const parsed = (await response.json()) as YahooChartResponse;
 
-    return zip(
-      parsed.chart.result[0]?.timestamp,
-      parsed.chart.result[0]?.indicators.adjclose[0]?.adjclose
-    )
-      .map(([t_in_s, price]) => ({ timestamp: t_in_s * 1000, value: price }))
-      .toReversed();
+    return (
+      zip(
+        parsed.chart.result[0]?.timestamp,
+        parsed.chart.result[0]?.indicators.adjclose[0]?.adjclose
+      )
+        .map(([t_in_s, price]) => ({ timestamp: t_in_s * 1000, value: price }))
+        .toReversed()
+        // Unfortunately,there can be 'null' values...
+        .filter((point) => typeof point.value === "number")
+    );
   };
 
 type YahooChartResponse = {

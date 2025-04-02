@@ -1,4 +1,5 @@
 import { waitFor } from "@testing-library/react";
+import moment from "moment";
 import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
   getTestOrdersGroupedByAsset,
@@ -18,7 +19,9 @@ describe("useGetPortfolioHistoryChartData", () => {
 
   vi.setSystemTime(TODAY);
 
-  const TIMESTAMPS = [DAY1, DAY2, DAY3, DAY4].map((d) => new Date(d).getTime());
+  const TIMESTAMPS = [DAY1, DAY2, DAY3, DAY4].map((d) =>
+    moment(d).startOf("day").valueOf()
+  );
 
   mockNetwork({
     prices: getPriceResponse("ABC", [
@@ -119,7 +122,7 @@ describe("useGetPortfolioHistoryChartData", () => {
         buyValue: 232.7,
         cashFlow: 232.7,
         marketValue: 2 * 110 + 3 * 10.3,
-        timestamp: new Date(TODAY).getTime(),
+        timestamp: moment(TODAY).startOf("day").valueOf(),
       },
     ]);
   });

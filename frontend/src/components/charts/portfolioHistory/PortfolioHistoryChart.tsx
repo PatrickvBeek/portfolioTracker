@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import {
-  DEFAULT_AREA_PROPS,
+  DEFAULT_LINE_PROPS,
   getAxisProps,
   getTimeAxisProps,
 } from "../chartUtils";
@@ -32,24 +32,31 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.heading}>Portfolio History</div>
+      <div className={styles.heading}>Balances</div>
       <ResponsiveContainer aspect={2.5} width={"100%"}>
         <LineChart data={chartData}>
           <Legend />
+          <XAxis {...getTimeAxisProps(chartData)} />
+          <YAxis
+            {...getAxisProps(chartData)}
+            tickFormatter={(value) => Number(value / 1000).toString()}
+            unit={" k€"}
+          />
+          <CartesianGrid stroke="#ccc" />
           <Line
-            {...DEFAULT_AREA_PROPS}
+            {...DEFAULT_LINE_PROPS}
             dataKey={"cashFlow" satisfies PortfolioHistoryDataSets}
             name={"Cash Flow"}
             stroke="var(--theme-highlight)"
           />
           <Line
-            {...DEFAULT_AREA_PROPS}
+            {...DEFAULT_LINE_PROPS}
             dataKey={"buyValue" satisfies PortfolioHistoryDataSets}
             name={"Buy Value"}
             stroke="var(--orange)"
           />
           <Line
-            {...DEFAULT_AREA_PROPS}
+            {...DEFAULT_LINE_PROPS}
             dataKey={"marketValue" satisfies PortfolioHistoryDataSets}
             name={"Market Value"}
             stroke="var(--green)"
@@ -67,13 +74,6 @@ export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
               moment(new Date(value)).format("ddd DD.MM.YYYY")
             }
           />
-          <XAxis {...getTimeAxisProps(chartData)} />
-          <YAxis
-            {...getAxisProps(chartData)}
-            tickFormatter={(value) => Number(value / 1000).toString()}
-            unit={" k€"}
-          />
-          <CartesianGrid stroke="#ccc" />
         </LineChart>
       </ResponsiveContainer>
     </div>
