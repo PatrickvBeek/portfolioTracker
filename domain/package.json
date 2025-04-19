@@ -8,12 +8,11 @@
   },
   "devDependencies": {
     "@types/uuid": "^8.3.4",
-    "@vitest/coverage-v8": "^1.4.0",
+    "@vitest/coverage-v8": "^3.1.1",
     "c8": "^9.1.0",
     "madge": "^6.1.0",
     "typescript": "^5.5.2",
-    "vite": "^5.2.4",
-    "vitest": "^1.4.0"
+    "vitest": "^3.1.1"
   },
   "private": true,
   "scripts": {
