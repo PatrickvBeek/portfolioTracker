@@ -10,7 +10,10 @@ import {
 import { History } from "pt-domain/src/portfolioHistory/history.entities";
 import { last, select } from "radash";
 import { useSymbol } from "../../../hooks/assets/assetHooks";
-import { usePortfolioSelector } from "../../../hooks/portfolios/portfolioHooks";
+import {
+  useGetPortfolio,
+  usePortfolioSelector,
+} from "../../../hooks/portfolios/portfolioHooks";
 import {
   CustomQuery,
   useGetPricesForIsins,
@@ -44,31 +47,32 @@ const useTimeWeightedReturnHistory = (
 const usePerformanceBenchmark = (
   portfolioName: string,
   isin: string
-): CustomQuery<History<number>> | undefined =>
-  usePortfolioSelector(portfolioName, (portfolio) => {
-    const portfolioStartTime = getFirstOrderTimeStamp(portfolio) || -Infinity;
-    const symbol = useSymbol(isin);
+): CustomQuery<History<number>> | undefined => {
+  const portfolio = useGetPortfolio(portfolioName);
+  const portfolioStartTime =
+    (portfolio && getFirstOrderTimeStamp(portfolio)) || -Infinity;
+  const symbol = useSymbol(isin);
 
-    return usePriceQuery(symbol, (priceHistory) => {
-      // pickValueFromHistory is not used since order timestamps are at
-      // start of day and we want to find a point on the same day.
-      const startPoint = priceHistory.findLast(
-        (p) => p.timestamp >= portfolioStartTime
-      );
+  return usePriceQuery(symbol, (priceHistory) => {
+    // pickValueFromHistory is not used since order timestamps are at
+    // start of day and we want to find a point on the same day.
+    const startPoint = priceHistory.findLast(
+      (p) => p.timestamp >= portfolioStartTime
+    );
 
-      if (!startPoint) {
-        return [];
-      }
+    if (!startPoint) {
+      return [];
+    }
 
-      const { timestamp, value } = startPoint;
+    const { timestamp, value } = startPoint;
 
-      return select(
-        priceHistory,
-        getHistoryPointMapper((p) => rel2percentage(p / value)),
-        (p) => p.timestamp >= timestamp
-      );
-    });
+    return select(
+      priceHistory,
+      getHistoryPointMapper((p) => rel2percentage(p / value)),
+      (p) => p.timestamp >= timestamp
+    );
   });
+};
 
 export type PerformanceChartDataSets = "portfolio" | "benchmark";
 
