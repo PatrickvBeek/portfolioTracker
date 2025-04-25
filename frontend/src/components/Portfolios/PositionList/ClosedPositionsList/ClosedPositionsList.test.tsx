@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { Asset, AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
   getElementsByIsin,
@@ -9,6 +9,7 @@ import {
 import { Portfolio } from "pt-domain/src/portfolio/portfolio.entities";
 import {
   customRender,
+  customWaitFor,
   getTextWithNonBreakingSpaceReplaced,
 } from "../../../../testUtils/componentHelpers";
 import { setUserData } from "../../../../testUtils/localStorage";
@@ -108,7 +109,7 @@ describe("the ClosedPositionList component", () => {
     });
 
     expect(await screen.findAllByRole("row")).toHaveLength(3);
-    await waitFor(async () =>
+    await customWaitFor(async () =>
       expect(await getCellTextsForRow(1)).toEqual([
         "Asset 2",
         "3",

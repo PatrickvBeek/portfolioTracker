@@ -3,11 +3,12 @@ import { v4 } from "uuid";
 import { DividendPayout } from "./dividendPayouts/dividend.entities";
 import { Order } from "./order/order.entities";
 import { Portfolio } from "./portfolio/portfolio.entities";
-import { TEST_PORTFOLIO } from "./testConstants";
 
 export function getTestPortfolio(overrides: Partial<Portfolio>): Portfolio {
   return {
-    ...TEST_PORTFOLIO,
+    name: `portfolio_name-${uid(5)}`,
+    orders: {},
+    dividendPayouts: {},
     ...overrides,
   };
 }

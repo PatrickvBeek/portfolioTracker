@@ -1,10 +1,12 @@
-import { waitFor } from "@testing-library/dom";
 import {
   getTestOrdersGroupedByAsset,
   getTestPortfolio,
 } from "pt-domain/src/dataHelpers";
 import { vi } from "vitest";
-import { customRenderHook } from "../../../testUtils/componentHelpers";
+import {
+  customRenderHook,
+  customWaitFor,
+} from "../../../testUtils/componentHelpers";
 import { setUserData } from "../../../testUtils/localStorage";
 import { getPriceResponse, mockNetwork } from "../../../testUtils/networkMock";
 import { useTimeWeightedReturn } from "./PortfolioSummary.logic";
@@ -58,7 +60,7 @@ describe("with online prices", () => {
       useTimeWeightedReturn(portfolioName)
     );
 
-    await waitFor(() => expect(result.current?.isLoading).toBe(false));
+    await customWaitFor(() => expect(result.current?.isLoading).toBe(false));
 
     expect(result.current?.data).toBe(1.0975);
   });

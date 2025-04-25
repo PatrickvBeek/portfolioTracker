@@ -27,7 +27,8 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
   portfolioName,
 }) => {
   const [benchmark, setBenchmark] = useState("");
-  const chartData = usePerformanceChartData(portfolioName, benchmark) || [];
+  const chartData =
+    usePerformanceChartData(portfolioName, benchmark).data || [];
 
   return (
     <div>

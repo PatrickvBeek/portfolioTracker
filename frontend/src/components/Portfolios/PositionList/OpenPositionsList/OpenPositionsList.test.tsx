@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { Asset, AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
   getElementsByIsin,
@@ -9,6 +9,7 @@ import {
 import { Portfolio } from "pt-domain/src/portfolio/portfolio.entities";
 import {
   customRender,
+  customWaitFor,
   getTextWithNonBreakingSpaceReplaced,
 } from "../../../../testUtils/componentHelpers";
 import { setUserData } from "../../../../testUtils/localStorage";
@@ -97,7 +98,7 @@ describe("the open inventory list component", () => {
       component: <OpenPositionsList portfolioName={testPortfolioName} />,
     });
 
-    await waitFor(async () =>
+    await customWaitFor(async () =>
       expect(await getCellTextsForRow(1)).toEqual([
         "Open Asset",
         "1",
@@ -108,7 +109,7 @@ describe("the open inventory list component", () => {
       ])
     );
 
-    await waitFor(async () =>
+    await customWaitFor(async () =>
       expect(await getCellTextsForRow(2)).toEqual([
         "1 Position",
         "",

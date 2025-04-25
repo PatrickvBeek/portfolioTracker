@@ -1,4 +1,3 @@
-import { waitFor } from "@testing-library/react";
 import moment from "moment";
 import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
@@ -6,7 +5,10 @@ import {
   getTestPortfolio,
 } from "pt-domain/src/dataHelpers";
 import { vi } from "vitest";
-import { customRenderHook } from "../../../testUtils/componentHelpers";
+import {
+  customRenderHook,
+  customWaitFor,
+} from "../../../testUtils/componentHelpers";
 import { getPriceResponse, mockNetwork } from "../../../testUtils/networkMock";
 import { useGetPortfolioHistoryChartData } from "./BalancesChart.logic";
 
@@ -89,7 +91,7 @@ describe("useGetPortfolioHistoryChartData", () => {
       useGetPortfolioHistoryChartData("p1")
     );
 
-    await waitFor(() => {
+    await customWaitFor(() => {
       expect(result.current[0]).toHaveProperty("marketValue");
     });
 

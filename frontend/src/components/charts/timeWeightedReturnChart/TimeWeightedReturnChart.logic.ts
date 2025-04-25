@@ -19,6 +19,9 @@ import {
 import { ChartData } from "../chartTypes";
 import { getDefaultTimeAxis, historiesToChartData } from "../chartUtils";
 
+const rel2percentage = (value: number) => (value - 1) * 100;
+const percentage2rel = (value: number) => value / 100 + 1;
+
 const useTimeWeightedReturnHistory = (
   portfolioName: string
 ): CustomQuery<History<number>> | undefined =>
@@ -34,7 +37,7 @@ const useTimeWeightedReturnHistory = (
         portfolio,
         priceMapQuery.data,
         xMin ? getDefaultTimeAxis(xMin) : undefined
-      ).map(getHistoryPointMapper((value) => (value - 1) * 100)),
+      ).map(getHistoryPointMapper(rel2percentage)),
     };
   });
 
@@ -61,7 +64,7 @@ const usePerformanceBenchmark = (
 
       return select(
         priceHistory,
-        getHistoryPointMapper((p) => (p / value - 1) * 100),
+        getHistoryPointMapper((p) => rel2percentage(p / value)),
         (p) => p.timestamp >= timestamp
       );
     });
@@ -72,10 +75,15 @@ export type PerformanceChartDataSets = "portfolio" | "benchmark";
 export const usePerformanceChartData = (
   portfolioName: string,
   benchmarkIsin: string
-): ChartData<PerformanceChartDataSets> => {
-  const twrHistory = useTimeWeightedReturnHistory(portfolioName)?.data ?? [];
-  const benchmarkHistory =
-    usePerformanceBenchmark(portfolioName, benchmarkIsin)?.data ?? [];
+): CustomQuery<ChartData<PerformanceChartDataSets>> => {
+  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioName);
+  const benchmarkHistoryQuery = usePerformanceBenchmark(
+    portfolioName,
+    benchmarkIsin
+  );
+
+  const twrHistory = twrHistoryQuery?.data ?? [];
+  const benchmarkHistory = benchmarkHistoryQuery?.data ?? [];
 
   const benchmarkStart = last(benchmarkHistory)?.timestamp;
   const twrAtBenchmarkStart =
@@ -84,13 +92,23 @@ export const usePerformanceChartData = (
   const adjustedTwrHistory = twrAtBenchmarkStart
     ? select(
         twrHistory,
-        getHistoryPointMapper((p) => p - twrAtBenchmarkStart.value),
+        getHistoryPointMapper((p) =>
+          rel2percentage(
+            percentage2rel(p) / percentage2rel(twrAtBenchmarkStart.value)
+          )
+        ),
         (p) => p.timestamp >= twrAtBenchmarkStart.timestamp
       )
     : twrHistory;
 
-  return historiesToChartData([
-    { history: adjustedTwrHistory, newKey: "portfolio" },
-    { history: benchmarkHistory, newKey: "benchmark" },
-  ]);
+  return {
+    isLoading:
+      twrHistoryQuery?.isLoading || benchmarkHistoryQuery?.isLoading || false,
+    isError:
+      twrHistoryQuery?.isError || benchmarkHistoryQuery?.isError || false,
+    data: historiesToChartData([
+      { history: adjustedTwrHistory, newKey: "portfolio" },
+      { history: benchmarkHistory, newKey: "benchmark" },
+    ]),
+  };
 };
