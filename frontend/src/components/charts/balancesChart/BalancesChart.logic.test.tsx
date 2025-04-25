@@ -8,7 +8,7 @@ import {
 import { vi } from "vitest";
 import { customRenderHook } from "../../../testUtils/componentHelpers";
 import { getPriceResponse, mockNetwork } from "../../../testUtils/networkMock";
-import { useGetPortfolioHistoryChartData } from "./PortfolioHistoryChart.logic";
+import { useGetPortfolioHistoryChartData } from "./BalancesChart.logic";
 
 describe("useGetPortfolioHistoryChartData", () => {
   const DAY1 = "2020-03-01";

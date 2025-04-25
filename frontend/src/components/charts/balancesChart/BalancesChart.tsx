@@ -18,10 +18,10 @@ import {
 import {
   PortfolioHistoryDataSets,
   useGetPortfolioHistoryChartData,
-} from "./PortfolioHistoryChart.logic";
-import styles from "./PortfolioHistoryChart.module.less";
+} from "./BalancesChart.logic";
+import styles from "./BalancesChart.module.less";
 
-export const PortfolioHistoryChart: FC<{ portfolioName: string }> = ({
+export const PortfolioBalancesChart: FC<{ portfolioName: string }> = ({
   portfolioName,
 }) => {
   const chartData = useGetPortfolioHistoryChartData(portfolioName);

@@ -20,9 +20,10 @@ import {
 import {
   PerformanceChartDataSets,
   usePerformanceChartData,
-} from "./TimeWeightedReturn.logic";
-import styles from "./TimeWeightedReturnHistory.module.less";
-export const TimeWeightedReturnHistory: FC<{ portfolioName: string }> = ({
+} from "./TimeWeightedReturnChart.logic";
+import styles from "./TimeWeightedReturnChart.module.less";
+
+export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
   portfolioName,
 }) => {
   const [benchmark, setBenchmark] = useState("");
