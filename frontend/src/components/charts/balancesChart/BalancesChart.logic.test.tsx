@@ -1,13 +1,16 @@
-import { waitFor } from "@testing-library/react";
+import moment from "moment";
 import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
   getTestOrdersGroupedByAsset,
   getTestPortfolio,
 } from "pt-domain/src/dataHelpers";
 import { vi } from "vitest";
-import { customRenderHook } from "../../../testUtils/componentHelpers";
+import {
+  customRenderHook,
+  customWaitFor,
+} from "../../../testUtils/componentHelpers";
 import { getPriceResponse, mockNetwork } from "../../../testUtils/networkMock";
-import { useGetPortfolioHistoryChartData } from "./PortfolioHistoryChart.logic";
+import { useGetPortfolioHistoryChartData } from "./BalancesChart.logic";
 
 describe("useGetPortfolioHistoryChartData", () => {
   const DAY1 = "2020-03-01";
@@ -18,7 +21,9 @@ describe("useGetPortfolioHistoryChartData", () => {
 
   vi.setSystemTime(TODAY);
 
-  const TIMESTAMPS = [DAY1, DAY2, DAY3, DAY4].map((d) => new Date(d).getTime());
+  const TIMESTAMPS = [DAY1, DAY2, DAY3, DAY4].map((d) =>
+    moment(d).startOf("day").valueOf()
+  );
 
   mockNetwork({
     prices: getPriceResponse("ABC", [
@@ -86,7 +91,7 @@ describe("useGetPortfolioHistoryChartData", () => {
       useGetPortfolioHistoryChartData("p1")
     );
 
-    await waitFor(() => {
+    await customWaitFor(() => {
       expect(result.current[0]).toHaveProperty("marketValue");
     });
 
@@ -119,7 +124,7 @@ describe("useGetPortfolioHistoryChartData", () => {
         buyValue: 232.7,
         cashFlow: 232.7,
         marketValue: 2 * 110 + 3 * 10.3,
-        timestamp: new Date(TODAY).getTime(),
+        timestamp: moment(TODAY).startOf("day").valueOf(),
       },
     ]);
   });

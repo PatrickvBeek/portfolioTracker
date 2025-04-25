@@ -72,7 +72,7 @@ export function OrderInputForm({
     <div className={bemBlock(className)} data-testid={"order-input-form"}>
       <AssetDropdown
         className={bemElement("asset")}
-        onSelect={setAssetIsin}
+        onChange={(isin) => setAssetIsin(isin || DEFAULTS.isin)}
         isMandatory={true}
       />
       <NumberInput

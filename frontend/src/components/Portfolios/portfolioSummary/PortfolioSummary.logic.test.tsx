@@ -2,10 +2,11 @@ import {
   getTestOrdersGroupedByAsset,
   getTestPortfolio,
 } from "pt-domain/src/dataHelpers";
-import { customRenderHook } from "../../../testUtils/componentHelpers";
-
-import { waitFor } from "@testing-library/dom";
 import { vi } from "vitest";
+import {
+  customRenderHook,
+  customWaitFor,
+} from "../../../testUtils/componentHelpers";
 import { setUserData } from "../../../testUtils/localStorage";
 import { mockNetwork } from "../../../testUtils/networkMock";
 import {
@@ -101,7 +102,7 @@ describe("PortfolioSummary hooks", () => {
       );
 
       expect(result.current?.isLoading).toEqual(true);
-      await waitFor(() => {
+      await customWaitFor(() => {
         expect(result.current?.isLoading).toEqual(false);
       });
       expect(result.current?.data).toEqual(50 - 1 + 0 - 1);
@@ -110,7 +111,7 @@ describe("PortfolioSummary hooks", () => {
     it("useMarketValue", async () => {
       const { result } = customRenderHook(() => useMarketValue(portfolioName));
 
-      await waitFor(() => {
+      await customWaitFor(() => {
         expect(result.current?.isLoading).toBe(false);
       });
       expect(result.current?.data).toBe(1150 + 2000);
@@ -126,7 +127,7 @@ describe("PortfolioSummary hooks", () => {
       );
       const marketValue = customRenderHook(() => useMarketValue(portfolioName));
 
-      await waitFor(() => {
+      await customWaitFor(() => {
         [nonRealizedGains, marketValue].every(
           (query) => query.result.current?.isLoading === false
         );
@@ -150,7 +151,7 @@ describe("PortfolioSummary hooks", () => {
         useTimeWeightedReturn(portfolioName)
       );
 
-      await waitFor(() => {
+      await customWaitFor(() => {
         expect(result.current?.isLoading).toBe(false);
       });
 

@@ -21,7 +21,13 @@ function PortfolioFormSideBar({
   return (
     <div>
       <Headline text={"Add Data to Portfolio"}></Headline>
-      <Tabs value={tab} onChange={(_, tab) => setTab(tab)} centered>
+      <Tabs
+        value={tab}
+        onChange={(_, tab) => setTab(tab)}
+        sx={{
+          borderBottom: "solid 1px #aaa",
+        }}
+      >
         <Tab label={"Order"} value={FORM.ORDER} />
         <Tab label={"Dividend"} value={FORM.DIVIDEND} />
       </Tabs>

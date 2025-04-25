@@ -3,88 +3,13 @@ import {
   getTestOrdersGroupedByAsset,
   getTestPortfolio,
 } from "../dataHelpers";
-import { getCashFlowHistory } from "../portfolio/portfolio.derivers";
-import { Portfolio } from "../portfolio/portfolio.entities";
-import { getBuyValueHistoryForPortfolio } from "./history.derivers";
+import { getTotalCashFlowHistory } from "../portfolio/portfolio.derivers";
 
 const DAY1 = "2023-01-01";
 const DAY2 = "2023-01-02";
 const DAY3 = "2023-01-03";
 
 describe("the history operation", () => {
-  describe("getBuyValueHistory", () => {
-    it("returns the correct history for a portfolio having orders. Selling orders in order of buying", () => {
-      const TEST_PORTFOLIO: Portfolio = {
-        name: "test-portfolio",
-        orders: getTestOrdersGroupedByAsset([
-          {
-            asset: "asset1",
-            timestamp: DAY1,
-            sharePrice: 10,
-            pieces: 2,
-            orderFee: 15, // not relevant
-          },
-          {
-            asset: "asset2",
-            timestamp: DAY2,
-            pieces: 1,
-            sharePrice: 5,
-          },
-          {
-            asset: "asset1",
-            timestamp: DAY3,
-            pieces: -1,
-            sharePrice: 11,
-          },
-        ]),
-        dividendPayouts: {},
-      };
-
-      expect(getBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
-        getValuesAsHistory([
-          { timestamp: DAY1, value: 20 },
-          { timestamp: DAY2, value: 25 },
-          { timestamp: DAY3, value: 15 },
-        ])
-      );
-    });
-
-    it("returns the correct history for a portfolio having orders. Selling orders out of order of buying", () => {
-      const TEST_PORTFOLIO: Portfolio = {
-        name: "test-portfolio",
-        orders: getTestOrdersGroupedByAsset([
-          {
-            asset: "asset1",
-            timestamp: DAY1,
-            sharePrice: 10,
-            pieces: 2,
-          },
-          {
-            asset: "asset2",
-            timestamp: DAY2,
-            pieces: 1,
-            sharePrice: 5,
-          },
-          {
-            asset: "asset2",
-            timestamp: DAY3,
-            pieces: -1,
-            sharePrice: 6,
-          },
-        ]),
-        dividendPayouts: {},
-      };
-
-      expect(getBuyValueHistoryForPortfolio(TEST_PORTFOLIO)).toEqual(
-        getValuesAsHistory([
-          { timestamp: DAY1, value: 20 },
-          { timestamp: DAY2, value: 25 },
-          { timestamp: DAY3, value: 20 },
-        ])
-      );
-    });
-  });
-
   describe("getCashFlowHistory", () => {
     it("buying and selling without costs", () => {
       const portfolio = getTestPortfolio({
@@ -124,7 +49,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 80 },
           { timestamp: DAY1, value: 102 },
@@ -164,7 +89,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 85 },
           { timestamp: DAY2, value: 78.5 },
@@ -204,7 +129,7 @@ describe("the history operation", () => {
         ]),
       });
 
-      expect(getCashFlowHistory(portfolio)).toEqual(
+      expect(getTotalCashFlowHistory(portfolio)).toEqual(
         getValuesAsHistory([
           { timestamp: DAY1, value: 85 },
           { timestamp: DAY2, value: 78.5 },

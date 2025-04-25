@@ -2,16 +2,16 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { History } from "pt-domain/src/portfolioHistory/history.entities";
 import { unique, zipToObject } from "radash";
 import { useGetApiKeys } from "../apiKeys/apiKeyHooks";
-import { useGetAssets, useGetSymbol } from "../assets/assetHooks";
+import { useGetAssets, useSymbol } from "../assets/assetHooks";
 import { getPricesFromAlphaVantage } from "./alphaVantage";
 import { getPricesFromYahooFinance } from "./yahooFinance";
 
 const PRICE_BASE_QUERY_KEY = "prices";
 
-export type PriceQuery = {
+export type CustomQuery<T = number> = {
   isLoading: boolean;
   isError: boolean;
-  data: number | undefined;
+  data: T | undefined;
 };
 
 const useGetPriceProvider = () => {
@@ -37,7 +37,7 @@ export const useCurrentPrice = (symbol: string) =>
   usePriceQuery(symbol, (prices = []) => prices.at(0)?.value);
 
 export const useCurrentPriceByIsin = (isin: string) =>
-  useCurrentPrice(useGetSymbol(isin) || "");
+  useCurrentPrice(useSymbol(isin));
 
 export const useGetPricesForIsins = (isins: string[]) => {
   const assets = useGetAssets() || {};

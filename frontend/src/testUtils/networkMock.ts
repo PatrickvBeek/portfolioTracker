@@ -29,7 +29,10 @@ export function mockNetwork(backendData: MockBackendData) {
   });
   afterAll(() => server.close());
 
-  return server;
+  return {
+    setBackendData: (newData: MockBackendData) =>
+      server.resetHandlers(...getHandlers(newData)),
+  };
 }
 
 export const getPriceResponse = (

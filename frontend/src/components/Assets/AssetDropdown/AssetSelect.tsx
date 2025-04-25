@@ -13,10 +13,17 @@ export type AssetDropdownProps = Pick<
   "isValid" | "errorMessage" | "isMandatory"
 > &
   Props<{
-    onSelect: (isin: string) => void;
+    onChange: (isin: string | undefined) => void;
+    filterAssets?: (asset: Asset) => boolean;
+    label?: string;
   }>;
 
-const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
+const AssetDropdown = ({
+  onChange,
+  label,
+  filterAssets,
+  className,
+}: AssetDropdownProps) => {
   const assetLib = useGetAssets();
 
   const assetsMap: Record<string, Asset> = assetLib || {};
@@ -26,10 +33,10 @@ const AssetDropdown = ({ onSelect, className }: AssetDropdownProps) => {
     <Autocomplete
       className={bemBlock(className)}
       renderInput={(params) => (
-        <TextField {...params} variant="outlined" label="Asset" />
+        <TextField {...params} variant="outlined" label={label || "Asset"} />
       )}
-      options={assets}
-      onChange={(_, value) => value?.isin && onSelect(value?.isin)}
+      options={filterAssets ? assets.filter(filterAssets) : assets}
+      onChange={(_, value) => onChange(value?.isin)}
       getOptionLabel={(asset) => `${asset.displayName} (${asset.isin})`}
       renderOption={(props, asset) => {
         const { key, ...restProps } = props;

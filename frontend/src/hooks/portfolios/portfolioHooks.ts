@@ -37,9 +37,15 @@ export function useSetPortfolios() {
   };
 }
 
-export function useGetPortfolio(name: string) {
+export function useGetPortfolio(name: string): Portfolio {
   const portfolios = useGetPortfolios();
-  return portfolios[name];
+  return (
+    portfolios[name] ?? {
+      name: "",
+      orders: {},
+      dividendPayouts: {},
+    }
+  );
 }
 
 export function useGetPortfolioActivity(portfolioName: string) {

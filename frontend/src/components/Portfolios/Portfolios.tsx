@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
-import { PortfolioHistoryChart } from "../charts/portfolioHistory/PortfolioHistoryChart";
+import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
+import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
 import SelectionHeader from "../general/SelectionHeader";
 import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
@@ -54,7 +55,8 @@ function Portfolios({ className }: PortfolioProps) {
       </div>
       <div className={bemElement("content")}>
         <PortfolioSummary portfolioName={selectedPortfolio} />
-        <PortfolioHistoryChart portfolioName={selectedPortfolio} />
+        <PortfolioBalancesChart portfolioName={selectedPortfolio} />
+        <TimeWeightedReturnChart portfolioName={selectedPortfolio} />
         <OpenPositionsList portfolioName={selectedPortfolio} />
         <ClosedPositionsList portfolioName={selectedPortfolio} />
         <ActivityList portfolio={selectedPortfolio} />

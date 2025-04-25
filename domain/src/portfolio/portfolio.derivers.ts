@@ -1,6 +1,7 @@
-import { group, mapValues, min, partial, sort, sum } from "radash";
+import { last, mapValues, min, partial, sort, sum } from "radash";
 import {
   getActivityCashFlow,
+  getCashFlowHistoryForActivities,
   getNumericDateTime,
 } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
@@ -8,6 +9,7 @@ import {
   getBatches,
   getBatchesHistory,
   getBatchesOfType,
+  getBuyValue,
   getProfitForClosedBatch,
   getProfitForOpenBatch,
 } from "../batch/batch.derivers";
@@ -17,13 +19,18 @@ import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { areOrdersEqualOnDay } from "../order/order.derivers";
 import { Order } from "../order/order.entities";
 import {
-  getCashFlowHistoryForActivities,
+  differentiateNumberHistory,
+  getHistoryMapper,
   getPiecesAtTimeStamp,
+  mergePointsAtSameTimestamp,
   pickValueFromHistory,
 } from "../portfolioHistory/history.derivers";
 import { History } from "../portfolioHistory/history.entities";
+import { updateBy } from "../utils/arrays";
 import { isFloatPositive } from "../utils/floats";
 import { Portfolio } from "./portfolio.entities";
+
+type PriceMap = Record<string, History<number>>;
 
 const getOrdersForIsin = (portfolio: Portfolio, isin: string): Order[] =>
   portfolio.orders[isin] || [];
@@ -210,23 +217,20 @@ export const getCurrentValueOfOpenBatches = (
   currentPrice: number
 ): number => getPiecesOfIsinInPortfolio(portfolio, isin) * currentPrice;
 
-export const getCashFlowHistory = (portfolio: Portfolio) =>
+export const getTotalCashFlowHistory = (portfolio: Portfolio) =>
   getCashFlowHistoryForActivities(
     sort(getActivitiesForPortfolio(portfolio), (o) => getNumericDateTime(o))
   );
 
-const getCashFlowsMergedOnSameDay = (portfolio: Portfolio): History<number> => {
+const getCashFlowsMergedAtSameTimestamp = (
+  portfolio: Portfolio
+): History<number> => {
   const flows = getActivitiesForPortfolio(portfolio).map((a) => ({
     value: getActivityCashFlow(a),
     timestamp: getNumericDateTime(a),
   }));
 
-  return Object.entries(group(flows, (flows) => flows.timestamp)).map(
-    ([timestamp, flowValues]) => ({
-      timestamp: parseInt(timestamp),
-      value: sum(flowValues || [], (flowValues) => flowValues.value),
-    })
-  );
+  return mergePointsAtSameTimestamp(flows);
 };
 
 export const getFirstOrderTimeStamp = (portfolio: Portfolio) =>
@@ -253,41 +257,65 @@ export const getMarketValueHistory = (
   }));
 };
 
+/**
+ * First, try to find the price of an asset by an exact match in the transactions.
+ * If there is no transaction at this date, use online prices. If they are none available,
+ * use the latest known price from the transactions.
+ */
 export const getPriceAtTimestamp = (
   portfolio: Portfolio,
   isin: string,
   t: number,
   priceMap: Record<string, History<number>>
 ): number =>
-  pickValueFromHistory(priceMap[isin], t, "descending")?.value ||
+  getOrdersForIsin(portfolio, isin).find((o) => getNumericDateTime(o) === t)
+    ?.sharePrice ??
+  pickValueFromHistory(priceMap[isin], t, "descending")?.value ??
   getOrdersForIsin(portfolio, isin).findLast((o) => getNumericDateTime(o) <= t)
-    ?.sharePrice ||
-  returnNullAndLogWarning(isin, t);
+    ?.sharePrice ??
+  returnNaNAndLogWarning(isin, t);
 
-const returnNullAndLogWarning = (isin: string, t: number): number => {
+const returnNaNAndLogWarning = (isin: string, t: number): number => {
   console.log(
     `Could not find any price for ${isin} at ${t}. Neither in transactions nor in online price map.`
   );
-  return 0;
+  return NaN;
 };
 
 export const getTimeWeightedReturn = (
   portfolio: Portfolio,
   priceMap: PriceMap
-): number => {
-  const cashFlows = getCashFlowsMergedOnSameDay(portfolio);
+): number | undefined =>
+  last(getTimeWeightedReturnHistory(portfolio, priceMap))?.value;
+
+export const getTimeWeightedReturnHistory = (
+  portfolio: Portfolio,
+  priceMap: PriceMap,
+  baseAxis: number[] = [Date.now()]
+): History<number> => {
+  const cashFlows = getCashFlowsMergedAtSameTimestamp(portfolio);
   if (!cashFlows.length) {
-    return NaN;
+    return [];
   }
 
-  const TODAY = Date.now();
+  /**
+   * extend the actual cash flows with '0' cash flows.
+   * This allows to evaluate the TWR also between cash flows.
+   * */
+  const points = sort(
+    cashFlows.concat(baseAxis.map((t) => ({ timestamp: t, value: 0 }))),
+    (p) => p.timestamp
+  );
 
-  const xAxis = cashFlows.map((c) => c.timestamp).concat(TODAY);
-  const valueHistory = getMarketValueHistory(portfolio, priceMap, xAxis);
+  const valueHistory = getMarketValueHistory(
+    portfolio,
+    priceMap,
+    points.map((c) => c.timestamp)
+  );
 
-  const [_, ...restFlows] = cashFlows;
+  const [fistFlow, ...restFlows] = points;
 
-  let twr = 1;
+  const twr = [{ timestamp: fistFlow.timestamp, value: 1 }];
   let previousValue = valueHistory[0].value;
 
   for (const flow of restFlows) {
@@ -298,13 +326,30 @@ export const getTimeWeightedReturn = (
       pickValueFromHistory(valueHistory, currentTimestamp)?.value || 0;
     const currentReturn = (currentValue - currentCashFlow) / previousValue;
 
-    twr *= currentReturn;
+    twr.push({
+      timestamp: flow.timestamp,
+      value: twr[twr.length - 1].value * currentReturn,
+    });
     previousValue = currentValue;
   }
 
-  const todaysValue = pickValueFromHistory(valueHistory, TODAY)?.value;
-
-  return todaysValue ? twr * (todaysValue / previousValue) : twr;
+  return twr;
 };
 
-type PriceMap = Record<string, History<number>>;
+export const getBuyValueHistoryForPortfolio = (
+  portfolio: Portfolio
+): History<number> => {
+  const diffs = Object.values(portfolio.orders)
+    .map(getBatchesHistory)
+    .map(getHistoryMapper((batch) => sum(batch.open, getBuyValue)))
+    .map(differentiateNumberHistory)
+    .flat();
+
+  return updateBy(
+    sort(diffs, (diff) => diff.timestamp),
+    (prev, current) => ({
+      timestamp: current.timestamp,
+      value: prev.value + current.value,
+    })
+  );
+};

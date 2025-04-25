@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, renderHook, screen } from "@testing-library/react";
+import { render, renderHook, screen, waitFor } from "@testing-library/react";
 import userEvent, { Options, UserEvent } from "@testing-library/user-event";
 import { ReactElement } from "react";
 import { queryClientConfig } from "../queryClient/config";
@@ -61,3 +61,6 @@ export const componentHelpers = (user: UserEvent) => ({
 
 export const getTextWithNonBreakingSpaceReplaced = (element: HTMLElement) =>
   element.textContent?.replace(/\u00A0/g, " ");
+
+export const customWaitFor = (handler: () => void): Promise<void> =>
+  waitFor(handler, { interval: 10 });

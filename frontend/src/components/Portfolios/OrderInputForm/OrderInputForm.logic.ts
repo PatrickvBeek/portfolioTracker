@@ -3,16 +3,15 @@ import {
   isOrderValidForPortfolio,
   portfolioContainsOrder,
 } from "pt-domain/src/portfolio/portfolio.derivers";
-import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
+import { usePortfolioSelector } from "../../../hooks/portfolios/portfolioHooks";
 
-export const useOrderValidation = (portfolioName: string) => {
-  const portfolio = useGetPortfolio(portfolioName);
+export const useOrderValidation = (portfolioName: string) =>
+  usePortfolioSelector(portfolioName, (portfolio) => {
+    const isValid = (order: Order | undefined) =>
+      order ? isOrderValidForPortfolio(portfolio, order) : false;
 
-  const isValid = (order: Order | undefined) =>
-    order ? isOrderValidForPortfolio(portfolio, order) : false;
+    const isDuplicate = (order: Order | undefined) =>
+      order ? portfolioContainsOrder(portfolio, order) : false;
 
-  const isDuplicate = (order: Order | undefined) =>
-    order ? portfolioContainsOrder(portfolio, order) : false;
-
-  return { isValid, isDuplicate };
-};
+    return { isValid, isDuplicate };
+  }) ?? { isDuplicate: () => false, isValid: () => false };

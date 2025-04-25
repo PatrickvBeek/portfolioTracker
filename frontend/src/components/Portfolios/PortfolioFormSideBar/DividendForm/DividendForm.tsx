@@ -63,7 +63,9 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
   return (
     <div className={bemBlock(undefined)}>
       <AssetDropdown
-        onSelect={(isin) => setFormState({ ...formState, asset: isin })}
+        onChange={(isin) =>
+          setFormState({ ...formState, asset: isin || DEFAULTS.asset })
+        }
         className={bemElement("asset")}
       />
       <NumberInput

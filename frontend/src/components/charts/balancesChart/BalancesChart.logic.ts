@@ -1,23 +1,20 @@
 import { getNumericDateTime } from "pt-domain/src/activity/activity.derivers";
 import {
-  getCashFlowHistory,
+  getBuyValueHistoryForPortfolio,
   getFirstOrderTimeStamp,
   getMarketValueHistory,
+  getTotalCashFlowHistory,
 } from "pt-domain/src/portfolio/portfolio.derivers";
-import {
-  getBuyValueHistoryForPortfolio,
-  removeDuplicatesAtSameTimeStamp,
-} from "pt-domain/src/portfolioHistory/history.derivers";
+import { removeDuplicatesAtSameTimeStamp } from "pt-domain/src/portfolioHistory/history.derivers";
 import { History } from "pt-domain/src/portfolioHistory/history.entities";
-import { range, sort, unique } from "radash";
+import { unique } from "radash";
 import {
   useGetPortfolio,
   useGetPortfolioActivity,
 } from "../../../hooks/portfolios/portfolioHooks";
 import { useGetPricesForIsins } from "../../../hooks/prices/priceHooks";
 import { ChartDataPoint } from "../chartTypes";
-
-const DAY_IN_MS = 1000 * 60 * 60 * 24;
+import { getDefaultTimeAxis, historiesToChartData } from "../chartUtils";
 
 export type PortfolioHistoryDataSets = "buyValue" | "cashFlow" | "marketValue";
 
@@ -49,7 +46,7 @@ const useGetBuyValueHistory = (portfolioName: string) => {
 const useGetCashFlowHistory = (portfolioName: string) => {
   const portfolio = useGetPortfolio(portfolioName);
   return portfolio
-    ? removeDuplicatesAtSameTimeStamp(getCashFlowHistory(portfolio))
+    ? removeDuplicatesAtSameTimeStamp(getTotalCashFlowHistory(portfolio))
     : [];
 };
 
@@ -68,33 +65,13 @@ const useGetMarketValueHistory = (portfolioName: string): History<number> => {
 
   const portfolioTimestamps = activity.map(getNumericDateTime);
   const xAxis = unique(
-    Array.from(range(xMin, Date.now(), (i) => i, 7 * DAY_IN_MS))
+    getDefaultTimeAxis(xMin)
       .concat(portfolioTimestamps)
       .concat(Date.now())
       .sort()
   );
 
   return getMarketValueHistory(portfolio, pricesQuery.data, xAxis);
-};
-
-const historiesToChartData = <Keys extends string>(
-  datasets: { history: History<number>; newKey: Keys }[]
-): ChartDataPoint<Keys>[] => {
-  const map = new Map<number, ChartDataPoint<Keys>>();
-
-  datasets.forEach((dataset) => {
-    dataset.history.forEach((point) => {
-      if (!map.has(point.timestamp)) {
-        map.set(point.timestamp, {
-          timestamp: point.timestamp,
-        } as ChartDataPoint<Keys>);
-      }
-      map.get(point.timestamp)![dataset.newKey] =
-        point.value as ChartDataPoint<Keys>[Keys];
-    });
-  });
-
-  return sort(Array.from(map.values()), (p) => p.timestamp);
 };
 
 const extendToToday = (history: History<number>): History<number> => {
