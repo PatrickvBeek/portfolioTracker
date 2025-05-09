@@ -1,6 +1,9 @@
 import { omit, shake, sort } from "radash";
+import { getNumericDateTime } from "../activity/activity.derivers";
+import { PortfolioActivity } from "../activity/activity.entities";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
+import { toCompoundPortfolioName } from "../utils/portfolioUtils";
 import { Portfolio, PortfolioLibrary } from "./portfolio.entities";
 
 export function addPortfolioToLibrary(
@@ -95,3 +98,35 @@ export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
 
 const purgeEmptyArrays = <T>(obj: Record<string, T[]>): Record<string, T[]> =>
   shake(obj, (value) => !value.length);
+
+export function combinePortfolios(portfolios: Portfolio[]): Portfolio {
+  const mergeActivityArrays = <T extends PortfolioActivity>(
+    target: Record<string, T[]>,
+    source: Record<string, T[]>
+  ): Record<string, T[]> => {
+    const merged = { ...target };
+    for (const [asset, items] of Object.entries(source)) {
+      merged[asset] = sort(
+        [...(merged[asset] || []), ...items],
+        getNumericDateTime
+      );
+    }
+    return merged;
+  };
+
+  return portfolios.reduce(
+    (combined, portfolio) => ({
+      ...combined,
+      orders: mergeActivityArrays(combined.orders, portfolio.orders),
+      dividendPayouts: mergeActivityArrays(
+        combined.dividendPayouts,
+        portfolio.dividendPayouts
+      ),
+    }),
+    {
+      name: toCompoundPortfolioName(portfolios.map((p) => p.name)),
+      orders: {},
+      dividendPayouts: {},
+    }
+  );
+}

@@ -32,6 +32,12 @@ import { Portfolio } from "./portfolio.entities";
 
 type PriceMap = Record<string, History<number>>;
 
+export const EMPTY_PORTFOLIO = {
+  name: "",
+  orders: {},
+  dividendPayouts: {},
+};
+
 const getOrdersForIsin = (portfolio: Portfolio, isin: string): Order[] =>
   portfolio.orders[isin] || [];
 
