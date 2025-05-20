@@ -1,10 +1,19 @@
+@import (reference) "src/definitions.less";
+
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--default-spacing);
+  gap: @default-spacing;
+}
+
+.headingContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 4px; // to align with chart frame
 }
 
 .heading {
-  font-size: var(--font-large1);
+  font-size: @font-large1;
   font-weight: bold;
 }

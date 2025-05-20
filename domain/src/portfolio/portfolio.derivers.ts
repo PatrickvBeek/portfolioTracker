@@ -359,3 +359,23 @@ export const getBuyValueHistoryForPortfolio = (
     })
   );
 };
+
+export const getProfitHistory = (
+  portfolio: Portfolio,
+  priceMap: PriceMap,
+  xAxis: number[]
+): History<number> => {
+  const marketValueHistory = getMarketValueHistory(portfolio, priceMap, xAxis);
+  const cashFlowHistory = getTotalCashFlowHistory(portfolio);
+
+  return marketValueHistory.map((marketValuePoint) => {
+    const latestCashFlow =
+      pickValueFromHistory(cashFlowHistory, marketValuePoint.timestamp)
+        ?.value || 0;
+
+    return {
+      timestamp: marketValuePoint.timestamp,
+      value: marketValuePoint.value - latestCashFlow,
+    };
+  });
+};

@@ -99,3 +99,21 @@ export const getDefaultTimeAxis = (xMin: number) =>
       Date.now()
     )
   );
+
+export function calculateGradientOffset<T>(
+  data: T[],
+  valueKey: keyof T
+): number {
+  const values = data.map((item) => Number(item[valueKey]) || 0);
+  const dataMax = Math.max(...values);
+  const dataMin = Math.min(...values);
+
+  if (dataMax <= 0) {
+    return 0;
+  }
+  if (dataMin >= 0) {
+    return 1;
+  }
+
+  return dataMax / (dataMax - dataMin);
+}

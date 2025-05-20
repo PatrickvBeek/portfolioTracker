@@ -1,6 +1,5 @@
 import {
   getFirstOrderTimeStamp,
-  getIsins,
   getTimeWeightedReturnHistory,
 } from "pt-domain/src/portfolio/portfolio.derivers";
 import {
@@ -14,11 +13,8 @@ import {
   useGetPortfolio,
   usePortfolioSelector,
 } from "../../../hooks/portfolios/portfolioHooks";
-import {
-  CustomQuery,
-  useGetPricesForIsins,
-  usePriceQuery,
-} from "../../../hooks/prices/priceHooks";
+import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
+import { usePortfolioPriceData } from "../chartHooks";
 import { ChartData } from "../chartTypes";
 import { getDefaultTimeAxis, historiesToChartData } from "../chartUtils";
 
@@ -29,8 +25,7 @@ const useTimeWeightedReturnHistory = (
   portfolioName: string
 ): CustomQuery<History<number>> | undefined =>
   usePortfolioSelector(portfolioName, (portfolio) => {
-    const isins = getIsins(portfolio);
-    const priceMapQuery = useGetPricesForIsins(isins);
+    const priceMapQuery = usePortfolioPriceData(portfolioName);
     const xMin = getFirstOrderTimeStamp(portfolio);
 
     return {
@@ -49,8 +44,7 @@ const usePerformanceBenchmark = (
   isin: string
 ): CustomQuery<History<number>> | undefined => {
   const portfolio = useGetPortfolio(portfolioName);
-  const portfolioStartTime =
-    (portfolio && getFirstOrderTimeStamp(portfolio)) || -Infinity;
+  const portfolioStartTime = getFirstOrderTimeStamp(portfolio) || -Infinity;
   const symbol = useSymbol(isin);
 
   return usePriceQuery(symbol, (priceHistory) => {
