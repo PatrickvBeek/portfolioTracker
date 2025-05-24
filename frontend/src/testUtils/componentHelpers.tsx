@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, renderHook, screen, waitFor } from "@testing-library/react";
 import userEvent, { Options, UserEvent } from "@testing-library/user-event";
 import { ReactElement } from "react";
+import { CustomQuery } from "../hooks/prices/priceHooks";
 import { queryClientConfig } from "../queryClient/config";
 import { UserDataProvider } from "../userDataContext";
 
@@ -64,3 +65,11 @@ export const getTextWithNonBreakingSpaceReplaced = (element: HTMLElement) =>
 
 export const customWaitFor = (handler: () => void): Promise<void> =>
   waitFor(handler, { interval: 10 });
+
+export async function renderAndAwaitQueryHook<T>(
+  hook: () => CustomQuery<T>
+): Promise<CustomQuery<T>> {
+  const { result } = customRenderHook(hook);
+  await customWaitFor(() => expect(result.current.isLoading).toBe(false));
+  return result.current;
+}

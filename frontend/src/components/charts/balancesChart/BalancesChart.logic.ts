@@ -3,6 +3,7 @@ import {
   getBuyValueHistoryForPortfolio,
   getFirstOrderTimeStamp,
   getMarketValueHistory,
+  getProfitHistory,
   getTotalCashFlowHistory,
 } from "pt-domain/src/portfolio/portfolio.derivers";
 import { removeDuplicatesAtSameTimeStamp } from "pt-domain/src/portfolioHistory/history.derivers";
@@ -12,27 +13,66 @@ import {
   useGetPortfolio,
   useGetPortfolioActivity,
 } from "../../../hooks/portfolios/portfolioHooks";
-import { useGetPricesForIsins } from "../../../hooks/prices/priceHooks";
+import { CustomQuery } from "../../../hooks/prices/priceHooks";
+import { usePortfolioPriceData } from "../chartHooks";
 import { ChartDataPoint } from "../chartTypes";
 import { getDefaultTimeAxis, historiesToChartData } from "../chartUtils";
 
-export type PortfolioHistoryDataSets = "buyValue" | "cashFlow" | "marketValue";
+export type BalancesChartDataSets = "buyValue" | "cashFlow" | "marketValue";
 
-export type PortfolioHistoryChartData =
-  ChartDataPoint<PortfolioHistoryDataSets>[];
+export type BalancesChartData = ChartDataPoint<BalancesChartDataSets>[];
 
 export const useGetPortfolioHistoryChartData = (
   portfolioName: string
-): PortfolioHistoryChartData => {
+): CustomQuery<BalancesChartData> => {
   const buyValueHistory = useGetBuyValueHistory(portfolioName);
   const cashFlowHistory = useGetCashFlowHistory(portfolioName);
   const marketValueHistory = useGetMarketValueHistory(portfolioName);
 
-  return historiesToChartData<PortfolioHistoryDataSets>([
-    { history: extendToToday(buyValueHistory), newKey: "buyValue" },
-    { history: extendToToday(cashFlowHistory), newKey: "cashFlow" },
-    { history: marketValueHistory, newKey: "marketValue" },
-  ]);
+  return {
+    isLoading: marketValueHistory.isLoading,
+    isError: marketValueHistory.isError,
+    data: historiesToChartData<BalancesChartDataSets>([
+      { history: extendToToday(buyValueHistory), newKey: "buyValue" },
+      { history: extendToToday(cashFlowHistory), newKey: "cashFlow" },
+      { history: marketValueHistory.data || [], newKey: "marketValue" },
+    ]),
+  };
+};
+
+export const useProfitHistory = (
+  portfolioName: string
+): CustomQuery<History<number>> => {
+  const portfolio = useGetPortfolio(portfolioName);
+  const timeAxis = usePortfolioTimeAxis(portfolioName);
+  const priceQuery = usePortfolioPriceData(portfolioName);
+
+  const profitHistory = getProfitHistory(portfolio, priceQuery.data, timeAxis);
+
+  return {
+    isLoading: priceQuery.isLoading,
+    isError: priceQuery.isError,
+    data: profitHistory,
+  };
+};
+
+const usePortfolioTimeAxis = (portfolioName: string): number[] => {
+  const portfolio = useGetPortfolio(portfolioName);
+  const activity = useGetPortfolioActivity(portfolioName);
+
+  const xMin = getFirstOrderTimeStamp(portfolio);
+
+  if (!xMin) {
+    return [];
+  }
+
+  const portfolioTimestamps = activity.map(getNumericDateTime);
+  return unique(
+    getDefaultTimeAxis(xMin)
+      .concat(portfolioTimestamps)
+      .concat(Date.now())
+      .sort()
+  );
 };
 
 const useGetBuyValueHistory = (portfolioName: string) => {
@@ -50,28 +90,18 @@ const useGetCashFlowHistory = (portfolioName: string) => {
     : [];
 };
 
-const useGetMarketValueHistory = (portfolioName: string): History<number> => {
+const useGetMarketValueHistory = (
+  portfolioName: string
+): CustomQuery<History<number>> => {
   const portfolio = useGetPortfolio(portfolioName);
-  const pricesQuery = useGetPricesForIsins(
-    Object.keys(portfolio?.orders || {})
-  );
-  const activity = useGetPortfolioActivity(portfolioName);
+  const timeAxis = usePortfolioTimeAxis(portfolioName);
+  const priceQuery = usePortfolioPriceData(portfolioName);
 
-  const xMin = portfolio && getFirstOrderTimeStamp(portfolio);
-
-  if (pricesQuery.isLoading || !xMin) {
-    return [];
-  }
-
-  const portfolioTimestamps = activity.map(getNumericDateTime);
-  const xAxis = unique(
-    getDefaultTimeAxis(xMin)
-      .concat(portfolioTimestamps)
-      .concat(Date.now())
-      .sort()
-  );
-
-  return getMarketValueHistory(portfolio, pricesQuery.data, xAxis);
+  return {
+    isLoading: priceQuery.isLoading,
+    isError: priceQuery.isError,
+    data: getMarketValueHistory(portfolio, priceQuery.data, timeAxis),
+  };
 };
 
 const extendToToday = (history: History<number>): History<number> => {

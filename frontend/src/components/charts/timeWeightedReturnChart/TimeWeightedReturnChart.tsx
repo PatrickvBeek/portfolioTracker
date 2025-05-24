@@ -5,13 +5,13 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
 import { Headline } from "../../general/headline/Headline";
+import { ChartContainer } from "../ChartContainer";
 import {
   DEFAULT_LINE_PROPS,
   getAxisProps,
@@ -27,8 +27,9 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
   portfolioName,
 }) => {
   const [benchmark, setBenchmark] = useState("");
-  const chartData =
-    usePerformanceChartData(portfolioName, benchmark).data || [];
+  const { isLoading, data } = usePerformanceChartData(portfolioName, benchmark);
+
+  const chartData = data || [];
 
   return (
     <div>
@@ -41,7 +42,7 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
           filterAssets={(a) => !!a.symbol}
         />
       </div>
-      <ResponsiveContainer aspect={2.5} width={"100%"}>
+      <ChartContainer isLoading={isLoading}>
         <LineChart data={chartData}>
           <Legend />
           <XAxis {...getTimeAxisProps(chartData)} />
@@ -81,7 +82,7 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
             }
           />
         </LineChart>
-      </ResponsiveContainer>
+      </ChartContainer>
     </div>
   );
 };

@@ -4,10 +4,7 @@ import {
   getTestPortfolio,
 } from "pt-domain/src/dataHelpers";
 import { vi } from "vitest";
-import {
-  customRenderHook,
-  customWaitFor,
-} from "../../../testUtils/componentHelpers";
+import { renderAndAwaitQueryHook } from "../../../testUtils/componentHelpers";
 import { setUserData } from "../../../testUtils/localStorage";
 import { getPriceResponse, mockNetwork } from "../../../testUtils/networkMock";
 import { ChartData } from "../chartTypes";
@@ -76,15 +73,27 @@ const { setBackendData } = mockNetwork({ prices: {} });
 
 describe("the hook", () => {
   describe("usePerformanceChartData", () => {
+    it("gracefully handles a non-existing portfolio name", async () => {
+      setBackendData({ prices: getPriceResponse("a", []) });
+
+      const result = await renderAndAwaitQueryHook(() =>
+        usePerformanceChartData("does not exist", "does not exist either")
+      );
+
+      expect(result).toEqual({
+        isError: false,
+        isLoading: false,
+        data: [],
+      });
+    });
+
     it("returns only twr if no benchmark symbol is given", async () => {
       setBackendData({ prices: getPriceResponse("a", []) });
-      const { result } = customRenderHook(() =>
+      const result = await renderAndAwaitQueryHook(() =>
         usePerformanceChartData(portfolio.name, "")
       );
 
-      await customWaitFor(() => expect(result.current.isLoading).toBeFalsy());
-
-      expectChartsAreEqualForKeys(["portfolio"], result.current.data ?? [], [
+      expectChartsAreEqualForKeys(["portfolio"], result.data ?? [], [
         { timestamp: DAY1.getTime(), portfolio: 0 },
         { timestamp: DAY2.getTime(), portfolio: 1 },
         { timestamp: DAY2.getTime(), portfolio: 2 },
@@ -104,15 +113,13 @@ describe("the hook", () => {
           [TODAY, 208],
         ]),
       });
-      const { result } = customRenderHook(() =>
+      const result = await renderAndAwaitQueryHook(() =>
         usePerformanceChartData(portfolio.name, assetLib[BENCHMARK].isin)
       );
 
-      await customWaitFor(() => expect(result.current.isLoading).toBeFalsy());
-
       expectChartsAreEqualForKeys(
         ["portfolio", "benchmark"],
-        result.current.data ?? [],
+        result.data ?? [],
         [
           { timestamp: DAY1.getTime(), benchmark: 0, portfolio: 0 },
           { timestamp: DAY2.getTime(), benchmark: 1, portfolio: 1 },
@@ -131,15 +138,13 @@ describe("the hook", () => {
           [TODAY, 208],
         ]),
       });
-      const { result } = customRenderHook(() =>
+      const result = await renderAndAwaitQueryHook(() =>
         usePerformanceChartData(portfolio.name, assetLib[BENCHMARK].isin)
       );
 
-      await customWaitFor(() => expect(result.current.isLoading).toBeFalsy());
-
       expectChartsAreEqualForKeys(
         ["portfolio", "benchmark"],
-        result.current.data ?? [],
+        result.data ?? [],
         [
           {
             timestamp: DAY3.getTime(),
