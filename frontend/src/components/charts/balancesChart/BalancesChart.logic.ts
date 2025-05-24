@@ -24,16 +24,20 @@ export type BalancesChartData = ChartDataPoint<BalancesChartDataSets>[];
 
 export const useGetPortfolioHistoryChartData = (
   portfolioName: string
-): BalancesChartData => {
+): CustomQuery<BalancesChartData> => {
   const buyValueHistory = useGetBuyValueHistory(portfolioName);
   const cashFlowHistory = useGetCashFlowHistory(portfolioName);
   const marketValueHistory = useGetMarketValueHistory(portfolioName);
 
-  return historiesToChartData<BalancesChartDataSets>([
-    { history: extendToToday(buyValueHistory), newKey: "buyValue" },
-    { history: extendToToday(cashFlowHistory), newKey: "cashFlow" },
-    { history: marketValueHistory, newKey: "marketValue" },
-  ]);
+  return {
+    isLoading: marketValueHistory.isLoading,
+    isError: marketValueHistory.isError,
+    data: historiesToChartData<BalancesChartDataSets>([
+      { history: extendToToday(buyValueHistory), newKey: "buyValue" },
+      { history: extendToToday(cashFlowHistory), newKey: "cashFlow" },
+      { history: marketValueHistory.data || [], newKey: "marketValue" },
+    ]),
+  };
 };
 
 export const useProfitHistory = (
@@ -86,16 +90,18 @@ const useGetCashFlowHistory = (portfolioName: string) => {
     : [];
 };
 
-const useGetMarketValueHistory = (portfolioName: string): History<number> => {
+const useGetMarketValueHistory = (
+  portfolioName: string
+): CustomQuery<History<number>> => {
   const portfolio = useGetPortfolio(portfolioName);
   const timeAxis = usePortfolioTimeAxis(portfolioName);
   const priceQuery = usePortfolioPriceData(portfolioName);
 
-  if (priceQuery.isLoading) {
-    return [];
-  }
-
-  return getMarketValueHistory(portfolio, priceQuery.data, timeAxis);
+  return {
+    isLoading: priceQuery.isLoading,
+    isError: priceQuery.isError,
+    data: getMarketValueHistory(portfolio, priceQuery.data, timeAxis),
+  };
 };
 
 const extendToToday = (history: History<number>): History<number> => {

@@ -8,14 +8,14 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import { ChartContainer } from "../ChartContainer";
 import {
-  DEFAULT_LINE_PROPS,
   calculateGradientOffset,
+  DEFAULT_LINE_PROPS,
   getAxisProps,
   getTimeAxisProps,
 } from "../chartUtils";
@@ -29,14 +29,12 @@ import styles from "./BalancesChart.module.less";
 type ViewMode = "total" | "profitLoss";
 
 const TotalValueChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
-  const chartData = useGetPortfolioHistoryChartData(portfolioName);
+  const { data, isLoading } = useGetPortfolioHistoryChartData(portfolioName);
 
-  if (!chartData.length) {
-    return null;
-  }
+  const chartData = data || [];
 
   return (
-    <ResponsiveContainer aspect={2.5} width={"100%"}>
+    <ChartContainer isLoading={isLoading}>
       <LineChart data={chartData}>
         <Legend />
         <XAxis {...getTimeAxisProps(chartData)} />
@@ -51,12 +49,14 @@ const TotalValueChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
           dataKey={"cashFlow" satisfies BalancesChartDataSets}
           name={"Cash Flow"}
           stroke="var(--theme-highlight)"
+          strokeOpacity={chartData.length ? 1 : 0.5}
         />
         <Line
           {...DEFAULT_LINE_PROPS}
           dataKey={"buyValue" satisfies BalancesChartDataSets}
           name={"Buy Value"}
           stroke="var(--orange)"
+          strokeOpacity={chartData.length ? 1 : 0.5}
         />
         <Line
           {...DEFAULT_LINE_PROPS}
@@ -64,6 +64,7 @@ const TotalValueChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
           name={"Market Value"}
           stroke="var(--green)"
           type={"linear"}
+          strokeOpacity={chartData.length ? 1 : 0.5}
         />
         <Tooltip
           formatter={(value, name) => [
@@ -78,21 +79,19 @@ const TotalValueChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
           }
         />
       </LineChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   );
 };
 
 const ProfitChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
-  const { isLoading, data: chartData } = useProfitHistory(portfolioName);
+  const { isLoading, data } = useProfitHistory(portfolioName);
 
-  if (isLoading || !chartData) {
-    return null;
-  }
+  const chartData = data ?? [];
 
   const offset = calculateGradientOffset(chartData, "value");
 
   return (
-    <ResponsiveContainer aspect={2.5} width={"100%"}>
+    <ChartContainer isLoading={isLoading}>
       <AreaChart data={chartData}>
         <Legend />
         <XAxis {...getTimeAxisProps(chartData)} />
@@ -116,6 +115,7 @@ const ProfitChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
           name="Profit"
           stroke="url(#splitColor)"
           fill="url(#splitColor)"
+          fillOpacity={isLoading ? 0.5 : 1}
         />
         <Tooltip
           formatter={(value, name) => [
@@ -130,7 +130,7 @@ const ProfitChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
           }
         />
       </AreaChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   );
 };
 

@@ -7,7 +7,6 @@ import {
 import { vi } from "vitest";
 import {
   customRenderHook,
-  customWaitFor,
   renderAndAwaitQueryHook,
 } from "../../../testUtils/componentHelpers";
 import { getPriceResponse, mockNetwork } from "../../../testUtils/networkMock";
@@ -39,12 +38,12 @@ describe("useGetPortfolioHistoryChartData", () => {
     moment(d).startOf("day").valueOf()
   );
 
-  it("handles a missing portfolio gracefully", () => {
-    const { result } = customRenderHook(() =>
+  it("handles a missing portfolio gracefully", async () => {
+    const result = await renderAndAwaitQueryHook(() =>
       useGetPortfolioHistoryChartData("I don't exist")
     );
 
-    expect(result.current).toEqual([]);
+    expect(result.data).toEqual([]);
   });
 
   it("retrieves and merges data correctly", async () => {
@@ -99,15 +98,11 @@ describe("useGetPortfolioHistoryChartData", () => {
       })
     );
 
-    const { result } = customRenderHook(() =>
+    const result = renderAndAwaitQueryHook(() =>
       useGetPortfolioHistoryChartData("p1")
     );
 
-    await customWaitFor(() => {
-      expect(result.current[0]).toHaveProperty("marketValue");
-    });
-
-    expect(result.current).toEqual([
+    expect((await result).data).toEqual([
       {
         buyValue: 100,
         cashFlow: 100,
