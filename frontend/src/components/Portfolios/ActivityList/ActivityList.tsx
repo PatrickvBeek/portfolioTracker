@@ -4,7 +4,7 @@ import { isOrder } from "pt-domain/src/activity/activity.derivers";
 import { PortfolioActivity } from "pt-domain/src/activity/activity.entities";
 import { getDividendVolume } from "pt-domain/src/dividendPayouts/dividend.derivers";
 import { getOrderVolume } from "pt-domain/src/order/order.derivers";
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
   useDeleteDividendPayoutFromPortfolio,
@@ -13,15 +13,18 @@ import {
 } from "../../../hooks/portfolios/portfolioHooks";
 import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
+import { Button } from "../../general/Button";
 import CustomTable from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
 import { Headline } from "../../general/headline/Headline";
+import styles from "./ActivityList.module.less";
 
 type ActivityListProps = Props<{
   portfolio: string;
 }>;
 
 function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
+  const [showAll, setShowAll] = useState(false);
   const activity = useGetPortfolioActivity(portfolio);
   const assetsLib = useGetAssets();
   const deleteOrder = useDeleteOrderFromPortfolio(portfolio);
@@ -31,7 +34,9 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
     return null;
   }
 
-  const tableData = activity.reverse();
+  const tableData = showAll
+    ? activity.reverse()
+    : activity.reverse().slice(0, 10);
   const assets = assetsLib;
 
   const columnHelper = createColumnHelper<PortfolioActivity>();
@@ -136,6 +141,12 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
     <div>
       <Headline text={"Portfolio Activity"} />
       <CustomTable columns={defs} data={tableData} />
+      <div className={styles.showAllButton}>
+        <Button
+          onClick={() => setShowAll(!showAll)}
+          label={showAll ? "Show less" : "Show all"}
+        />
+      </div>
     </div>
   );
 }
