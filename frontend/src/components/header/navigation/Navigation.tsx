@@ -1,6 +1,5 @@
-import classNames from "classnames";
+import { Tab, Tabs } from "@mui/material";
 import { FC } from "react";
-import styles from "./Navigation.module.less";
 
 export const Navigation: FC<{
   tabs: string[];
@@ -9,20 +8,41 @@ export const Navigation: FC<{
 }> = ({ tabs, selectedTab, onSelect }) => {
   return (
     <div role={"navigation"}>
-      <div className={styles.tabs} role={"tablist"}>
+      <Tabs
+        value={selectedTab}
+        onChange={(_, tab) => onSelect(tab)}
+        textColor="primary"
+        sx={{
+          "& .MuiTabs-indicator": {
+            display: "none",
+          },
+        }}
+      >
         {tabs.map((tab) => (
-          <div
-            role={"tab"}
-            className={classNames(styles.tab, {
-              [styles.tab_selected]: tab === selectedTab,
-            })}
+          <Tab
+            sx={{
+              color: "var(--theme-tint)",
+              fontWeight: "bold",
+              fontSize: "var(--font-large1)",
+
+              // to make the left icon aligned with the layout width
+              marginLeft: "calc(-1 * var(--default-spacing))",
+
+              ":hover": {
+                color: "white",
+                cursor: "pointer",
+              },
+
+              "&.Mui-selected": {
+                color: "white",
+              },
+            }}
             key={tab}
-            onClick={() => onSelect(tab)}
-          >
-            {tab}
-          </div>
+            label={tab}
+            value={tab}
+          />
         ))}
-      </div>
+      </Tabs>
     </div>
   );
 };

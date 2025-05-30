@@ -1,5 +1,4 @@
 import { Tab, Tabs } from "@mui/material";
-import React from "react";
 
 type SelectionHeaderProps<T> = {
   entries: string[];
@@ -13,14 +12,12 @@ const SelectionHeader = <T extends string>({
   selectedEntry,
   setSelectedEntry,
 }: SelectionHeaderProps<T>) => {
-  const handleChange = (_: React.SyntheticEvent, newValue: T) => {
-    setSelectedEntry(newValue);
-  };
-
   return (
     <Tabs
       value={selectedEntry}
-      onChange={handleChange}
+      onChange={(_, newValue) => {
+        setSelectedEntry(newValue);
+      }}
       indicatorColor="primary"
       textColor="primary"
       variant="scrollable"

@@ -12,6 +12,7 @@
 
 .portfolios__header {
   grid-area: header;
+  border-bottom: #aaa solid 1px;
 }
 
 .portfolios__side-bar {

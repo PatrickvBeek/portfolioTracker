@@ -1,3 +1,4 @@
+import { AppBar, Stack } from "@mui/material";
 import { FC, ReactElement } from "react";
 import { ApiKeys } from "./apiKeys/ApiKeys";
 import styles from "./Header.module.less";
@@ -10,14 +11,14 @@ export const Header: FC<{
   selectedTab: string;
   onSelect: (s: string) => void;
 }> = ({ tabs, selectedTab, onSelect }): ReactElement => (
-  <div className={styles.container}>
+  <AppBar position="sticky">
     <div className={styles.content}>
       <Navigation tabs={tabs} selectedTab={selectedTab} onSelect={onSelect} />
-      <div className={styles.controls}>
+      <Stack spacing={1} direction={"row"}>
         <ApiKeys />
         <DataExport />
         <DataImport />
-      </div>
+      </Stack>
     </div>
-  </div>
+  </AppBar>
 );

@@ -21,7 +21,6 @@ const theme = createTheme({
     MuiTabs: {
       styleOverrides: {
         root: {
-          borderBottom: "#aaa solid 1px",
           alignItems: "flex-end",
           display: "flex",
           minHeight: "2rem",
