@@ -1,12 +1,5 @@
-.order-input-form {
-  display: flex;
-  flex-direction: column;
-}
-
 .order-input-form__asset {
-  grid-area: asset;
   margin-bottom: var(--default-spacing);
-  margin-top: var(--default-spacing);
 }
 
 .order-input-form__button {

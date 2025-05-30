@@ -1,40 +1,35 @@
-import { bemHelper } from "../../utility/bemHelper";
-import { Props } from "../../utility/types";
-import "./SelectionHeader.css";
+import { Tab, Tabs } from "@mui/material";
+import React from "react";
 
-const { bemBlock, bemElement } = bemHelper("selection-header");
-
-type SelectionHeaderProps = Props<{
+type SelectionHeaderProps<T> = {
   entries: string[];
   selectedEntry: string;
-  setSelectedEntry: (e: string) => void;
+  setSelectedEntry: (e: T) => void;
   descriptor?: string;
-}>;
+};
 
-const SelectionHeader = ({
+const SelectionHeader = <T extends string>({
   entries,
   selectedEntry,
   setSelectedEntry,
-  className,
-}: SelectionHeaderProps) => {
+}: SelectionHeaderProps<T>) => {
+  const handleChange = (_: React.SyntheticEvent, newValue: T) => {
+    setSelectedEntry(newValue);
+  };
+
   return (
-    <div className={bemBlock(className)} role={"tablist"}>
-      {entries.map((entry) => {
-        const isSelected = selectedEntry === entry;
-        return (
-          <span
-            key={entry}
-            role={"tab"}
-            className={bemElement("element", {
-              selected: isSelected,
-            })}
-            onClick={() => setSelectedEntry(entry)}
-          >
-            {entry}
-          </span>
-        );
-      })}
-    </div>
+    <Tabs
+      value={selectedEntry}
+      onChange={handleChange}
+      indicatorColor="primary"
+      textColor="primary"
+      variant="scrollable"
+      scrollButtons="auto"
+    >
+      {entries.map((entry) => (
+        <Tab key={entry} label={entry} value={entry} />
+      ))}
+    </Tabs>
   );
 };
 
