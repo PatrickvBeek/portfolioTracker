@@ -87,7 +87,7 @@ export const DEFAULT_LINE_PROPS = {
   dot: false,
   type: "stepAfter",
   connectNulls: true,
-  strokeWidth: 3,
+  strokeWidth: 2,
   animationDuration: 300,
 } as const;
 

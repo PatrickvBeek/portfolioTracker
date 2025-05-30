@@ -1,10 +1,10 @@
 import moment from "moment";
 import { FC, useState } from "react";
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   Tooltip,
   XAxis,
   YAxis,
@@ -12,6 +12,7 @@ import {
 import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
 import { Headline } from "../../general/headline/Headline";
 import { ChartContainer } from "../ChartContainer";
+import { getSplitColorGradientDef } from "../chartElements";
 import {
   DEFAULT_LINE_PROPS,
   getAxisProps,
@@ -31,6 +32,11 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
 
   const chartData = data || [];
 
+  const { gradientDefinition, fillUrl, strokeUrl } = getSplitColorGradientDef(
+    chartData,
+    "portfolio"
+  );
+
   return (
     <div>
       <div className={styles.header}>
@@ -43,7 +49,7 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
         />
       </div>
       <ChartContainer isLoading={isLoading}>
-        <LineChart data={chartData}>
+        <AreaChart data={chartData}>
           <Legend />
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis
@@ -52,21 +58,25 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
             unit={" %"}
           />
           <CartesianGrid stroke="#ccc" />
-          <Line
+          {gradientDefinition}
+          <Area
             {...DEFAULT_LINE_PROPS}
             type={"linear"}
             dataKey={"portfolio" satisfies PerformanceChartDataSets}
             name={"Your Portfolio"}
-            stroke="var(--theme-highlight)"
+            stroke={strokeUrl}
+            fill={fillUrl}
+            fillOpacity={1}
           />
           {benchmark ? (
-            <Line
+            <Area
               {...DEFAULT_LINE_PROPS}
               type={"linear"}
               dataKey={"benchmark" satisfies PerformanceChartDataSets}
               name={"Benchmark"}
               strokeOpacity={0.55}
               stroke="grey"
+              fillOpacity={0}
             />
           ) : null}
           <Tooltip
@@ -81,7 +91,7 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
               moment(new Date(value)).format("ddd DD.MM.YYYY")
             }
           />
-        </LineChart>
+        </AreaChart>
       </ChartContainer>
     </div>
   );

@@ -13,8 +13,8 @@ import {
   YAxis,
 } from "recharts";
 import { ChartContainer } from "../ChartContainer";
+import { getSplitColorGradientDef } from "../chartElements";
 import {
-  calculateGradientOffset,
   DEFAULT_LINE_PROPS,
   getAxisProps,
   getTimeAxisProps,
@@ -88,7 +88,10 @@ const ProfitChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
 
   const chartData = data ?? [];
 
-  const offset = calculateGradientOffset(chartData, "value");
+  const { fillUrl, strokeUrl, gradientDefinition } = getSplitColorGradientDef(
+    chartData,
+    "value"
+  );
 
   return (
     <ChartContainer isLoading={isLoading}>
@@ -101,21 +104,16 @@ const ProfitChart: FC<{ portfolioName: string }> = ({ portfolioName }) => {
           unit={" k€"}
         />
         <CartesianGrid stroke="#ccc" />
-        <defs>
-          <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
-            <stop offset={offset} stopColor="var(--green)" stopOpacity={1} />
-            <stop offset={offset} stopColor="var(--red)" stopOpacity={1} />
-          </linearGradient>
-        </defs>
+        {gradientDefinition}
         <Area
           {...DEFAULT_LINE_PROPS}
           strokeWidth={2}
           type="linear"
           dataKey={"value"}
           name="Profit"
-          stroke="url(#splitColor)"
-          fill="url(#splitColor)"
-          fillOpacity={isLoading ? 0.5 : 1}
+          stroke={strokeUrl}
+          fill={fillUrl}
+          fillOpacity={1}
         />
         <Tooltip
           formatter={(value, name) => [
