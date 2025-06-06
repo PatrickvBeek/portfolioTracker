@@ -283,7 +283,7 @@ export const PositionsList = ({
 }: PositionsListProps) => {
   return (
     <div className={bemBlock(className)}>
-      <Headline text={headline} />
+      <Headline text={headline} className={bemElement("headline")} />
       <CustomTable
         key={portfolioName}
         data={items}

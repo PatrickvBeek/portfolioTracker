@@ -139,7 +139,7 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
 
   return (
     <div>
-      <Headline text={"Portfolio Activity"} />
+      <Headline text={"Portfolio Activity"} className={styles.headline} />
       <CustomTable columns={defs} data={tableData} />
       <div className={styles.showAllButton}>
         <Button

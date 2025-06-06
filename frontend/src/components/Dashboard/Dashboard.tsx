@@ -36,7 +36,7 @@ const Dashboard = () => {
   return (
     <div className={styles.container}>
       <div>
-        <Headline text={"Included Portfolios"} />
+        <Headline text={"Included Portfolios"} className={styles.headline} />
         <div className={styles.portfolioSelection}>
           {portfolioNames.map((name) => (
             <Chip
