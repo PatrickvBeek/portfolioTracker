@@ -1,0 +1,33 @@
+@import "../../../definitions.less";
+
+.overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: @default-border-radius;
+  padding: @default-spacing;
+  max-width: 80%;
+  margin: 0 @default-spacing;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: @default-spacing;
+}
+
+.title {
+  font-size: @font-large1;
+  font-weight: 500;
+}
+
+.closeButton {
+  cursor: pointer;
+}
+
+.body {
+  padding-top: @default-spacing;
+}
