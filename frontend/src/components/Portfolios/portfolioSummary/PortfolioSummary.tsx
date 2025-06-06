@@ -27,7 +27,7 @@ export const PortfolioSummary: FC<{ portfolioName: string }> = ({
 
   return (
     <div>
-      <Headline text={"Summary"} />
+      <Headline text={"Summary"} className={styles.headline} />
       <div className={styles.tiles}>
         <SummaryTile
           title={"Balances"}
