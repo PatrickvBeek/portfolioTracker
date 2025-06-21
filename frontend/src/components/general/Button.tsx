@@ -1,8 +1,8 @@
-import { ReactElement } from "react";
-import { bemHelper } from "../../utility/bemHelper";
-import "./Button.css";
-
-const { bemBlock } = bemHelper("button");
+import {
+  Button as MuiButton,
+  ButtonProps as MuiButtonProps,
+} from "@mui/material";
+import { ReactElement, forwardRef } from "react";
 
 export interface ButtonProps {
   onClick: () => void;
@@ -13,25 +13,43 @@ export interface ButtonProps {
   autoFocus?: boolean;
 }
 
-export const Button = ({
-  onClick,
-  label,
-  isDisabled,
-  isPrimary,
-  className,
-  autoFocus,
-}: ButtonProps): ReactElement => {
-  return (
-    <button
-      className={bemBlock(className, {
-        [`primary${isDisabled ? "-disabled" : ""}`]: isPrimary,
-        [`secondary${isDisabled ? "-disabled" : ""}`]: !isPrimary,
-      })}
-      onClick={onClick}
-      disabled={isDisabled}
-      autoFocus={autoFocus}
-    >
-      {label}
-    </button>
-  );
-};
+interface ExtendedButtonProps
+  extends ButtonProps,
+    Omit<
+      MuiButtonProps,
+      | "onClick"
+      | "disabled"
+      | "children"
+      | "variant"
+      | "className"
+      | "autoFocus"
+    > {}
+
+export const Button = forwardRef<HTMLButtonElement, ExtendedButtonProps>(
+  (
+    {
+      onClick,
+      label,
+      isDisabled,
+      isPrimary,
+      className,
+      autoFocus,
+      ...muiProps
+    },
+    ref
+  ): ReactElement => {
+    return (
+      <MuiButton
+        ref={ref}
+        variant={isPrimary ? "contained" : "outlined"}
+        onClick={onClick}
+        disabled={isDisabled}
+        className={className}
+        autoFocus={autoFocus}
+        {...muiProps}
+      >
+        {label}
+      </MuiButton>
+    );
+  }
+);

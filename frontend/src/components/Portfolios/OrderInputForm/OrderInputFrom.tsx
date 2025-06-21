@@ -121,6 +121,7 @@ export function OrderInputForm({
         </div>
       </div>
       <Button
+        sx={{ marginTop: "1rem" }}
         className={bemElement("button")}
         onClick={submitHandler}
         label={"Submit"}
