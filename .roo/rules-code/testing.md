@@ -1,3 +1,5 @@
 - this repository uses vitest for testing. Never use any other test runner when writing tests
 - when testing react components, use the react testing library. This repo provides testing utils in frontend/src/testUtils.
-- when you want to run tests unit test in either of the sub projects (frontend or domain), you can use the command 'npx vitest run <path/to/file>' from the root folder of the sub project.
+  - the util 'customRender' in 'componentHelper.tsx' returns the initialized 'user' object that can be used to simulate user interactions
+  - when creating queries with the react testing library, always stick to best practices and follow the recommended priority for queries; if necessary, improve the component's implementation to facilitate better accessibility and easier testing.
+- when you want to run unit test in either of the sub projects (frontend or domain), you can use the command 'yarn vitest run <path/to/file>' from the root folder of the sub project.

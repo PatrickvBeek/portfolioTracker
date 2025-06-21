@@ -4,11 +4,13 @@ import { isOrder } from "pt-domain/src/activity/activity.derivers";
 import { PortfolioActivity } from "pt-domain/src/activity/activity.entities";
 import { getDividendVolume } from "pt-domain/src/dividendPayouts/dividend.derivers";
 import { getOrderVolume } from "pt-domain/src/order/order.derivers";
+import { canDeleteActivity } from "pt-domain/src/portfolio/portfolio.validation";
 import { ReactElement, useState } from "react";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
   useDeleteDividendPayoutFromPortfolio,
   useDeleteOrderFromPortfolio,
+  useGetPortfolio,
   useGetPortfolioActivity,
 } from "../../../hooks/portfolios/portfolioHooks";
 import { toPrice } from "../../../utility/prices";
@@ -17,6 +19,7 @@ import { Button } from "../../general/Button";
 import CustomTable from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
 import { Headline } from "../../general/headline/Headline";
+import { InvalidDeletionDialog } from "../InvalidDeletionDialog/InvalidDeletionDialog";
 import styles from "./ActivityList.module.less";
 
 type ActivityListProps = Props<{
@@ -25,14 +28,30 @@ type ActivityListProps = Props<{
 
 function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
   const [showAll, setShowAll] = useState(false);
+  const [showInvalidDeletionDialog, setShowInvalidDeletionDialog] =
+    useState(false);
   const activity = useGetPortfolioActivity(portfolio);
+  const portfolioData = useGetPortfolio(portfolio);
   const assetsLib = useGetAssets();
   const deleteOrder = useDeleteOrderFromPortfolio(portfolio);
   const deleteDividendPayout = useDeleteDividendPayoutFromPortfolio(portfolio);
 
-  if (!activity || !assetsLib) {
+  if (!activity || !assetsLib || !portfolioData) {
     return null;
   }
+
+  const handleDeleteActivity = (activity: PortfolioActivity) => {
+    if (!canDeleteActivity(portfolioData, activity)) {
+      setShowInvalidDeletionDialog(true);
+      return;
+    }
+
+    if (isOrder(activity)) {
+      deleteOrder(activity);
+    } else {
+      deleteDividendPayout(activity);
+    }
+  };
 
   const tableData = showAll
     ? activity.reverse()
@@ -121,11 +140,7 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
         const activity = props.getValue();
         return (
           <DeleteButtonWithConfirmation
-            deleteHandler={() =>
-              isOrder(activity)
-                ? deleteOrder(activity)
-                : deleteDividendPayout(activity)
-            }
+            deleteHandler={() => handleDeleteActivity(activity)}
             title={"Delete Activity?"}
             body={`Are you sure you want to delete this activity?`}
           />
@@ -147,6 +162,10 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
           label={showAll ? "Show less" : "Show all"}
         />
       </div>
+      <InvalidDeletionDialog
+        open={showInvalidDeletionDialog}
+        onClose={() => setShowInvalidDeletionDialog(false)}
+      />
     </div>
   );
 }
