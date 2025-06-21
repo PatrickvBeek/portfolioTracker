@@ -1,15 +1,16 @@
-import { Tab, Tabs } from "@mui/material";
+import { Stack } from "@mui/material";
 import { ReactElement, useState } from "react";
 import { Props } from "../../../utility/types";
 import { Headline } from "../../general/headline/Headline";
+import SelectionHeader from "../../general/SelectionHeader";
 import { OrderInputForm } from "../OrderInputForm/OrderInputFrom";
 import DividendForm from "./DividendForm/DividendForm";
 
 type PortfolioFormSideBarProps = Props<{ portfolioName: string }>;
 
 const FORM = {
-  ORDER: "order",
-  DIVIDEND: "dividend",
+  ORDER: "Order",
+  DIVIDEND: "Dividend",
 } as const;
 type Forms = (typeof FORM)[keyof typeof FORM];
 
@@ -19,25 +20,24 @@ function PortfolioFormSideBar({
   const [tab, setTab] = useState<Forms>(FORM.ORDER);
 
   return (
-    <div>
+    <Stack spacing={1}>
       <Headline text={"Add Data to Portfolio"}></Headline>
-      <Tabs
-        value={tab}
-        onChange={(_, tab) => setTab(tab)}
-        sx={{
-          borderBottom: "solid 1px #aaa",
-        }}
-      >
-        <Tab label={"Order"} value={FORM.ORDER} />
-        <Tab label={"Dividend"} value={FORM.DIVIDEND} />
-      </Tabs>
+      <Stack direction="row" justifyContent="center">
+        <SelectionHeader
+          entries={[FORM.ORDER, FORM.DIVIDEND]}
+          selectedEntry={tab}
+          setSelectedEntry={(newValue: Forms) => {
+            setTab(newValue);
+          }}
+        />
+      </Stack>
 
       {tab === FORM.ORDER ? (
         <OrderInputForm portfolioName={portfolioName} />
       ) : (
         <DividendForm portfolioName={portfolioName} />
       )}
-    </div>
+    </Stack>
   );
 }
 

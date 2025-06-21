@@ -1,8 +1,7 @@
-import { ReactElement, useCallback, useEffect } from "react";
-import { bemHelper } from "../../../utility/bemHelper";
-import "./Overlay.css";
-
-const { bemBlock, bemElement } = bemHelper("overlay");
+import CloseIcon from "@mui/icons-material/Close";
+import { Box, IconButton, Modal, Typography } from "@mui/material";
+import { ReactElement } from "react";
+import styles from "./Overlay.module.less";
 
 export interface OverlayProps {
   onClose: () => void;
@@ -11,33 +10,24 @@ export interface OverlayProps {
 }
 
 const Overlay = ({ onClose, children, title }: OverlayProps) => {
-  const handleEsc = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    },
-    [onClose]
-  );
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleEsc, false);
-  });
-
   return (
-    <div className={bemBlock("")}>
-      <div className={bemElement("background")}>
-        <div className={bemElement("content")} role={"dialog"}>
-          <div className={bemElement("header")}>
-            <span className={bemElement("title")}>{title}</span>
-            <span className={bemElement("close-button")} onClick={onClose}>
-              <i className="fa fa-times" />
-            </span>
-          </div>
-          <div className={bemElement("body")}>{children}</div>
-        </div>
-      </div>
-    </div>
+    <Modal open={true} onClose={onClose}>
+      <Box className={styles.overlay} role="dialog">
+        <Box className={styles.header}>
+          <Typography variant="h6" component="span" className={styles.title}>
+            {title}
+          </Typography>
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            className={styles.closeButton}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Box className={styles.body}>{children}</Box>
+      </Box>
+    </Modal>
   );
 };
 

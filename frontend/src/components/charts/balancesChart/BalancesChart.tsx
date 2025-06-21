@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Headline } from "../../general/headline/Headline";
 import { ChartContainer } from "../ChartContainer";
 import { getSplitColorGradientDef } from "../chartElements";
 import {
@@ -149,7 +150,7 @@ export const PortfolioBalancesChart: FC<{ portfolioName: string }> = ({
   return (
     <div className={styles.container}>
       <div className={styles.headingContainer}>
-        <div className={styles.heading}>Balances</div>
+        <Headline text={"Balances"} />
         <ToggleButtonGroup
           value={viewMode}
           exclusive

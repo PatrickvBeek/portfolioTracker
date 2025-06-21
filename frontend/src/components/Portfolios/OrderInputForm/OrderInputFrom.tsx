@@ -1,3 +1,4 @@
+import { Stack } from "@mui/material";
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
 import { useAddOrderToPortfolio } from "../../../hooks/portfolios/portfolioHooks";
@@ -14,7 +15,7 @@ import {
 import "./OrderInputForm.css";
 import { useOrderValidation } from "./OrderInputForm.logic";
 
-const { bemBlock, bemElement } = bemHelper("order-input-form");
+const { bemElement } = bemHelper("order-input-form");
 
 export type OrderInputFormProps = Props<{
   portfolioName: string;
@@ -30,7 +31,6 @@ const DEFAULTS = {
 };
 
 export function OrderInputForm({
-  className,
   portfolioName,
 }: OrderInputFormProps): ReactElement {
   const [isin, setAssetIsin] = useState(DEFAULTS.isin);
@@ -69,7 +69,7 @@ export function OrderInputForm({
   };
 
   return (
-    <div className={bemBlock(className)} data-testid={"order-input-form"}>
+    <Stack>
       <AssetDropdown
         className={bemElement("asset")}
         onChange={(isin) => setAssetIsin(isin || DEFAULTS.isin)}
@@ -121,6 +121,7 @@ export function OrderInputForm({
         </div>
       </div>
       <Button
+        sx={{ marginTop: "1rem" }}
         className={bemElement("button")}
         onClick={submitHandler}
         label={"Submit"}
@@ -136,7 +137,7 @@ export function OrderInputForm({
           }}
         />
       )}
-    </div>
+    </Stack>
   );
 }
 

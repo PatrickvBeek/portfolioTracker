@@ -1,0 +1,6 @@
+- Try to use Material UI components when applicable
+- When you need to apply custom styling to tags, don't use inline styling. Use Less modules instead. The naming convention is <ComponentName>.module.less
+- When you encounter a component that uses 'bemHelper' together with a .css file, consider this as a deprecated pattern. This should be replaced by a css module (using less)
+- When adding styles to .less files, consider using predefined values from the file frontend/src/definitions.less
+- Don't put extensive logic for data handling into components, but offload that to custom hooks. Hooks that are likely only to be used by a single component, should go into a logic file. The naming convention is <ComponentName>.logic.ts
+- The domain logic of this project is located the folder 'domain'. Keep the domain logic as much as possible out of the react-related code in 'frontend'. Therefore, the custom react hooks should offload intricate calculations to the util functions in the domain folder

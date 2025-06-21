@@ -1,0 +1,3 @@
+- this repository uses vitest for testing. Never use any other test runner when writing tests
+- when testing react components, use the react testing library. This repo provides testing utils in frontend/src/testUtils.
+- when you want to run tests unit test in either of the sub projects (frontend or domain), you can use the command 'npx vitest run <path/to/file>' from the root folder of the sub project.

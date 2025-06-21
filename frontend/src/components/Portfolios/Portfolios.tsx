@@ -50,7 +50,6 @@ function Portfolios({ className }: PortfolioProps) {
           entries={Object.keys(portfolioLib)}
           selectedEntry={selectedPortfolio}
           setSelectedEntry={setSelectedPortfolio}
-          className={bemElement("portfolio-selection")}
         />
       </div>
       <div className={bemElement("content")}>

@@ -12,6 +12,7 @@
 
 .portfolios__header {
   grid-area: header;
+  border-bottom: #aaa solid 1px;
 }
 
 .portfolios__side-bar {
@@ -27,15 +28,8 @@
   gap: var(--triple-spacing);
 }
 
-.portfolios__portfolio-selection {
-  font-size: var(--font-large1);
-  width: 100%;
-}
-
 .portfolios__order-side-bar {
   grid-area: orderSideBar;
-  display: flex;
-  flex-direction: column;
   position: sticky;
   top: 4rem;
   height: fit-content;
