@@ -1,3 +1,4 @@
+import { IconButton } from "@mui/material";
 import { ReactElement, useState } from "react";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
@@ -17,10 +18,14 @@ function DeleteButtonWithConfirmation({
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className={bemBlock("")}>
-      <i
-        className={"fa fa-trash " + bemElement("button")}
+      <IconButton
+        size={"small"}
+        className={bemElement("button")}
         onClick={() => setIsOpen(true)}
-      ></i>
+        aria-label="Delete"
+      >
+        <i className="fa fa-trash"></i>
+      </IconButton>
       {isOpen && (
         <Confirmation
           title={title}
