@@ -1,10 +1,12 @@
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import moment from "moment";
-import { isOrder } from "pt-domain/src/activity/activity.derivers";
-import { PortfolioActivity } from "pt-domain/src/activity/activity.entities";
-import { getDividendVolume } from "pt-domain/src/dividendPayouts/dividend.derivers";
-import { getOrderVolume } from "pt-domain/src/order/order.derivers";
-import { canDeleteActivity } from "pt-domain/src/portfolio/portfolio.validation";
+import {
+  canDeleteActivity,
+  getDividendVolume,
+  getOrderVolume,
+  isOrder,
+  PortfolioActivity,
+} from "pt-domain";
 import { ReactElement, useState } from "react";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {

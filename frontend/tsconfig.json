@@ -16,9 +16,12 @@
     "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "pt-domain": ["../domain/src"],
+      "pt-domain/*": ["../domain/src/*"]
+    }
   },
   "include": ["src", "types"],
   "types": ["node", "@testing-library/jest-dom", "vitest/globals"]
 }
-// "exclude": ["**/*.test.*", "**/__mocks__/*", "**/__tests__/*"],

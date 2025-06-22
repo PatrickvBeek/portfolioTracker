@@ -1,5 +1,5 @@
-import { BatchType } from "pt-domain/src/batch/batch.entities";
 import {
+  BatchType,
   getAssetsForBatchType,
   getCurrentValueOfOpenBatches,
   getLatestPriceFromTransactions,
@@ -7,7 +7,7 @@ import {
   getPiecesOfIsinInPortfolio,
   getRealizedGainsForIsin,
   getSoldValueOfClosedBatches,
-} from "pt-domain/src/portfolio/portfolio.derivers";
+} from "pt-domain";
 import { sort, sum } from "radash";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { useCurrentPriceByIsin } from "../../../hooks/prices/priceHooks";

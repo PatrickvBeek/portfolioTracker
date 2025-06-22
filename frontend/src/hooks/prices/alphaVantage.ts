@@ -1,4 +1,4 @@
-import { History } from "pt-domain/src/portfolioHistory/history.entities";
+import { History } from "pt-domain";
 
 export const getPricesFromAlphaVantage = async (
   symbol: string

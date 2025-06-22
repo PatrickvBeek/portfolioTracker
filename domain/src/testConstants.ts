@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { v4 as uuidv4 } from "uuid";
 import { Portfolio, PortfolioLibrary } from "./portfolio/portfolio.entities";
 
 export const TEST_ASSET_TESLA = {
@@ -16,7 +16,7 @@ export const TEST_ASSET_LIB = {
 };
 
 export const TEST_ORDER_TESLA = {
-  uuid: randomUUID(),
+  uuid: uuidv4(),
   asset: TEST_ASSET_TESLA.isin,
   sharePrice: 100,
   orderFee: 1,
@@ -26,7 +26,7 @@ export const TEST_ORDER_TESLA = {
 };
 
 export const TEST_ORDER_1_GOOGLE = {
-  uuid: randomUUID(),
+  uuid: uuidv4(),
   asset: TEST_ASSET_GOOGLE.isin,
   sharePrice: 100,
   orderFee: 1,
@@ -36,7 +36,7 @@ export const TEST_ORDER_1_GOOGLE = {
 };
 
 export const TEST_ORDER_2_GOOGLE = {
-  uuid: randomUUID(),
+  uuid: uuidv4(),
   asset: TEST_ASSET_GOOGLE.isin,
   sharePrice: 105,
   orderFee: 1,

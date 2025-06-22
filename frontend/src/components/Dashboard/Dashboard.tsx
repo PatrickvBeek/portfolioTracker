@@ -1,5 +1,5 @@
 import { Chip } from "@mui/material";
-import { toCompoundPortfolioName } from "pt-domain/src/utils/portfolioUtils";
+import { toCompoundPortfolioName } from "pt-domain";
 import { useState } from "react";
 import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
