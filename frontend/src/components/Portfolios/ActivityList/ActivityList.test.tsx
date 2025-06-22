@@ -1,11 +1,12 @@
 import { screen } from "@testing-library/react";
-import { Asset, AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
+  Asset,
+  AssetLibrary,
   getElementsByIsin,
   getElementsGroupedByAsset,
   getTestOrder,
-} from "pt-domain/src/dataHelpers";
-import { Portfolio } from "pt-domain/src/portfolio/portfolio.entities";
+  Portfolio,
+} from "pt-domain";
 import { describe, expect, it } from "vitest";
 import {
   customRender,

@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { getElementsByIsin } from "pt-domain/src/dataHelpers";
+import { getElementsByIsin } from "pt-domain";
 import { vi } from "vitest";
 import { customRender } from "../../../testUtils/componentHelpers";
 import AssetSelect from "./AssetSelect";

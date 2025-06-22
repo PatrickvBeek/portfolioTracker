@@ -1,8 +1,5 @@
 import moment from "moment";
-import {
-  getTestOrdersGroupedByAsset,
-  getTestPortfolio,
-} from "pt-domain/src/dataHelpers";
+import { getTestOrdersGroupedByAsset, getTestPortfolio } from "pt-domain";
 import { vi } from "vitest";
 import { renderAndAwaitQueryHook } from "../../../testUtils/componentHelpers";
 import { setUserData } from "../../../testUtils/localStorage";
