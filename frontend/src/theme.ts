@@ -38,6 +38,7 @@ const theme = createTheme({
           fontWeight: 800,
           textTransform: "none",
           minWidth: "auto",
+          lineHeight: "unset",
         },
         containedPrimary: {
           backgroundColor: colors.primaryHighlight,
