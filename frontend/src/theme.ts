@@ -38,6 +38,7 @@ const theme = createTheme({
           fontWeight: 800,
           textTransform: "none",
           minWidth: "auto",
+          lineHeight: "unset",
         },
         containedPrimary: {
           backgroundColor: colors.primaryHighlight,
@@ -65,6 +66,28 @@ const theme = createTheme({
             border: `2px solid ${colors.primaryTint}`,
             color: colors.primaryTint,
           },
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          padding: "1.0rem",
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          padding: "1.0rem",
+        },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          padding: "1.0rem",
+          paddingTop: "0",
         },
       },
     },

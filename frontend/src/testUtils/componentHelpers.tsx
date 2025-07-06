@@ -1,3 +1,4 @@
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, renderHook, screen, waitFor } from "@testing-library/react";
 import userEvent, { Options, UserEvent } from "@testing-library/user-event";
@@ -6,15 +7,28 @@ import { CustomQuery } from "../hooks/prices/priceHooks";
 import { queryClientConfig } from "../queryClient/config";
 import { UserDataProvider } from "../userDataContext";
 
+// Create a test theme that disables ripple effects to prevent act() warnings
+const testTheme = createTheme({
+  components: {
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
+  },
+});
+
 export function customRenderHook<T>(hookCallback: () => T) {
   const queryClient = new QueryClient(queryClientConfig);
   return renderHook(hookCallback, {
     wrapper: ({ children }) => (
-      <UserDataProvider>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      </UserDataProvider>
+      <ThemeProvider theme={testTheme}>
+        <UserDataProvider>
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        </UserDataProvider>
+      </ThemeProvider>
     ),
   });
 }
@@ -29,11 +43,13 @@ export function customRender({
   const queryClient = new QueryClient(queryClientConfig);
   const user = userEvent.setup(userEventOptions);
   const renderResult = render(
-    <UserDataProvider>
-      <QueryClientProvider client={queryClient}>
-        {component}
-      </QueryClientProvider>
-    </UserDataProvider>
+    <ThemeProvider theme={testTheme}>
+      <UserDataProvider>
+        <QueryClientProvider client={queryClient}>
+          {component}
+        </QueryClientProvider>
+      </UserDataProvider>
+    </ThemeProvider>
   );
 
   return {
