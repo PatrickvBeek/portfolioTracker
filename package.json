@@ -15,7 +15,7 @@
     "prettier": "^3.3.2"
   },
   "devDependencies": {
-    "dependency-cruiser": "^16.2.4",
+    "dependency-cruiser": "^16.10.4",
     "syncpack": "^13.0.4"
   },
   "prettier": {
