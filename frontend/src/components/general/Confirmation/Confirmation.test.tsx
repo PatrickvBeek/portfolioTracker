@@ -5,6 +5,7 @@ import Confirmation, { ConfirmationProps } from "./Confirmation";
 
 describe("the confirmation component", () => {
   const PROPS: ConfirmationProps = {
+    open: true,
     title: "test title",
     body: "something evil will happen, do you want to continue?",
     confirmLabel: "yeah!",

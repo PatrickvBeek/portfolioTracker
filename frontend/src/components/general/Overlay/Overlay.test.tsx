@@ -7,20 +7,20 @@ describe("the Overlay component", () => {
   const onClose = vi.fn();
 
   it("can be rendered with default props", () => {
-    render(<Overlay onClose={onClose} />);
+    render(<Overlay open={true} onClose={onClose} />);
     const overlay = screen.getByRole("dialog");
     expect(overlay).toBeInTheDocument();
   });
 
   it("renders the title if provided", () => {
-    render(<Overlay onClose={onClose} title="Test Title" />);
+    render(<Overlay open={true} onClose={onClose} title="Test Title" />);
     const title = screen.getByText("Test Title");
     expect(title).toBeInTheDocument();
   });
 
   it("renders children if provided", () => {
     render(
-      <Overlay onClose={onClose}>
+      <Overlay open={true} onClose={onClose}>
         <p>Test Child</p>
       </Overlay>
     );
@@ -29,14 +29,16 @@ describe("the Overlay component", () => {
   });
 
   it("calls onClose when close button is clicked", () => {
-    render(<Overlay onClose={onClose} />);
+    render(<Overlay open={true} onClose={onClose} />);
     const closeButton = screen.getByLabelText("close");
     closeButton.click();
     expect(onClose).toHaveBeenCalled();
   });
 
   it("calls onClose when ESC key is pressed", () => {
-    const { user } = customRender({ component: <Overlay onClose={onClose} /> });
+    const { user } = customRender({
+      component: <Overlay open={true} onClose={onClose} />,
+    });
     user.keyboard("Escape");
     expect(onClose).toHaveBeenCalled();
   });

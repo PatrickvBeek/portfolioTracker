@@ -23,28 +23,27 @@ export const ApiKeys: FC = ({}) => {
           onClick={() => setIsOverlayOpen(true)}
         />
       </Tooltip>
-      {isOverlayOpen && (
-        <Overlay
-          onClose={() => setIsOverlayOpen(false)}
-          title={"Manage API Keys"}
-        >
-          <div className={styles.form}>
-            <TextInput
-              label={"Yahoo Finance API Key"}
-              text={yahooKey}
-              onChange={(e) => setYahooKey(e.target.value)}
-            ></TextInput>
-            <Button
-              onClick={() => {
-                submitYahooKey(yahooKey);
-                setIsOverlayOpen(false);
-              }}
-              label={"Submit"}
-              isPrimary
-            />
-          </div>
-        </Overlay>
-      )}
+      <Overlay
+        open={isOverlayOpen}
+        onClose={() => setIsOverlayOpen(false)}
+        title={"Manage API Keys"}
+      >
+        <div className={styles.form}>
+          <TextInput
+            label={"Yahoo Finance API Key"}
+            text={yahooKey}
+            onChange={(e) => setYahooKey(e.target.value)}
+          ></TextInput>
+          <Button
+            onClick={() => {
+              submitYahooKey(yahooKey);
+              setIsOverlayOpen(false);
+            }}
+            label={"Submit"}
+            isPrimary
+          />
+        </div>
+      </Overlay>
     </div>
   );
 };

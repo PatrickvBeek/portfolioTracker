@@ -38,27 +38,25 @@ const PortfolioActionsBar = ({
       >
         {"Delete Portfolio"}
       </div>
-      {isDeleteOverlayOpen && (
-        <Confirmation
-          title={`Delete ${portfolioName}?`}
-          body={`You are about to delete the portfolio '${portfolioName}'. This will delete also all associated transaction data. Do you want to continue?`}
-          confirmLabel={"Delete"}
-          cancelLabel={"Cancel"}
-          onConfirm={() => {
-            deletePortfolio(portfolioName);
-            setIsDeleteOverlayOpen(false);
-          }}
-          onCancel={() => setIsDeleteOverlayOpen(false)}
-        />
-      )}
-      {isAddOverlayOpen && (
-        <Overlay
-          title={"Add a new Portfolio"}
-          onClose={() => setIsAddOverlayOpen(false)}
-        >
-          <PortfolioInputForm onConfirm={() => setIsAddOverlayOpen(false)} />
-        </Overlay>
-      )}
+      <Confirmation
+        open={isDeleteOverlayOpen}
+        title={`Delete ${portfolioName}?`}
+        body={`You are about to delete the portfolio '${portfolioName}'. This will delete also all associated transaction data. Do you want to continue?`}
+        confirmLabel={"Delete"}
+        cancelLabel={"Cancel"}
+        onConfirm={() => {
+          deletePortfolio(portfolioName);
+          setIsDeleteOverlayOpen(false);
+        }}
+        onCancel={() => setIsDeleteOverlayOpen(false)}
+      />
+      <Overlay
+        open={isAddOverlayOpen}
+        title={"Add a new Portfolio"}
+        onClose={() => setIsAddOverlayOpen(false)}
+      >
+        <PortfolioInputForm onConfirm={() => setIsAddOverlayOpen(false)} />
+      </Overlay>
     </div>
   );
 };

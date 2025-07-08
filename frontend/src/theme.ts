@@ -69,25 +69,32 @@ const theme = createTheme({
         },
       },
     },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          padding: "1rem",
+        },
+      },
+    },
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          padding: "1.0rem",
+          padding: "0",
         },
       },
     },
     MuiDialogContent: {
       styleOverrides: {
         root: {
-          padding: "1.0rem",
+          padding: "0",
         },
       },
     },
     MuiDialogActions: {
       styleOverrides: {
         root: {
-          padding: "1.0rem",
-          paddingTop: "0",
+          padding: "0",
+          paddingTop: "2rem",
         },
       },
     },

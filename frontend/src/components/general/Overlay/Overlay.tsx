@@ -1,33 +1,36 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, IconButton, Modal, Typography } from "@mui/material";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+} from "@mui/material";
 import { ReactElement } from "react";
-import styles from "./Overlay.module.less";
 
 export interface OverlayProps {
+  open: boolean;
   onClose: () => void;
   children?: ReactElement;
   title?: string | ReactElement;
 }
 
-const Overlay = ({ onClose, children, title }: OverlayProps) => {
+const Overlay = ({ open, onClose, children, title }: OverlayProps) => {
   return (
-    <Modal open={true} onClose={onClose}>
-      <Box className={styles.overlay} role="dialog">
-        <Box className={styles.header}>
-          <Typography variant="h6" component="span" className={styles.title}>
-            {title}
-          </Typography>
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            className={styles.closeButton}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <Box className={styles.body}>{children}</Box>
-      </Box>
-    </Modal>
+    <Dialog open={open} onClose={onClose}>
+      <Stack
+        alignItems={"center"}
+        flexDirection={"row"}
+        justifyContent={"space-between"}
+        marginBottom={"1rem"}
+      >
+        <DialogTitle>{title}</DialogTitle>
+        <IconButton aria-label="close" onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      </Stack>
+      <DialogContent>{children}</DialogContent>
+    </Dialog>
   );
 };
 

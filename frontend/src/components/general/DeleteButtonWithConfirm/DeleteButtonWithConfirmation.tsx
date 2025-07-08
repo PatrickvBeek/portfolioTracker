@@ -22,23 +22,22 @@ function DeleteButtonWithConfirmation({
         size={"small"}
         className={bemElement("button")}
         onClick={() => setIsOpen(true)}
-        aria-label="Delete"
+        aria-label={"Delete"}
       >
         <i className="fa fa-trash"></i>
       </IconButton>
-      {isOpen && (
-        <Confirmation
-          title={title}
-          body={body}
-          confirmLabel={"Delete"}
-          cancelLabel={"Cancel"}
-          onConfirm={() => {
-            deleteHandler();
-            setIsOpen(false);
-          }}
-          onCancel={() => setIsOpen(false)}
-        />
-      )}
+      <Confirmation
+        title={title}
+        body={body}
+        open={isOpen}
+        confirmLabel={"Delete"}
+        cancelLabel={"Cancel"}
+        onConfirm={() => {
+          deleteHandler();
+          setIsOpen(false);
+        }}
+        onCancel={() => setIsOpen(false)}
+      />
     </div>
   );
 }
