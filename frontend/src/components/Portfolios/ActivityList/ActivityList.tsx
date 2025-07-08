@@ -21,7 +21,7 @@ import { Button } from "../../general/Button";
 import CustomTable from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
 import { Headline } from "../../general/headline/Headline";
-import { InvalidDeletionDialog } from "../InvalidDeletionDialog/InvalidDeletionDialog";
+import { InfoDialog } from "../../general/InfoDialog/InfoDialog";
 import styles from "./ActivityList.module.less";
 
 type ActivityListProps = Props<{
@@ -164,9 +164,11 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
           label={showAll ? "Show less" : "Show all"}
         />
       </div>
-      <InvalidDeletionDialog
+      <InfoDialog
         open={showInvalidDeletionDialog}
         onClose={() => setShowInvalidDeletionDialog(false)}
+        title="Cannot Delete Transaction"
+        message="This transaction cannot be deleted because it would cause a situation, where at least one transaction attempts to sell more pieces than available at this point in time."
       />
     </div>
   );
