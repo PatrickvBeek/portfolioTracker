@@ -1,5 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { History } from "pt-domain/src/portfolioHistory/history.entities";
+import { History } from "pt-domain";
 import { unique, zipToObject } from "radash";
 import { useGetApiKeys } from "../apiKeys/apiKeyHooks";
 import { useGetAssets, useSymbol } from "../assets/assetHooks";

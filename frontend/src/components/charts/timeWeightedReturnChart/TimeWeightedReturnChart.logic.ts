@@ -1,12 +1,10 @@
 import {
   getFirstOrderTimeStamp,
-  getTimeWeightedReturnHistory,
-} from "pt-domain/src/portfolio/portfolio.derivers";
-import {
   getHistoryPointMapper,
+  getTimeWeightedReturnHistory,
+  History,
   pickValueFromHistory,
-} from "pt-domain/src/portfolioHistory/history.derivers";
-import { History } from "pt-domain/src/portfolioHistory/history.entities";
+} from "pt-domain";
 import { last, select } from "radash";
 import { useSymbol } from "../../../hooks/assets/assetHooks";
 import {

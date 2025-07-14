@@ -1,7 +1,4 @@
-import {
-  getTestOrdersGroupedByAsset,
-  getTestPortfolio,
-} from "pt-domain/src/dataHelpers";
+import { getTestOrdersGroupedByAsset, getTestPortfolio } from "pt-domain";
 import { vi } from "vitest";
 import {
   customRenderHook,

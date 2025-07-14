@@ -1,5 +1,4 @@
-import { AssetLibrary } from "pt-domain/src/asset/asset.entities";
-import { PortfolioLibrary } from "pt-domain/src/portfolio/portfolio.entities";
+import { AssetLibrary, PortfolioLibrary } from "pt-domain";
 import { createContext, FC, PropsWithChildren, useState } from "react";
 import { ApiKeys } from "./components/header/userData/userData";
 

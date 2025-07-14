@@ -1,13 +1,3 @@
-import { DividendPayout } from "pt-domain/src/dividendPayouts/dividend.entities";
-import { Order } from "pt-domain/src/order/order.entities";
-import {
-  EMPTY_PORTFOLIO,
-  getActivitiesForPortfolio,
-} from "pt-domain/src/portfolio/portfolio.derivers";
-import {
-  Portfolio,
-  PortfolioLibrary,
-} from "pt-domain/src/portfolio/portfolio.entities";
 import {
   addDividendPayoutToPortfolio,
   addOrderToPortfolio,
@@ -16,11 +6,15 @@ import {
   deleteDividendPayoutFromPortfolio,
   deleteOrderFromPortfolio,
   deletePortfolioFromLibrary,
-} from "pt-domain/src/portfolio/portfolio.operations";
-import {
+  DividendPayout,
+  EMPTY_PORTFOLIO,
+  getActivitiesForPortfolio,
   getPortfolioNamesFromCompound,
   isCompoundPortfolioName,
-} from "pt-domain/src/utils/portfolioUtils";
+  Order,
+  Portfolio,
+  PortfolioLibrary,
+} from "pt-domain";
 import { useContext } from "react";
 import { UserDataContext } from "../../userDataContext";
 

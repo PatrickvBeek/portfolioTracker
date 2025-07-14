@@ -1,8 +1,9 @@
-import { Asset, AssetLibrary } from "pt-domain/src/asset/asset.entities";
 import {
   addAssetToLibrary,
+  Asset,
+  AssetLibrary,
   deleteAssetFromLib,
-} from "pt-domain/src/asset/asset.operations";
+} from "pt-domain";
 import { useContext } from "react";
 import { UserDataContext } from "../../userDataContext";
 

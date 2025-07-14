@@ -9,7 +9,8 @@
     "start": "yarn workspace frontend start",
     "architecture-tests": "yarn depcruise domain/src frontend/src",
     "test": "yarn workspace pt-domain test && yarn workspace frontend test",
-    "tsc": "yarn workspace pt-domain tsc && yarn workspace frontend tsc"
+    "tsc": "tsc --build",
+    "tsc:watch": "tsc --build --watch"
   },
   "dependencies": {
     "prettier": "^3.3.2"

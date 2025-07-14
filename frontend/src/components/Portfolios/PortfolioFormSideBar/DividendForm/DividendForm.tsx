@@ -1,4 +1,4 @@
-import { DividendPayout } from "pt-domain/src/dividendPayouts/dividend.entities";
+import { DividendPayout } from "pt-domain";
 import { ReactElement, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { useAddDividendPayoutToPortfolio } from "../../../../hooks/portfolios/portfolioHooks";

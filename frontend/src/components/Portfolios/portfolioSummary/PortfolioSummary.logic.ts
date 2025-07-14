@@ -6,7 +6,7 @@ import {
   getRealizedGains,
   getTimeWeightedReturn,
   getTotalCashFlowHistory,
-} from "pt-domain/src/portfolio/portfolio.derivers";
+} from "pt-domain";
 import { sum } from "radash";
 import {
   useGetPortfolioActivity,

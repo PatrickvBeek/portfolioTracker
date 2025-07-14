@@ -1,4 +1,4 @@
-import { getIsins } from "pt-domain/src/portfolio/portfolio.derivers";
+import { getIsins } from "pt-domain";
 import { useGetPortfolio } from "../../hooks/portfolios/portfolioHooks";
 import { useGetPricesForIsins } from "../../hooks/prices/priceHooks";
 
