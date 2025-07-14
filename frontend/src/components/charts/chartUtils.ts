@@ -4,7 +4,7 @@ import {
   scaleTime as d3ScaleTime,
 } from "d3-scale";
 import moment from "moment";
-import { History } from "pt-domain/src/portfolioHistory/history.entities";
+import { History } from "pt-domain";
 import { isNumber, omit, range, sort, unique } from "radash";
 import { XAxisProps, YAxisProps } from "recharts";
 import { ChartData, ChartDataPoint } from "./chartTypes";

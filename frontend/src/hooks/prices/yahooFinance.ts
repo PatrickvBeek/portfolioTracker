@@ -1,4 +1,4 @@
-import { History } from "pt-domain/src/portfolioHistory/history.entities";
+import { History } from "pt-domain";
 import { zip } from "radash";
 
 const BASE_URL = "https://yfapi.net";

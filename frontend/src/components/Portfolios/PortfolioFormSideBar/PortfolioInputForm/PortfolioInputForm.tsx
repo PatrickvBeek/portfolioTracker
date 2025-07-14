@@ -1,5 +1,5 @@
 import { Stack } from "@mui/material";
-import { newPortfolioFromName } from "pt-domain/src/portfolio/portfolio.operations";
+import { newPortfolioFromName } from "pt-domain";
 import { useState } from "react";
 import { useAddPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
 import { Button } from "../../../general/Button";
