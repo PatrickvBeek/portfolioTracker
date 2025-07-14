@@ -128,15 +128,14 @@ export function OrderInputForm({
         isDisabled={!isFormValid || !isValid(orderToSubmit)}
         isPrimary={true}
       />
-      {isWarningOpen && (
-        <DuplicationWarning
-          onCancel={() => setIsWarningOpen(false)}
-          onConfirm={() => {
-            orderToSubmit && addOrder(orderToSubmit);
-            setIsWarningOpen(false);
-          }}
-        />
-      )}
+      <DuplicationWarning
+        open={isWarningOpen}
+        onCancel={() => setIsWarningOpen(false)}
+        onConfirm={() => {
+          orderToSubmit && addOrder(orderToSubmit);
+          setIsWarningOpen(false);
+        }}
+      />
     </Stack>
   );
 }
@@ -162,12 +161,18 @@ function getOrderSummaryText({
 type DuplicationWarningProps = {
   onConfirm: () => void;
   onCancel: () => void;
+  open: boolean;
 };
 
-function DuplicationWarning({ onCancel, onConfirm }: DuplicationWarningProps) {
+function DuplicationWarning({
+  onCancel,
+  open,
+  onConfirm,
+}: DuplicationWarningProps) {
   return (
     <Confirmation
       title={"Duplicate Order Detected!"}
+      open={open}
       body={
         <>
           <p>

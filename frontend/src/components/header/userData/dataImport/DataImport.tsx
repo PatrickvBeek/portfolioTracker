@@ -3,8 +3,7 @@ import { FC, ReactElement, useId, useState } from "react";
 import { useSetApiKeys } from "../../../../hooks/apiKeys/apiKeyHooks";
 import { useSetAssets } from "../../../../hooks/assets/assetHooks";
 import { useSetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
-import { Button } from "../../../general/Button";
-import Overlay from "../../../general/Overlay/Overlay";
+import { InfoDialog } from "../../../general/InfoDialog/InfoDialog";
 import { parseUserData } from "../userData";
 import styles from "./DataImport.module.less";
 
@@ -14,7 +13,7 @@ export const DataImport: FC = (): ReactElement => {
   const setApiKeys = useSetApiKeys();
 
   const id = useId();
-  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -23,7 +22,7 @@ export const DataImport: FC = (): ReactElement => {
         const fileReader = new FileReader();
         fileReader.readAsText(file, "UTF-8");
         fileReader.onerror = () => {
-          setIsOverlayOpen(true);
+          setIsErrorDialogOpen(true);
         };
         fileReader.onload = (evt) => {
           const readingResult = evt.target?.result;
@@ -35,7 +34,7 @@ export const DataImport: FC = (): ReactElement => {
               setApiKeys(parsedUserData.apiKeys);
             } catch (e) {
               console.log(e);
-              setIsOverlayOpen(true);
+              setIsErrorDialogOpen(true);
             }
           } else {
             throw new Error("parsed input type is not 'string'");
@@ -44,7 +43,7 @@ export const DataImport: FC = (): ReactElement => {
       }
     } catch (e) {
       console.log(e);
-      setIsOverlayOpen(true);
+      setIsErrorDialogOpen(true);
     }
   };
 
@@ -76,21 +75,16 @@ export const DataImport: FC = (): ReactElement => {
           accept=".json"
           onChange={handleChange}
         />
-        {isOverlayOpen && (
-          <Overlay title={"Error"} onClose={() => setIsOverlayOpen(false)}>
-            <div className={styles.overlay_content}>
-              <div>
-                Oh no! 😢 <br />
-                An unknown error occurred while reading the selected file.
-              </div>
-              <Button
-                onClick={() => setIsOverlayOpen(false)}
-                label={"Okay"}
-                isPrimary
-              />
-            </div>
-          </Overlay>
-        )}
+        <InfoDialog
+          open={isErrorDialogOpen}
+          onClose={() => setIsErrorDialogOpen(false)}
+          title="Error parsing file"
+          message=<div>
+            Oh no! 😢 <br />
+            An unknown error occurred while reading the selected file.
+          </div>
+          actionLabel="Okay"
+        />
       </div>
     </Tooltip>
   );

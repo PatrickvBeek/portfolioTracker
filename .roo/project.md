@@ -68,6 +68,9 @@ The web app on the other hand depends on the domain module. It offloads involved
 
 - Typescript for all implementation
 - react for the UI components
+  - MUI as component library
+  - MUI components are styled via a global theme file theme.ts
+  - Other styling via CSS modules (using LESS)
 - Recharts for plotting
 - Tanstack query for request state management / request caching
 - Vitest as a test runner, never use Jest

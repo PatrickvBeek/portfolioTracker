@@ -1,16 +1,14 @@
+import { DialogActions, DialogContent } from "@mui/material";
 import { ReactNode } from "react";
-import { bemHelper } from "../../../utility/bemHelper";
 import { Button } from "../Button";
 import Overlay from "../Overlay/Overlay";
-import "./Confirmation.css";
-
-const { bemBlock, bemElement } = bemHelper("confirmation");
 
 export type ConfirmationProps = {
   title: string;
   body: ReactNode;
   confirmLabel: string;
   cancelLabel: string;
+  open: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   primary?: "confirm" | "cancel";
@@ -21,15 +19,16 @@ const Confirmation = ({
   body,
   confirmLabel,
   cancelLabel,
+  open,
   onConfirm,
   onCancel,
   primary = "cancel",
 }: ConfirmationProps) => {
   return (
-    <Overlay onClose={onCancel} title={title}>
-      <div className={bemBlock("")}>
-        <div className={bemElement("description")}>{body}</div>
-        <div className={bemElement("buttons")}>
+    <Overlay open={open} onClose={onCancel} title={title}>
+      <>
+        <DialogContent>{body}</DialogContent>
+        <DialogActions sx={{ gap: 1, justifyContent: "flex-end" }}>
           <Button
             onClick={onCancel}
             label={cancelLabel}
@@ -39,12 +38,11 @@ const Confirmation = ({
           <Button
             onClick={onConfirm}
             label={confirmLabel}
-            className={bemElement("confirm")}
             isPrimary={primary === "confirm"}
             autoFocus={primary === "confirm"}
           />
-        </div>
-      </div>
+        </DialogActions>
+      </>
     </Overlay>
   );
 };
