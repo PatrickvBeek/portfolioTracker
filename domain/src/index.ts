@@ -3,6 +3,7 @@ export * from "./asset";
 export * from "./batch";
 export * from "./dataHelpers";
 export * from "./dividendPayouts";
+export * from "./forecast";
 export * from "./order";
 export * from "./portfolio";
 export * from "./portfolioHistory";
