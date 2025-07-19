@@ -7,7 +7,7 @@ import {
   TEST_PORTFOLIO_LIB,
 } from "pt-domain";
 import { customRender } from "../../../testUtils/componentHelpers";
-import { OrderInputForm, OrderInputFormProps } from "./OrderInputFrom";
+import { OrderInputForm, OrderInputFormProps } from "./OrderInputForm";
 
 describe("The OrderInputForm", () => {
   const PROPS: OrderInputFormProps = {
