@@ -310,9 +310,6 @@ const input = screen.getByLabelText("Amount");
 # From project root
 cd domain && yarn vitest run <path/to/file>
 cd frontend && yarn vitest run <path/to/file>
-
-# Watch mode
-yarn vitest watch
 ```
 
 ## Development Workflows
@@ -367,7 +364,7 @@ yarn start  # Runs on http://localhost:5173
 
 # Domain testing
 cd domain
-yarn test:watch
+yarn test
 ```
 
 ### 3. Building for Production
@@ -664,7 +661,6 @@ yarn tsc
 - [`frontend/src/theme.ts`](frontend/src/theme.ts) - MUI theme
 - [`frontend/src/definitions.less`](frontend/src/definitions.less) - CSS variables
 - [`frontend/src/testUtils/componentHelpers.tsx`](frontend/src/testUtils/componentHelpers.tsx) - Test utilities
-- [`.roo/project.md`](.roo/project.md) - Project overview
 
 ### Technology Stack
 
