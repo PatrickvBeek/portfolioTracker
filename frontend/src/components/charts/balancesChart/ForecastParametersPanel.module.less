@@ -1,0 +1,94 @@
+@import (reference) "src/definitions.less";
+
+.accordion {
+  margin-bottom: @default-spacing;
+  border: 1px solid @light-gray;
+  border-radius: @default-border-radius;
+  box-shadow: none;
+
+  &:before {
+    display: none;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: @default-spacing;
+  padding: @default-spacing;
+}
+
+.controlsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: @default-spacing;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: @half-spacing;
+  }
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: @half-spacing;
+  align-items: flex-start;
+}
+
+.label {
+  font-weight: 500;
+  color: @theme-highlight;
+  font-size: @font-small1;
+}
+
+.labelWithInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.displayOptions {
+  display: flex;
+  flex-direction: column;
+  gap: @half-spacing;
+  align-items: flex-start;
+}
+
+.scenarioDetails {
+  margin-top: @half-spacing;
+  padding-top: @half-spacing;
+  border-top: 1px solid @light-gray;
+
+  .parametersGrid {
+    display: flex;
+    gap: @half-spacing;
+    flex-wrap: wrap;
+    margin-top: @half-spacing;
+  }
+}
+
+// Mobile responsive adjustments
+@media (max-width: 768px) {
+  .controlsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: @default-spacing;
+  }
+
+  .controlGroup {
+    width: 100%;
+  }
+
+  .displayOptions {
+    width: 100%;
+  }
+}
+
+// Tablet responsive adjustments
+@media (max-width: 1024px) and (min-width: 769px) {
+  .controlsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

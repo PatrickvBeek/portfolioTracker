@@ -31,3 +31,8 @@ export interface RandomShockParams {
 export interface ForecastConfig {
   confidencePercentiles?: [number, number];
 }
+
+export type GbmParameters = {
+  mu: number;
+  sigma: number;
+};

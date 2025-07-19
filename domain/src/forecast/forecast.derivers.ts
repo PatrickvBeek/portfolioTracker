@@ -1,9 +1,11 @@
 import normal from "@stdlib/random/base/normal";
 import { sum } from "radash";
+import { History } from "../portfolioHistory/history.entities";
 import {
   ForecastConfig,
   ForecastInput,
   ForecastResult,
+  GbmParameters,
   RandomShockParams,
   SimulationResult,
 } from "./forecast.entities";
@@ -129,3 +131,47 @@ export const runGeometricBrownianMotionForecast = (
 
   return computeStatistics(portfolioValuesMatrix, input, config);
 };
+
+export const getGeometricBrownianMotionParams = (
+  twrHistory: History<number>
+): GbmParameters | undefined => {
+  if (twrHistory.length < 2) {
+    return undefined;
+  }
+
+  // Calculate log returns assuming evenly spaced (!) data
+  const logReturns: number[] = [];
+  for (let i = 1; i < twrHistory.length; i++) {
+    const logReturn = Math.log(twrHistory[i].value / twrHistory[i - 1].value);
+    logReturns.push(logReturn);
+  }
+
+  const muRaw = calculateMean(logReturns);
+
+  const meanSquaredDifference = logReturns.reduce((acc, value) => {
+    const diff = value - muRaw;
+    return acc + diff * diff;
+  }, 0);
+
+  const varianceRaw = meanSquaredDifference / logReturns.length;
+  const sigmaRaw = Math.sqrt(varianceRaw);
+
+  const totalTimeMs =
+    twrHistory[twrHistory.length - 1].timestamp - twrHistory[0].timestamp;
+  const numberOfSteps = twrHistory.length - 1;
+  const averageStepMs = totalTimeMs / numberOfSteps;
+  const averageStepsPerMonth = (1000 * 60 * 60 * 24 * 30.44) / averageStepMs; // Convert ms to months (avg days per month)
+
+  // Normalize to monthly parameters
+  const mu = muRaw * averageStepsPerMonth;
+  const sigma = sigmaRaw * Math.sqrt(averageStepsPerMonth);
+
+  return { mu, sigma };
+};
+
+export const gbmParamsToAnnualPercentage = (
+  params: GbmParameters | undefined
+) => ({
+  mu: params && 100 * (Math.exp(12 * params.mu) - 1),
+  sigma: params && 100 * (Math.exp(Math.sqrt(12) * params.sigma) - 1),
+});
