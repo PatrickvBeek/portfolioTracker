@@ -16,10 +16,6 @@ import {
   useGetPricesForIsins,
 } from "../../hooks/prices/priceHooks";
 import { getDefaultTimeAxis } from "./chartUtils";
-import {
-  percentage2rel,
-  rel2percentage,
-} from "./timeWeightedReturnChart/TimeWeightedReturnChart.logic";
 
 export const usePortfolioPriceData = (portfolioName: string) => {
   const portfolio = useGetPortfolio(portfolioName);
@@ -54,3 +50,6 @@ export const usePortfolioGeometricBrownianMotionParams = (
     data.map(getHistoryPointMapper(percentage2rel))
   );
 };
+
+export const rel2percentage = (value: number) => (value - 1) * 100;
+export const percentage2rel = (value: number) => value / 100 + 1;

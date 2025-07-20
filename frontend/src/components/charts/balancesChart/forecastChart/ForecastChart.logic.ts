@@ -153,45 +153,36 @@ export const useForecastChartData = (
     params.scenario
   );
 
-  const forecastData = useMemo(() => {
-    if (!portfolio || !scenarioDetails) {
-      return [];
-    }
+  if (!portfolio || !scenarioDetails) {
+    return { isError, isLoading, data: [] };
+  }
 
-    const months = FORECAST_HORIZON_MONTHS[params.timeHorizon];
-    const startTimestamp = Date.now();
+  const months = FORECAST_HORIZON_MONTHS[params.timeHorizon];
+  const startTimestamp = Date.now();
 
-    const forecastInput: ForecastInput = {
-      mu: scenarioDetails.params.mu,
-      sigma: scenarioDetails.params.sigma,
-      months,
-      monthlyInvestment: params.monthlyContribution,
-      startingValue: currentValue,
-      simulationCount: 1000,
-    };
+  const forecastInput: ForecastInput = {
+    mu: scenarioDetails.params.mu,
+    sigma: scenarioDetails.params.sigma,
+    months,
+    monthlyInvestment: params.monthlyContribution,
+    startingValue: currentValue,
+    simulationCount: 1000,
+  };
 
-    const confidencePercentiles: [number, number] = [
-      50 - params.confidenceLevel / 2,
-      50 + params.confidenceLevel / 2,
-    ];
+  const confidencePercentiles: [number, number] = [
+    50 - params.confidenceLevel / 2,
+    50 + params.confidenceLevel / 2,
+  ];
 
-    const forecastResult = runGeometricBrownianMotionForecast(forecastInput, {
-      confidencePercentiles,
-    });
+  const forecastResult = runGeometricBrownianMotionForecast(forecastInput, {
+    confidencePercentiles,
+  });
 
-    return transformForecastToChartData(
-      forecastResult,
-      startTimestamp,
-      currentCashFlow
-    );
-  }, [
-    portfolio,
-    params,
-    portfolioName,
-    scenarioDetails,
-    currentValue,
-    currentCashFlow,
-  ]);
+  const forecastData = transformForecastToChartData(
+    forecastResult,
+    startTimestamp,
+    currentCashFlow
+  );
 
   return {
     isLoading,

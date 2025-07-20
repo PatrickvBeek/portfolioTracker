@@ -8,12 +8,13 @@ import {
   AccordionSummary,
   Box,
   Chip,
+  debounce,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { FC } from "react";
+import { FC, useCallback, useState } from "react";
 import {
   FORECAST_CONFIDENCE_LEVELS,
   FORECAST_HORIZONS,
@@ -35,10 +36,22 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
   parameters,
   onParametersChange,
 }) => {
+  const [monthlyContributionInput, setMonthlyContributionInput] = useState(
+    parameters.monthlyContribution.toString()
+  );
+
   const scenarioDetails = useForecastScenarioParams(
     portfolioName,
     parameters.scenario
   );
+
+  const debouncedParameterChange = useCallback(
+    debounce((newParameters: ForecastParameters) => {
+      onParametersChange(newParameters);
+    }, 500),
+    [onParametersChange]
+  );
+
   const handleScenarioChange = (
     _event: React.MouseEvent<HTMLElement>,
     newScenario: ForecastScenario | null
@@ -60,8 +73,11 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
   const handleMonthlyContributionChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const value = parseFloat(event.target.value) || 0;
-    onParametersChange({ ...parameters, monthlyContribution: value });
+    const inputValue = event.target.value;
+    setMonthlyContributionInput(inputValue);
+
+    const value = parseFloat(inputValue) || 0;
+    debouncedParameterChange({ ...parameters, monthlyContribution: value });
   };
 
   const handleConfidenceLevelChange = (
@@ -110,11 +126,9 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
 
           {/* Scenario */}
           <Box className={styles.controlGroup}>
-            <Box className={styles.labelWithInfo}>
-              <Typography variant="body2" className={styles.label}>
-                Performance Scenario
-              </Typography>
-            </Box>
+            <Typography variant="body2" className={styles.label}>
+              Performance Scenario
+            </Typography>
             <ToggleButtonGroup
               value={parameters.scenario}
               exclusive
@@ -138,7 +152,7 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
             </Typography>
             <TextField
               type="number"
-              value={parameters.monthlyContribution}
+              value={monthlyContributionInput}
               onChange={handleMonthlyContributionChange}
               size="small"
               slotProps={{

@@ -76,7 +76,7 @@ export const ForecastChart: FC<{ portfolioName: string }> = ({
           <Line
             {...DEFAULT_LINE_PROPS}
             dataKey={"cashFlow" satisfies ForecastChartDataSets}
-            name={"Cash Flow (Forecast)"}
+            name={"Cash Flow"}
             stroke="var(--theme-highlight)"
             strokeDasharray="8 4"
             strokeWidth={2}
@@ -87,6 +87,16 @@ export const ForecastChart: FC<{ portfolioName: string }> = ({
             dataKey={"median" satisfies ForecastChartDataSets}
             name={"Market Value (Median)"}
             stroke="var(--green)"
+            strokeDasharray="8 4"
+            strokeWidth={2}
+            type={"linear"}
+          />
+
+          <Line
+            {...DEFAULT_LINE_PROPS}
+            dataKey={"mean" satisfies ForecastChartDataSets}
+            name={"Market Value (Mean)"}
+            stroke="var(--dark-red)"
             strokeDasharray="8 4"
             strokeWidth={2}
             type={"linear"}

@@ -8,12 +8,13 @@ import { last, select } from "radash";
 import { useSymbol } from "../../../hooks/assets/assetHooks";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
-import { useTimeWeightedReturnHistory } from "../chartHooks";
+import {
+  percentage2rel,
+  rel2percentage,
+  useTimeWeightedReturnHistory,
+} from "../chartHooks";
 import { ChartData } from "../chartTypes";
 import { historiesToChartData } from "../chartUtils";
-
-export const rel2percentage = (value: number) => (value - 1) * 100;
-export const percentage2rel = (value: number) => value / 100 + 1;
 
 const usePerformanceBenchmark = (
   portfolioName: string,
