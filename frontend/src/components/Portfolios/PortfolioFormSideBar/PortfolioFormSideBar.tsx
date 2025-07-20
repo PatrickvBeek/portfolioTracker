@@ -3,7 +3,7 @@ import { ReactElement, useState } from "react";
 import { Props } from "../../../utility/types";
 import { Headline } from "../../general/headline/Headline";
 import SelectionHeader from "../../general/SelectionHeader";
-import { OrderInputForm } from "../OrderInputForm/OrderInputFrom";
+import { OrderInputForm } from "../OrderInputForm/OrderInputForm";
 import DividendForm from "./DividendForm/DividendForm";
 
 type PortfolioFormSideBarProps = Props<{ portfolioName: string }>;

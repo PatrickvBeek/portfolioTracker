@@ -1,41 +1,20 @@
 import {
   getFirstOrderTimeStamp,
   getHistoryPointMapper,
-  getTimeWeightedReturnHistory,
   History,
   pickValueFromHistory,
 } from "pt-domain";
 import { last, select } from "radash";
 import { useSymbol } from "../../../hooks/assets/assetHooks";
-import {
-  useGetPortfolio,
-  usePortfolioSelector,
-} from "../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
-import { usePortfolioPriceData } from "../chartHooks";
+import {
+  percentage2rel,
+  rel2percentage,
+  useTimeWeightedReturnHistory,
+} from "../chartHooks";
 import { ChartData } from "../chartTypes";
-import { getDefaultTimeAxis, historiesToChartData } from "../chartUtils";
-
-const rel2percentage = (value: number) => (value - 1) * 100;
-const percentage2rel = (value: number) => value / 100 + 1;
-
-const useTimeWeightedReturnHistory = (
-  portfolioName: string
-): CustomQuery<History<number>> | undefined =>
-  usePortfolioSelector(portfolioName, (portfolio) => {
-    const priceMapQuery = usePortfolioPriceData(portfolioName);
-    const xMin = getFirstOrderTimeStamp(portfolio);
-
-    return {
-      isLoading: priceMapQuery.isLoading,
-      isError: priceMapQuery.isError,
-      data: getTimeWeightedReturnHistory(
-        portfolio,
-        priceMapQuery.data,
-        xMin ? getDefaultTimeAxis(xMin) : undefined
-      ).map(getHistoryPointMapper(rel2percentage)),
-    };
-  });
+import { historiesToChartData } from "../chartUtils";
 
 const usePerformanceBenchmark = (
   portfolioName: string,

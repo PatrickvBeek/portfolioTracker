@@ -8,6 +8,7 @@
     "./*": "./src/*"
   },
   "dependencies": {
+    "@stdlib/random": "^0.3.3",
     "moment": "^2.29.4",
     "radash": "^12.1.0",
     "uuid": "^11.1.0"

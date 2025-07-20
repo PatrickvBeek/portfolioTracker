@@ -18,7 +18,7 @@ export function getAxisProps(
 ): Partial<YAxisProps> {
   const values = chartData
     .map((point) => Object.values(omit(point, ["timestamp"])))
-    .flat()
+    .flat(2)
     .filter(isNumber);
   const domain = d3Extent(values) as [number, number];
   const scale = d3LinearScale(values).domain(domain).range([0, 1]);
@@ -117,3 +117,12 @@ export function calculateGradientOffset<T>(
 
   return dataMax / (dataMax - dataMin);
 }
+
+export const asLocale = (value: any, digits: number): string =>
+  new Number(value).toLocaleString(undefined, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
+
+export const asLocaleEuro = (value: any, digits: number): string =>
+  `${asLocale(value, digits)} €`;

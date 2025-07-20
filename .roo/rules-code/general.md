@@ -1,3 +1,1 @@
-- Always make sure you know the contents of [project.md](../project.md) and consider the contents for you current task.
-- keep code comments to an absolute minimum. Try to write code that is self explanatory.
-- do not use javascript classes. This project uses mostly a functional programming style. Therefore avoid mutating data objects unless it is critical for performance.
+- Always make sure you know the contents of [project.md](../technical_onboarding.md) and consider the contents for you current task.

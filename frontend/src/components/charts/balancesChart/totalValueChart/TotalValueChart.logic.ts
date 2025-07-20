@@ -1,22 +1,16 @@
 import {
   getBuyValueHistoryForPortfolio,
-  getFirstOrderTimeStamp,
   getMarketValueHistory,
-  getNumericDateTime,
-  getProfitHistory,
   getTotalCashFlowHistory,
   History,
   removeDuplicatesAtSameTimeStamp,
 } from "pt-domain";
-import { unique } from "radash";
-import {
-  useGetPortfolio,
-  useGetPortfolioActivity,
-} from "../../../hooks/portfolios/portfolioHooks";
-import { CustomQuery } from "../../../hooks/prices/priceHooks";
-import { usePortfolioPriceData } from "../chartHooks";
-import { ChartDataPoint } from "../chartTypes";
-import { getDefaultTimeAxis, historiesToChartData } from "../chartUtils";
+import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
+import { CustomQuery } from "../../../../hooks/prices/priceHooks";
+import { usePortfolioPriceData } from "../../chartHooks";
+import { ChartDataPoint } from "../../chartTypes";
+import { historiesToChartData } from "../../chartUtils";
+import { usePortfolioTimeAxis } from "../shared/balancesChart.utils";
 
 export type BalancesChartDataSets = "buyValue" | "cashFlow" | "marketValue";
 
@@ -38,41 +32,6 @@ export const useGetPortfolioHistoryChartData = (
       { history: marketValueHistory.data || [], newKey: "marketValue" },
     ]),
   };
-};
-
-export const useProfitHistory = (
-  portfolioName: string
-): CustomQuery<History<number>> => {
-  const portfolio = useGetPortfolio(portfolioName);
-  const timeAxis = usePortfolioTimeAxis(portfolioName);
-  const priceQuery = usePortfolioPriceData(portfolioName);
-
-  const profitHistory = getProfitHistory(portfolio, priceQuery.data, timeAxis);
-
-  return {
-    isLoading: priceQuery.isLoading,
-    isError: priceQuery.isError,
-    data: profitHistory,
-  };
-};
-
-const usePortfolioTimeAxis = (portfolioName: string): number[] => {
-  const portfolio = useGetPortfolio(portfolioName);
-  const activity = useGetPortfolioActivity(portfolioName);
-
-  const xMin = getFirstOrderTimeStamp(portfolio);
-
-  if (!xMin) {
-    return [];
-  }
-
-  const portfolioTimestamps = activity.map(getNumericDateTime);
-  return unique(
-    getDefaultTimeAxis(xMin)
-      .concat(portfolioTimestamps)
-      .concat(Date.now())
-      .sort()
-  );
 };
 
 const useGetBuyValueHistory = (portfolioName: string) => {

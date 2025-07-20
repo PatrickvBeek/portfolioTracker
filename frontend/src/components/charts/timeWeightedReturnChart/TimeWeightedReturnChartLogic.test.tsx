@@ -176,7 +176,18 @@ function expectChartsAreEqualForKeys<T extends string>(
     const expectedPoint = expected[i];
 
     for (const key of keys) {
-      expect(actualPoint[key] ?? 0).toBeCloseTo(expectedPoint[key] ?? 0);
+      const actualValue = actualPoint[key] ?? 0;
+      const expectedValue = expectedPoint[key] ?? 0;
+
+      // Handle both number and number[] values (for forecast charts with uncertainty bands)
+      const actualNumber =
+        typeof actualValue === "number" ? actualValue : (actualValue[0] ?? 0);
+      const expectedNumber =
+        typeof expectedValue === "number"
+          ? expectedValue
+          : (expectedValue[0] ?? 0);
+
+      expect(actualNumber).toBeCloseTo(expectedNumber);
     }
     expect(moment(actualPoint.timestamp).startOf("day").unix).toEqual(
       moment(expectedPoint.timestamp).startOf("day").unix
