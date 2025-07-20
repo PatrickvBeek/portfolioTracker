@@ -21,7 +21,7 @@ import {
   ForecastParameters,
   ForecastScenario,
   useForecastScenarioParams,
-} from "./BalancesChart.logic";
+} from "./ForecastChart.logic";
 import styles from "./ForecastParametersPanel.module.less";
 
 interface ForecastParametersPanelProps {
