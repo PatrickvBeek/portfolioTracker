@@ -1,0 +1,137 @@
+@import (reference) "src/theme/definitions.less";
+
+.container {
+  padding: @double-spacing;
+  width: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: auto 1fr 15rem;
+  grid-template-areas:
+    "sideBar header header"
+    "sideBar content orderSideBar";
+  gap: 3rem 4rem;
+
+  // Mobile responsive adjustments
+  @media (max-width: @breakpoint-mobile) {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "content";
+    gap: @default-spacing;
+    padding: @default-spacing;
+  }
+
+  // Tablet responsive adjustments
+  @media (max-width: @breakpoint-tablet) and (min-width: (@breakpoint-mobile + 1)) {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "sideBar header"
+      "sideBar content"
+      "sideBar orderSideBar";
+    gap: @double-spacing @default-spacing;
+    padding: @double-spacing;
+  }
+}
+
+.header {
+  grid-area: header;
+  border-bottom: #aaa solid 1px;
+}
+
+.sideBar {
+  grid-area: sideBar;
+
+  @media (max-width: @breakpoint-mobile) {
+    // Hide left sidebar when not in normal position (mobile only)
+    display: none;
+  }
+}
+
+.content {
+  grid-area: content;
+  align-self: flex-start;
+
+  display: flex;
+  flex-direction: column;
+  gap: @triple-spacing;
+
+  @media (max-width: @breakpoint-mobile) {
+    gap: @double-spacing;
+  }
+
+  @media (max-width: @breakpoint-tablet) and (min-width: (@breakpoint-mobile + 1)) {
+    gap: @double-spacing;
+  }
+}
+
+.orderSideBar {
+  grid-area: orderSideBar;
+  position: sticky;
+  top: 4rem;
+  height: fit-content;
+
+  @media (max-width: @breakpoint-tablet) {
+    // Hide order sidebar when not in normal position (tablet and mobile)
+    display: none;
+  }
+}
+
+// Menu button - appears when left sidebar is not in normal position
+.menuButton {
+  display: none;
+
+  // Show left button when left sidebar is not in normal position (mobile only)
+  @media (max-width: @breakpoint-mobile) {
+    display: flex;
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 1000;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: @theme-highlight;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+
+    &:hover {
+      background-color: @theme;
+    }
+  }
+}
+
+.orderMenuButton {
+  display: none;
+
+  // Show right button when right sidebar is not in normal position (tablet and mobile)
+  @media (max-width: @breakpoint-tablet) {
+    display: flex;
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: @theme-highlight;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+
+    &:hover {
+      background-color: @theme;
+    }
+  }
+}
+
+.drawerContent {
+  padding: @default-spacing;
+  width: 280px;
+}

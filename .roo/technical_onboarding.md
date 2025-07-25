@@ -200,6 +200,23 @@ export const Component = () => (
 );
 ```
 
+**Important Styling Guidelines:**
+
+1. **Migration from BEM/CSS**: Replace deprecated `bemHelper` patterns with CSS modules. Use simple class names like `.container` instead of prefixed names like `.component__container`.
+
+2. **Class Name Access**: Use direct property access (`styles.container`) instead of bracket notation (`styles['component__container']`) by choosing simple class names.
+
+3. **Responsive Design**:
+
+   - Use mobile-first approach with media queries
+   - Leverage centralized breakpoints from `definitions.less`
+   - Ensure continuous UI coverage (e.g., when sidebars hide, show corresponding buttons)
+
+4. **Styling Method Selection**:
+   - **CSS Modules** (.module.less): Default for component styling
+   - **theme.ts**: Only for MUI component customization
+   - **definitions.less**: Shared variables and mixins
+
 ### Material UI Integration
 
 #### Theme Customization ([`frontend/src/theme/theme.ts`](frontend/src/theme/theme.ts))
@@ -635,6 +652,10 @@ const { data } = useQuery({
 - [ ] **Accessibility considered** - Proper ARIA labels and roles
 - [ ] **Performance optimized** - Memoization where needed
 - [ ] **Type safety maintained** - Strict TypeScript usage
+- [ ] **Modern styling approach** - CSS Modules over BEM/CSS
+- [ ] **Simple class names** - No unnecessary prefixes
+- [ ] **Responsive breakpoints** - Using centralized variables
+- [ ] **Continuous coverage** - No gaps in UI functionality
 
 ## Quick Reference
 

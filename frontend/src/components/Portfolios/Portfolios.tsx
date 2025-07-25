@@ -1,6 +1,7 @@
+import MenuIcon from "@mui/icons-material/Menu";
+import { Drawer, IconButton } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
-import { bemHelper } from "../../utility/bemHelper";
 import { Props } from "../../utility/types";
 import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
@@ -9,12 +10,10 @@ import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
 import PortfolioActionsBar from "./PortfolioActionsBar/PortfolioActionsBar";
 import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
-import "./Portfolios.css";
+import styles from "./Portfolios.module.less";
+import { PortfolioSummary } from "./portfolioSummary/PortfolioSummary";
 import { ClosedPositionsList } from "./PositionList/ClosedPositionsList/ClosedPositionsList";
 import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPositionsList";
-import { PortfolioSummary } from "./portfolioSummary/PortfolioSummary";
-
-const { bemBlock, bemElement } = bemHelper("portfolios");
 
 export type PortfolioProps = Props<{}>;
 
@@ -23,6 +22,8 @@ function Portfolios({ className }: PortfolioProps) {
   const [selectedPortfolio, setSelectedPortfolio] = useState<
     string | undefined
   >(Object.keys(portfolioLib)[0]);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileOrderSidebarOpen, setMobileOrderSidebarOpen] = useState(false);
 
   useEffect(() => {
     const portfolios = Object.keys(portfolioLib || {});
@@ -40,19 +41,16 @@ function Portfolios({ className }: PortfolioProps) {
   }
 
   return (
-    <div className={bemBlock(className)}>
-      <PortfolioActionsBar
-        className={bemElement("side-bar")}
-        portfolioName={selectedPortfolio}
-      />
-      <div className={bemElement("header")}>
+    <div className={`${styles.container} ${className || ""}`}>
+      <div className={styles.header}>
         <SelectionHeader
           entries={Object.keys(portfolioLib)}
           selectedEntry={selectedPortfolio}
           setSelectedEntry={setSelectedPortfolio}
         />
       </div>
-      <div className={bemElement("content")}>
+
+      <div className={styles.content}>
         <PortfolioSummary portfolioName={selectedPortfolio} />
         <PortfolioBalancesChart portfolioName={selectedPortfolio} />
         <TimeWeightedReturnChart portfolioName={selectedPortfolio} />
@@ -60,10 +58,50 @@ function Portfolios({ className }: PortfolioProps) {
         <ClosedPositionsList portfolioName={selectedPortfolio} />
         <ActivityList portfolio={selectedPortfolio} />
       </div>
+
+      {/* Order Sidebar */}
       <PortfolioFormSideBar
-        className={bemElement("order-side-bar")}
+        className={styles.orderSideBar}
         portfolioName={selectedPortfolio}
       />
+      <IconButton
+        className={styles.orderMenuButton}
+        onClick={() => setMobileOrderSidebarOpen(true)}
+        aria-label="Open order form"
+      >
+        <span>+</span>
+      </IconButton>
+      <Drawer
+        anchor="right"
+        open={mobileOrderSidebarOpen}
+        onClose={() => setMobileOrderSidebarOpen(false)}
+      >
+        <div className={styles.drawerContent}>
+          <PortfolioFormSideBar portfolioName={selectedPortfolio} />
+        </div>
+      </Drawer>
+
+      {/* Actions Sidebar */}
+      <PortfolioActionsBar
+        className={styles.sideBar}
+        portfolioName={selectedPortfolio}
+      />
+      <IconButton
+        className={styles.menuButton}
+        onClick={() => setMobileSidebarOpen(true)}
+        aria-label="Open portfolio actions"
+      >
+        <MenuIcon />
+      </IconButton>
+      <Drawer
+        anchor="left"
+        open={mobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
+      >
+        <div className={styles.drawerContent}>
+          <PortfolioActionsBar portfolioName={selectedPortfolio} />
+        </div>
+      </Drawer>
     </div>
   );
 }
