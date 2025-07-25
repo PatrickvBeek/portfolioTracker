@@ -1,0 +1,1 @@
+- Always make sure you know the contents of [technical_onboarding.md](../technical_onboarding.md) and consider the contents for you current task.
