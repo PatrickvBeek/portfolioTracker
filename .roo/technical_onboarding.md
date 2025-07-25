@@ -175,7 +175,7 @@ export const Component = (props: Props) => {
 
 ```less
 // Component.module.less
-@import (reference) "src/definitions.less";
+@import (reference) "src/theme/definitions.less";
 
 .container {
   display: flex;
@@ -202,7 +202,7 @@ export const Component = () => (
 
 ### Material UI Integration
 
-#### Theme Customization ([`frontend/src/theme.ts`](frontend/src/theme.ts))
+#### Theme Customization ([`frontend/src/theme/theme.ts`](frontend/src/theme/theme.ts))
 
 ```typescript
 // Extend MUI theme for project-specific styling
@@ -410,7 +410,7 @@ import { useQuery } from "@tanstack/react-query";
 
 ```less
 // Use predefined values from definitions.less
-@import (reference) "src/definitions.less";
+@import (reference) "src/theme/definitions.less";
 
 .container {
   padding: @default-spacing; // 1rem
@@ -582,7 +582,7 @@ await waitFor(() => {
 }
 
 // ✅ Good - use definitions.less variables
-@import (reference) "src/definitions.less";
+@import (reference) "src/theme/definitions.less";
 .container {
   padding: @default-spacing;
   color: @theme;
@@ -658,8 +658,8 @@ yarn tsc
 ### Key Files to Know
 
 - [`domain/src/index.ts`](domain/src/index.ts) - Domain exports
-- [`frontend/src/theme.ts`](frontend/src/theme.ts) - MUI theme
-- [`frontend/src/definitions.less`](frontend/src/definitions.less) - CSS variables
+- [`frontend/src/theme/theme.ts`](frontend/src/theme/theme.ts) - MUI theme
+- [`frontend/src/theme/definitions.less`](frontend/src/theme/definitions.less) - CSS variables
 - [`frontend/src/testUtils/componentHelpers.tsx`](frontend/src/testUtils/componentHelpers.tsx) - Test utilities
 
 ### Technology Stack

@@ -7,7 +7,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import { Header } from "./components/header/Header";
 import Portfolios from "./components/Portfolios/Portfolios";
 import { queryClientConfig } from "./queryClient/config";
-import theme from "./theme";
+import theme from "./theme/theme";
 import { UserDataProvider } from "./userDataContext";
 import { bemHelper } from "./utility/bemHelper";
 import { GeneralComponentProps } from "./utility/types";
