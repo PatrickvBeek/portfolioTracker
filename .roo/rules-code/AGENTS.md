@@ -7,4 +7,4 @@
 - Component logic must be extracted to `<Component>.logic.ts` files for complex data handling
 - Domain calculations must be kept in `domain/` folder, not in React hooks
 - Domain imports use `"pt-domain"` alias, not relative paths
-- LESS files must reference predefined variables from `frontend/src/definitions.less`
+- LESS files must reference predefined variables from `frontend/src/theme/definitions.less`
