@@ -1,4 +1,4 @@
-import { Tooltip } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import { FC, ReactElement, useId } from "react";
 import { InfoDialog } from "../../../general/InfoDialog/InfoDialog";
 import styles from "./DataImport.module.less";
@@ -9,29 +9,19 @@ export const DataImport: FC = (): ReactElement => {
     useDataImport();
   const id = useId();
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      document.getElementById(id)?.click();
-    }
+  const handleButtonClick = () => {
+    document.getElementById(id)?.click();
   };
 
   return (
     <>
       <Tooltip title={"Import all your data from a file"}>
-        <div>
-          <label
-            htmlFor={id}
-            className={styles.label}
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-          >
-            <i
-              className={"fa-file-arrow-up fa-solid fa-lg"}
-              style={{ color: "white" }}
-            />
-          </label>
-        </div>
+        <IconButton onClick={handleButtonClick}>
+          <i
+            className={"fa-file-arrow-up fa-solid fa-lg"}
+            style={{ color: "white" }}
+          />
+        </IconButton>
       </Tooltip>
 
       <input
