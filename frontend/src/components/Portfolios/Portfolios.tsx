@@ -6,12 +6,12 @@ import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
 import { Props } from "../../utility/types";
 import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
-import SelectionHeader from "../general/SelectionHeader";
 import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
 import PortfolioActionsBar from "./PortfolioActionsBar/PortfolioActionsBar";
 import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import styles from "./Portfolios.module.less";
+import PortfolioSelectionHeader from "./PortfolioSelectionHeader/PortfolioSelectionHeader";
 import { PortfolioSummary } from "./portfolioSummary/PortfolioSummary";
 import { ClosedPositionsList } from "./PositionList/ClosedPositionsList/ClosedPositionsList";
 import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPositionsList";
@@ -43,10 +43,10 @@ function Portfolios({ className }: PortfolioProps) {
   return (
     <div className={`${styles.container} ${className || ""}`}>
       <div className={styles.header}>
-        <SelectionHeader
-          entries={Object.keys(portfolioLib)}
-          selectedEntry={selectedPortfolio}
-          setSelectedEntry={setSelectedPortfolio}
+        <PortfolioSelectionHeader
+          portfolioNames={Object.keys(portfolioLib)}
+          selectedPortfolio={selectedPortfolio}
+          setSelectedPortfolio={setSelectedPortfolio}
         />
       </div>
 

@@ -1,0 +1,17 @@
+@import (reference) "src/theme/definitions.less";
+
+.container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: @default-spacing;
+}
+
+.tabsContainer {
+  flex: 1;
+  min-width: 0; // Allow flex shrinking
+}
+
+.addButton {
+  flex-shrink: 0;
+}
