@@ -93,11 +93,6 @@ function Portfolios({ className }: PortfolioProps) {
       <StyledFloatingButton
         onClick={() => setMobileDrawerOpen(true)}
         aria-label="Open portfolio menu"
-        sx={{
-          display: {
-            lg: "none",
-          },
-        }}
       >
         <MenuIcon />
       </StyledFloatingButton>
@@ -118,6 +113,9 @@ const StyledFloatingButton = styled(IconButton)(({ theme }) => ({
   color: "white",
   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
   fontWeight: "bold",
+  [theme.breakpoints.up("lg")]: {
+    display: "none",
+  },
 }));
 
 export default Portfolios;
