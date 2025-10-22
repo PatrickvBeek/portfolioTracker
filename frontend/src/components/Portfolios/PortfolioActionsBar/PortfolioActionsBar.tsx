@@ -3,8 +3,6 @@ import { useDeletePortfolio } from "../../../hooks/portfolios/portfolioHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
 import Confirmation from "../../general/Confirmation/Confirmation";
-import Overlay from "../../general/Overlay/Overlay";
-import PortfolioInputForm from "../PortfolioFormSideBar/PortfolioInputForm/PortfolioInputForm";
 import "./PortfolioActionsBar.css";
 
 const { bemBlock, bemElement } = bemHelper("portfolio-actions-bar");
@@ -18,19 +16,12 @@ const PortfolioActionsBar = ({
   portfolioName,
 }: PortfolioViewSideBarProps) => {
   const [isDeleteOverlayOpen, setIsDeleteOverlayOpen] = useState(false);
-  const [isAddOverlayOpen, setIsAddOverlayOpen] = useState(false);
   const deletePortfolio = useDeletePortfolio();
 
   return (
     <div className={bemBlock(className)}>
       <div role={"columnheader"} className={bemElement("heading")}>
         {"Actions"}
-      </div>
-      <div
-        className={bemElement("entry")}
-        onClick={() => setIsAddOverlayOpen(true)}
-      >
-        {"Add Portfolio"}
       </div>
       <div
         className={bemElement("entry")}
@@ -50,13 +41,6 @@ const PortfolioActionsBar = ({
         }}
         onCancel={() => setIsDeleteOverlayOpen(false)}
       />
-      <Overlay
-        open={isAddOverlayOpen}
-        title={"Add a new Portfolio"}
-        onClose={() => setIsAddOverlayOpen(false)}
-      >
-        <PortfolioInputForm onConfirm={() => setIsAddOverlayOpen(false)} />
-      </Overlay>
     </div>
   );
 };

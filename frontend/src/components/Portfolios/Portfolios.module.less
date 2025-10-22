@@ -1,0 +1,64 @@
+@import (reference) "src/theme/definitions.less";
+
+.container {
+  padding: @double-spacing;
+  width: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: auto 1fr 15rem;
+  grid-template-areas:
+    "sideBar header header"
+    "sideBar content orderSideBar";
+  gap: @triple-spacing @quad-spacing;
+
+  @media (max-width: @breakpoint-tablet) {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "content";
+    gap: @default-spacing;
+  }
+}
+
+.header {
+  grid-area: header;
+  border-bottom: #aaa solid 1px;
+}
+
+.sideBar {
+  grid-area: sideBar;
+
+  @media (max-width: @breakpoint-tablet) {
+    display: none;
+  }
+}
+
+.content {
+  grid-area: content;
+  align-self: flex-start;
+
+  display: flex;
+  flex-direction: column;
+  gap: @triple-spacing;
+
+  @media (max-width: @breakpoint-tablet) {
+    gap: @double-spacing;
+  }
+}
+
+.orderSideBar {
+  grid-area: orderSideBar;
+  position: sticky;
+  top: @quad-spacing;
+  height: fit-content;
+
+  @media (max-width: @breakpoint-tablet) {
+    display: none;
+  }
+}
+
+.drawerContent {
+  padding: @double-spacing;
+  max-width: 100vw;
+  width: 20rem;
+}

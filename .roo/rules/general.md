@@ -1,0 +1,2 @@
+- Keep code comments to an absolute minimum. Only for information that is not immediately clear from the code, it might be okay to put code comments. Those comments should not explain what happens, but rather document a decision that might otherwise not be clear afterwards.
+- In this repository, functional style code is preferred over classes.

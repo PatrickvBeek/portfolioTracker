@@ -1,4 +1,4 @@
-import { Tab, Tabs } from "@mui/material";
+import { Tab, Tabs, styled } from "@mui/material";
 import { FC } from "react";
 
 export const Navigation: FC<{
@@ -8,41 +8,38 @@ export const Navigation: FC<{
 }> = ({ tabs, selectedTab, onSelect }) => {
   return (
     <div role={"navigation"}>
-      <Tabs
+      <StyledTabs
         value={selectedTab}
         onChange={(_, tab) => onSelect(tab)}
         textColor="primary"
-        sx={{
-          "& .MuiTabs-indicator": {
-            display: "none",
-          },
-        }}
       >
         {tabs.map((tab) => (
-          <Tab
-            sx={{
-              color: "var(--theme-tint)",
-              fontWeight: "bold",
-              fontSize: "var(--font-large1)",
-
-              // to make the left icon aligned with the layout width
-              marginLeft: "calc(-1 * var(--default-spacing))",
-
-              ":hover": {
-                color: "white",
-                cursor: "pointer",
-              },
-
-              "&.Mui-selected": {
-                color: "white",
-              },
-            }}
-            key={tab}
-            label={tab}
-            value={tab}
-          />
+          <StyledTab key={tab} label={tab} value={tab} />
         ))}
-      </Tabs>
+      </StyledTabs>
     </div>
   );
 };
+
+const StyledTabs = styled(Tabs)({
+  "& .MuiTabs-indicator": {
+    display: "none",
+  },
+});
+
+const StyledTab = styled(Tab)(() => ({
+  color: "var(--theme-tint)",
+  fontWeight: "bold",
+  fontSize: "var(--font-large1)",
+  // to make the left icon aligned with the layout width
+  marginLeft: "calc(-1 * var(--default-spacing))",
+
+  "&:hover": {
+    color: "white",
+    cursor: "pointer",
+  },
+
+  "&.Mui-selected": {
+    color: "white",
+  },
+}));

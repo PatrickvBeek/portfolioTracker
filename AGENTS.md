@@ -13,7 +13,7 @@ This file provides guidance to agents when working with code in this repository.
 - Components using `bemHelper` + `.css` files are deprecated → migrate to `.module.less`
 - Component logic goes in `<Component>.logic.ts` files, not inline in components
 - MUI styling changes must be made in `theme.ts`, never inline styles
-- LESS files must use predefined variables from `frontend/src/definitions.less`
+- LESS files must use predefined variables from `frontend/src/theme/definitions.less`
 
 ## Non-Obvious Testing Patterns
 

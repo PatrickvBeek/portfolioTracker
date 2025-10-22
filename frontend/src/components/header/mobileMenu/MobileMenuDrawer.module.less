@@ -1,0 +1,40 @@
+@import (reference) "src/theme/definitions.less";
+
+.drawerPaper {
+  width: 280px;
+  box-sizing: border-box;
+}
+
+.drawerContent {
+  width: 280px;
+  padding: @default-spacing 0;
+}
+
+.navigationSection {
+  margin-bottom: @default-spacing;
+}
+
+.menuItem {
+  min-height: 48px;
+  padding: @half-spacing @default-spacing;
+  display: flex;
+  align-items: center;
+  gap: @half-spacing;
+}
+
+.selectedTab {
+  background-color: var(--theme-tint-soft);
+
+  .tabText {
+    color: var(--theme) !important;
+    font-weight: 600;
+  }
+}
+
+.tabText {
+  font-size: var(--font-large1) !important;
+}
+
+.actionText {
+  font-size: var(--font-base);
+}
