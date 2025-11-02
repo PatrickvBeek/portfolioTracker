@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import {
   Box,
   Divider,
@@ -22,6 +23,24 @@ interface MobileMenuDrawerProps {
   selectedTab: string;
   onTabSelect: (tab: string) => void;
 }
+
+const StyledIcon = styled.i`
+  color: var(--theme);
+`;
+
+const StyledTabText = styled(ListItemText)`
+  .MuiListItemText-primary {
+    font-size: var(--font-large1);
+  }
+`;
+
+const StyledSelectedTabText = styled(ListItemText)`
+  .MuiListItemText-primary {
+    font-size: var(--font-large1);
+    color: var(--theme);
+    font-weight: 600;
+  }
+`;
 
 const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
   open,
@@ -82,10 +101,11 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                   onClick={() => handleTabClick(tab)}
                   className={`${styles.menuItem} ${tab === selectedTab ? styles.selectedTab : ""}`}
                 >
-                  <ListItemText
-                    primary={tab}
-                    classes={{ primary: styles.tabText }}
-                  />
+                  {tab === selectedTab ? (
+                    <StyledSelectedTabText primary={tab} />
+                  ) : (
+                    <StyledTabText primary={tab} />
+                  )}
                 </ListItemButton>
               </ListItem>
             ))}
@@ -100,10 +120,7 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                 onClick={handleImportClick}
                 className={styles.menuItem}
               >
-                <i
-                  className="fa-solid fa-file-arrow-up"
-                  style={{ color: "var(--theme)" }}
-                />
+                <StyledIcon className="fa-solid fa-file-arrow-up" />
                 <ListItemText
                   primary="Import Data"
                   classes={{ primary: styles.actionText }}
@@ -116,10 +133,7 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                 onClick={handleExportClick}
                 className={styles.menuItem}
               >
-                <i
-                  className="fa-solid fa-file-arrow-down"
-                  style={{ color: "var(--theme)" }}
-                />
+                <StyledIcon className="fa-solid fa-file-arrow-down" />
                 <ListItemText
                   primary="Export Data"
                   classes={{ primary: styles.actionText }}
@@ -132,10 +146,7 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
                 onClick={handleApiKeysClick}
                 className={styles.menuItem}
               >
-                <i
-                  className="fa-solid fa-key"
-                  style={{ color: "var(--theme)" }}
-                />
+                <StyledIcon className="fa-solid fa-key" />
                 <ListItemText
                   primary="Manage API Keys"
                   classes={{ primary: styles.actionText }}

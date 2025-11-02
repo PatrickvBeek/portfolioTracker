@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import { DialogActions, DialogContent } from "@mui/material";
 import { ReactNode } from "react";
 import { Button } from "../Button";
@@ -14,6 +15,11 @@ export type ConfirmationProps = {
   primary?: "confirm" | "cancel";
 };
 
+const StyledDialogActions = styled(DialogActions)`
+  gap: 8px;
+  justify-content: flex-end;
+`;
+
 const Confirmation = ({
   title,
   body,
@@ -28,7 +34,7 @@ const Confirmation = ({
     <Overlay open={open} onClose={onCancel} title={title}>
       <>
         <DialogContent>{body}</DialogContent>
-        <DialogActions sx={{ gap: 1, justifyContent: "flex-end" }}>
+        <StyledDialogActions>
           <Button
             onClick={onCancel}
             label={cancelLabel}
@@ -41,7 +47,7 @@ const Confirmation = ({
             isPrimary={primary === "confirm"}
             autoFocus={primary === "confirm"}
           />
-        </DialogActions>
+        </StyledDialogActions>
       </>
     </Overlay>
   );

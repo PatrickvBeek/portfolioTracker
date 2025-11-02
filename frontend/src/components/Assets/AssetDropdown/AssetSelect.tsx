@@ -1,4 +1,5 @@
-import { Autocomplete, Box, TextField } from "@mui/material";
+import styled from "@emotion/styled";
+import { Autocomplete, TextField } from "@mui/material";
 import { Asset } from "pt-domain";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { bemHelper } from "../../../utility/bemHelper";
@@ -7,6 +8,12 @@ import { DropdownProps } from "../../general/Dropdown/Dropdown";
 import "./AssetSelect.css";
 
 const { bemBlock, bemElement } = bemHelper("asset-select");
+
+const StyledOptionItem = styled.li`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
 
 export type AssetDropdownProps = Pick<
   DropdownProps,
@@ -41,16 +48,7 @@ const AssetDropdown = ({
       renderOption={(props, asset) => {
         const { key, ...restProps } = props;
         return (
-          <Box
-            component={"li"}
-            key={key}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-            }}
-            {...restProps}
-          >
+          <StyledOptionItem key={key} {...restProps}>
             <div className={bemElement("option-main-text")}>
               {asset.displayName}
             </div>
@@ -62,7 +60,7 @@ const AssetDropdown = ({
                 className={bemElement("option-fine-print")}
               >{`Symbol: ${asset.symbol}`}</div>
             ) : null}
-          </Box>
+          </StyledOptionItem>
         );
       }}
     />

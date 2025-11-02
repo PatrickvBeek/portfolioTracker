@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import {
   Paper,
   Table,
@@ -27,6 +28,27 @@ type TableProps<TData> = {
   renderSubComponent?: (props: { row: Row<TData> }) => React.ReactElement;
 };
 
+const StyledHeaderRow = styled(TableRow)`
+  background-color: var(--theme);
+`;
+
+const StyledHeaderCell = styled(TableCell)`
+  color: white;
+  font-weight: bold;
+  font-size: var(--font-base);
+`;
+
+const StyledFooterRow = styled(TableRow)`
+  background-color: #e9e9e9;
+  border-top: solid;
+`;
+
+const StyledFooterCell = styled(TableCell)`
+  color: #000000;
+  font-size: var(--font-base);
+  font-weight: bold;
+`;
+
 function CustomTable<T>({
   data,
   columns,
@@ -46,30 +68,20 @@ function CustomTable<T>({
       <Table>
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow
-              key={headerGroup.id}
-              sx={{
-                backgroundColor: "var(--theme)",
-              }}
-            >
+            <StyledHeaderRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableCell
+                <StyledHeaderCell
                   key={header.id}
                   colSpan={header.colSpan}
                   align={getAlignment(header)}
-                  style={{
-                    color: "white",
-                    fontWeight: "bold",
-                    fontSize: "var(--font-base)",
-                  }}
                 >
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
                   )}
-                </TableCell>
+                </StyledHeaderCell>
               ))}
-            </TableRow>
+            </StyledHeaderRow>
           ))}
         </TableHead>
         <TableBody>
@@ -101,22 +113,11 @@ function CustomTable<T>({
               )
             ) &&
             table.getFooterGroups().map((footerGroup) => (
-              <TableRow
-                key={footerGroup.id}
-                sx={{
-                  backgroundColor: "#e9e9e9",
-                  borderTop: "solid",
-                }}
-              >
+              <StyledFooterRow key={footerGroup.id}>
                 {footerGroup.headers.map((header) => (
-                  <TableCell
+                  <StyledFooterCell
                     key={header.id}
                     align={getAlignment(header)}
-                    sx={{
-                      color: "black",
-                      fontSize: "var(--font-base)",
-                      fontWeight: "bold",
-                    }}
                   >
                     {header.isPlaceholder
                       ? null
@@ -124,9 +125,9 @@ function CustomTable<T>({
                           header.column.columnDef.footer,
                           header.getContext()
                         )}
-                  </TableCell>
+                  </StyledFooterCell>
                 ))}
-              </TableRow>
+              </StyledFooterRow>
             ))}
         </TableFooter>
       </Table>

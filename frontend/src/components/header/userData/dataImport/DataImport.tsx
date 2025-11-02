@@ -1,6 +1,7 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { FC, ReactElement, useId } from "react";
 import { InfoDialog } from "../../../general/InfoDialog/InfoDialog";
+import { StyledIcon } from "../../../general/StyledComponents";
 import styles from "./DataImport.module.less";
 import { useDataImport } from "./useDataImport";
 
@@ -17,10 +18,7 @@ export const DataImport: FC = (): ReactElement => {
     <>
       <Tooltip title={"Import all your data from a file"}>
         <IconButton onClick={handleButtonClick}>
-          <i
-            className={"fa-file-arrow-up fa-solid fa-lg"}
-            style={{ color: "white" }}
-          />
+          <StyledIcon className={"fa-file-arrow-up fa-solid fa-lg"} />
         </IconButton>
       </Tooltip>
 
