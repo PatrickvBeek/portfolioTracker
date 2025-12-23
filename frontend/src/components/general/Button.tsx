@@ -1,8 +1,6 @@
-import {
-  Button as MuiButton,
-  ButtonProps as MuiButtonProps,
-} from "@mui/material";
+import { ButtonProps as MuiButtonProps } from "@mui/material";
 import { ReactElement, forwardRef } from "react";
+import { StyledMuiButton } from "./StyledComponents";
 
 export interface ButtonProps {
   onClick: () => void;
@@ -39,9 +37,9 @@ export const Button = forwardRef<HTMLButtonElement, ExtendedButtonProps>(
     ref
   ): ReactElement => {
     return (
-      <MuiButton
+      <StyledMuiButton
         ref={ref}
-        variant={isPrimary ? "contained" : "outlined"}
+        isPrimary={isPrimary}
         onClick={onClick}
         disabled={isDisabled}
         className={className}
@@ -49,7 +47,7 @@ export const Button = forwardRef<HTMLButtonElement, ExtendedButtonProps>(
         {...muiProps}
       >
         {label}
-      </MuiButton>
+      </StyledMuiButton>
     );
   }
 );

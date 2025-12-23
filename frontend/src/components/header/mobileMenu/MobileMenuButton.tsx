@@ -1,5 +1,6 @@
 import { IconButton, Tooltip } from "@mui/material";
 import React from "react";
+import { StyledIcon } from "../../general/StyledComponents";
 import styles from "./MobileMenuButton.module.less";
 
 interface MobileMenuButtonProps {
@@ -14,7 +15,7 @@ const MobileMenuButton: React.FC<MobileMenuButtonProps> = ({ onClick }) => {
         aria-label="Open navigation menu"
         className={styles.menuButton}
       >
-        <i className="fa-solid fa-bars fa-lg" style={{ color: "white" }} />
+        <StyledIcon className="fa-solid fa-bars fa-lg" />
       </IconButton>
     </Tooltip>
   );

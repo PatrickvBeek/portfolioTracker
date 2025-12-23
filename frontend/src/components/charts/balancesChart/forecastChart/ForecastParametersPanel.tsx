@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import {
   ExpandMore as ExpandMoreIcon,
   Info as InfoIcon,
@@ -24,6 +25,30 @@ import {
   useForecastScenarioParams,
 } from "./ForecastChart.logic";
 import styles from "./ForecastParametersPanel.module.less";
+
+const StyledTextField = styled(TextField)`
+  width: 14ch;
+`;
+
+const StyledScenarioTitle = styled(Typography)`
+  margin-bottom: 4px;
+`;
+
+const StyledScenarioDescription = styled(Typography)`
+  margin-bottom: 8px;
+`;
+
+const StyledChipContainer = styled(Box)`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const StyledInfoContainer = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
 
 interface ForecastParametersPanelProps {
   portfolioName: string;
@@ -150,7 +175,7 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
             <Typography variant="body2" className={styles.label}>
               Monthly Contributions
             </Typography>
-            <TextField
+            <StyledTextField
               type="number"
               value={monthlyContributionInput}
               onChange={handleMonthlyContributionChange}
@@ -159,7 +184,6 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
                 htmlInput: { min: 0, step: 50 },
                 input: { startAdornment: "€" },
               }}
-              sx={{ width: "14ch" }}
             />
           </Box>
 
@@ -194,13 +218,13 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
         <Box className={styles.scenarioDetails}>
           {scenarioDetails ? (
             <Box>
-              <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+              <StyledScenarioTitle variant="subtitle2">
                 {`Forecast Scenario: ${scenarioDetails.displayInfo.name}`}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              </StyledScenarioTitle>
+              <StyledScenarioDescription variant="body2" color="text.secondary">
                 {scenarioDetails.displayInfo.description}
-              </Typography>
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+              </StyledScenarioDescription>
+              <StyledChipContainer>
                 <Chip
                   label={`Annual Return: ${scenarioDetails.displayInfo.annualReturn}`}
                   size="small"
@@ -211,17 +235,17 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
                   size="small"
                   variant="outlined"
                 />
-              </Box>
+              </StyledChipContainer>
             </Box>
           ) : (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <StyledInfoContainer>
               <InfoIcon color="disabled" fontSize="small" />
               <Typography variant="body2" color="text.secondary">
                 {parameters.scenario === "portfolio"
                   ? "Portfolio historical data insufficient for analysis"
                   : "Scenario parameters not available"}
               </Typography>
-            </Box>
+            </StyledInfoContainer>
           )}
         </Box>
       </AccordionDetails>

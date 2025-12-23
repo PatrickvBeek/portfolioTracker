@@ -1,5 +1,6 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { FC } from "react";
+import { StyledIcon } from "../../general/StyledComponents";
 import ApiKeysOverlay from "./ApiKeysOverlay";
 import { useApiKeysManager } from "./useApiKeysManager";
 
@@ -17,7 +18,7 @@ export const ApiKeys: FC = () => {
     <div className={"styles.container"}>
       <Tooltip title="Manage API keys">
         <IconButton onClick={openApiKeys}>
-          <i className="fa-solid fa-key" style={{ color: "white" }} />
+          <StyledIcon className="fa-solid fa-key" />
         </IconButton>
       </Tooltip>
       <ApiKeysOverlay

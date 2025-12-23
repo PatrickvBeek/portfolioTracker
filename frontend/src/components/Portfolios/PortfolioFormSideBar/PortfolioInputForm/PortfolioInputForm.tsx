@@ -19,9 +19,7 @@ const PortfolioInputForm = ({ onConfirm }: { onConfirm?: () => void }) => {
       />
       <div>
         <Button
-          sx={{
-            marginTop: "1.25rem",
-          }}
+          sx={{ marginTop: "1.25rem" }}
           onClick={() => {
             fieldContent && addPortfolio(newPortfolioFromName(fieldContent));
             setFieldContent("");
