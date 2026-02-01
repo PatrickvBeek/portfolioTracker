@@ -40,7 +40,7 @@ export const getPriceResponse = (
   dailyPrices: [Date, number][]
 ) => ({
   [symbol]: {
-    "Time Series (Daily)": Object.fromEntries(
+    "Weekly Time Series": Object.fromEntries(
       sort(dailyPrices, ([date]) => date.getTime(), true).map(
         ([date, price]) => [date, getDailyPriceResponse(price)]
       )
@@ -50,7 +50,7 @@ export const getPriceResponse = (
 
 const getDailyPriceResponse = (
   price: number
-): AlphaVantageDailyResult["Time Series (Daily)"][string] => {
+): AlphaVantageDailyResult["Weekly Time Series"][string] => {
   return {
     "1. open": price.toString(),
     "2. high": price.toString(),

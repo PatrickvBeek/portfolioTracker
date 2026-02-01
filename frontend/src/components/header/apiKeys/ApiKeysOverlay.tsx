@@ -27,6 +27,25 @@ const ApiKeysOverlay: React.FC<ApiKeysOverlayProps> = ({
           text={yahooKey}
           onChange={(e) => onYahooKeyChange(e.target.value)}
         />
+        <div className={styles.info}>
+          <div className={styles.infoText}>
+            You can get a free API key from{" "}
+            <a
+              href="https://financeapi.net"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              financeapi.net
+            </a>
+          </div>
+          <div className={styles.benefit}>
+            With YH API access the app provides more fine granular price updates
+            and higher request limits. Otherwise it will try to use AlphaVantage
+            as a fallback with only weekly prices information and throttled
+            request rate.
+          </div>
+        </div>
         <Button onClick={onSubmit} label={"Submit"} isPrimary />
       </div>
     </Overlay>
