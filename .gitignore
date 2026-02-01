@@ -5,8 +5,7 @@ frontend/node_modules
 node_modules/
 /.pnp
 .pnp.js
-**/*.d.ts
-**/*.d.ts.map
+
 
 # testing
 /coverage

@@ -1,5 +1,29 @@
+@import (reference) "src/theme/definitions.less";
+
 .form {
   display: flex;
   flex-direction: column;
   width: 30em;
+}
+
+.info {
+  margin: @default-spacing 0;
+  font-size: @font-small1;
+}
+
+.infoText {
+  margin-bottom: @half-spacing;
+}
+
+.link {
+  color: @light-blue;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.benefit {
+  color: @light-gray;
 }
