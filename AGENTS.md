@@ -8,7 +8,7 @@ This file provides guidance to agents when working with code in this repository.
 - **Watch mode**: `cd domain && yarn vitest watch` or `cd frontend && yarn vitest watch`
 - **Full test suite**: `yarn test` (runs both domain and frontend tests)
 - **Type checking**: `yarn tsc` (root), `cd domain && yarn tsc`, `cd frontend && yarn tsc`
-- **Linting**: `yarn lint` (runs eslint on all files)
+- **Linting**: `yarn lint` (runs oxlint on all files)
 - **Lint fix**: `yarn lint:fix` (auto-fixes linting issues)
 - **Architecture validation**: `yarn architecture-tests` (runs dependency-cruiser to enforce domain isolation)
 - **Format check**: `yarn format` (prettier --check)
@@ -43,8 +43,8 @@ This file provides guidance to agents when working with code in this repository.
 ### Formatting
 
 - Prettier with `trailingComma: "es5"` (see package.json)
-- ESLint enforces TypeScript best practices
-- No inline comments unless specifically requested
+  - Oxlint enforces TypeScript best practices
+  - No inline comments unless specifically requested
 - Consistent indentation (2 spaces)
 
 ### File Organization

@@ -12,7 +12,8 @@ export interface ButtonProps {
 }
 
 interface ExtendedButtonProps
-  extends ButtonProps,
+  extends
+    ButtonProps,
     Omit<
       MuiButtonProps,
       | "onClick"
