@@ -18,14 +18,5 @@ export default defineConfig(() => {
         exclude: ["node_modules/", "src/setupTests.ts"],
       },
     },
-    server: {
-      proxy: {
-        "/api": {
-          target: "http://localhost:6060",
-          changeOrigin: true,
-          secure: false,
-        },
-      },
-    },
   };
 });
