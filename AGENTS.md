@@ -4,17 +4,17 @@ This file provides guidance to agents when working with code in this repository.
 
 ## Build/Lint/Test Commands
 
-- **Single test**: `cd domain && yarn vitest run <path>` or `cd frontend && yarn vitest run <path>`
-- **Watch mode**: `cd domain && yarn vitest watch` or `cd frontend && yarn vitest watch`
-- **Full test suite**: `yarn test` (runs both domain and frontend tests)
-- **Type checking**: `yarn tsc` (root), `cd domain && yarn tsc`, `cd frontend && yarn tsc`
-- **Linting**: `yarn lint` (runs oxlint on all files)
-- **Lint fix**: `yarn lint:fix` (auto-fixes linting issues)
-- **Architecture validation**: `yarn architecture-tests` (runs dependency-cruiser to enforce domain isolation)
-- **Format check**: `yarn format` (prettier --check)
-- **Format fix**: `yarn format:fix` (prettier --write)
-- **Build frontend**: `yarn build` or `yarn workspace frontend build`
-- **Start dev server**: `yarn start` or `yarn workspace frontend start`
+- **Single test**: `cd domain && pnpm vitest run <path>` or `cd frontend && pnpm vitest run <path>`
+- **Watch mode**: `cd domain && pnpm vitest watch` or `cd frontend && pnpm vitest watch`
+- **Full test suite**: `pnpm test` (runs both domain and frontend tests)
+- **Type checking**: `pnpm tsc` (root), `cd domain && pnpm tsc`, `cd frontend && pnpm tsc`
+- **Linting**: `pnpm lint` (runs oxlint on all files)
+- **Lint fix**: `pnpm lint:fix` (auto-fixes linting issues)
+- **Architecture validation**: `pnpm architecture-tests` (runs dependency-cruiser to enforce domain isolation)
+- **Format check**: `pnpm fmt:check`
+- **Format fix**: `pnpm fmt`
+- **Build frontend**: `pnpm build` or `pnpm --filter frontend build`
+- **Start dev server**: `pnpm start` or `pnpm --filter frontend start`
 
 ## Code Style Guidelines
 
@@ -23,12 +23,13 @@ This file provides guidance to agents when working with code in this repository.
 - Domain imports in frontend: Use alias `"pt-domain"` not relative paths (e.g., `import { Order } from "pt-domain"`)
 - Local imports: Prefer relative paths for same-package imports
 - Group imports: external libs → pt-domain → local modules
+- `pt-domain` is a workspace dependency linked via `"pt-domain": "workspace:*"` in frontend package.json
 
 ### Types
 
 - Use TypeScript strict mode (enforced)
 - Define types in `.entities.ts` files for domain models
-- Expect explicit type annotations, avoid `any`
+- Expect explicit type annotations, avoid `any` (oxlint enforces this)
 - Use union types for variants (e.g., `BatchType`)
 - Test types use pattern: `type NameProps = Props<{ required: string; optional?: number }>`
 
@@ -42,9 +43,9 @@ This file provides guidance to agents when working with code in this repository.
 
 ### Formatting
 
-- Prettier with `trailingComma: "es5"` (see package.json)
-  - Oxlint enforces TypeScript best practices
-  - No inline comments unless specifically requested
+- oxfmt config: `trailingComma: es5`, `printWidth: 80` (see `.oxfmtrc.json`)
+- Oxlint enforces TypeScript best practices with extensive rule set
+- No inline comments unless specifically requested
 - Consistent indentation (2 spaces)
 
 ### File Organization
@@ -66,7 +67,8 @@ This file provides guidance to agents when working with code in this repository.
 ## Critical Architecture Rules
 
 - **Domain isolation**: Domain layer strictly forbidden from importing frontend code (enforced by dependency-cruiser)
-- **Monorepo structure**: Domain exports via `"pt-domain"` package name, frontend consumes it
+- **Monorepo structure**: pnpm workspaces with `pt-domain` as domain, `frontend` as React app
+- **Workspace configuration**: `.pnpm-workspace.yaml` defines packages: `domain` and `frontend`
 
 ## React Patterns
 
@@ -96,14 +98,23 @@ This file provides guidance to agents when working with code in this repository.
 
 ## Common Dependencies
 
+- **Package manager**: pnpm (monorepo with workspaces)
 - **Date handling**: `moment` (consistent across domain and frontend)
 - **Utils**: `radash` for functional utilities (`omit`, `shake`, `sort`)
 - **UUID**: `uuid` package for unique identifiers
 - **Icons**: FontAwesome (`@fortawesome/fontawesome-free`)
 - **Charts**: Recharts, D3 arrays/scaling
+- **Dev tools**: oxlint (linting), oxfmt (formatting), syncpack (dependency version sync)
 
 ## TypeScript Config
 
 - ES modules: `"type": "module"` in package.json
 - Paths: No custom path mappings - use `"pt-domain"` alias
 - Strict mode enabled
+- Workspace dependencies use `"workspace:*"` protocol
+
+## Important Notes
+
+- **syncpack**: Uses `.syncpackrc.yml` configuration with workspace packages ignored via `versionGroups`
+- **pnpm-lock.yaml**: Single lockfile at root for all workspaces
+- **node_modules**: pnpm uses symlinks and shared content-addressable storage for efficiency
