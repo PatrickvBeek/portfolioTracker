@@ -1,38 +1,35 @@
 {
   "private": true,
   "type": "module",
-  "workspaces": [
-    "domain",
-    "frontend"
-  ],
   "scripts": {
-    "build": "yarn workspace frontend build",
-    "start": "yarn workspace frontend start",
-    "architecture-tests": "yarn depcruise domain/src frontend/src",
-    "test": "yarn workspace pt-domain test && yarn workspace frontend test",
-    "tsc": "tsc --build",
-    "tsc:watch": "tsc --build --watch",
+    "build": "pnpm --filter frontend build",
+    "start": "pnpm --filter frontend start",
+    "architecture-tests": "pnpm exec depcruise domain/src frontend/src",
+    "test": "pnpm --filter pt-domain test && pnpm --filter frontend test",
+    "tsc": "pnpm exec tsc --build",
+    "tsc:watch": "pnpm exec tsc --build --watch",
     "prepare": "husky",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt:check": "oxfmt --check",
     "fmt": "oxfmt"
   },
-  "dependencies": {},
   "devDependencies": {
     "dependency-cruiser": "^16.10.4",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "oxfmt": "^0.28.0",
     "oxlint": "^1.43.0",
-    "syncpack": "^13.0.4"
+    "syncpack": "^13.0.4",
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "oxlint --fix"
+      "pnpm oxlint --fix"
     ],
     "*.{json,md,css,less,html}": [
-      "oxfmt"
+      "pnpm oxfmt"
     ]
-  }
+  },
+  "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a"
 }

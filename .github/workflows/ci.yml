@@ -7,29 +7,32 @@ jobs:
       - name: Checkout repository code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "yarn"
+          cache: "pnpm"
 
       - name: Install Dependencies at Root
-        run: yarn install
+        run: pnpm install
 
       - name: Assert synced dependencies
-        run: yarn syncpack list-mismatches
+        run: pnpm exec syncpack list-mismatches
 
       - name: Check architecture
-        run: yarn run architecture-tests
+        run: pnpm run architecture-tests
 
       - name: Lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Prettier
-        run: yarn fmt:check
+        run: pnpm fmt:check
 
       - name: TypeScript Check
-        run: yarn tsc
+        run: pnpm tsc
 
       - name: Unit Tests
-        run: yarn test
+        run: pnpm test
