@@ -1,6 +1,61 @@
+@import (reference) "src/theme/definitions.less";
+
 .container {
   position: relative;
   width: 100%;
+
+  :global(.recharts-responsive-container) {
+    aspect-ratio: 2.5 / 1;
+
+    @media (max-width: 768px) {
+      aspect-ratio: 1.5 / 1;
+    }
+  }
+}
+
+.container :global(.recharts-legend-wrapper) {
+  padding: 0 @half-spacing;
+
+  @media (max-width: @breakpoint-mobile) {
+    padding: 0;
+  }
+}
+
+.container :global(.recharts-legend) {
+  display: flex;
+
+  @media (max-width: @breakpoint-mobile) {
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: @font-small1;
+
+    -ms-overflow-style: none;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+.container :global(.recharts-legend-item) {
+  @media (max-width: @breakpoint-mobile) {
+    padding-right: @half-spacing;
+    flex-shrink: 0;
+  }
+}
+
+.container :global(.recharts-legend-wrapper.align-bottom) {
+  margin-top: @half-spacing;
+}
+
+:global(.recharts-wrapper) {
+  min-height: 200px;
+
+  @media (max-width: 768px) {
+    min-height: 150px;
+  }
 }
 
 .overlay {

@@ -30,7 +30,7 @@ export const TotalValueChart: FC<{ portfolioName: string }> = ({
   return (
     <ChartContainer isLoading={isLoading}>
       <LineChart data={chartData}>
-        <Legend />
+        <Legend verticalAlign="bottom" />
         <XAxis {...getTimeAxisProps(chartData)} />
         <YAxis
           {...getAxisProps(chartData)}

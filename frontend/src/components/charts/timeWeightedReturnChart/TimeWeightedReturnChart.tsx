@@ -50,7 +50,7 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
       </div>
       <ChartContainer isLoading={isLoading}>
         <AreaChart data={chartData}>
-          <Legend />
+          <Legend verticalAlign="bottom" />
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis
             {...getAxisProps(chartData, 5, false)}

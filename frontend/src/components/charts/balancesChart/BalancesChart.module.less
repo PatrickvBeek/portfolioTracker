@@ -11,4 +11,15 @@
   justify-content: space-between;
   align-items: center;
   padding-right: 4px; // to align with chart frame
+
+  @media (max-width: @breakpoint-mobile) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: @default-spacing;
+    padding-right: 0;
+  }
+}
+
+.mobileSelect {
+  width: 100%;
 }

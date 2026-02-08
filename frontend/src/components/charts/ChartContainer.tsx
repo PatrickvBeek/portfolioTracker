@@ -13,8 +13,6 @@ export const ChartContainer: FC<{
         <LoadingIndicator />
       </div>
     )}
-    <ResponsiveContainer aspect={2.5} width={"100%"}>
-      {children}
-    </ResponsiveContainer>
+    <ResponsiveContainer width={"100%"}>{children}</ResponsiveContainer>
   </div>
 );

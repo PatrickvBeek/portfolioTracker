@@ -1,5 +1,13 @@
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
 import { FC, useState } from "react";
+import { useBreakpoint } from "../../../theme/breakpoints";
 import { Headline } from "../../general/headline/Headline";
 import styles from "./BalancesChart.module.less";
 import { ForecastChart } from "./forecastChart/ForecastChart";
@@ -10,6 +18,7 @@ import { TotalValueChart } from "./totalValueChart/TotalValueChart";
 export const PortfolioBalancesChart: FC<{ portfolioName: string }> = ({
   portfolioName,
 }) => {
+  const { isMobile } = useBreakpoint();
   const [viewMode, setViewMode] = useState<ViewMode>("total");
 
   const ChartsComponents: Record<ViewMode, FC<{ portfolioName: string }>> = {
@@ -33,24 +42,40 @@ export const PortfolioBalancesChart: FC<{ portfolioName: string }> = ({
     <div className={styles.container}>
       <div className={styles.headingContainer}>
         <Headline text={"Balances"} />
-        <ToggleButtonGroup
-          value={viewMode}
-          exclusive
-          onChange={handleViewModeChange}
-          aria-label="chart view mode"
-          size="small"
-          color="primary"
-        >
-          <ToggleButton value="total" aria-label="total value">
-            Total Value
-          </ToggleButton>
-          <ToggleButton value="profitLoss" aria-label="profit/loss">
-            Profit / Loss
-          </ToggleButton>
-          <ToggleButton value="forecast" aria-label="forecast">
-            Forecast
-          </ToggleButton>
-        </ToggleButtonGroup>
+
+        {isMobile ? (
+          <FormControl className={styles.mobileSelect}>
+            <InputLabel>View Mode</InputLabel>
+            <Select
+              value={viewMode}
+              label="View Mode"
+              onChange={(e) => setViewMode(e.target.value as ViewMode)}
+            >
+              <MenuItem value="total">Total Value</MenuItem>
+              <MenuItem value="profitLoss">Profit / Loss</MenuItem>
+              <MenuItem value="forecast">Forecast</MenuItem>
+            </Select>
+          </FormControl>
+        ) : (
+          <ToggleButtonGroup
+            value={viewMode}
+            exclusive
+            onChange={handleViewModeChange}
+            aria-label="chart view mode"
+            size="small"
+            color="primary"
+          >
+            <ToggleButton value="total" aria-label="total value">
+              Total Value
+            </ToggleButton>
+            <ToggleButton value="profitLoss" aria-label="profit/loss">
+              Profit / Loss
+            </ToggleButton>
+            <ToggleButton value="forecast" aria-label="forecast">
+              Forecast
+            </ToggleButton>
+          </ToggleButtonGroup>
+        )}
       </div>
       {<SubChart portfolioName={portfolioName} />}
     </div>
