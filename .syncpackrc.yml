@@ -1,0 +1,5 @@
+versionGroups:
+  - label: "Ignore workspace package versions"
+    dependencyTypes:
+      - local
+    isIgnored: true

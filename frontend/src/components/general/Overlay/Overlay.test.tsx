@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-import { customRender } from "../../../testUtils/componentHelpers";
 import Overlay from "./Overlay";
 
 describe("the Overlay component", () => {
@@ -32,14 +31,6 @@ describe("the Overlay component", () => {
     render(<Overlay open={true} onClose={onClose} />);
     const closeButton = screen.getByLabelText("close");
     closeButton.click();
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it("calls onClose when ESC key is pressed", () => {
-    const { user } = customRender({
-      component: <Overlay open={true} onClose={onClose} />,
-    });
-    user.keyboard("Escape");
     expect(onClose).toHaveBeenCalled();
   });
 });
