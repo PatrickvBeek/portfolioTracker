@@ -13,8 +13,11 @@ import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
 import { Headline } from "../../general/headline/Headline";
 import { ChartContainer } from "../ChartContainer";
 import { getSplitColorGradientDef } from "../chartElements";
+import { ChartRange } from "../chartRange.types";
+import { ChartRangeSelector } from "../ChartRangeSelector";
 import {
   DEFAULT_LINE_PROPS,
+  filterChartDataByRange,
   getAxisProps,
   getTimeAxisProps,
 } from "../chartUtils";
@@ -28,9 +31,10 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
   portfolioName,
 }) => {
   const [benchmark, setBenchmark] = useState("");
+  const [range, setRange] = useState<ChartRange>("Max");
   const { isLoading, data } = usePerformanceChartData(portfolioName, benchmark);
 
-  const chartData = data || [];
+  const chartData = filterChartDataByRange(data || [], range);
 
   const { gradientDefinition, fillUrl, strokeUrl } = getSplitColorGradientDef(
     chartData,
@@ -41,19 +45,22 @@ export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
     <div>
       <div className={styles.header}>
         <Headline text={"Performance: Time Weighted Return"} />
-        <AssetDropdown
-          onChange={(isin) => setBenchmark(isin || "")}
-          label="Benchmark"
-          className={styles.benchmark_select}
-          filterAssets={(a) => !!a.symbol}
-        />
+        <div className={styles.controls}>
+          <ChartRangeSelector value={range} onChange={setRange} />
+          <AssetDropdown
+            onChange={(isin) => setBenchmark(isin || "")}
+            label="Benchmark"
+            className={styles.benchmark_select}
+            filterAssets={(a) => !!a.symbol}
+          />
+        </div>
       </div>
       <ChartContainer isLoading={isLoading}>
         <AreaChart data={chartData}>
           <Legend verticalAlign="bottom" />
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis
-            {...getAxisProps(chartData, 5, false)}
+            {...getAxisProps(chartData)}
             tickFormatter={(value) => Number(value).toFixed(0)}
             unit={" %"}
           />

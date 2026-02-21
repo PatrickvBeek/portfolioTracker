@@ -7,14 +7,30 @@ import moment from "moment";
 import { History } from "pt-domain";
 import { isNumber, omit, range, sort, unique } from "radash";
 import { XAxisProps, YAxisProps } from "recharts";
+import { CHART_RANGE_DAYS, ChartRange } from "./chartRange.types";
 import { ChartData, ChartDataPoint } from "./chartTypes";
 
 const MARGIN = 0.05;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+export const filterChartDataByRange = <Keys extends string>(
+  chartData: ChartData<Keys>,
+  range: ChartRange
+): ChartData<Keys> => {
+  const days = CHART_RANGE_DAYS[range];
+  if (range === "Max" || chartData.length === 0 || days == null) {
+    return chartData;
+  }
+
+  const now = moment().startOf("day").valueOf();
+  const rangeStart = now - days * MS_PER_DAY;
+
+  return chartData.filter((point) => point.timestamp >= rangeStart);
+};
 
 export function getAxisProps(
   chartData: ChartData<string>,
-  nTicks: number = 5,
-  zeroBased = true
+  nTicks: number = 5
 ): Partial<YAxisProps> {
   const values = chartData
     .map((point) => Object.values(omit(point, ["timestamp"])))
@@ -30,7 +46,7 @@ export function getAxisProps(
     tickFormatter: scale.tickFormat(nTicks),
     ticks: scale.ticks(nTicks),
     type: "number",
-    domain: [zeroBased ? 0 : yMin - MARGIN * diff, yMax + MARGIN * diff],
+    domain: [yMin - MARGIN * diff, yMax + MARGIN * diff],
   };
 }
 

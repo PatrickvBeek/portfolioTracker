@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import { FC, useState } from "react";
 import { useBreakpoint } from "../../../theme/breakpoints";
-import { Headline } from "../../general/headline/Headline";
 import styles from "./BalancesChart.module.less";
 import { ForecastChart } from "./forecastChart/ForecastChart";
 import { ProfitChart } from "./profitChart/ProfitChart";
@@ -41,8 +40,6 @@ export const PortfolioBalancesChart: FC<{ portfolioName: string }> = ({
   return (
     <div className={styles.container}>
       <div className={styles.headingContainer}>
-        <Headline text={"Balances"} />
-
         {isMobile ? (
           <FormControl className={styles.mobileSelect}>
             <InputLabel>View Mode</InputLabel>

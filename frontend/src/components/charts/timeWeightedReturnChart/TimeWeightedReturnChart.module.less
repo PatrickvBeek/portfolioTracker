@@ -2,10 +2,23 @@
 
 .benchmark_select {
   width: 24rem;
-  margin-right: 4px; // to align with chart frame
+  margin-right: 4px;
+  margin-left: @default-spacing;
 
   @media (max-width: 768px) {
     width: calc(100% - 4px);
+    margin-left: 0;
+  }
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
   }
 }
 
