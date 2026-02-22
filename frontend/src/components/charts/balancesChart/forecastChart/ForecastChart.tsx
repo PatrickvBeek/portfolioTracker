@@ -57,7 +57,7 @@ export const ForecastChart: FC<{ portfolioName: string }> = ({
           <Legend verticalAlign="bottom" />
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis
-            {...getAxisProps(chartData, 5, false)}
+            {...getAxisProps(chartData)}
             tickFormatter={(value) => Number(value / 1000).toString()}
             unit={" k€"}
           />
