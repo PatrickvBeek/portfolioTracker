@@ -64,6 +64,9 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
   const [monthlyContributionInput, setMonthlyContributionInput] = useState(
     parameters.monthlyContribution.toString()
   );
+  const [inflationRateInput, setInflationRateInput] = useState(
+    (parameters.inflationRate * 100).toString()
+  );
 
   const scenarioDetails = useForecastScenarioParams(
     portfolioName,
@@ -103,6 +106,16 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
 
     const value = parseFloat(inputValue) || 0;
     debouncedParameterChange({ ...parameters, monthlyContribution: value });
+  };
+
+  const handleInflationRateChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const inputValue = event.target.value;
+    setInflationRateInput(inputValue);
+
+    const value = parseFloat(inputValue) / 100 || 0;
+    debouncedParameterChange({ ...parameters, inflationRate: value });
   };
 
   const handleConfidenceLevelChange = (
@@ -183,6 +196,23 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
               slotProps={{
                 htmlInput: { min: 0, step: 50 },
                 input: { startAdornment: "€" },
+              }}
+            />
+          </Box>
+
+          {/* Inflation Rate */}
+          <Box className={styles.controlGroup}>
+            <Typography variant="body2" className={styles.label}>
+              Inflation Rate
+            </Typography>
+            <StyledTextField
+              type="number"
+              value={inflationRateInput}
+              onChange={handleInflationRateChange}
+              size="small"
+              slotProps={{
+                htmlInput: { min: 0, step: 0.5 },
+                input: { endAdornment: "%" },
               }}
             />
           </Box>

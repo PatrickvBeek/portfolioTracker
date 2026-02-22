@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { History } from "../portfolioHistory/history.entities";
 import {
+  applyInflationDiscount,
   getGeometricBrownianMotionParams,
   runGeometricBrownianMotionForecast,
 } from "./forecast.derivers";
 import { ForecastInput } from "./forecast.entities";
 
-const msPerMonth = 1000 * 60 * 60 * 24 * 30.44; // Average days per month
+const msPerMonth = 1000 * 60 * 60 * 24 * 30.44;
 
 describe("forecasting.derivers", () => {
   describe("runGeometricBrownianMotionForecast", () => {
@@ -127,7 +128,6 @@ describe("forecasting.derivers", () => {
     });
 
     it("should handle different time intervals correctly", () => {
-      // Create data with 3-month intervals instead of monthly
       const quarterlyHistory: History<number> = [
         { timestamp: 0, value: 100 },
         { timestamp: 3 * msPerMonth, value: 105 },
@@ -137,13 +137,109 @@ describe("forecasting.derivers", () => {
 
       const { mu, sigma } = getGeometricBrownianMotionParams(quarterlyHistory)!;
 
-      // Should normalize quarterly returns to monthly
-      // For consistent 5% quarterly returns, monthly should be approximately log(1.05)/3
       const expectedMonthlyMu = Math.log(1.05) / 3;
       expect(mu).toBeCloseTo(expectedMonthlyMu, 3);
 
-      // With consistent returns, sigma should still be close to 0
       expect(sigma).toBeCloseTo(0, 3);
+    });
+  });
+
+  describe("applyInflationDiscount", () => {
+    it("should return unchanged result when inflation rate is 0", () => {
+      const result = {
+        median: [1000, 2000, 3000],
+        mean: [1100, 2100, 3100],
+        confidenceLow: [800, 1800, 2800],
+        confidenceHigh: [1400, 2400, 3400],
+        cashFlows: [100, 200, 300],
+      };
+
+      const discounted = applyInflationDiscount(result, 0);
+
+      expect(discounted).toEqual(result);
+    });
+
+    it("should correctly discount values at 2% inflation over 12 months", () => {
+      const result = {
+        median: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
+        mean: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
+        confidenceLow: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
+        confidenceHigh: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
+        cashFlows: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
+      };
+
+      const discounted = applyInflationDiscount(result, 0.02);
+
+      expect(discounted.median[1]).toBeCloseTo(
+        6500 / Math.pow(1.02, 2 / 12),
+        1
+      );
+      expect(discounted.median[11]).toBeCloseTo(10000 / 1.02, 1);
+    });
+
+    it("should correctly discount values at 3% inflation over 120 months (10 years)", () => {
+      const result = {
+        median: Array(119).fill(0).concat([100000]),
+        mean: Array(119).fill(0).concat([100000]),
+        confidenceLow: Array(119).fill(0).concat([100000]),
+        confidenceHigh: Array(119).fill(0).concat([100000]),
+        cashFlows: Array(119).fill(0).concat([100000]),
+      };
+
+      const discounted = applyInflationDiscount(result, 0.03);
+
+      expect(discounted.median[119]).toBeCloseTo(
+        100000 / Math.pow(1.03, 10),
+        0
+      );
+    });
+
+    it("should discount all five arrays: median, mean, confidenceLow, confidenceHigh, cashFlows", () => {
+      const result = {
+        median: [1000, 2000],
+        mean: [1100, 2100],
+        confidenceLow: [800, 1800],
+        confidenceHigh: [1400, 2400],
+        cashFlows: [100, 200],
+      };
+
+      const discounted = applyInflationDiscount(result, 0.05);
+
+      const expectedMedian0 = 1000 / Math.pow(1.05, 1 / 12);
+      const expectedMedian1 = 2000 / Math.pow(1.05, 2 / 12);
+
+      expect(discounted.median[0]).toBeCloseTo(expectedMedian0, 1);
+      expect(discounted.median[1]).toBeCloseTo(expectedMedian1, 1);
+      expect(discounted.mean[0]).toBeCloseTo(1100 / Math.pow(1.05, 1 / 12), 1);
+      expect(discounted.confidenceLow[1]).toBeCloseTo(
+        1800 / Math.pow(1.05, 2 / 12),
+        1
+      );
+      expect(discounted.confidenceHigh[0]).toBeCloseTo(
+        1400 / Math.pow(1.05, 1 / 12),
+        1
+      );
+      expect(discounted.cashFlows[1]).toBeCloseTo(
+        200 / Math.pow(1.05, 2 / 12),
+        1
+      );
+    });
+
+    it("should handle decimal inflation rates (e.g., 2.5%)", () => {
+      const result = {
+        median: [1000],
+        mean: [1000],
+        confidenceLow: [1000],
+        confidenceHigh: [1000],
+        cashFlows: [100],
+      };
+
+      const discounted = applyInflationDiscount(result, 0.025);
+
+      expect(discounted.median[0]).toBeCloseTo(
+        1000 / Math.pow(1.025, 1 / 12),
+        1
+      );
     });
   });
 });

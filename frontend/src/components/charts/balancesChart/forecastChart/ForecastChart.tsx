@@ -40,6 +40,7 @@ export const ForecastChart: FC<{ portfolioName: string }> = ({
     monthlyContribution:
       50 * Math.round((cashFlow ?? 0) / portfolioAge / 12 / 50),
     confidenceLevel: 68,
+    inflationRate: 0.02,
   });
 
   const { data, isLoading } = useForecastChartData(portfolioName, params);

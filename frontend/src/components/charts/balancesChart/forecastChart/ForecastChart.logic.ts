@@ -1,4 +1,5 @@
 import {
+  applyInflationDiscount,
   ForecastInput,
   ForecastResult,
   GbmParameters,
@@ -47,6 +48,7 @@ export interface ForecastParameters {
   timeHorizon: ForecastHorizon;
   monthlyContribution: number;
   confidenceLevel: ForecastConfidenceLevel;
+  inflationRate: number;
 }
 
 const FORECAST_SCENARIOS = {
@@ -121,11 +123,16 @@ const FORECAST_HORIZON_MONTHS: Record<ForecastHorizon, number> = {
 const transformForecastToChartData = (
   forecastResult: ForecastResult,
   startTimestamp: number,
-  currentCashFlow: number
+  currentCashFlow: number,
+  inflationRate: number
 ): ForecastChartData => {
+  const discountedResult = applyInflationDiscount(
+    forecastResult,
+    inflationRate
+  );
   const { median, mean, confidenceLow, confidenceHigh, cashFlows } =
-    forecastResult;
-  const monthInMs = 30 * 24 * 60 * 60 * 1000; // Approximate month in milliseconds
+    discountedResult;
+  const monthInMs = 30 * 24 * 60 * 60 * 1000;
 
   return median.map((_: number, index: number) => ({
     timestamp: startTimestamp + (index + 1) * monthInMs,
@@ -181,7 +188,8 @@ export const useForecastChartData = (
   const forecastData = transformForecastToChartData(
     forecastResult,
     startTimestamp,
-    currentCashFlow
+    currentCashFlow,
+    params.inflationRate
   );
 
   return {

@@ -130,6 +130,7 @@ describe("ForecastChart.logic", () => {
       timeHorizon: FORECAST_HORIZONS["5Y"],
       monthlyContribution: 0,
       confidenceLevel: FORECAST_CONFIDENCE_LEVELS["68"],
+      inflationRate: 0.02,
     };
 
     it("returns empty data when portfolio doesn't exist", () => {
