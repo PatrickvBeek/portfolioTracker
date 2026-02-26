@@ -175,3 +175,29 @@ export const gbmParamsToAnnualPercentage = (
   mu: params && 100 * (Math.exp(12 * params.mu) - 1),
   sigma: params && 100 * (Math.exp(Math.sqrt(12) * params.sigma) - 1),
 });
+
+export const applyInflationDiscount = (
+  result: ForecastResult,
+  inflationRate: number
+): ForecastResult => {
+  if (inflationRate === 0) {
+    return result;
+  }
+
+  const discountFactor = (monthsElapsed: number): number =>
+    Math.pow(1 + inflationRate, monthsElapsed / 12);
+
+  const discountArray = (values: number[]): number[] =>
+    values.map((value, index) => {
+      const monthsElapsed = index + 1;
+      return value / discountFactor(monthsElapsed);
+    });
+
+  return {
+    median: discountArray(result.median),
+    mean: discountArray(result.mean),
+    confidenceLow: discountArray(result.confidenceLow),
+    confidenceHigh: discountArray(result.confidenceHigh),
+    cashFlows: discountArray(result.cashFlows),
+  };
+};

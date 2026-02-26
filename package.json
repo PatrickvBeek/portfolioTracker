@@ -25,7 +25,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "pnpm oxlint --fix"
+      "pnpm oxlint --fix",
+      "pnpm oxfmt"
     ],
     "*.{json,md,css,less,html}": [
       "pnpm oxfmt"
