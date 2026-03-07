@@ -54,7 +54,7 @@ describe("with online prices", () => {
 
   it("useTimeWeightedReturn", async () => {
     const { result } = customRenderHook(() =>
-      useTimeWeightedReturn(portfolioName)
+      useTimeWeightedReturn([portfolioName])
     );
 
     await customWaitFor(() => expect(result.current?.isLoading).toBe(false));

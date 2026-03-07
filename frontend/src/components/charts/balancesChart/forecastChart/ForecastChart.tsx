@@ -29,11 +29,11 @@ import {
 } from "./ForecastChart.logic";
 import { ForecastParametersPanel } from "./ForecastParametersPanel";
 
-export const ForecastChart: FC<{ portfolioName: string }> = ({
-  portfolioName,
+export const ForecastChart: FC<{ portfolioNames: string[] }> = ({
+  portfolioNames,
 }) => {
-  const cashFlow = useCashFlow(portfolioName);
-  const portfolioAge = usePortfolioAge(portfolioName);
+  const cashFlow = useCashFlow(portfolioNames);
+  const portfolioAge = usePortfolioAge(portfolioNames);
   const [params, setParams] = useState<ForecastParameters>({
     scenario: "portfolio",
     timeHorizon: "10Y",
@@ -43,13 +43,13 @@ export const ForecastChart: FC<{ portfolioName: string }> = ({
     inflationRate: 0.02,
   });
 
-  const { data, isLoading } = useForecastChartData(portfolioName, params);
+  const { data, isLoading } = useForecastChartData(portfolioNames, params);
   const chartData = data || [];
 
   return (
     <>
       <ForecastParametersPanel
-        portfolioName={portfolioName}
+        portfolioNames={portfolioNames}
         parameters={params}
         onParametersChange={setParams}
       />

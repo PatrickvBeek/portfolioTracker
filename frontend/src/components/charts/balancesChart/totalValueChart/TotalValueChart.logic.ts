@@ -1,11 +1,13 @@
 import {
+  combinePortfolios,
   getBuyValueHistoryForPortfolio,
   getMarketValueHistory,
   getTotalCashFlowHistory,
   History,
+  mergePointsAtSameTimestamp,
   removeDuplicatesAtSameTimeStamp,
 } from "pt-domain";
-import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { usePortfolioPriceData } from "../../chartHooks";
 import { ChartDataPoint } from "../../chartTypes";
@@ -17,11 +19,11 @@ export type BalancesChartDataSets = "buyValue" | "cashFlow" | "marketValue";
 export type BalancesChartData = ChartDataPoint<BalancesChartDataSets>[];
 
 export const useGetPortfolioHistoryChartData = (
-  portfolioName: string
+  portfolioNames: string[]
 ): CustomQuery<BalancesChartData> => {
-  const buyValueHistory = useGetBuyValueHistory(portfolioName);
-  const cashFlowHistory = useGetCashFlowHistory(portfolioName);
-  const marketValueHistory = useGetMarketValueHistory(portfolioName);
+  const buyValueHistory = useGetBuyValueHistory(portfolioNames);
+  const cashFlowHistory = useGetCashFlowHistory(portfolioNames);
+  const marketValueHistory = useGetMarketValueHistory(portfolioNames);
 
   return {
     isLoading: marketValueHistory.isLoading,
@@ -34,32 +36,34 @@ export const useGetPortfolioHistoryChartData = (
   };
 };
 
-const useGetBuyValueHistory = (portfolioName: string) => {
-  const portfolio = useGetPortfolio(portfolioName);
+const useGetBuyValueHistory = (portfolioNames: string[]) => {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const allHistories = portfolios.map(getBuyValueHistoryForPortfolio);
+  const merged = mergePointsAtSameTimestamp(allHistories.flat());
 
-  return portfolio
-    ? removeDuplicatesAtSameTimeStamp(getBuyValueHistoryForPortfolio(portfolio))
-    : [];
+  return removeDuplicatesAtSameTimeStamp(merged);
 };
 
-const useGetCashFlowHistory = (portfolioName: string) => {
-  const portfolio = useGetPortfolio(portfolioName);
-  return portfolio
-    ? removeDuplicatesAtSameTimeStamp(getTotalCashFlowHistory(portfolio))
+const useGetCashFlowHistory = (portfolioNames: string[]) => {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  return merged
+    ? removeDuplicatesAtSameTimeStamp(getTotalCashFlowHistory(merged))
     : [];
 };
 
 const useGetMarketValueHistory = (
-  portfolioName: string
+  portfolioNames: string[]
 ): CustomQuery<History<number>> => {
-  const portfolio = useGetPortfolio(portfolioName);
-  const timeAxis = usePortfolioTimeAxis(portfolioName);
-  const priceQuery = usePortfolioPriceData(portfolioName);
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  const timeAxis = usePortfolioTimeAxis(portfolioNames);
+  const priceQuery = usePortfolioPriceData(portfolioNames);
 
   return {
     isLoading: priceQuery.isLoading,
     isError: priceQuery.isError,
-    data: getMarketValueHistory(portfolio, priceQuery.data, timeAxis),
+    data: getMarketValueHistory(merged, priceQuery.data, timeAxis),
   };
 };
 

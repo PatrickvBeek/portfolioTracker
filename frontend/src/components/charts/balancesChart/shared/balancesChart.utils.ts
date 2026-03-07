@@ -1,22 +1,31 @@
-import { getFirstOrderTimeStamp, getNumericDateTime } from "pt-domain";
-import { unique } from "radash";
 import {
-  useGetPortfolio,
-  useGetPortfolioActivity,
-} from "../../../../hooks/portfolios/portfolioHooks";
+  getAllOrdersInPortfolio,
+  getFirstOrderTimeStamp,
+  getNumericDateTime,
+} from "pt-domain";
+import { unique } from "radash";
+import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
+import { isNotNil } from "../../../../utility/types";
 import { getDefaultTimeAxis } from "../../chartUtils";
 
-export const usePortfolioTimeAxis = (portfolioName: string): number[] => {
-  const portfolio = useGetPortfolio(portfolioName);
-  const activity = useGetPortfolioActivity(portfolioName);
+export const usePortfolioTimeAxis = (portfolioNames: string[]): number[] => {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
 
-  const xMin = getFirstOrderTimeStamp(portfolio);
-
-  if (!xMin) {
+  if (portfolios.length === 0) {
     return [];
   }
 
-  const portfolioTimestamps = activity.map(getNumericDateTime);
+  const allActivities = portfolios.flatMap(getAllOrdersInPortfolio);
+
+  const xMin = Math.min(
+    ...portfolios.map((p) => getFirstOrderTimeStamp(p)).filter(isNotNil)
+  );
+
+  if (!xMin || !isFinite(xMin)) {
+    return [];
+  }
+
+  const portfolioTimestamps = allActivities.map(getNumericDateTime);
   return unique(
     getDefaultTimeAxis(xMin)
       .concat(portfolioTimestamps)

@@ -14,13 +14,13 @@ import { ProfitChart } from "./profitChart/ProfitChart";
 import { ViewMode } from "./shared/balancesChart.types";
 import { TotalValueChart } from "./totalValueChart/TotalValueChart";
 
-export const PortfolioBalancesChart: FC<{ portfolioName: string }> = ({
-  portfolioName,
+export const PortfolioBalancesChart: FC<{ portfolioNames: string[] }> = ({
+  portfolioNames,
 }) => {
   const { isMobile } = useBreakpoint();
   const [viewMode, setViewMode] = useState<ViewMode>("total");
 
-  const ChartsComponents: Record<ViewMode, FC<{ portfolioName: string }>> = {
+  const ChartsComponents: Record<ViewMode, FC<{ portfolioNames: string[] }>> = {
     total: TotalValueChart,
     profitLoss: ProfitChart,
     forecast: ForecastChart,
@@ -74,7 +74,7 @@ export const PortfolioBalancesChart: FC<{ portfolioName: string }> = ({
           </ToggleButtonGroup>
         )}
       </div>
-      {<SubChart portfolioName={portfolioName} />}
+      {<SubChart portfolioNames={portfolioNames} />}
     </div>
   );
 };

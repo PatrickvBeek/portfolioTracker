@@ -22,11 +22,11 @@ import {
 import { useProfitHistory } from "./ProfitChart.logic";
 import styles from "./ProfitChart.module.less";
 
-export const ProfitChart: FC<{ portfolioName: string }> = ({
-  portfolioName,
+export const ProfitChart: FC<{ portfolioNames: string[] }> = ({
+  portfolioNames,
 }) => {
   const [range, setRange] = useState<ChartRange>("Max");
-  const { isLoading, data } = useProfitHistory(portfolioName);
+  const { isLoading, data } = useProfitHistory(portfolioNames);
 
   const chartData = filterChartDataByRange(data ?? [], range);
 

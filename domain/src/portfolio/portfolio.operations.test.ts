@@ -64,7 +64,7 @@ describe("The portfolio deriver", () => {
 
       const result = combinePortfolios([portfolio1, portfolio2]);
 
-      expect(result.name).toBe(`${portfolio1.name}::${portfolio2.name}`);
+      expect(result.name).toBe("");
       expect(Object.values(result.orders).flat()).toEqual([]);
       expect(Object.values(result.dividendPayouts).flat()).toEqual([]);
     });

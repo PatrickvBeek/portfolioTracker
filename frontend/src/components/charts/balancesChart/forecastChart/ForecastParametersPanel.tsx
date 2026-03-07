@@ -51,13 +51,13 @@ const StyledInfoContainer = styled(Box)`
 `;
 
 interface ForecastParametersPanelProps {
-  portfolioName: string;
+  portfolioNames: string[];
   parameters: ForecastParameters;
   onParametersChange: (parameters: ForecastParameters) => void;
 }
 
 export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
-  portfolioName,
+  portfolioNames,
   parameters,
   onParametersChange,
 }) => {
@@ -69,7 +69,7 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
   );
 
   const scenarioDetails = useForecastScenarioParams(
-    portfolioName,
+    portfolioNames,
     parameters.scenario
   );
 

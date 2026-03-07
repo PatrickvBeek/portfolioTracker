@@ -7,7 +7,7 @@ import {
   runGeometricBrownianMotionForecast,
 } from "pt-domain";
 import { useMemo } from "react";
-import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import {
   useCashFlow,
@@ -71,11 +71,11 @@ interface ScenarioDetails {
 }
 
 export const useForecastScenarioParams = (
-  portfolioName: string,
+  portfolioNames: string[],
   scenario: ForecastScenario
 ): ScenarioDetails | undefined => {
   const portfolioGbmParams =
-    usePortfolioGeometricBrownianMotionParams(portfolioName);
+    usePortfolioGeometricBrownianMotionParams(portfolioNames);
 
   return useMemo(() => {
     if (scenario === "market") {
@@ -144,23 +144,23 @@ const transformForecastToChartData = (
 };
 
 export const useForecastChartData = (
-  portfolioName: string,
+  portfolioNames: string[],
   params: ForecastParameters
 ): CustomQuery<ForecastChartData> => {
-  const portfolio = useGetPortfolio(portfolioName);
-  const { data, isError, isLoading } = useMarketValue(portfolioName) ?? {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const { data, isError, isLoading } = useMarketValue(portfolioNames) ?? {
     data: 0,
     isError: false,
     isLoading: false,
   };
   const currentValue = data ?? 0;
-  const currentCashFlow = useCashFlow(portfolioName) ?? 0;
+  const currentCashFlow = useCashFlow(portfolioNames) ?? 0;
   const scenarioDetails = useForecastScenarioParams(
-    portfolioName,
+    portfolioNames,
     params.scenario
   );
 
-  if (!portfolio || !scenarioDetails) {
+  if (portfolios.length === 0 || !scenarioDetails) {
     return { isError, isLoading, data: [] };
   }
 

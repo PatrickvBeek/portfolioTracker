@@ -74,7 +74,7 @@ describe("the hook", () => {
       setBackendData({ prices: getPriceResponse("a", []) });
 
       const result = await renderAndAwaitQueryHook(() =>
-        usePerformanceChartData("does not exist", "does not exist either")
+        usePerformanceChartData(["does not exist"], "does not exist either")
       );
 
       expect(result).toEqual({
@@ -87,7 +87,7 @@ describe("the hook", () => {
     it("returns only twr if no benchmark symbol is given", async () => {
       setBackendData({ prices: getPriceResponse("a", []) });
       const result = await renderAndAwaitQueryHook(() =>
-        usePerformanceChartData(portfolio.name, "")
+        usePerformanceChartData([portfolio.name], "")
       );
 
       expectChartsAreEqualForKeys(["portfolio"], result.data ?? [], [
@@ -111,7 +111,7 @@ describe("the hook", () => {
         ]),
       });
       const result = await renderAndAwaitQueryHook(() =>
-        usePerformanceChartData(portfolio.name, assetLib[BENCHMARK].isin)
+        usePerformanceChartData([portfolio.name], assetLib[BENCHMARK].isin)
       );
 
       expectChartsAreEqualForKeys(
@@ -136,7 +136,7 @@ describe("the hook", () => {
         ]),
       });
       const result = await renderAndAwaitQueryHook(() =>
-        usePerformanceChartData(portfolio.name, assetLib[BENCHMARK].isin)
+        usePerformanceChartData([portfolio.name], assetLib[BENCHMARK].isin)
       );
 
       expectChartsAreEqualForKeys(

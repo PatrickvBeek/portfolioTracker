@@ -68,7 +68,7 @@ export const getBatchesForIsin = (
     getDividendPayoutsForIsin(portfolio, isin)
   );
 
-const getAllOrdersInPortfolio = (portfolio: Portfolio): Order[] =>
+export const getAllOrdersInPortfolio = (portfolio: Portfolio): Order[] =>
   Object.values(portfolio.orders).flat();
 
 export const getAssetsForBatchType = (

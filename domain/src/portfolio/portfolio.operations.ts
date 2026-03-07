@@ -3,7 +3,6 @@ import { getNumericDateTime } from "../activity/activity.derivers";
 import { PortfolioActivity } from "../activity/activity.entities";
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
-import { toCompoundPortfolioName } from "../utils/portfolioUtils";
 import { Portfolio, PortfolioLibrary } from "./portfolio.entities";
 
 export function addPortfolioToLibrary(
@@ -99,6 +98,15 @@ export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
 const purgeEmptyArrays = <T>(obj: Record<string, T[]>): Record<string, T[]> =>
   shake(obj, (value) => !value.length);
 
+/**
+ * Combines multiple portfolios into a single portfolio view.
+ *
+ * WARNING: The resulting portfolio is a synthetic aggregate - FIFO-based
+ * calculations (e.g. getBatches, getRealizedGains, getBatchesHistory) will
+ * produce incorrect results as they would match buys/sells across different
+ * portfolios. Safe for aggregate metrics that don't rely on price differences
+ * between buy and sell like total value, profit history, and cash flow calculations.
+ */
 export function combinePortfolios(portfolios: Portfolio[]): Portfolio {
   const mergeActivityArrays = <T extends PortfolioActivity>(
     target: Record<string, T[]>,
@@ -124,7 +132,7 @@ export function combinePortfolios(portfolios: Portfolio[]): Portfolio {
       ),
     }),
     {
-      name: toCompoundPortfolioName(portfolios.map((p) => p.name)),
+      name: "",
       orders: {},
       dividendPayouts: {},
     }

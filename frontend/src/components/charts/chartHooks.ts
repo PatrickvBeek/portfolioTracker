@@ -1,4 +1,5 @@
 import {
+  combinePortfolios,
   GbmParameters,
   getFirstOrderTimeStamp,
   getGeometricBrownianMotionParams,
@@ -7,43 +8,42 @@ import {
   getTimeWeightedReturnHistory,
   History,
 } from "pt-domain";
-import {
-  useGetPortfolio,
-  usePortfolioSelector,
-} from "../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../hooks/portfolios/portfolioHooks";
 import {
   CustomQuery,
   useGetPricesForIsins,
 } from "../../hooks/prices/priceHooks";
 import { getDefaultTimeAxis } from "./chartUtils";
 
-export const usePortfolioPriceData = (portfolioName: string) => {
-  const portfolio = useGetPortfolio(portfolioName);
-  return useGetPricesForIsins(getIsins(portfolio));
+export const usePortfolioPriceData = (portfolioNames: string[]) => {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  return useGetPricesForIsins(getIsins(merged));
 };
 
 export const useTimeWeightedReturnHistory = (
-  portfolioName: string
-): CustomQuery<History<number>> | undefined =>
-  usePortfolioSelector(portfolioName, (portfolio) => {
-    const priceMapQuery = usePortfolioPriceData(portfolioName);
-    const xMin = getFirstOrderTimeStamp(portfolio);
+  portfolioNames: string[]
+): CustomQuery<History<number>> | undefined => {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  const priceMapQuery = usePortfolioPriceData(portfolioNames);
+  const xMin = getFirstOrderTimeStamp(merged);
 
-    return {
-      isLoading: priceMapQuery.isLoading,
-      isError: priceMapQuery.isError,
-      data: getTimeWeightedReturnHistory(
-        portfolio,
-        priceMapQuery.data,
-        xMin ? getDefaultTimeAxis(xMin) : undefined
-      ).map(getHistoryPointMapper(rel2percentage)),
-    };
-  });
+  return {
+    isLoading: priceMapQuery.isLoading,
+    isError: priceMapQuery.isError,
+    data: getTimeWeightedReturnHistory(
+      merged,
+      priceMapQuery.data,
+      xMin ? getDefaultTimeAxis(xMin) : undefined
+    ).map(getHistoryPointMapper(rel2percentage)),
+  };
+};
 
 export const usePortfolioGeometricBrownianMotionParams = (
-  portfolioName: string
+  portfolioNames: string[]
 ): GbmParameters | undefined => {
-  const twrHistory = useTimeWeightedReturnHistory(portfolioName);
+  const twrHistory = useTimeWeightedReturnHistory(portfolioNames);
   const data = twrHistory?.data || [];
 
   return getGeometricBrownianMotionParams(

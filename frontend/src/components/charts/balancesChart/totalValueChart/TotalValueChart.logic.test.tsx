@@ -37,7 +37,7 @@ describe("useGetPortfolioHistoryChartData", () => {
 
   it("handles a missing portfolio gracefully", async () => {
     const result = await renderAndAwaitQueryHook(() =>
-      useGetPortfolioHistoryChartData("I don't exist")
+      useGetPortfolioHistoryChartData(["I don't exist"])
     );
 
     expect(result.data).toEqual([]);
@@ -96,7 +96,7 @@ describe("useGetPortfolioHistoryChartData", () => {
     );
 
     const result = renderAndAwaitQueryHook(() =>
-      useGetPortfolioHistoryChartData("p1")
+      useGetPortfolioHistoryChartData(["p1"])
     );
 
     expect((await result).data).toEqual([

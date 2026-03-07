@@ -27,12 +27,15 @@ import {
 } from "./TimeWeightedReturnChart.logic";
 import styles from "./TimeWeightedReturnChart.module.less";
 
-export const TimeWeightedReturnChart: FC<{ portfolioName: string }> = ({
-  portfolioName,
+export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
+  portfolioNames,
 }) => {
   const [benchmark, setBenchmark] = useState("");
   const [range, setRange] = useState<ChartRange>("Max");
-  const { isLoading, data } = usePerformanceChartData(portfolioName, benchmark);
+  const { isLoading, data } = usePerformanceChartData(
+    portfolioNames,
+    benchmark
+  );
 
   const chartData = filterChartDataByRange(data || [], range);
 

@@ -1,17 +1,18 @@
-import { getProfitHistory, History } from "pt-domain";
-import { useGetPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
+import { combinePortfolios, getProfitHistory, History } from "pt-domain";
+import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { usePortfolioPriceData } from "../../chartHooks";
 import { usePortfolioTimeAxis } from "../shared/balancesChart.utils";
 
 export const useProfitHistory = (
-  portfolioName: string
+  portfolioNames: string[]
 ): CustomQuery<History<number>> => {
-  const portfolio = useGetPortfolio(portfolioName);
-  const timeAxis = usePortfolioTimeAxis(portfolioName);
-  const priceQuery = usePortfolioPriceData(portfolioName);
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  const timeAxis = usePortfolioTimeAxis(portfolioNames);
+  const priceQuery = usePortfolioPriceData(portfolioNames);
 
-  const profitHistory = getProfitHistory(portfolio, priceQuery.data, timeAxis);
+  const profitHistory = getProfitHistory(merged, priceQuery.data, timeAxis);
 
   return {
     isLoading: priceQuery.isLoading,

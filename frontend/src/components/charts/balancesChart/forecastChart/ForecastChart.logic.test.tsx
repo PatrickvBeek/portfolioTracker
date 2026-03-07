@@ -45,7 +45,7 @@ describe("ForecastChart.logic", () => {
   describe("useForecastScenarioParams", () => {
     it('returns market scenario details when scenario is "market"', () => {
       const { result } = customRenderHook(() =>
-        useForecastScenarioParams("TEST", "market")
+        useForecastScenarioParams(["TEST"], "market")
       );
 
       expect(result.current).toEqual({
@@ -62,14 +62,13 @@ describe("ForecastChart.logic", () => {
 
     it('returns undefined when scenario is "portfolio" but no portfolio exists', () => {
       const { result } = customRenderHook(() =>
-        useForecastScenarioParams("nonexistent", "portfolio")
+        useForecastScenarioParams(["nonexistent"], "portfolio")
       );
 
       expect(result.current).toBeUndefined();
     });
 
     it('returns portfolio scenario details when scenario is "portfolio" and portfolio exists', () => {
-      // Set up asset library first
       localStorage.setItem(
         "assets",
         JSON.stringify({
@@ -111,7 +110,7 @@ describe("ForecastChart.logic", () => {
       );
 
       const { result } = customRenderHook(() =>
-        useForecastScenarioParams("testPortfolio", "portfolio")
+        useForecastScenarioParams(["testPortfolio"], "portfolio")
       );
 
       expect(result.current).toBeDefined();
@@ -134,7 +133,7 @@ describe("ForecastChart.logic", () => {
     };
 
     it("returns empty data when portfolio doesn't exist", () => {
-      customRenderHook(() => useForecastChartData("nonexistent", baseParams));
+      customRenderHook(() => useForecastChartData(["nonexistent"], baseParams));
 
       // Since we mock the runGeometricBrownianMotionForecast, even with no portfolio
       // it will return data if scenario is "market". Let's test with portfolio scenario instead.
@@ -144,7 +143,7 @@ describe("ForecastChart.logic", () => {
       };
 
       const { result: portfolioResult } = customRenderHook(() =>
-        useForecastChartData("nonexistent", portfolioParams)
+        useForecastChartData(["nonexistent"], portfolioParams)
       );
 
       expect(portfolioResult.current.data).toEqual([]);
@@ -185,7 +184,7 @@ describe("ForecastChart.logic", () => {
       );
 
       const { result } = customRenderHook(() =>
-        useForecastChartData("testPortfolio", baseParams)
+        useForecastChartData(["testPortfolio"], baseParams)
       );
 
       expect(result.current.data).toHaveLength(60); // 5y * 12months
@@ -195,6 +194,7 @@ describe("ForecastChart.logic", () => {
       expect(firstDataPoint.median).toBeCloseTo(100.6, 0);
       expect(firstDataPoint.mean).toBeCloseTo(100.7, 0);
     });
+
     it("returns forecast chart data for 'portfolio' scenario with minimal portfolio", async () => {
       // Create minimal portfolio to avoid complex price hook interactions
       const portfolio = getTestPortfolio({
@@ -230,7 +230,7 @@ describe("ForecastChart.logic", () => {
       );
 
       const { data } = await renderAndAwaitQueryHook(() =>
-        useForecastChartData("testPortfolio", {
+        useForecastChartData(["testPortfolio"], {
           ...baseParams,
           scenario: "portfolio",
         })
@@ -240,7 +240,7 @@ describe("ForecastChart.logic", () => {
 
       const firstDataPoint = data![0];
       expect(firstDataPoint).toHaveProperty("timestamp");
-      expect(firstDataPoint.median).toBeCloseTo(122, -0.3);
+      expect(firstDataPoint.median).toBeCloseTo(121.5, -0.3);
     });
 
     it("should handle different time horizons correctly", () => {
@@ -262,7 +262,7 @@ describe("ForecastChart.logic", () => {
       };
 
       const { result } = customRenderHook(() =>
-        useForecastChartData("testPortfolio", paramsWithDifferentHorizon)
+        useForecastChartData(["testPortfolio"], paramsWithDifferentHorizon)
       );
 
       expect(result.current.data).toHaveLength(12);
