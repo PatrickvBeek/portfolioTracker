@@ -1,5 +1,4 @@
 import { Chip } from "@mui/material";
-import { toCompoundPortfolioName } from "pt-domain";
 import { useState } from "react";
 import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
@@ -30,7 +29,6 @@ const Dashboard = () => {
     );
   }
 
-  const compoundName = toCompoundPortfolioName(selectedPortfolios);
   const hasSelections = selectedPortfolios.length > 0;
 
   return (
@@ -55,9 +53,9 @@ const Dashboard = () => {
 
       {hasSelections ? (
         <>
-          <PortfolioSummary portfolioName={compoundName} />
-          <PortfolioBalancesChart portfolioName={compoundName} />
-          <TimeWeightedReturnChart portfolioName={compoundName} />
+          <PortfolioSummary portfolioNames={selectedPortfolios} />
+          <PortfolioBalancesChart portfolioNames={selectedPortfolios} />
+          <TimeWeightedReturnChart portfolioNames={selectedPortfolios} />
         </>
       ) : (
         <div className={styles.emptyState}>

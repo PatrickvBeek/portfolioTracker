@@ -14,15 +14,15 @@ import {
 } from "./PortfolioSummary.logic";
 import styles from "./PortfolioSummary.module.less";
 
-export const PortfolioSummary: FC<{ portfolioName: string }> = ({
-  portfolioName,
+export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
+  portfolioNames,
 }) => {
-  const cashFlow = useCashFlow(portfolioName);
-  const realizedGains = useRealizedGains(portfolioName);
-  const nonRealizedGainsQuery = useNonRealizedGains(portfolioName);
-  const marketValue = useMarketValue(portfolioName);
-  const portfolioAge = usePortfolioAge(portfolioName);
-  const twr = useTimeWeightedReturn(portfolioName);
+  const cashFlow = useCashFlow(portfolioNames);
+  const realizedGains = useRealizedGains(portfolioNames);
+  const nonRealizedGainsQuery = useNonRealizedGains(portfolioNames);
+  const marketValue = useMarketValue(portfolioNames);
+  const portfolioAge = usePortfolioAge(portfolioNames);
+  const twr = useTimeWeightedReturn(portfolioNames);
   const twrA = twr?.data && Math.pow(twr.data, 1 / portfolioAge);
 
   return (

@@ -2,21 +2,19 @@ import {
   addDividendPayoutToPortfolio,
   addOrderToPortfolio,
   addPortfolioToLibrary,
-  combinePortfolios,
   deleteDividendPayoutFromPortfolio,
   deleteOrderFromPortfolio,
   deletePortfolioFromLibrary,
   DividendPayout,
   EMPTY_PORTFOLIO,
   getActivitiesForPortfolio,
-  getPortfolioNamesFromCompound,
-  isCompoundPortfolioName,
   Order,
   Portfolio,
   PortfolioLibrary,
 } from "pt-domain";
 import { useContext } from "react";
 import { UserDataContext } from "../../userDataContext";
+import { isNotNil } from "../../utility/types";
 
 export const usePortfolioSelector = <T>(
   portfolioName: string,
@@ -41,17 +39,12 @@ export function useSetPortfolios() {
 
 export function useGetPortfolio(name: string): Portfolio {
   const portfolios = useGetPortfolios();
-
-  if (isCompoundPortfolioName(name)) {
-    const portfolioNames = getPortfolioNamesFromCompound(name);
-    const validPortfolios = portfolioNames
-      .map((n) => portfolios[n])
-      .filter((p) => p !== undefined);
-
-    return combinePortfolios(validPortfolios);
-  }
-
   return portfolios[name] ?? EMPTY_PORTFOLIO;
+}
+
+export function useGetPortfoliosByNames(names: string[]): Portfolio[] {
+  const portfolios = useGetPortfolios();
+  return names.map((name) => portfolios[name]).filter(isNotNil);
 }
 
 export function useGetPortfolioActivity(portfolioName: string) {

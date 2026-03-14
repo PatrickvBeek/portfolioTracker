@@ -49,7 +49,7 @@ describe("useProfitHistory", () => {
 
   it("handles a missing portfolio gracefully", () => {
     const { result } = customRenderHook(() =>
-      useProfitHistory("I don't exist")
+      useProfitHistory(["I don't exist"])
     );
 
     expect(result.current.data).toEqual([]);
@@ -69,7 +69,7 @@ describe("useProfitHistory", () => {
     );
 
     const { result } = customRenderHook(() =>
-      useProfitHistory("emptyPortfolio")
+      useProfitHistory(["emptyPortfolio"])
     );
 
     expect(result.current).toEqual({
@@ -107,7 +107,7 @@ describe("useProfitHistory", () => {
     );
 
     const result = await renderAndAwaitQueryHook(() =>
-      useProfitHistory("singleOrderPortfolio")
+      useProfitHistory(["singleOrderPortfolio"])
     );
 
     expect(result).toEqual({
@@ -162,7 +162,7 @@ describe("useProfitHistory", () => {
     );
 
     const result = await renderAndAwaitQueryHook(() =>
-      useProfitHistory("multipleOrdersSameDayPortfolio")
+      useProfitHistory(["multipleOrdersSameDayPortfolio"])
     );
 
     expect(result).toEqual({
@@ -233,7 +233,7 @@ describe("useProfitHistory", () => {
     );
 
     const result = await renderAndAwaitQueryHook(() =>
-      useProfitHistory("consecutiveDaysPortfolio")
+      useProfitHistory(["consecutiveDaysPortfolio"])
     );
 
     expect(result.data).toEqual([
@@ -296,7 +296,7 @@ describe("useProfitHistory", () => {
     );
 
     const result = await renderAndAwaitQueryHook(() =>
-      useProfitHistory("nonConsecutiveDaysPortfolio")
+      useProfitHistory(["nonConsecutiveDaysPortfolio"])
     );
 
     expect(result.data).toEqual([

@@ -4,10 +4,11 @@ import {
   History,
   pickValueFromHistory,
 } from "pt-domain";
-import { last, select } from "radash";
+import { last, min, select } from "radash";
 import { useSymbol } from "../../../hooks/assets/assetHooks";
-import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../../hooks/portfolios/portfolioHooks";
 import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
+import { isNotNil } from "../../../utility/types";
 import {
   percentage2rel,
   rel2percentage,
@@ -17,11 +18,14 @@ import { ChartData } from "../chartTypes";
 import { historiesToChartData } from "../chartUtils";
 
 const usePerformanceBenchmark = (
-  portfolioName: string,
+  portfolioNames: string[],
   isin: string
 ): CustomQuery<History<number>> | undefined => {
-  const portfolio = useGetPortfolio(portfolioName);
-  const portfolioStartTime = getFirstOrderTimeStamp(portfolio) || -Infinity;
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const portfolioStartTime =
+    min(portfolios.map((p) => getFirstOrderTimeStamp(p)).filter(isNotNil)) ??
+    -Infinity;
+
   const symbol = useSymbol(isin);
 
   return usePriceQuery(symbol, (priceHistory) => {
@@ -48,12 +52,12 @@ const usePerformanceBenchmark = (
 export type PerformanceChartDataSets = "portfolio" | "benchmark";
 
 export const usePerformanceChartData = (
-  portfolioName: string,
+  portfolioNames: string[],
   benchmarkIsin: string
 ): CustomQuery<ChartData<PerformanceChartDataSets>> => {
-  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioName);
+  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioNames);
   const benchmarkHistoryQuery = usePerformanceBenchmark(
-    portfolioName,
+    portfolioNames,
     benchmarkIsin
   );
 

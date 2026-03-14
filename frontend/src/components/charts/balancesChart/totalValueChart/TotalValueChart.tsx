@@ -24,11 +24,11 @@ import {
 } from "./TotalValueChart.logic";
 import styles from "./TotalValueChart.module.less";
 
-export const TotalValueChart: FC<{ portfolioName: string }> = ({
-  portfolioName,
+export const TotalValueChart: FC<{ portfolioNames: string[] }> = ({
+  portfolioNames,
 }) => {
   const [range, setRange] = useState<ChartRange>("Max");
-  const { data, isLoading } = useGetPortfolioHistoryChartData(portfolioName);
+  const { data, isLoading } = useGetPortfolioHistoryChartData(portfolioNames);
 
   const chartData = filterChartDataByRange(data || [], range);
 

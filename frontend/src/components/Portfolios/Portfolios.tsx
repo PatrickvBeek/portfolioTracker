@@ -51,9 +51,9 @@ function Portfolios({ className }: PortfolioProps) {
       </div>
 
       <div className={styles.content}>
-        <PortfolioSummary portfolioName={selectedPortfolio} />
-        <PortfolioBalancesChart portfolioName={selectedPortfolio} />
-        <TimeWeightedReturnChart portfolioName={selectedPortfolio} />
+        <PortfolioSummary portfolioNames={[selectedPortfolio]} />
+        <PortfolioBalancesChart portfolioNames={[selectedPortfolio]} />
+        <TimeWeightedReturnChart portfolioNames={[selectedPortfolio]} />
         <OpenPositionsList portfolioName={selectedPortfolio} />
         <ClosedPositionsList portfolioName={selectedPortfolio} />
         <ActivityList portfolio={selectedPortfolio} />
