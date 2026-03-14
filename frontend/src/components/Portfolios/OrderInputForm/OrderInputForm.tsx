@@ -63,8 +63,8 @@ export function OrderInputForm({
   const submitHandler = () => {
     if (isDuplicate(orderToSubmit)) {
       setIsWarningOpen(true);
-    } else {
-      orderToSubmit && addOrder(orderToSubmit);
+    } else if (orderToSubmit) {
+      addOrder(orderToSubmit);
     }
   };
 
@@ -132,7 +132,9 @@ export function OrderInputForm({
         open={isWarningOpen}
         onCancel={() => setIsWarningOpen(false)}
         onConfirm={() => {
-          orderToSubmit && addOrder(orderToSubmit);
+          if (orderToSubmit) {
+            addOrder(orderToSubmit);
+          }
           setIsWarningOpen(false);
         }}
       />
