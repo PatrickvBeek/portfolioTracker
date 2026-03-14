@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "lib": ["es2023"],
+    "lib": ["es2023", "dom"],
+    "types": ["vitest/globals"],
     "strict": true,
     "noEmit": true,
     "noUnusedLocals": true,
