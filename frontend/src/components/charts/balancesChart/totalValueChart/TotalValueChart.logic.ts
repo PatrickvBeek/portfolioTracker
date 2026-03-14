@@ -4,9 +4,10 @@ import {
   getMarketValueHistory,
   getTotalCashFlowHistory,
   History,
-  mergePointsAtSameTimestamp,
+  pickValueFromHistory,
   removeDuplicatesAtSameTimeStamp,
 } from "pt-domain";
+import { sum, unique } from "radash";
 import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { usePortfolioPriceData } from "../../chartHooks";
@@ -36,10 +37,21 @@ export const useGetPortfolioHistoryChartData = (
   };
 };
 
-const useGetBuyValueHistory = (portfolioNames: string[]) => {
+export const useGetBuyValueHistory = (portfolioNames: string[]) => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const allHistories = portfolios.map(getBuyValueHistoryForPortfolio);
-  const merged = mergePointsAtSameTimestamp(allHistories.flat());
+
+  const allTimestamps = unique(
+    allHistories.flat().map((p) => p.timestamp)
+  ).sort((a, b) => a - b);
+
+  const merged = allTimestamps.map((timestamp) => ({
+    timestamp,
+    value: sum(
+      allHistories,
+      (history) => pickValueFromHistory(history, timestamp)?.value ?? 0
+    ),
+  }));
 
   return removeDuplicatesAtSameTimeStamp(merged);
 };
