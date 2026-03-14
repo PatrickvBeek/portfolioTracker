@@ -21,6 +21,7 @@ const AssetTable = () => {
 
   const columnHelper = createColumnHelper<Asset>();
 
+  // oxlint-disable-next-line typescript-eslint/no-explicit-any
   const defs: ColumnDef<Asset, any>[] = [
     columnHelper.accessor("displayName", { header: "Name" }),
     columnHelper.accessor("isin", { header: "ISIN" }),

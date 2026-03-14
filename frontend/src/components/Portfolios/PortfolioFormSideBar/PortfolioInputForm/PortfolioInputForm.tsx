@@ -21,9 +21,13 @@ const PortfolioInputForm = ({ onConfirm }: { onConfirm?: () => void }) => {
         <Button
           sx={{ marginTop: "1.25rem" }}
           onClick={() => {
-            fieldContent && addPortfolio(newPortfolioFromName(fieldContent));
+            if (fieldContent) {
+              addPortfolio(newPortfolioFromName(fieldContent));
+            }
             setFieldContent("");
-            onConfirm && onConfirm();
+            if (onConfirm) {
+              onConfirm();
+            }
           }}
           label={"Add"}
           isDisabled={fieldContent.length === 0}

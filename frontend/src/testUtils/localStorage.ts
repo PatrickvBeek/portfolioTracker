@@ -7,10 +7,13 @@ export const setUserData = (
   localStorage.setItem("assets", "{}");
   localStorage.setItem("apiKeys", JSON.stringify({ yahoo: "" }));
 
-  userData.portfolios &&
+  if (userData.portfolios) {
     localStorage.setItem("portfolios", JSON.stringify(userData.portfolios));
-  userData.assets &&
+  }
+  if (userData.assets) {
     localStorage.setItem("assets", JSON.stringify(userData.assets));
-  userData.apiKeys &&
+  }
+  if (userData.apiKeys) {
     localStorage.setItem("apiKeys", JSON.stringify(userData.apiKeys));
+  }
 };

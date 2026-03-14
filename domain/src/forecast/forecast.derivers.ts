@@ -62,8 +62,12 @@ const calculatePercentile = (values: number[], percentile: number): number => {
   const upper = Math.ceil(index);
   const weight = index - lower;
 
-  if (upper >= sorted.length) return sorted[sorted.length - 1];
-  if (lower < 0) return sorted[0];
+  if (upper >= sorted.length) {
+    return sorted[sorted.length - 1];
+  }
+  if (lower < 0) {
+    return sorted[0];
+  }
 
   return sorted[lower] * (1 - weight) + sorted[upper] * weight;
 };

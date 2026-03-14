@@ -28,16 +28,16 @@ export const parseUserData = (jsonString: string): UserData => {
  * Data Migrations
  */
 
-const doMigration = (data: UserDataOfAnyVersion): UserData =>
-  // @ts-expect-error
-  [getV2].reduce((result, reducer, i) => {
-    // @ts-expect-error
-    return result.meta.exportVersion <= i + 1 ? reducer(data) : data;
-  }, data);
+const doMigration = (data: UserDataOfAnyVersion): UserData => {
+  if (data.meta.exportVersion === 1) {
+    return getV2(data);
+  }
+  return data as UserData;
+};
 
 type UserDataOfAnyVersion = UserData | UserDataV1;
 
-const getV2 = (userData: UserDataV1): UserData => ({
+const getV2 = (userData: UserDataOfAnyVersion): UserData => ({
   ...userData,
   apiKeys: { yahoo: "" },
   meta: {

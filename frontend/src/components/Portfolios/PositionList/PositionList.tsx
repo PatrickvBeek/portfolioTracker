@@ -31,107 +31,109 @@ type PositionsListProps = Props<{
   portfolioName: string;
 }>;
 
-const getColumDefs: (
+const getColumDefs = (
   portfolioName: string,
   batchType: BatchType
-) => ColumnDef<string, any>[] = (portfolioName, batchType) => [
-  {
-    header: "Asset",
-    cell: ({ row }) => (
-      <AssetName
-        isin={row.original}
-        canExpand={row.getCanExpand()}
-        isExpanded={row.getIsExpanded()}
-        toggleExpandHandler={row.getToggleExpandedHandler()}
-      />
-    ),
-    footer: ({ table }) =>
-      `${table.getRowCount()} Position${table.getRowCount() === 1 ? "" : "s"}`,
-  },
-  {
-    header: "Pieces",
-    cell: ({ row }) => (
-      <PositionPieces
-        portfolioName={portfolioName}
-        isin={row.original}
-        batchType={batchType}
-      />
-    ),
-    meta: {
-      align: "right",
+  // oxlint-disable-next-line typescript-eslint/no-explicit-any
+): ColumnDef<string, any>[] =>
+  [
+    {
+      header: "Asset",
+      cell: ({ row }) => (
+        <AssetName
+          isin={row.original}
+          canExpand={row.getCanExpand()}
+          isExpanded={row.getIsExpanded()}
+          toggleExpandHandler={row.getToggleExpandedHandler()}
+        />
+      ),
+      footer: ({ table }) =>
+        `${table.getRowCount()} Position${table.getRowCount() === 1 ? "" : "s"}`,
     },
-  },
-  {
-    header: "Total Value",
-    cell: ({ row }) => (
-      <TotalPositionValue
-        portfolioName={portfolioName}
-        isin={row.original}
-        batchType={batchType}
-      />
-    ),
-    footer: () => (
-      <TotalValueSum portfolioName={portfolioName} batchType={batchType} />
-    ),
-    meta: {
-      align: "right",
+    {
+      header: "Pieces",
+      cell: ({ row }) => (
+        <PositionPieces
+          portfolioName={portfolioName}
+          isin={row.original}
+          batchType={batchType}
+        />
+      ),
+      meta: {
+        align: "right",
+      },
     },
-  },
-  {
-    header: "Realized Gains",
-    cell: ({ row }) => (
-      <RealizedPositionGains
-        isin={row.original}
-        portfolioName={portfolioName}
-      />
-    ),
-    footer: () => (
-      <PositionListSumAsBalance
-        portfolioName={portfolioName}
-        batchType={batchType}
-        selector={useGetRealizedPositionGains}
-      />
-    ),
-    meta: {
-      align: "right",
+    {
+      header: "Total Value",
+      cell: ({ row }) => (
+        <TotalPositionValue
+          portfolioName={portfolioName}
+          isin={row.original}
+          batchType={batchType}
+        />
+      ),
+      footer: () => (
+        <TotalValueSum portfolioName={portfolioName} batchType={batchType} />
+      ),
+      meta: {
+        align: "right",
+      },
     },
-  },
-  {
-    header: "Non-Realized Gains",
-    cell: ({ row }) => (
-      <NonRealizedPositionGains
-        isin={row.original}
-        portfolioName={portfolioName}
-      />
-    ),
-    footer: () => (
-      <PositionListSumAsBalance
-        portfolioName={portfolioName}
-        batchType={batchType}
-        selector={(p, isin) => useGetNonRealizedPositionGains(p, isin).data}
-      />
-    ),
-    meta: {
-      align: "right",
+    {
+      header: "Realized Gains",
+      cell: ({ row }) => (
+        <RealizedPositionGains
+          isin={row.original}
+          portfolioName={portfolioName}
+        />
+      ),
+      footer: () => (
+        <PositionListSumAsBalance
+          portfolioName={portfolioName}
+          batchType={batchType}
+          selector={useGetRealizedPositionGains}
+        />
+      ),
+      meta: {
+        align: "right",
+      },
     },
-  },
-  {
-    header: "Profit",
-    cell: ({ row }) => (
-      <PositionProfit isin={row.original} portfolioName={portfolioName} />
-    ),
-    footer: () => (
-      <PositionListSumAsBalance
-        portfolioName={portfolioName}
-        batchType={batchType}
-        selector={(p, isin) => useGetPositionProfit(p, isin).data}
-      />
-    ),
-    meta: {
-      align: "right",
+    {
+      header: "Non-Realized Gains",
+      cell: ({ row }) => (
+        <NonRealizedPositionGains
+          isin={row.original}
+          portfolioName={portfolioName}
+        />
+      ),
+      footer: () => (
+        <PositionListSumAsBalance
+          portfolioName={portfolioName}
+          batchType={batchType}
+          selector={(p, isin) => useGetNonRealizedPositionGains(p, isin).data}
+        />
+      ),
+      meta: {
+        align: "right",
+      },
     },
-  },
-];
+    {
+      header: "Profit",
+      cell: ({ row }) => (
+        <PositionProfit isin={row.original} portfolioName={portfolioName} />
+      ),
+      footer: () => (
+        <PositionListSumAsBalance
+          portfolioName={portfolioName}
+          batchType={batchType}
+          selector={(p, isin) => useGetPositionProfit(p, isin).data}
+        />
+      ),
+      meta: {
+        align: "right",
+      },
+    },
+  ];
 
 type PositionItemProps = {
   portfolioName: string;

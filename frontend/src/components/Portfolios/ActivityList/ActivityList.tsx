@@ -62,6 +62,7 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
 
   const columnHelper = createColumnHelper<PortfolioActivity>();
 
+  // oxlint-disable-next-line typescript-eslint/no-explicit-any
   const defs: ColumnDef<PortfolioActivity, any>[] = [
     columnHelper.accessor((a) => a, {
       id: "type",
