@@ -67,7 +67,7 @@ export function getTimeAxisProps(
   };
 }
 
-const defaultDateDomain = ([dataMin, dataMax]: [number, number]): [
+const defaultDateDomain = ([dataMin, dataMax]: readonly [number, number]): [
   number,
   number,
 ] => [

@@ -77,8 +77,8 @@ export const TotalValueChart: FC<{ portfolioNames: string[] }> = ({
               }) + " €",
               name,
             ]}
-            labelFormatter={(value: number) =>
-              moment(new Date(value)).format("ddd DD.MM.YYYY")
+            labelFormatter={(value) =>
+              moment(new Date(Number(value))).format("ddd DD.MM.YYYY")
             }
           />
         </LineChart>
