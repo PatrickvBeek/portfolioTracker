@@ -13,12 +13,14 @@ const fetchPricesFromAlphaVantage = async (
   );
   const prices = (await response.json()) as AlphaVantageDailyResult;
 
-  return Object.entries(prices["Weekly Time Series"]).map(
-    ([dateString, price]) => ({
-      timestamp: new Date(dateString).getTime(),
-      value: parseFloat((price as any)["4. close"]),
-    })
-  );
+  const entries = Object.entries(prices["Weekly Time Series"]) as [
+    string,
+    PriceEntry,
+  ][];
+  return entries.map(([dateString, price]) => ({
+    timestamp: new Date(dateString).getTime(),
+    value: parseFloat(price["4. close"]),
+  }));
 };
 
 const isTest = import.meta.env.MODE === "test";
@@ -39,3 +41,5 @@ export type AlphaVantageDailyResult = {
     }
   >;
 };
+
+type PriceEntry = AlphaVantageDailyResult["Weekly Time Series"][string];
