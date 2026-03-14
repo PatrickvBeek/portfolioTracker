@@ -15,12 +15,12 @@
     "fmt": "oxfmt"
   },
   "devDependencies": {
-    "dependency-cruiser": "^16.10.4",
+    "dependency-cruiser": "^17.3.9",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "oxfmt": "^0.28.0",
-    "oxlint": "^1.43.0",
-    "syncpack": "^13.0.4",
+    "lint-staged": "^16.4.0",
+    "oxfmt": "^0.40.0",
+    "oxlint": "^1.55.0",
+    "syncpack": "^14.2.0",
     "typescript": "^5.9.3"
   },
   "lint-staged": {

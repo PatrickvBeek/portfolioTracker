@@ -20,7 +20,7 @@ jobs:
         run: pnpm install
 
       - name: Assert synced dependencies
-        run: pnpm syncpack list-mismatches
+        run: pnpm syncpack lint
 
       - name: Check architecture
         run: pnpm run architecture-tests
@@ -28,7 +28,7 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Prettier
+      - name: Code format
         run: pnpm fmt:check
 
       - name: TypeScript Check

@@ -110,10 +110,10 @@ export const ForecastChart: FC<{ portfolioNames: string[] }> = ({
                     `${asLocaleEuro(value[0], 0)} - ${asLocaleEuro(value[1], 0)}`,
                     name,
                   ]
-                : [asLocaleEuro(value, 0), name]
+                : [asLocaleEuro(Number(value), 0), name]
             }
-            labelFormatter={(value: number) =>
-              moment(new Date(value)).format("ddd DD.MM.YYYY")
+            labelFormatter={(value) =>
+              moment(new Date(Number(value))).format("ddd DD.MM.YYYY")
             }
           />
         </ComposedChart>
