@@ -78,7 +78,7 @@
       "files": ["**/*.{ts,tsx,js,jsx}"],
       "rules": {
         "curly": ["error", "all"],
-        "@typescript-eslint/ban-ts-comment": "warn",
+        "@typescript-eslint/ban-ts-comment": "error",
         "no-array-constructor": "error",
         "@typescript-eslint/no-duplicate-enum-values": "error",
         "@typescript-eslint/no-empty-object-type": "error",
