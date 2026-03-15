@@ -30,7 +30,7 @@ function modify(className: string, modifiers: Modifiers): Modifiers {
   );
 }
 
-export function bemBlock(
+function bemBlock(
   block: string,
   className: string | undefined,
   modifiers?: Modifiers
@@ -38,7 +38,7 @@ export function bemBlock(
   return classNames(block, modify(block, modifiers), className);
 }
 
-export function bemElement(
+function bemElement(
   block: string,
   element: string,
   modifiers?: Modifiers

@@ -21,7 +21,7 @@ export function useSetAssets() {
   };
 }
 
-export function useUpdateAssets(
+function useUpdateAssets(
   updater: (assetLib: AssetLibrary, updateData: Asset) => AssetLibrary
 ) {
   const { setAssets, assets } = useContext(UserDataContext);

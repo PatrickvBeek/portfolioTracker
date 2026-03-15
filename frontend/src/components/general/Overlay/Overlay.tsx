@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { ReactElement } from "react";
 
-export interface OverlayProps {
+interface OverlayProps {
   open: boolean;
   onClose: () => void;
   children?: ReactElement;

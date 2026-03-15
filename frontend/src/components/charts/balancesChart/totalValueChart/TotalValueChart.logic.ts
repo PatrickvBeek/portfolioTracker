@@ -17,7 +17,7 @@ import { usePortfolioTimeAxis } from "../shared/balancesChart.utils";
 
 export type BalancesChartDataSets = "buyValue" | "cashFlow" | "marketValue";
 
-export type BalancesChartData = ChartDataPoint<BalancesChartDataSets>[];
+type BalancesChartData = ChartDataPoint<BalancesChartDataSets>[];
 
 export const useGetPortfolioHistoryChartData = (
   portfolioNames: string[]

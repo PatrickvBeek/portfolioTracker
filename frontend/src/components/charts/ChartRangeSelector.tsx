@@ -2,7 +2,7 @@ import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { FC } from "react";
 import { ChartRange, CHART_RANGES } from "./chartRange.types";
 
-export interface ChartRangeSelectorProps {
+interface ChartRangeSelectorProps {
   value: ChartRange;
   onChange: (range: ChartRange) => void;
 }

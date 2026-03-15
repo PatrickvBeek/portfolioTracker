@@ -7,7 +7,7 @@ import "./PortfolioActionsBar.css";
 
 const { bemBlock, bemElement } = bemHelper("portfolio-actions-bar");
 
-export type PortfolioViewSideBarProps = Props<{
+type PortfolioViewSideBarProps = Props<{
   portfolioName: string;
 }>;
 

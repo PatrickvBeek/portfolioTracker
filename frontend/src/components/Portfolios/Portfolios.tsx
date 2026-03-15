@@ -16,7 +16,7 @@ import { PortfolioSummary } from "./portfolioSummary/PortfolioSummary";
 import { ClosedPositionsList } from "./PositionList/ClosedPositionsList/ClosedPositionsList";
 import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPositionsList";
 
-export type PortfolioProps = Props;
+type PortfolioProps = Props;
 
 function Portfolios({ className }: PortfolioProps) {
   const portfolioLib = useGetPortfolios();

@@ -1,1 +1,2 @@
+pnpm knip --cache
 pnpm lint-staged
