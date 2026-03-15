@@ -4,7 +4,7 @@ import "./FormRowFlex.css";
 
 const { bemBlock, bemElement } = bemHelper("form-row-flex");
 
-export interface FormRowFlexProps {
+interface FormRowFlexProps {
   children: ReactElement[];
   className?: string;
 }

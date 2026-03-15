@@ -4,7 +4,7 @@ import { Asset } from "pt-domain";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { bemHelper } from "../../../utility/bemHelper";
 import { Props } from "../../../utility/types";
-import { DropdownProps } from "../../general/Dropdown/Dropdown";
+import { InputProps } from "../../general/types";
 import "./AssetSelect.css";
 
 const { bemBlock, bemElement } = bemHelper("asset-select");
@@ -15,8 +15,8 @@ const StyledOptionItem = styled.li`
   align-items: flex-start;
 `;
 
-export type AssetDropdownProps = Pick<
-  DropdownProps,
+type AssetDropdownProps = Pick<
+  InputProps,
   "isValid" | "errorMessage" | "isMandatory"
 > &
   Props<{

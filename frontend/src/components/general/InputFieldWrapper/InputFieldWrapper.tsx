@@ -5,7 +5,7 @@ import { InputProps } from "../types";
 
 const { bemBlock, bemElement } = bemHelper("input");
 
-export interface InputWrapperProps extends InputProps {
+interface InputWrapperProps extends InputProps {
   children: ReactElement;
 }
 

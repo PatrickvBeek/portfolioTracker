@@ -33,7 +33,7 @@ export type ForecastChartDataSets =
   | "mean"
   | "uncertaintyBand"
   | "cashFlow";
-export type ForecastChartData = ChartDataPoint<ForecastChartDataSets>[];
+type ForecastChartData = ChartDataPoint<ForecastChartDataSets>[];
 
 export const FORECAST_CONFIDENCE_LEVELS = {
   "50": 50,

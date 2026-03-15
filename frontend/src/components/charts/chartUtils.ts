@@ -134,7 +134,7 @@ export function calculateGradientOffset<T>(
   return dataMax / (dataMax - dataMin);
 }
 
-export const asLocale = (value: number | string, digits: number): string =>
+const asLocale = (value: number | string, digits: number): string =>
   new Number(value).toLocaleString(undefined, {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,

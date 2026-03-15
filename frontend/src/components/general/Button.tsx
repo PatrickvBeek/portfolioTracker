@@ -2,7 +2,7 @@ import { ButtonProps as MuiButtonProps } from "@mui/material";
 import { ReactElement, forwardRef } from "react";
 import { StyledMuiButton } from "./StyledComponents";
 
-export interface ButtonProps {
+interface ButtonProps {
   onClick: () => void;
   label: string;
   isDisabled?: boolean;
