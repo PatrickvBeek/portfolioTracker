@@ -10,7 +10,10 @@ import {
 } from "pt-domain";
 import { sort, sum } from "radash";
 import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
-import { useCurrentPriceByIsin } from "../../../hooks/prices/priceHooks";
+import {
+  useCurrentPriceByIsin,
+  useGetPricesForIsins,
+} from "../../../hooks/prices/priceHooks";
 
 export function useGetPositionListItems(
   portfolioName: string,
@@ -130,5 +133,29 @@ export const usePositionListSum = (
   return (
     isins &&
     sum(isins.map((isin) => selector(portfolioName, isin, batchType) || 0))
+  );
+};
+
+export const usePositionListTotalValueSum = (
+  portfolioName: string,
+  batchType: BatchType
+): number | undefined => {
+  const portfolio = useGetPortfolio(portfolioName);
+  const isins = useGetAssetsForBatchType(portfolioName, batchType);
+  const pricesQuery = useGetPricesForIsins(isins || []);
+
+  if (!isins || !portfolio) {
+    return undefined;
+  }
+
+  return sum(
+    isins.map((isin) => {
+      const onlinePrice = pricesQuery.data?.[isin]?.[0]?.value;
+      const currentPrice =
+        onlinePrice ?? getLatestPriceFromTransactions(portfolio, isin) ?? NaN;
+      return batchType === "open"
+        ? getCurrentValueOfOpenBatches(portfolio, isin, currentPrice)
+        : getSoldValueOfClosedBatches(portfolio, isin);
+    })
   );
 };

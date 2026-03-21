@@ -20,13 +20,14 @@
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.40.0",
     "oxlint": "^1.55.0",
+    "oxlint-tsgolint": "^0.17.0",
     "syncpack": "^14.2.0",
     "typescript": "^5.9.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "pnpm oxlint --fix",
-      "pnpm oxfmt"
+      "pnpm oxfmt",
+      "pnpm oxlint --fix"
     ],
     "*.{json,md,css,less,html}": [
       "pnpm oxfmt"

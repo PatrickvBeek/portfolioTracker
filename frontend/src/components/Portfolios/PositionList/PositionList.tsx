@@ -20,6 +20,7 @@ import {
   useGetRealizedPositionGains,
   useGetTotalPositionValue,
   usePositionListSum,
+  usePositionListTotalValueSum,
 } from "./PositionList.logic";
 
 const { bemBlock, bemElement } = bemHelper("position-list");
@@ -208,11 +209,7 @@ function TotalValueSum({
   portfolioName,
   batchType,
 }: Omit<PositionItemProps, "isin">) {
-  const sum = usePositionListSum(
-    portfolioName,
-    batchType,
-    (p, isin, batchType) => useGetTotalPositionValue(p, isin, batchType).data
-  );
+  const sum = usePositionListTotalValueSum(portfolioName, batchType);
   return isNumber(sum) ? toPrice(sum) : null;
 }
 

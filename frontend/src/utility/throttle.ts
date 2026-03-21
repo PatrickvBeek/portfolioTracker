@@ -8,8 +8,10 @@ export function throttle<T extends unknown[], R>(
   let pendingRequest: Promise<void> | null = null;
 
   return async function checkedCall(...args: T): Promise<R> {
-    while (pendingRequest) {
-      await pendingRequest;
+    let current = pendingRequest;
+    while (current !== null) {
+      await current;
+      current = pendingRequest;
     }
 
     const now = Date.now();
