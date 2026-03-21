@@ -43,7 +43,7 @@ describe("throttle", () => {
 
     const promises = [throttledFn(1), throttledFn(2), throttledFn(3)];
 
-    vi.advanceTimersByTimeAsync(250);
+    await vi.advanceTimersByTimeAsync(250);
     await Promise.all(promises);
 
     expect(fn).toHaveBeenCalledTimes(3);
@@ -73,9 +73,9 @@ describe("throttle", () => {
     const throttledFn = throttle(fn, 100);
 
     const result1 = throttledFn(3);
-    vi.advanceTimersByTimeAsync(50);
+    await vi.advanceTimersByTimeAsync(50);
     const result2 = throttledFn(4);
-    vi.advanceTimersByTimeAsync(50);
+    await vi.advanceTimersByTimeAsync(50);
 
     const value1 = await result1;
     const value2 = await result2;
@@ -93,7 +93,7 @@ describe("throttle", () => {
 
     const promises = [throttledFn(1), throttledFn(2)];
 
-    vi.advanceTimersByTimeAsync(150);
+    await vi.advanceTimersByTimeAsync(150);
     await Promise.all(promises);
 
     expect(fn).toHaveBeenCalledTimes(2);

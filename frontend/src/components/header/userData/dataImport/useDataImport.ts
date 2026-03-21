@@ -14,10 +14,10 @@ export const useDataImport = () => {
     (file: File) => {
       const fileReader = new FileReader();
       fileReader.readAsText(file, "UTF-8");
-      fileReader.onerror = () => {
+      fileReader.addEventListener("error", () => {
         setIsErrorDialogOpen(true);
-      };
-      fileReader.onload = (evt) => {
+      });
+      fileReader.addEventListener("load", (evt) => {
         const readingResult = evt.target?.result;
         if (typeof readingResult === "string") {
           try {
@@ -33,7 +33,7 @@ export const useDataImport = () => {
           console.error("parsed input type is not 'string'");
           setIsErrorDialogOpen(true);
         }
-      };
+      });
     },
     [setPortfolios, setAssets, setApiKeys]
   );
@@ -57,13 +57,12 @@ export const useDataImport = () => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".json";
-    input.onchange = (e) => {
-      const target = e.target as HTMLInputElement;
-      const file = target.files?.[0];
+    input.addEventListener("change", () => {
+      const file = input.files?.[0];
       if (file) {
         importData(file);
       }
-    };
+    });
     input.click();
   }, [importData]);
 

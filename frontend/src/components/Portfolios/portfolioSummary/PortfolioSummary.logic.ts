@@ -43,13 +43,12 @@ export const useNonRealizedGains = (
   portfolioNames: string[]
 ): CustomQuery | undefined => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const allIsins = [...new Set(portfolios.flatMap((p) => getIsins(p)))];
+  const priceMap = useGetPricesForIsins(allIsins);
 
   if (portfolios.length === 0) {
     return { isLoading: false, isError: false, data: 0 };
   }
-
-  const allIsins = [...new Set(portfolios.flatMap((p) => getIsins(p)))];
-  const priceMap = useGetPricesForIsins(allIsins);
 
   const nonRealizedGainsPerPortfolio = portfolios.map((portfolio) =>
     getNonRealizedGains(portfolio, priceMap.data)
@@ -66,13 +65,12 @@ export const useMarketValue = (
   portfolioNames: string[]
 ): CustomQuery | undefined => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const allIsins = [...new Set(portfolios.flatMap((p) => getIsins(p)))];
+  const priceMapQuery = useGetPricesForIsins(allIsins);
 
   if (portfolios.length === 0) {
     return { isLoading: false, isError: false, data: 0 };
   }
-
-  const allIsins = [...new Set(portfolios.flatMap((p) => getIsins(p)))];
-  const priceMapQuery = useGetPricesForIsins(allIsins);
 
   const marketValuePerPortfolio = portfolios.map((portfolio) => {
     const isins = getIsins(portfolio);
@@ -112,14 +110,13 @@ export const useTimeWeightedReturn = (
   portfolioNames: string[]
 ): CustomQuery | undefined => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  const isins = getIsins(merged);
+  const priceMapQuery = useGetPricesForIsins(isins);
 
   if (portfolios.length === 0) {
     return { isLoading: false, isError: false, data: undefined };
   }
-
-  const merged = combinePortfolios(portfolios);
-  const isins = getIsins(merged);
-  const priceMapQuery = useGetPricesForIsins(isins);
 
   return {
     isLoading: priceMapQuery.isLoading,

@@ -30,6 +30,6 @@ export const usePortfolioTimeAxis = (portfolioNames: string[]): number[] => {
     getDefaultTimeAxis(xMin)
       .concat(portfolioTimestamps)
       .concat(Date.now())
-      .sort()
+      .toSorted((a, b) => a - b)
   );
 };

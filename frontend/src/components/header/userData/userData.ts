@@ -16,6 +16,7 @@ export type UserData = {
 };
 
 export const parseUserData = (jsonString: string): UserData => {
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion JSON.parse returns any, validation done below
   const parsedObject = JSON.parse(jsonString) as UserDataOfAnyVersion;
   if (!(parsedObject.assets && parsedObject.meta && parsedObject.portfolios)) {
     throw new Error(`cannot parse user data ${jsonString}`);
@@ -32,6 +33,7 @@ const doMigration = (data: UserDataOfAnyVersion): UserData => {
   if (data.meta.exportVersion === 1) {
     return getV2(data);
   }
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion runtime check ensures correct version
   return data as UserData;
 };
 

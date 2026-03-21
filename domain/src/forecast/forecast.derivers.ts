@@ -56,7 +56,7 @@ const runSingleSimulation = (
 };
 
 const calculatePercentile = (values: number[], percentile: number): number => {
-  const sorted = [...values].sort((a, b) => a - b);
+  const sorted = values.toSorted((a, b) => a - b);
   const index = (percentile / 100) * (sorted.length - 1);
   const lower = Math.floor(index);
   const upper = Math.ceil(index);

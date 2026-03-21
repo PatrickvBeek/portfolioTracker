@@ -73,6 +73,7 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
     parameters.scenario
   );
 
+  // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps
   const debouncedParameterChange = useCallback(
     debounce((newParameters: ForecastParameters) => {
       onParametersChange(newParameters);

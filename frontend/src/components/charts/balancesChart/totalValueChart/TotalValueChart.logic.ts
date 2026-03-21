@@ -43,7 +43,7 @@ export const useGetBuyValueHistory = (portfolioNames: string[]) => {
 
   const allTimestamps = unique(
     allHistories.flat().map((p) => p.timestamp)
-  ).sort((a, b) => a - b);
+  ).toSorted((a, b) => a - b);
 
   const merged = allTimestamps.map((timestamp) => ({
     timestamp,

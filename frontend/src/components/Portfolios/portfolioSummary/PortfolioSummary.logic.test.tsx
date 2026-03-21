@@ -135,8 +135,8 @@ describe("PortfolioSummary hooks", () => {
       });
 
       expect(
-        cashFlow.result.current! +
-          realizedGains.result.current! +
+        cashFlow.result.current +
+          realizedGains.result.current +
           nonRealizedGains.result.current!.data!
       ).toBe(marketValue.result.current?.data);
     });

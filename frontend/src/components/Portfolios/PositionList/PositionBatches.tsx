@@ -193,4 +193,5 @@ function FooterCell({ children }: React.PropsWithChildren) {
 const sumBy = <T extends OpenBatchListItem | ClosedBatchListItem>(
   batches: T[],
   key: { [K in keyof T]: T[K] extends number ? K : never }[keyof T]
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion conditional type ensures key accesses number property
 ): number => sum(batches, (batch) => batch[key] as number);

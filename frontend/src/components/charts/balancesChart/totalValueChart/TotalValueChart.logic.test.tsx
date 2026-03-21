@@ -140,9 +140,9 @@ describe("useGetPortfolioHistoryChartData", () => {
   });
 });
 
-describe("useGetBuyValueHistory", () => {
-  const ts = (dateStr: string) => new Date(dateStr).getTime();
+const ts = (dateStr: string) => new Date(dateStr).getTime();
 
+describe("useGetBuyValueHistory", () => {
   it("returns correct sum for multiple portfolios with different assets", () => {
     const portfolio1 = getTestPortfolio({
       name: "p1",

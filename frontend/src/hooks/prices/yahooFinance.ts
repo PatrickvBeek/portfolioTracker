@@ -18,6 +18,7 @@ export const getPricesFromYahooFinance =
         },
       }
     );
+    // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion external API response shape assumed
     const parsed = (await response.json()) as YahooChartResponse;
 
     return (

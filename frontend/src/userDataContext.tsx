@@ -45,17 +45,20 @@ export const UserDataProvider: FC<PropsWithChildren> = ({ children }) => {
 
 function readAssetsFromLocalStorage(): AssetLibrary {
   const savedAssets = localStorage.getItem("assets");
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion localStorage is trusted source
   return savedAssets ? (JSON.parse(savedAssets) as AssetLibrary) : {};
 }
 
 function readPortfoliosFromLocalStorage(): PortfolioLibrary {
   const savedPortfolios = localStorage.getItem("portfolios");
   return savedPortfolios
-    ? (JSON.parse(savedPortfolios) as PortfolioLibrary)
+    ? // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion localStorage is trusted source
+      (JSON.parse(savedPortfolios) as PortfolioLibrary)
     : {};
 }
 
 function readApiKeysFromLocalStorage(): ApiKeys {
   const savedApiKeys = localStorage.getItem("apiKeys");
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion localStorage is trusted source
   return savedApiKeys ? (JSON.parse(savedApiKeys) as ApiKeys) : { yahoo: "" };
 }
