@@ -56,8 +56,8 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
   };
 
   const tableData = showAll
-    ? activity.reverse()
-    : activity.reverse().slice(0, 10);
+    ? activity.toReversed()
+    : activity.toReversed().slice(0, 10);
   const assets = assetsLib;
 
   const columnHelper = createColumnHelper<PortfolioActivity>();

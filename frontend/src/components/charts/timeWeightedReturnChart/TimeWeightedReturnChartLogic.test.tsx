@@ -189,7 +189,9 @@ function expectChartsAreEqualForKeys<T extends string>(
 
       expect(actualNumber).toBeCloseTo(expectedNumber);
     }
+    // oxlint-disable-next-line typescript-eslint/unbound-method
     expect(moment(actualPoint.timestamp).startOf("day").unix).toEqual(
+      // oxlint-disable-next-line typescript-eslint/unbound-method
       moment(expectedPoint.timestamp).startOf("day").unix
     );
   }

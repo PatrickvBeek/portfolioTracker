@@ -136,6 +136,7 @@ function CustomTable<T>({
 }
 
 function getAlignment<T>(cell: Cell<T, unknown> | Header<T, unknown>) {
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion TanStack Table meta is unknown by design
   const meta = cell.column.columnDef.meta as
     | {
         align: "right" | "left" | "center" | undefined;

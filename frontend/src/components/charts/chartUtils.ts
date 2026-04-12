@@ -36,7 +36,10 @@ export function getAxisProps(
     .map((point) => Object.values(omit(point, ["timestamp"])))
     .flat(2)
     .filter(isNumber);
-  const domain = d3Extent(values) as [number, number];
+  const domain = d3Extent(values);
+  if (domain[0] === undefined || domain[1] === undefined) {
+    return { type: "number" };
+  }
   const scale = d3LinearScale(values).domain(domain).range([0, 1]);
 
   const [yMin, yMax] = domain;
@@ -55,7 +58,10 @@ export function getTimeAxisProps(
   nTicks: number = 5
 ): Partial<XAxisProps> {
   const dates = chartData.map((point) => point.timestamp);
-  const domain = d3Extent(dates) as [number, number];
+  const domain = d3Extent(dates);
+  if (domain[0] === undefined || domain[1] === undefined) {
+    return { dataKey: "timestamp", type: "number" };
+  }
   const tScale = d3ScaleTime().domain(domain).range([0, 1]);
 
   return {
@@ -87,11 +93,13 @@ export const historiesToChartData = <Keys extends string>(
         .valueOf();
 
       if (!map.has(startOfDayTimestamp)) {
+        // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion incremental object building with generic keys
         map.set(startOfDayTimestamp, {
           timestamp: startOfDayTimestamp,
         } as ChartDataPoint<Keys>);
       }
       map.get(startOfDayTimestamp)![dataset.newKey] =
+        // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion incremental object building with generic keys
         point.value as ChartDataPoint<Keys>[Keys];
     });
   });

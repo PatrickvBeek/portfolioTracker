@@ -11,12 +11,10 @@ const fetchPricesFromAlphaVantage = async (
   const response = await fetch(
     `https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${symbol}&apikey=free_tier`
   );
+  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion external API response shape assumed
   const prices = (await response.json()) as AlphaVantageDailyResult;
 
-  const entries = Object.entries(prices["Weekly Time Series"]) as [
-    string,
-    PriceEntry,
-  ][];
+  const entries = Object.entries(prices["Weekly Time Series"]);
   return entries.map(([dateString, price]) => ({
     timestamp: new Date(dateString).getTime(),
     value: parseFloat(price["4. close"]),
@@ -41,5 +39,3 @@ export type AlphaVantageDailyResult = {
     }
   >;
 };
-
-type PriceEntry = AlphaVantageDailyResult["Weekly Time Series"][string];

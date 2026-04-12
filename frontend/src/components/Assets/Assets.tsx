@@ -7,7 +7,7 @@ import "./Assets.css";
 
 const { bemBlock, bemElement } = bemHelper("assets-page");
 
-type AssetsProps = Props<object>;
+type AssetsProps = Props;
 
 function Assets({ className }: AssetsProps) {
   return (
