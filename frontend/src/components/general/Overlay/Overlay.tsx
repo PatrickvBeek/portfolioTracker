@@ -19,10 +19,12 @@ const Overlay = ({ open, onClose, children, title }: OverlayProps) => {
   return (
     <Dialog open={open} onClose={onClose}>
       <Stack
-        alignItems={"center"}
-        flexDirection={"row"}
-        justifyContent={"space-between"}
-        marginBottom={"1rem"}
+        sx={{
+          alignItems: "center",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginBottom: "1rem",
+        }}
       >
         <DialogTitle>{title}</DialogTitle>
         <IconButton aria-label="close" onClick={onClose}>

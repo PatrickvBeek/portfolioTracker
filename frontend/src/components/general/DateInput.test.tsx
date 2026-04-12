@@ -6,7 +6,7 @@ const LABEL = "label";
 
 describe("the DateInput component", () => {
   const errorMessage = "test-error-message";
-  const onChangeMock = vi.fn();
+  const onChangeMock = vi.fn<(date: Date | undefined) => void>();
   const testProps: DateInputProps = {
     isValid: true,
     isMandatory: true,

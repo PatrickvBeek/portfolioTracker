@@ -21,7 +21,7 @@ function PortfolioFormSideBar({
   return (
     <Stack spacing={1}>
       <Headline text={"Add Data to Portfolio"}></Headline>
-      <Stack direction="row" justifyContent="center">
+      <Stack direction="row" sx={{ justifyContent: "center" }}>
         <SelectionHeader
           entries={[FORM.ORDER, FORM.DIVIDEND]}
           selectedEntry={tab}

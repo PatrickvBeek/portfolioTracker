@@ -8,7 +8,7 @@ const TEST_ASSET_ISIN = "isin";
 const TEST_ASSET_NAME = "some asset";
 
 describe("the AssetInputFields component", () => {
-  const callback = vi.fn();
+  const callback = vi.fn<(isin: string | undefined) => void>();
 
   localStorage.setItem(
     "assets",

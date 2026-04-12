@@ -59,7 +59,7 @@ export const ForecastChart: FC<{ portfolioNames: string[] }> = ({
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis
             {...getAxisProps(chartData)}
-            tickFormatter={(value) => Number(value / 1000).toString()}
+            tickFormatter={(value) => (value / 1000).toString()}
             unit={" k€"}
           />
           <CartesianGrid stroke="#ccc" />
