@@ -45,7 +45,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.0",
-    "jsdom": "^28.1.0",
+    "happy-dom": "^20.8.9",
     "less": "^4.6.4",
     "msw": "^2.12.10",
     "typescript": "^5.9.3",
