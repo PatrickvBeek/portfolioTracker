@@ -1,5 +1,4 @@
 import { screen, waitFor } from "@testing-library/react";
-import { createElement } from "react";
 import { vi } from "vitest";
 import { customRender } from "../../testUtils/componentHelpers";
 import Dashboard from "./Dashboard";
@@ -8,13 +7,11 @@ vi.mock("./Dashboard.logic", () => ({
   usePortfolioNames: () => ["Portfolio 1", "Portfolio 2", "Portfolio 3"],
 }));
 
-vi.mock("recharts", async () => {
-  const original = await vi.importActual("recharts");
-  return {
-    ...original,
-    ResponsiveContainer: () => createElement("div"),
-  };
-});
+vi.mock("../charts/ChartContainer", () => ({
+  ChartContainer: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+}));
 
 const getChip = (name: string) => screen.getByRole("button", { name });
 
