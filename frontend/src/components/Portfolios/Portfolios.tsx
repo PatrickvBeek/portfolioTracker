@@ -75,7 +75,7 @@ function Portfolios({ className }: PortfolioProps) {
       >
         <div className={styles.drawerContent}>
           <Stack spacing={2}>
-            <Box display="flex" justifyContent="flex-end">
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <IconButton
                 onClick={() => setMobileDrawerOpen(false)}
                 aria-label="Close drawer"

@@ -9,7 +9,7 @@ const PortfolioInputForm = ({ onConfirm }: { onConfirm?: () => void }) => {
   const [fieldContent, setFieldContent] = useState("");
   const addPortfolio = useAddPortfolio();
   return (
-    <Stack direction={"row"} spacing={1} alignItems={"flex-start"}>
+    <Stack direction={"row"} spacing={1} sx={{ alignItems: "flex-start" }}>
       <TextInput
         text={fieldContent}
         onChange={(element) => setFieldContent(element.target.value)}

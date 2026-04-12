@@ -116,7 +116,7 @@ describe("The OrderInputForm", () => {
 
     await user.type(
       screen.getByLabelText("Order Date"),
-      TEST_ORDER_TESLA.timestamp.toString()
+      TEST_ORDER_TESLA.timestamp
     );
     await user.click(await screen.findByRole("button", { name: "Submit" }));
 

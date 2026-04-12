@@ -44,20 +44,17 @@ export function getBatchesOfType<T extends BatchType>(
 }
 
 export function getBatchesHistory(orders: Order[]): History<Batches> {
-  const history = sort(orders, getNumericDateTime).reduce<History<Batches>>(
-    (history, order) => {
-      const oldBatches = last(history)?.value || EMPTY_BATCHES;
-      const newBatches = updateBatchesWithOrder(oldBatches, order);
-      if (!newBatches) {
-        return history;
-      }
-      return [
-        ...history,
-        { timestamp: getNumericDateTime(order), value: newBatches },
-      ];
-    },
-    [] as History<Batches>
-  );
+  const history = sort(orders, getNumericDateTime).reduce((history, order) => {
+    const oldBatches = last(history)?.value || EMPTY_BATCHES;
+    const newBatches = updateBatchesWithOrder(oldBatches, order);
+    if (!newBatches) {
+      return history;
+    }
+    return [
+      ...history,
+      { timestamp: getNumericDateTime(order), value: newBatches },
+    ];
+  }, [] as History<Batches>);
 
   if (history.length !== orders.length) {
     return [];

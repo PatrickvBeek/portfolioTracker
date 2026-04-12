@@ -6,7 +6,8 @@ const TEST_LABEL = "test-label";
 
 describe("the text TextInput component", () => {
   const errorMessage = "test-error-message";
-  const onChangeMock = vi.fn();
+  const onChangeMock =
+    vi.fn<(event: React.ChangeEvent<HTMLInputElement>) => void>();
   const testProps: TextInputProps = {
     text: "test-text",
     isValid: true,

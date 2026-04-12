@@ -10,8 +10,8 @@ describe("the confirmation component", () => {
     body: "something evil will happen, do you want to continue?",
     confirmLabel: "yeah!",
     cancelLabel: "nooooo!",
-    onConfirm: vi.fn(),
-    onCancel: vi.fn(),
+    onConfirm: vi.fn<() => void>(),
+    onCancel: vi.fn<() => void>(),
   };
 
   function getConfirmButton(): HTMLElement | undefined {

@@ -3,7 +3,7 @@ import { vi } from "vitest";
 import Overlay from "./Overlay";
 
 describe("the Overlay component", () => {
-  const onClose = vi.fn();
+  const onClose = vi.fn<() => void>();
 
   it("can be rendered with default props", () => {
     render(<Overlay open={true} onClose={onClose} />);

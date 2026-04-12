@@ -7,7 +7,7 @@ import { NumberInput, NumberInputProps } from "./NumberInput";
 const LABEL = "test label";
 
 describe("the NumberInput component", () => {
-  const onChangeMock = vi.fn();
+  const onChangeMock = vi.fn<(value: number | undefined) => void>();
   const PROPS: NumberInputProps = { onChange: onChangeMock, label: LABEL };
   const user = userEvent.setup();
   const { fillNumberInput } = componentHelpers(user);

@@ -5,7 +5,9 @@ describe("throttle", () => {
   vi.useFakeTimers();
 
   it("executes first call immediately", async () => {
-    const fn = vi.fn(async (x: number) => x * 2);
+    const fn = vi.fn<(x: number) => Promise<number>>(
+      async (x: number) => x * 2
+    );
     const throttledFn = throttle(fn, 100);
 
     const promise = throttledFn(5);
@@ -18,7 +20,9 @@ describe("throttle", () => {
   });
 
   it("delays second call until minimum interval elapses", async () => {
-    const callback = vi.fn(async (x: number) => x * 2);
+    const callback = vi.fn<(x: number) => Promise<number>>(
+      async (x: number) => x * 2
+    );
     const throttledFn = throttle(callback, 100);
 
     const promise1 = throttledFn(5);
@@ -38,7 +42,9 @@ describe("throttle", () => {
   });
 
   it("queues concurrent requests and executes them sequentially", async () => {
-    const fn = vi.fn(async (x: number) => x * 2);
+    const fn = vi.fn<(x: number) => Promise<number>>(
+      async (x: number) => x * 2
+    );
     const throttledFn = throttle(fn, 100);
 
     const promises = [throttledFn(1), throttledFn(2), throttledFn(3)];
@@ -53,7 +59,9 @@ describe("throttle", () => {
   });
 
   it("respects minimum interval after previous call completes", async () => {
-    const fn = vi.fn(async (x: number) => x * 2);
+    const fn = vi.fn<(x: number) => Promise<number>>(
+      async (x: number) => x * 2
+    );
     const throttledFn = throttle(fn, 100);
 
     const promise1 = throttledFn(5);
@@ -69,7 +77,9 @@ describe("throttle", () => {
   });
 
   it("maintains return values", async () => {
-    const fn = vi.fn(async (x: number) => x * 2);
+    const fn = vi.fn<(x: number) => Promise<number>>(
+      async (x: number) => x * 2
+    );
     const throttledFn = throttle(fn, 100);
 
     const result1 = throttledFn(3);
@@ -85,7 +95,7 @@ describe("throttle", () => {
   });
 
   it("handles async functions correctly", async () => {
-    const fn = vi.fn(async (x: number) => {
+    const fn = vi.fn<(x: number) => Promise<number>>(async (x: number) => {
       await new Promise<void>((resolve) => resolve());
       return x * 2;
     });

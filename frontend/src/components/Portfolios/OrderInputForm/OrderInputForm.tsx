@@ -50,12 +50,12 @@ export function OrderInputForm({
 
   const orderToSubmit = isFormValid
     ? {
-        sharePrice: Number(sharePrice),
+        sharePrice: sharePrice,
         asset: isin,
-        orderFee: Number(fees) || 0,
-        pieces: Number(pieces),
+        orderFee: fees || 0,
+        pieces: pieces,
         timestamp: date.toISOString(),
-        taxes: Number(taxes) || 0,
+        taxes: taxes || 0,
         uuid: uuidV4(),
       }
     : undefined;

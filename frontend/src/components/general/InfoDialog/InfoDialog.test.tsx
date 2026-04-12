@@ -6,7 +6,7 @@ import { InfoDialog, InfoDialogProps } from "./InfoDialog";
 describe("InfoDialog", () => {
   const defaultProps: InfoDialogProps = {
     open: true,
-    onClose: vi.fn(),
+    onClose: vi.fn<() => void>(),
     title: "Test Title",
     message: "Test message content",
   };
@@ -55,7 +55,7 @@ describe("InfoDialog", () => {
   });
 
   it("calls onClose when OK button is clicked", async () => {
-    const mockOnClose = vi.fn();
+    const mockOnClose = vi.fn<() => void>();
     const { user } = customRender({
       component: <InfoDialog {...defaultProps} onClose={mockOnClose} />,
     });
@@ -67,7 +67,7 @@ describe("InfoDialog", () => {
   });
 
   it("calls onClose when Escape key is pressed", async () => {
-    const mockOnClose = vi.fn();
+    const mockOnClose = vi.fn<() => void>();
     const { user } = customRender({
       component: <InfoDialog {...defaultProps} onClose={mockOnClose} />,
     });
