@@ -11,8 +11,17 @@ export default defineConfig(() => {
     plugins: [react()],
     test: {
       globals: true,
-      environment: "jsdom",
+      environment: "happy-dom",
+      pool: "threads",
       setupFiles: "./src/setupTests.ts",
+      deps: {
+        optimizer: {
+          client: {
+            enabled: true,
+            include: ["@mui/icons-material"],
+          },
+        },
+      },
       coverage: {
         reporter: ["text", "html"],
         exclude: ["node_modules/", "src/setupTests.ts"],
