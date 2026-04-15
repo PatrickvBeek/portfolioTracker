@@ -75,6 +75,13 @@ export function OrderInputForm({
         onChange={(isin) => setAssetIsin(isin || DEFAULTS.isin)}
         isMandatory={true}
       />
+      <DateInput
+        className={bemElement("date")}
+        onChange={setDate}
+        label={"Order Date"}
+        defaultDate={DEFAULTS.date}
+        isMandatory={true}
+      />
       <NumberInput
         className={bemElement("pieces")}
         onChange={setPieces}
@@ -106,13 +113,6 @@ export function OrderInputForm({
         defaultValue={DEFAULTS.taxes}
         isMandatory={false}
         autoComplete={"off"}
-      />
-      <DateInput
-        className={bemElement("date")}
-        onChange={setDate}
-        label={"Order Date"}
-        defaultDate={DEFAULTS.date}
-        isMandatory={true}
       />
       <div className={bemElement("summary")}>
         Summary:
