@@ -21,6 +21,7 @@ frontend/build
 .env.development.local
 .env.test.local
 .env.production.local
+.opencode/**
 
 npm-debug.log*
 pnpm-debug.log*
