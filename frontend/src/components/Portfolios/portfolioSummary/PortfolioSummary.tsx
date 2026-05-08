@@ -1,7 +1,7 @@
-import classNames from "classnames";
 import { FC, ReactNode } from "react";
+import { cn } from "../../../utility/cn";
 import Balance from "../../general/Balance/Balance";
-import { Headline } from "../../general/headline/Headline";
+import { Heading } from "../../ui/Heading";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
 import Tile from "../../general/Tile";
 import {
@@ -12,7 +12,7 @@ import {
   useRealizedGains,
   useTimeWeightedReturn,
 } from "./PortfolioSummary.logic";
-import styles from "./PortfolioSummary.module.less";
+import { styles } from "./PortfolioSummary.styles";
 
 export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
   portfolioNames,
@@ -27,7 +27,9 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
 
   return (
     <div>
-      <Headline text={"Summary"} className={styles.headline} />
+      <Heading level="h1" className={styles.headline}>
+        Summary
+      </Heading>
       <div className={styles.tiles}>
         <SummaryTile
           title={"Balances"}
@@ -97,7 +99,7 @@ const SummaryTile: FC<{
   title: string;
 }> = ({ entries, title }) => (
   <Tile header={title}>
-    <div className={classNames(styles.rows)}>
+    <div className={styles.rows}>
       {entries.map(({ label, value, sumRow }) => (
         <SummaryTileRow
           key={label}
@@ -115,8 +117,8 @@ const SummaryTileRow: FC<{
   value: ReactNode;
   sumRow?: boolean;
 }> = ({ label, value, sumRow }) => (
-  <div className={classNames(styles.row, { [styles.sum_row]: sumRow })}>
+  <div className={cn(styles.row, sumRow && styles.sumRow)}>
     <span>{label}</span>
-    <span className={styles.row_value}>{value}</span>
+    <span className={styles.rowValue}>{value}</span>
   </div>
 );

@@ -13,6 +13,8 @@ domain/coverage
 
 # Agents
 .sisyphus/**
+.opencode/**
+.playwright-mcp/**
 
 # production
 frontend/build
@@ -23,7 +25,6 @@ frontend/build
 .env.development.local
 .env.test.local
 .env.production.local
-.opencode/**
 
 npm-debug.log*
 pnpm-debug.log*

@@ -20,7 +20,7 @@ import {
   getTimeAxisProps,
 } from "../../chartUtils";
 import { useProfitHistory } from "./ProfitChart.logic";
-import styles from "./ProfitChart.module.less";
+import { styles } from "./ProfitChart.styles";
 
 export const ProfitChart: FC<{ portfolioNames: string[] }> = ({
   portfolioNames,
@@ -41,7 +41,7 @@ export const ProfitChart: FC<{ portfolioNames: string[] }> = ({
         <ChartRangeSelector value={range} onChange={setRange} />
       </div>
       <ChartContainer isLoading={isLoading}>
-        <AreaChart data={chartData}>
+        <AreaChart data={chartData} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis

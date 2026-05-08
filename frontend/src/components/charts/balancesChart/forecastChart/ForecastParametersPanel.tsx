@@ -1,54 +1,15 @@
-import styled from "@emotion/styled";
-import {
-  ExpandMore as ExpandMoreIcon,
-  Info as InfoIcon,
-} from "@mui/icons-material";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Chip,
-  debounce,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
-} from "@mui/material";
-import { FC, useCallback, useState } from "react";
+import * as Accordion from "@radix-ui/react-accordion";
+import { ChevronDown, Info } from "lucide-react";
+import { FC, useCallback, useRef, useState } from "react";
+import { Input } from "../../../ui/Input";
+import { ToggleGroup, ToggleItem } from "../../../ui/ToggleGroup";
 import {
   FORECAST_CONFIDENCE_LEVELS,
   FORECAST_HORIZONS,
-  ForecastHorizon,
   ForecastParameters,
-  ForecastScenario,
   useForecastScenarioParams,
 } from "./ForecastChart.logic";
-import styles from "./ForecastParametersPanel.module.less";
-
-const StyledTextField = styled(TextField)`
-  width: 14ch;
-`;
-
-const StyledScenarioTitle = styled(Typography)`
-  margin-bottom: 4px;
-`;
-
-const StyledScenarioDescription = styled(Typography)`
-  margin-bottom: 8px;
-`;
-
-const StyledChipContainer = styled(Box)`
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-`;
-
-const StyledInfoContainer = styled(Box)`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
+import { styles } from "./ForecastParametersPanel.styles";
 
 interface ForecastParametersPanelProps {
   portfolioNames: string[];
@@ -73,31 +34,20 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
     parameters.scenario
   );
 
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps
   const debouncedParameterChange = useCallback(
-    debounce((newParameters: ForecastParameters) => {
-      onParametersChange(newParameters);
-    }, 500),
+    (newParameters: ForecastParameters) => {
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        onParametersChange(newParameters);
+      }, 500);
+    },
     [onParametersChange]
   );
-
-  const handleScenarioChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    newScenario: ForecastScenario | null
-  ) => {
-    if (newScenario !== null) {
-      onParametersChange({ ...parameters, scenario: newScenario });
-    }
-  };
-
-  const handleTimeHorizonChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    newTimeHorizon: ForecastHorizon | null
-  ) => {
-    if (newTimeHorizon !== null) {
-      onParametersChange({ ...parameters, timeHorizon: newTimeHorizon });
-    }
-  };
 
   const handleMonthlyContributionChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -119,167 +69,147 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
     debouncedParameterChange({ ...parameters, inflationRate: value });
   };
 
-  const handleConfidenceLevelChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    newLevel: ForecastParameters["confidenceLevel"] | null
-  ) => {
-    if (newLevel !== null) {
-      onParametersChange({ ...parameters, confidenceLevel: newLevel });
-    }
-  };
-
   return (
-    <Accordion className={styles.accordion}>
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        aria-controls="forecast-parameters-content"
-        id="forecast-parameters-header"
-      >
-        <Typography variant="subtitle1">Forecast Parameters</Typography>
-      </AccordionSummary>
-      <AccordionDetails className={styles.content}>
-        <Box className={styles.controlsGrid}>
-          {/* Time Horizon */}
-          <Box className={styles.controlGroup}>
-            <Typography variant="body2" className={styles.label}>
-              Time Horizon
-            </Typography>
-            <ToggleButtonGroup
-              value={parameters.timeHorizon}
-              exclusive
-              onChange={handleTimeHorizonChange}
-              aria-label="time horizon"
-              size="small"
-            >
-              {Object.values(FORECAST_HORIZONS).map((interval) => (
-                <ToggleButton
-                  key={interval}
-                  value={interval}
-                  aria-label={interval}
-                >
-                  {interval}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-          </Box>
-
-          {/* Scenario */}
-          <Box className={styles.controlGroup}>
-            <Typography variant="body2" className={styles.label}>
-              Performance Scenario
-            </Typography>
-            <ToggleButtonGroup
-              value={parameters.scenario}
-              exclusive
-              onChange={handleScenarioChange}
-              aria-label="investment scenario"
-              size="small"
-            >
-              <ToggleButton value="market" aria-label="market">
-                Market
-              </ToggleButton>
-              <ToggleButton value="portfolio" aria-label="portfolio">
-                Portfolio
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
-
-          {/* Monthly Contributions */}
-          <Box className={styles.controlGroup}>
-            <Typography variant="body2" className={styles.label}>
-              Monthly Contributions
-            </Typography>
-            <StyledTextField
-              type="number"
-              value={monthlyContributionInput}
-              onChange={handleMonthlyContributionChange}
-              size="small"
-              slotProps={{
-                htmlInput: { min: 0, step: 50 },
-                input: { startAdornment: "€" },
-              }}
-            />
-          </Box>
-
-          {/* Inflation Rate */}
-          <Box className={styles.controlGroup}>
-            <Typography variant="body2" className={styles.label}>
-              Inflation Rate
-            </Typography>
-            <StyledTextField
-              type="number"
-              value={inflationRateInput}
-              onChange={handleInflationRateChange}
-              size="small"
-              slotProps={{
-                htmlInput: { min: 0, step: 0.5 },
-                input: { endAdornment: "%" },
-              }}
-            />
-          </Box>
-
-          {/* Confidence Band Options */}
-          <Box className={styles.controlGroup}>
-            <Typography variant="body2" className={styles.label}>
-              Confidence Interval
-            </Typography>
-            <Box className={styles.displayOptions}>
-              <ToggleButtonGroup
-                value={parameters.confidenceLevel}
-                exclusive
-                onChange={handleConfidenceLevelChange}
-                aria-label="confidence level"
-                size="small"
-              >
-                {Object.values(FORECAST_CONFIDENCE_LEVELS).map((conf) => (
-                  <ToggleButton
-                    key={conf}
-                    value={conf}
-                    aria-label={`${conf} percent confidence`}
+    <Accordion.Root type="single" collapsible className={styles.accordion}>
+      <Accordion.Item value="parameters">
+        <Accordion.Header className={styles.header}>
+          <Accordion.Trigger className={styles.trigger}>
+            <span>Forecast Parameters</span>
+            <ChevronDown className={styles.chevron} />
+          </Accordion.Trigger>
+        </Accordion.Header>
+        <Accordion.Content className={styles.content}>
+          <div className={styles.controlsGrid}>
+            <div className={styles.controlGroup}>
+              <span className={styles.label}>Time Horizon</span>
+              <ToggleGroup>
+                {Object.values(FORECAST_HORIZONS).map((interval) => (
+                  <ToggleItem
+                    key={interval}
+                    value={interval}
+                    selected={parameters.timeHorizon === interval}
+                    onSelect={() =>
+                      onParametersChange({
+                        ...parameters,
+                        timeHorizon: interval,
+                      })
+                    }
                   >
-                    {`${conf}%`}
-                  </ToggleButton>
+                    {interval}
+                  </ToggleItem>
                 ))}
-              </ToggleButtonGroup>
-            </Box>
-          </Box>
-        </Box>
+              </ToggleGroup>
+            </div>
 
-        {/* Scenario Details */}
-        <Box className={styles.scenarioDetails}>
-          {scenarioDetails ? (
-            <Box>
-              <StyledScenarioTitle variant="subtitle2">
-                {`Forecast Scenario: ${scenarioDetails.displayInfo.name}`}
-              </StyledScenarioTitle>
-              <StyledScenarioDescription variant="body2" color="text.secondary">
-                {scenarioDetails.displayInfo.description}
-              </StyledScenarioDescription>
-              <StyledChipContainer>
-                <Chip
-                  label={`Annual Return: ${scenarioDetails.displayInfo.annualReturn}`}
-                  size="small"
-                  variant="outlined"
+            <div className={styles.controlGroup}>
+              <span className={styles.label}>Performance Scenario</span>
+              <ToggleGroup>
+                <ToggleItem
+                  value="market"
+                  selected={parameters.scenario === "market"}
+                  onSelect={() =>
+                    onParametersChange({ ...parameters, scenario: "market" })
+                  }
+                >
+                  Market
+                </ToggleItem>
+                <ToggleItem
+                  value="portfolio"
+                  selected={parameters.scenario === "portfolio"}
+                  onSelect={() =>
+                    onParametersChange({ ...parameters, scenario: "portfolio" })
+                  }
+                >
+                  Portfolio
+                </ToggleItem>
+              </ToggleGroup>
+            </div>
+
+            <div className={styles.controlGroup}>
+              <span className={styles.label}>Monthly Contributions</span>
+              <div className={styles.inputAdornment}>
+                <span className={styles.adornmentText}>€</span>
+                <Input
+                  type="number"
+                  value={monthlyContributionInput}
+                  onChange={handleMonthlyContributionChange}
+                  min={0}
+                  step={50}
+                  className="w-[14ch]"
                 />
-                <Chip
-                  label={`Volatility: ${scenarioDetails.displayInfo.volatility}`}
-                  size="small"
-                  variant="outlined"
+              </div>
+            </div>
+
+            <div className={styles.controlGroup}>
+              <span className={styles.label}>Inflation Rate</span>
+              <div className={styles.inputAdornment}>
+                <Input
+                  type="number"
+                  value={inflationRateInput}
+                  onChange={handleInflationRateChange}
+                  min={0}
+                  step={0.5}
+                  className="w-[14ch]"
                 />
-              </StyledChipContainer>
-            </Box>
-          ) : (
-            <StyledInfoContainer>
-              <InfoIcon color="disabled" fontSize="small" />
-              <Typography variant="body2" color="text.secondary">
-                {parameters.scenario === "portfolio"
-                  ? "Portfolio historical data insufficient for analysis"
-                  : "Scenario parameters not available"}
-              </Typography>
-            </StyledInfoContainer>
-          )}
-        </Box>
-      </AccordionDetails>
-    </Accordion>
+                <span className={styles.adornmentText}>%</span>
+              </div>
+            </div>
+
+            <div className={styles.controlGroup}>
+              <span className={styles.label}>Confidence Interval</span>
+              <div className={styles.displayOptions}>
+                <ToggleGroup>
+                  {Object.values(FORECAST_CONFIDENCE_LEVELS).map((conf) => (
+                    <ToggleItem
+                      key={conf}
+                      value={conf.toString()}
+                      selected={parameters.confidenceLevel === conf}
+                      onSelect={() =>
+                        onParametersChange({
+                          ...parameters,
+                          confidenceLevel: conf,
+                        })
+                      }
+                    >
+                      {`${conf}%`}
+                    </ToggleItem>
+                  ))}
+                </ToggleGroup>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.scenarioDetails}>
+            {scenarioDetails ? (
+              <div>
+                <p className="font-medium text-sm mb-1">
+                  {`Forecast Scenario: ${scenarioDetails.displayInfo.name}`}
+                </p>
+                <p className="text-sm text-text-muted mb-2">
+                  {scenarioDetails.displayInfo.description}
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <span className={styles.chip}>
+                    Annual Return: {scenarioDetails.displayInfo.annualReturn}
+                  </span>
+                  <span className={styles.chip}>
+                    Volatility: {scenarioDetails.displayInfo.volatility}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className={styles.infoContainer}>
+                <Info className={styles.infoIcon} />
+                <span className="text-sm text-text-muted">
+                  {parameters.scenario === "portfolio"
+                    ? "Portfolio historical data insufficient for analysis"
+                    : "Scenario parameters not available"}
+                </span>
+              </div>
+            )}
+          </div>
+        </Accordion.Content>
+      </Accordion.Item>
+    </Accordion.Root>
   );
 };

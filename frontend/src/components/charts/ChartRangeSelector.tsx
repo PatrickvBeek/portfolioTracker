@@ -1,5 +1,5 @@
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { FC } from "react";
+import { ToggleGroup, ToggleItem } from "../ui/ToggleGroup";
 import { ChartRange, CHART_RANGES } from "./chartRange.types";
 
 interface ChartRangeSelectorProps {
@@ -11,29 +11,23 @@ export const ChartRangeSelector: FC<ChartRangeSelectorProps> = ({
   value,
   onChange,
 }) => {
-  const handleChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    newRange: ChartRange | null
-  ) => {
-    if (newRange !== null) {
-      onChange(newRange);
-    }
+  const handleSelect = (range: ChartRange) => {
+    onChange(range);
   };
 
   return (
-    <ToggleButtonGroup
-      value={value}
-      exclusive
-      onChange={handleChange}
-      aria-label="time range"
-      size="small"
-      color="primary"
-    >
+    <ToggleGroup aria-label="time range">
       {Object.values(CHART_RANGES).map((r) => (
-        <ToggleButton key={r} value={r} aria-label={r}>
+        <ToggleItem
+          key={r}
+          value={r}
+          selected={value === r}
+          onSelect={handleSelect}
+          aria-label={r}
+        >
           {r}
-        </ToggleButton>
+        </ToggleItem>
       ))}
-    </ToggleButtonGroup>
+    </ToggleGroup>
   );
 };

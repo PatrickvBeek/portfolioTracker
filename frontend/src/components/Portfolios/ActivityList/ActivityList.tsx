@@ -20,7 +20,7 @@ import { Props } from "../../../utility/types";
 import { Button } from "../../general/Button";
 import CustomTable from "../../general/CustomTable/CustomTable";
 import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
-import { Headline } from "../../general/headline/Headline";
+import { Heading } from "../../ui/Heading";
 import { InfoDialog } from "../../general/InfoDialog/InfoDialog";
 import styles from "./ActivityList.module.less";
 
@@ -157,7 +157,9 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
 
   return (
     <div>
-      <Headline text={"Portfolio Activity"} className={styles.headline} />
+      <Heading level="h1" className={styles.headline}>
+        Portfolio Activity
+      </Heading>
       <CustomTable columns={defs} data={tableData} />
       <div className={styles.showAllButton}>
         <Button

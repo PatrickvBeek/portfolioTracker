@@ -22,7 +22,7 @@ import {
   BalancesChartDataSets,
   useGetPortfolioHistoryChartData,
 } from "./TotalValueChart.logic";
-import styles from "./TotalValueChart.module.less";
+import { styles } from "./TotalValueChart.styles";
 
 export const TotalValueChart: FC<{ portfolioNames: string[] }> = ({
   portfolioNames,
@@ -38,7 +38,7 @@ export const TotalValueChart: FC<{ portfolioNames: string[] }> = ({
         <ChartRangeSelector value={range} onChange={setRange} />
       </div>
       <ChartContainer isLoading={isLoading}>
-        <LineChart data={chartData}>
+        <LineChart data={chartData} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis
