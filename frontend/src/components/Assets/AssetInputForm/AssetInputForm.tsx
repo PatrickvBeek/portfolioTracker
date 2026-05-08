@@ -1,10 +1,9 @@
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import { useAddAsset } from "../../../hooks/assets/assetHooks";
-import { Button } from "../../general/Button";
-import { FormRowFlex } from "../../general/FormRowFlex/FormRowFlex";
-import { TextInput } from "../../general/TextInput";
-import CheckSymbolButton from "../CheckSymbolButton/CheckSymbolButton";
-import styles from "./AssetInputForm.module.less";
+import { SymbolConnectionIndicator } from "../AssetTable/SymbolConnectionIndicator";
+import { Button } from "../../ui/Button";
+import { Input } from "../../ui/Input";
+import { styles } from "./AssetInputForm.styles";
 
 const sanitizeIsin = (input: string): string => {
   return input.replace(/[^0-9a-zA-Z]/gi, "");
@@ -30,10 +29,11 @@ const isValidInput = (input: { name: string; isin: string }) => {
   return isValidName(input.name) && isValidIsin(input.isin);
 };
 
-const AssetInputForm = (): ReactElement => {
-  let [nameInputText, updateNameInputText] = useState("");
-  let [isinInputText, updateIsinInputText] = useState("");
-  let [symbolInputText, updateSymbolInputText] = useState("");
+export function AssetInputForm() {
+  const [nameInputText, updateNameInputText] = useState("");
+  const [isinInputText, updateIsinInputText] = useState("");
+  const [symbolInputText, updateSymbolInputText] = useState("");
+  const [checkSymbol, setCheckSymbol] = useState<string | null>(null);
 
   const addAssets = useAddAsset();
 
@@ -41,6 +41,7 @@ const AssetInputForm = (): ReactElement => {
     updateNameInputText("");
     updateIsinInputText("");
     updateSymbolInputText("");
+    setCheckSymbol(null);
     addAssets({
       displayName: nameInputText,
       isin: isinInputText,
@@ -48,59 +49,113 @@ const AssetInputForm = (): ReactElement => {
     });
   };
 
+  const handleCheckSymbol = () => {
+    setCheckSymbol(symbolInputText);
+  };
+
+  const nameValid = isValidName(nameInputText) || !nameInputText;
+  const isinValid = isValidIsin(isinInputText) || !isinInputText;
+  const symbolValid = isValidSymbol(symbolInputText);
+
+  const submitDisabled = !isValidInput({
+    name: nameInputText,
+    isin: isinInputText,
+  });
+
   return (
-    <div className={styles.form}>
-      <FormRowFlex>
-        <TextInput
-          onChange={(element) => {
-            updateNameInputText(element.target.value);
-          }}
-          text={nameInputText}
-          label={"Asset Name"}
-          placeholder={"Asset Name..."}
-          isMandatory={true}
-          isValid={isValidName(nameInputText) || !nameInputText}
-          errorMessage={"Please enter a non-empty string."}
-        />
-        <TextInput
-          onChange={(element) => {
-            updateIsinInputText(
-              sanitizeIsin(element.target.value).toUpperCase()
-            );
-          }}
-          text={isinInputText}
-          label={"ISIN"}
-          placeholder={"ISIN..."}
-          isMandatory={true}
-          isValid={isValidIsin(isinInputText) || !isinInputText}
-          errorMessage={"An ISIN contains exactly 12 characters."}
-        />
-        <TextInput
-          onChange={(element) => {
-            updateSymbolInputText(
-              sanitizeSymbol(element.target.value).toUpperCase()
-            );
-          }}
-          text={symbolInputText}
-          label={"Symbol"}
-          placeholder={"Symbol..."}
-          isValid={isValidSymbol(symbolInputText)}
-          errorMessage={"A symbol contains five or fewer letters."}
-        />
-      </FormRowFlex>
-      <div className={styles.buttons}>
-        <CheckSymbolButton symbol={symbolInputText} />
-        <Button
-          label="Submit"
-          isDisabled={
-            !isValidInput({ name: nameInputText, isin: isinInputText })
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!submitDisabled) {
+          handleSubmitButton();
+        }
+      }}
+      className="w-full"
+    >
+      <div className={styles.formRow}>
+        <Input
+          id="asset-name"
+          label={
+            <>
+              Asset Name
+              <span className={styles.requiredMarker}>*</span>
+            </>
           }
-          onClick={handleSubmitButton}
-          isPrimary={true}
+          state={!nameValid && nameInputText ? "error" : "default"}
+          errorMessage={
+            !nameValid && nameInputText
+              ? "Please enter a non-empty string."
+              : undefined
+          }
+          type="text"
+          value={nameInputText}
+          onChange={(e) => updateNameInputText(e.target.value)}
+          placeholder="Asset Name..."
+          className={styles.formField}
+        />
+
+        <Input
+          id="asset-isin"
+          label={
+            <>
+              ISIN
+              <span className={styles.requiredMarker}>*</span>
+            </>
+          }
+          state={!isinValid && isinInputText ? "error" : "default"}
+          errorMessage={
+            !isinValid && isinInputText
+              ? "An ISIN contains exactly 12 characters."
+              : undefined
+          }
+          type="text"
+          value={isinInputText}
+          onChange={(e) =>
+            updateIsinInputText(sanitizeIsin(e.target.value).toUpperCase())
+          }
+          placeholder="ISIN..."
+          maxLength={12}
+          className={styles.formField}
+        />
+
+        <Input
+          id="asset-symbol"
+          label="Symbol"
+          state={!symbolValid && symbolInputText ? "error" : "default"}
+          errorMessage={
+            !symbolValid && symbolInputText
+              ? "A symbol contains five or fewer letters."
+              : undefined
+          }
+          type="text"
+          value={symbolInputText}
+          onChange={(e) =>
+            updateSymbolInputText(sanitizeSymbol(e.target.value).toUpperCase())
+          }
+          placeholder="Symbol..."
+          className={styles.formField}
         />
       </div>
-    </div>
-  );
-};
 
-export default AssetInputForm;
+      <div className={styles.buttonRow}>
+        <Button
+          intent="ghost"
+          disabled={!symbolInputText}
+          onClick={handleCheckSymbol}
+        >
+          Check Symbol
+        </Button>
+
+        <Button intent="primary" disabled={submitDisabled} type="submit">
+          Submit
+        </Button>
+
+        {checkSymbol && (
+          <div className="ml-auto">
+            <SymbolConnectionIndicator symbol={checkSymbol} />
+          </div>
+        )}
+      </div>
+    </form>
+  );
+}

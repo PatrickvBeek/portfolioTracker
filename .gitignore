@@ -11,6 +11,8 @@ node_modules/
 /coverage
 domain/coverage
 
+# Agents
+.sisyphus/**
 
 # production
 frontend/build
@@ -21,6 +23,7 @@ frontend/build
 .env.development.local
 .env.test.local
 .env.production.local
+.opencode/**
 
 npm-debug.log*
 pnpm-debug.log*

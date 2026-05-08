@@ -23,6 +23,37 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "white",
+          borderRadius: "4px",
+        },
+      },
+    },
+    MuiAutocomplete: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "white",
+          borderRadius: "4px",
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "white",
+          borderRadius: "4px",
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "white",
+        },
+      },
+    },
     MuiDialog: {
       styleOverrides: {
         paper: {
