@@ -53,7 +53,8 @@ This file provides guidance to agents when working with code in this repository.
 - **Domain entities**: `<module>.entities.ts`
 - **Domain operations**: `<module>.operations.ts`, `<module>.derivers.ts`
 - **Component logic**: `<Component>.logic.ts` (NOT inline in component)
-- **Styles**: Use `.module.less` files (migrate from `bemHelper` + `.css`)
+- **Styles (RadixUI+Tailwind)**: `<Component>.styles.ts` (see Styling Rules below)
+- **Styles (MUI legacy)**: `.module.less` files (migrate from `bemHelper` + `.css`)
 - **Tests**: `<module>.test.ts`, `<Component>.test.tsx`
 
 ### Error Handling
@@ -80,10 +81,39 @@ This file provides guidance to agents when working with code in this repository.
 
 ## Styling Rules
 
+### RadixUI + Tailwind (preferred for new components)
+
+- **Design tokens**: Defined in `frontend/src/index.css` via Tailwind v4 `@theme` directive
+- **Utility function**: `cn()` from `frontend/src/utility/cn.ts` (combines `clsx` + `tailwind-merge`)
+- **Component variants**: Use `class-variance-authority` (CVA) for components with multiple variants (buttons, inputs, cards)
+- **Style files**: `<Component>.styles.ts` — contains CVA variant definitions AND plain style constants
+- **Shared UI styles**: Cross-component variants live in `frontend/src/components/ui/*.styles.ts`
+- **Import order in .styles.ts**: CVA variants (exported as named functions) first, then plain constants (exported as `styles` object)
+
+**What goes where:**
+
+| Style type                                        | Location                                   | Example                                    |
+| ------------------------------------------------- | ------------------------------------------ | ------------------------------------------ |
+| Cross-component variants (buttons, inputs, cards) | `components/ui/*.styles.ts`                | `buttonVariants()`, `inputVariants()`      |
+| Component-internal repeated patterns              | `<Component>.styles.ts` as `styles` object | `styles.tableRow`, `styles.sectionHeading` |
+| Component-specific variants                       | `<Component>.styles.ts` as CVA             | `deleteButtonVariants()`                   |
+| Layout utilities (flex, gap, padding, margin)     | Inline in TSX                              | `"flex items-center gap-3"`, `"mt-4"`      |
+| One-off single-class styles                       | Inline in TSX                              | `"w-6 h-6"`, `"ml-auto"`                   |
+
+**Rules:**
+
+- Extract visual/design-token classes (colors, borders, transitions, focus rings) into `.styles.ts`
+- Layout/structure classes (flex, grid, gap, padding, margin) can stay inline, if short
+- Never use `@apply` in CSS for component styles (Tailwind team discourages it)
+- Never use CSS Modules (`.module.css`) for Tailwind-styled components
+- Always use `cn()` for composing classes: `cn(buttonVariants({ intent: "primary" }), className)`
+
+### MUI + LESS (legacy, being migrated)
+
 - **MUI components**: Customize via `frontend/src/theme/theme.ts`, never inline styles
 - **Custom styles**: Use `.module.less` files with CSS modules
 - **LESS variables**: Must use predefined variables from `frontend/src/theme/definitions.less`
-- **Deprecated pattern**: `bemHelper` + `.css` files → migrate to `.module.less`
+- **Deprecated pattern**: `bemHelper` + `.css` files → migrate to `.module.less` or RadixUI+Tailwind
 - **Import always at top**: `import styles from "./MyComponent.module.less"`
 
 ## Testing Patterns
@@ -102,7 +132,7 @@ This file provides guidance to agents when working with code in this repository.
 - **Date handling**: `moment` (consistent across domain and frontend)
 - **Utils**: `radash` for functional utilities (`omit`, `shake`, `sort`)
 - **UUID**: `uuid` package for unique identifiers
-- **Icons**: FontAwesome (`@fortawesome/fontawesome-free`)
+- **Icons**: FontAwesome (`@fortawesome/fontawesome-free`), `lucide-react` (preferred for RadixUI components)
 - **Charts**: Recharts, D3 arrays/scaling
 - **Dev tools**: oxlint (linting), oxfmt (formatting), syncpack (dependency version sync)
 

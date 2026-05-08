@@ -3,52 +3,41 @@ import { useGetAssets } from "../../hooks/assets/assetHooks";
 import { cn } from "../../utility/cn";
 import { AssetInputForm } from "./AssetInputForm/AssetInputForm";
 import { AssetTable } from "./AssetTable/AssetTable";
+import { styles } from "./Assets.styles";
+import { headingVariants, styles as headingStyles } from "../ui/heading.styles";
 
 export function Assets({ className }: { className?: string }) {
   const assetLibrary = useGetAssets();
   const assetCount = assetLibrary ? Object.keys(assetLibrary).length : 0;
 
   return (
-    <div className={cn("min-h-screen bg-bg", className)}>
-      <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-accent-soft">
+    <div className={cn(styles.pageWrapper, className)}>
+      <div className={styles.contentContainer}>
+        <div className={styles.header}>
+          <div className={styles.headerRow}>
+            <div className={styles.iconBadge}>
               <Library className="w-6 h-6 text-accent" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-bold text-text">
-              Asset Library
-            </h1>
+            <h1 className={headingVariants({ level: "h1" })}>Asset Library</h1>
           </div>
-          <p className="text-text-muted ml-11">
+          <p className={headingStyles.subtitle}>
             {assetCount === 0
               ? "Start building your portfolio by adding assets"
               : `Managing ${assetCount} asset${assetCount !== 1 ? "s" : ""} in your library`}
           </p>
         </div>
 
-        <div
-          className={cn(
-            "rounded-xl border border-border",
-            "bg-bg-card shadow-lg",
-            "p-4 md:p-6"
-          )}
-        >
-          <div className="space-y-6">
-            <div
-              className={cn(
-                "p-4 md:p-5 rounded-lg border border-border",
-                "bg-bg-elevated"
-              )}
-            >
-              <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">
+        <div className={styles.contentCard}>
+          <div className={styles.contentBody}>
+            <div className={styles.formSection}>
+              <h2 className={headingVariants({ level: "section" })}>
                 Add New Asset
               </h2>
               <AssetInputForm />
             </div>
 
             <div>
-              <h2 className="text-sm font-medium text-text-muted uppercase tracking-wider mb-4">
+              <h2 className={headingVariants({ level: "section" })}>
                 Your Assets
               </h2>
               <AssetTable />

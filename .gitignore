@@ -11,6 +11,8 @@ node_modules/
 /coverage
 domain/coverage
 
+# Agents
+.sisyphus/**
 
 # production
 frontend/build

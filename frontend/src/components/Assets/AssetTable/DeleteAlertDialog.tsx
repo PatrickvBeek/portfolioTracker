@@ -1,5 +1,6 @@
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
-import { cn } from "../../../utility/cn";
+import { styles } from "./DeleteAlertDialog.styles";
+import { Button } from "../../ui/Button";
 
 type DeleteAlertDialogProps = {
   open: boolean;
@@ -19,49 +20,22 @@ export function DeleteAlertDialog({
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm data-[state=open]:animate-overlayShow" />
-        <AlertDialog.Content
-          className={cn(
-            "fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md",
-            "bg-bg-card rounded-lg shadow-2xl border border-border",
-            "p-6 focus:outline-none data-[state=open]:animate-contentShow"
-          )}
-        >
-          <AlertDialog.Title className="text-lg font-semibold text-text mb-2">
+        <AlertDialog.Overlay className={styles.overlay} />
+        <AlertDialog.Content className={styles.content}>
+          <AlertDialog.Title className={styles.title}>
             {title}
           </AlertDialog.Title>
-          <AlertDialog.Description className="text-text-muted mb-6">
+          <AlertDialog.Description className={styles.description}>
             {body}
           </AlertDialog.Description>
-          <div className="flex justify-end gap-3">
+          <div className={styles.buttonRow}>
             <AlertDialog.Cancel asChild>
-              <button
-                type="button"
-                className={cn(
-                  "px-4 py-2 rounded-md text-sm font-medium",
-                  "bg-transparent border border-border text-text-muted",
-                  "hover:bg-bg-elevated hover:text-text",
-                  "focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-2 focus:ring-offset-bg-card",
-                  "transition-colors duration-150"
-                )}
-              >
-                Cancel
-              </button>
+              <Button intent="ghost">Cancel</Button>
             </AlertDialog.Cancel>
             <AlertDialog.Action asChild>
-              <button
-                type="button"
-                onClick={onConfirm}
-                className={cn(
-                  "px-4 py-2 rounded-md text-sm font-medium",
-                  "bg-danger text-white",
-                  "hover:bg-danger-hover",
-                  "focus:outline-none focus:ring-2 focus:ring-danger focus:ring-offset-2 focus:ring-offset-bg-card",
-                  "transition-colors duration-150"
-                )}
-              >
+              <Button intent="danger" onClick={onConfirm}>
                 Delete
-              </button>
+              </Button>
             </AlertDialog.Action>
           </div>
         </AlertDialog.Content>
