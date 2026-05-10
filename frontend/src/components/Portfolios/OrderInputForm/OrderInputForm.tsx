@@ -73,6 +73,7 @@ export function OrderInputForm({
       <AssetDropdown
         className={bemElement("asset")}
         onChange={(isin) => setAssetIsin(isin || DEFAULTS.isin)}
+        label="Asset"
         isMandatory={true}
       />
       <DateInput

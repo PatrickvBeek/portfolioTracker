@@ -52,7 +52,7 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
           <ChartRangeSelector value={range} onChange={setRange} />
           <AssetDropdown
             onChange={(isin) => setBenchmark(isin || "")}
-            label="Benchmark"
+            placeholder="Benchmark"
             className={styles.benchmarkSelect}
             filterAssets={(a) => !!a.symbol}
           />

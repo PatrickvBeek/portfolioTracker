@@ -17,7 +17,7 @@ type DividendFormProps = Props<{
   portfolioName: string;
 }>;
 
-const { bemBlock, bemElement } = bemHelper("dividend-form");
+const { bemBlock } = bemHelper("dividend-form");
 
 type FormState = {
   asset: string;
@@ -66,7 +66,7 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
         onChange={(isin) =>
           setFormState({ ...formState, asset: isin || DEFAULTS.asset })
         }
-        className={bemElement("asset")}
+        label="Asset"
       />
       <NumberInput
         label={"Pieces"}
