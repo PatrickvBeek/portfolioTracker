@@ -1,0 +1,73 @@
+/* Recharts overrides that cannot be expressed in Tailwind */
+
+/* Tailwind preflight sets svg { display: block }, which breaks
+   Recharts' internal layout — the chart SVG and legend must share
+   space within .recharts-wrapper. display: block makes the SVG
+   take full height independently, causing the legend to overlap. */
+.chartContainer .recharts-surface {
+  display: inline;
+}
+
+.chartContainer {
+  position: relative;
+  width: 100%;
+}
+
+.chartContainer .recharts-responsive-container {
+  aspect-ratio: 2.5 / 1;
+}
+
+@media (max-width: 768px) {
+  .chartContainer .recharts-responsive-container {
+    aspect-ratio: 1.5 / 1;
+  }
+}
+
+.chartContainer .recharts-legend-wrapper {
+  padding: 0 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .chartContainer .recharts-legend-wrapper {
+    padding: 0;
+  }
+}
+
+.chartContainer .recharts-legend {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .chartContainer .recharts-legend {
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .chartContainer .recharts-legend::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .chartContainer .recharts-legend-item {
+    padding-right: 0.5rem;
+    flex-shrink: 0;
+  }
+}
+
+.chartContainer .recharts-legend-wrapper.align-bottom {
+  margin-top: 0.5rem;
+}
+
+.recharts-wrapper {
+  min-height: 200px;
+}
+
+@media (max-width: 768px) {
+  .recharts-wrapper {
+    min-height: 150px;
+  }
+}

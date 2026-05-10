@@ -1,15 +1,16 @@
 import { FC, ReactElement } from "react";
 import { ResponsiveContainer } from "recharts";
 import { LoadingIndicator } from "../general/LoadingIndicator/LoadingIndicator";
-import style from "./ChartContainer.module.less";
+import { styles } from "./ChartContainer.styles";
+import "./ChartContainer.css";
 
 export const ChartContainer: FC<{
   isLoading: boolean;
   children: ReactElement;
 }> = ({ isLoading, children }) => (
-  <div className={style.container}>
+  <div className={`chartContainer ${styles.container}`}>
     {isLoading && (
-      <div className={style.overlay}>
+      <div className={styles.overlay}>
         <LoadingIndicator />
       </div>
     )}

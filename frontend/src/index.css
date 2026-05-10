@@ -27,6 +27,9 @@
   --font-display: "DM Sans", sans-serif;
   --font-body: "DM Sans", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+
+  --animate-accordion-slide-down: accordion-slide-down 200ms ease-out;
+  --animate-accordion-slide-up: accordion-slide-up 200ms ease-out;
 }
 
 @layer base {
@@ -37,6 +40,10 @@
     font-display: swap;
     src: url("https://fonts.gstatic.com/s/dmsans/v15/rP2Vp3zwyFNGen6BFzj4I9il6z0.woff2")
       format("woff2");
+  }
+
+  select {
+    background-color: var(--color-bg-input);
   }
 }
 
@@ -70,5 +77,27 @@ code {
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes accordion-slide-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes accordion-slide-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
   }
 }

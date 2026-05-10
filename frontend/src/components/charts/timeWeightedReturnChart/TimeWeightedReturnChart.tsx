@@ -10,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
-import { Headline } from "../../general/headline/Headline";
+import { Heading } from "../../ui/Heading";
 import { ChartContainer } from "../ChartContainer";
 import { getSplitColorGradientDef } from "../chartElements";
 import { ChartRange } from "../chartRange.types";
@@ -25,7 +25,7 @@ import {
   PerformanceChartDataSets,
   usePerformanceChartData,
 } from "./TimeWeightedReturnChart.logic";
-import styles from "./TimeWeightedReturnChart.module.less";
+import { styles } from "./TimeWeightedReturnChart.styles";
 
 export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
   portfolioNames,
@@ -47,19 +47,19 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
   return (
     <div>
       <div className={styles.header}>
-        <Headline text={"Performance: Time Weighted Return"} />
+        <Heading level="h1">Performance: Time Weighted Return</Heading>
         <div className={styles.controls}>
           <ChartRangeSelector value={range} onChange={setRange} />
           <AssetDropdown
             onChange={(isin) => setBenchmark(isin || "")}
             label="Benchmark"
-            className={styles.benchmark_select}
+            className={styles.benchmarkSelect}
             filterAssets={(a) => !!a.symbol}
           />
         </div>
       </div>
       <ChartContainer isLoading={isLoading}>
-        <AreaChart data={chartData}>
+        <AreaChart data={chartData} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis

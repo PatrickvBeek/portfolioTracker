@@ -13,29 +13,29 @@ vi.mock("../charts/ChartContainer", () => ({
   ),
 }));
 
-const getChip = (name: string) => screen.getByRole("button", { name });
+const getTag = (name: string) => screen.getByRole("button", { name });
 
 describe("Dashboard", () => {
-  it("renders portfolio selection chips", async () => {
+  it("renders portfolio selection tags", async () => {
     customRender({ component: <Dashboard /> });
 
     await waitFor(() => {
-      expect(getChip("Portfolio 1")).toBeInTheDocument();
-      expect(getChip("Portfolio 2")).toBeInTheDocument();
-      expect(getChip("Portfolio 3")).toBeInTheDocument();
+      expect(getTag("Portfolio 1")).toBeInTheDocument();
+      expect(getTag("Portfolio 2")).toBeInTheDocument();
+      expect(getTag("Portfolio 3")).toBeInTheDocument();
     });
   });
 
-  it("toggles portfolio selection when clicking chips", async () => {
+  it("toggles portfolio selection when clicking tags", async () => {
     const { user } = customRender({ component: <Dashboard /> });
 
-    const portfolio1Chip = getChip("Portfolio 1");
-    expect(portfolio1Chip).toHaveAttribute("aria-selected", "true");
+    const portfolio1Tag = getTag("Portfolio 1");
+    expect(portfolio1Tag).toHaveAttribute("aria-selected", "true");
 
-    await user.click(portfolio1Chip);
+    await user.click(portfolio1Tag);
 
     await waitFor(() => {
-      expect(portfolio1Chip).toHaveAttribute("aria-selected", "false");
+      expect(portfolio1Tag).toHaveAttribute("aria-selected", "false");
     });
   });
 
@@ -43,13 +43,13 @@ describe("Dashboard", () => {
     const { user } = customRender({ component: <Dashboard /> });
 
     // Deselect all portfolios
-    const portfolio1Chip = getChip("Portfolio 1");
-    const portfolio2Chip = getChip("Portfolio 2");
-    const portfolio3Chip = getChip("Portfolio 3");
+    const portfolio1Tag = getTag("Portfolio 1");
+    const portfolio2Tag = getTag("Portfolio 2");
+    const portfolio3Tag = getTag("Portfolio 3");
 
-    await user.click(portfolio1Chip);
-    await user.click(portfolio2Chip);
-    await user.click(portfolio3Chip);
+    await user.click(portfolio1Tag);
+    await user.click(portfolio2Tag);
+    await user.click(portfolio3Tag);
 
     await waitFor(() => {
       expect(screen.getByText("No portfolios selected")).toBeInTheDocument();
@@ -59,8 +59,8 @@ describe("Dashboard", () => {
   it("updates compound portfolio name when selections change", async () => {
     const { user } = customRender({ component: <Dashboard /> });
 
-    const portfolio1Chip = getChip("Portfolio 1");
-    await user.click(portfolio1Chip);
+    const portfolio1Tag = getTag("Portfolio 1");
+    await user.click(portfolio1Tag);
 
     await waitFor(() => {
       expect(screen.getByText("Portfolio 1")).toBeInTheDocument();

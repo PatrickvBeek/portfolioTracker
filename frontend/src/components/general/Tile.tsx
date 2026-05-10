@@ -1,6 +1,6 @@
-import classNames from "classnames";
 import { FC, PropsWithChildren, ReactNode } from "react";
-import styles from "./Tile.module.less";
+import { cn } from "../../utility/cn";
+import { styles, tileVariants } from "../ui/tile.styles";
 
 const Tile: FC<
   PropsWithChildren<{
@@ -9,11 +9,9 @@ const Tile: FC<
   }>
 > = ({ header, children, className }) => {
   return (
-    <div className={classNames(styles.tile, className)}>
+    <div className={cn(tileVariants(), className)}>
       {header && (
-        <div className={classNames(styles.header_element, styles.element)}>
-          {header}
-        </div>
+        <div className={cn(styles.headerElement, styles.element)}>{header}</div>
       )}
       <div className={styles.element}>{children}</div>
     </div>

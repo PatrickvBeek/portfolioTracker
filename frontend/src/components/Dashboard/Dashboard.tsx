@@ -1,11 +1,11 @@
-import { Chip } from "@mui/material";
 import { useState } from "react";
+import { Heading } from "../ui/Heading";
+import { Tag } from "../ui/Tag";
 import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
-import { Headline } from "../general/headline/Headline";
 import { PortfolioSummary } from "../Portfolios/portfolioSummary/PortfolioSummary";
 import { usePortfolioNames } from "./Dashboard.logic";
-import styles from "./Dashboard.module.less";
+import { styles } from "./Dashboard.styles";
 
 const Dashboard = () => {
   const portfolioNames = usePortfolioNames();
@@ -34,19 +34,18 @@ const Dashboard = () => {
   return (
     <div className={styles.container}>
       <div>
-        <Headline text={"Included Portfolios"} className={styles.headline} />
+        <Heading level="h1" className={styles.headline}>
+          Included Portfolios
+        </Heading>
         <div className={styles.portfolioSelection}>
           {portfolioNames.map((name) => (
-            <Chip
+            <Tag
               key={name}
-              label={name}
-              color={selectedPortfolios.includes(name) ? "primary" : "default"}
-              aria-selected={selectedPortfolios.includes(name)}
+              selected={selectedPortfolios.includes(name)}
               onClick={() => togglePortfolio(name)}
-              variant={
-                selectedPortfolios.includes(name) ? "filled" : "outlined"
-              }
-            />
+            >
+              {name}
+            </Tag>
           ))}
         </div>
       </div>

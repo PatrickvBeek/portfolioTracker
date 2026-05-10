@@ -54,7 +54,7 @@ export const ForecastChart: FC<{ portfolioNames: string[] }> = ({
         onParametersChange={setParams}
       />
       <ChartContainer isLoading={isLoading}>
-        <ComposedChart data={chartData}>
+        <ComposedChart data={chartData} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />
           <XAxis {...getTimeAxisProps(chartData)} />
           <YAxis

@@ -1,14 +1,8 @@
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
 import { FC, useState } from "react";
+import { Select } from "../../ui/Select";
+import { ToggleGroup, ToggleItem } from "../../ui/ToggleGroup";
 import { useBreakpoint } from "../../../theme/breakpoints";
-import styles from "./BalancesChart.module.less";
+import { styles } from "./BalancesChart.styles";
 import { ForecastChart } from "./forecastChart/ForecastChart";
 import { ProfitChart } from "./profitChart/ProfitChart";
 import { ViewMode } from "./shared/balancesChart.types";
@@ -28,12 +22,14 @@ export const PortfolioBalancesChart: FC<{ portfolioNames: string[] }> = ({
 
   const SubChart = ChartsComponents[viewMode];
 
-  const handleViewModeChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    newViewMode: ViewMode | null
-  ) => {
-    if (newViewMode !== null) {
-      setViewMode(newViewMode);
+  const handleSelect = (mode: ViewMode) => {
+    setViewMode(mode);
+  };
+
+  const handleMobileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === "total" || value === "profitLoss" || value === "forecast") {
+      setViewMode(value);
     }
   };
 
@@ -41,37 +37,42 @@ export const PortfolioBalancesChart: FC<{ portfolioNames: string[] }> = ({
     <div className={styles.container}>
       <div className={styles.headingContainer}>
         {isMobile ? (
-          <FormControl className={styles.mobileSelect}>
-            <InputLabel>View Mode</InputLabel>
-            <Select
-              value={viewMode}
-              label="View Mode"
-              onChange={(e) => setViewMode(e.target.value as ViewMode)}
-            >
-              <MenuItem value="total">Total Value</MenuItem>
-              <MenuItem value="profitLoss">Profit / Loss</MenuItem>
-              <MenuItem value="forecast">Forecast</MenuItem>
-            </Select>
-          </FormControl>
-        ) : (
-          <ToggleButtonGroup
+          <Select
+            name="chart-view-mode"
             value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            aria-label="chart view mode"
-            size="small"
-            color="primary"
+            onChange={handleMobileChange}
           >
-            <ToggleButton value="total" aria-label="total value">
+            <option value="total">Total Value</option>
+            <option value="profitLoss">Profit / Loss</option>
+            <option value="forecast">Forecast</option>
+          </Select>
+        ) : (
+          <ToggleGroup aria-label="chart view mode">
+            <ToggleItem
+              value="total"
+              selected={viewMode === "total"}
+              onSelect={handleSelect}
+              aria-label="total value"
+            >
               Total Value
-            </ToggleButton>
-            <ToggleButton value="profitLoss" aria-label="profit/loss">
+            </ToggleItem>
+            <ToggleItem
+              value="profitLoss"
+              selected={viewMode === "profitLoss"}
+              onSelect={handleSelect}
+              aria-label="profit/loss"
+            >
               Profit / Loss
-            </ToggleButton>
-            <ToggleButton value="forecast" aria-label="forecast">
+            </ToggleItem>
+            <ToggleItem
+              value="forecast"
+              selected={viewMode === "forecast"}
+              onSelect={handleSelect}
+              aria-label="forecast"
+            >
               Forecast
-            </ToggleButton>
-          </ToggleButtonGroup>
+            </ToggleItem>
+          </ToggleGroup>
         )}
       </div>
       {<SubChart portfolioNames={portfolioNames} />}

@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
 import { ReactElement, useState } from "react";
-import { Headline } from "../../general/headline/Headline";
+import { Heading } from "../../ui/Heading";
 import SelectionHeader from "../../general/SelectionHeader";
 import { OrderInputForm } from "../OrderInputForm/OrderInputForm";
 import DividendForm from "./DividendForm/DividendForm";
@@ -20,7 +20,7 @@ function PortfolioFormSideBar({
 
   return (
     <Stack spacing={1}>
-      <Headline text={"Add Data to Portfolio"}></Headline>
+      <Heading level="h1">Add Data to Portfolio</Heading>
       <Stack direction="row" sx={{ justifyContent: "center" }}>
         <SelectionHeader
           entries={[FORM.ORDER, FORM.DIVIDEND]}
