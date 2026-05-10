@@ -41,6 +41,10 @@
     src: url("https://fonts.gstatic.com/s/dmsans/v15/rP2Vp3zwyFNGen6BFzj4I9il6z0.woff2")
       format("woff2");
   }
+
+  select {
+    background-color: var(--color-bg-input);
+  }
 }
 
 body {

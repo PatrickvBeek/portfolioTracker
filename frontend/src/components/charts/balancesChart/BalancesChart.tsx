@@ -1,4 +1,5 @@
 import { FC, useState } from "react";
+import { Select } from "../../ui/Select";
 import { ToggleGroup, ToggleItem } from "../../ui/ToggleGroup";
 import { useBreakpoint } from "../../../theme/breakpoints";
 import { styles } from "./BalancesChart.styles";
@@ -36,15 +37,15 @@ export const PortfolioBalancesChart: FC<{ portfolioNames: string[] }> = ({
     <div className={styles.container}>
       <div className={styles.headingContainer}>
         {isMobile ? (
-          <select
+          <Select
+            name="chart-view-mode"
             value={viewMode}
             onChange={handleMobileChange}
-            className="w-full px-3 py-2.5 rounded-md text-sm bg-bg-input border border-border text-text focus:outline-none focus:border-border-focus focus:ring-1 focus:ring-border-focus transition-colors duration-150"
           >
             <option value="total">Total Value</option>
             <option value="profitLoss">Profit / Loss</option>
             <option value="forecast">Forecast</option>
-          </select>
+          </Select>
         ) : (
           <ToggleGroup aria-label="chart view mode">
             <ToggleItem

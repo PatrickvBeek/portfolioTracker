@@ -74,7 +74,6 @@ export function AssetInputForm() {
     >
       <div className={styles.formRow}>
         <Input
-          id="asset-name"
           label={
             <>
               Asset Name
@@ -95,7 +94,6 @@ export function AssetInputForm() {
         />
 
         <Input
-          id="asset-isin"
           label={
             <>
               ISIN
@@ -119,7 +117,6 @@ export function AssetInputForm() {
         />
 
         <Input
-          id="asset-symbol"
           label="Symbol"
           state={!symbolValid && symbolInputText ? "error" : "default"}
           errorMessage={
