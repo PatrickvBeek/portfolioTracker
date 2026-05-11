@@ -1,6 +1,16 @@
+import React, { type ComponentPropsWithRef } from "react";
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
-import { DateInput, DateInputProps } from "./DateInput";
+import { DateInput } from "./DateInput";
+
+type DateInputProps = Omit<ComponentPropsWithRef<"input">, "onChange"> & {
+  onChange: (date: Date | undefined) => void;
+  defaultDate?: Date;
+  isMandatory?: boolean;
+  isValid?: boolean;
+  label?: React.ReactNode;
+  errorMessage?: string;
+};
 
 const LABEL = "label";
 

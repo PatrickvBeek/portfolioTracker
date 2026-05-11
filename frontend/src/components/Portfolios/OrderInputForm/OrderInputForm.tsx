@@ -1,21 +1,15 @@
-import { Stack } from "@mui/material";
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
 import { useAddOrderToPortfolio } from "../../../hooks/portfolios/portfolioHooks";
-import { bemHelper } from "../../../utility/bemHelper";
+import { cn } from "../../../utility/cn";
 import { Props, isNotNil } from "../../../utility/types";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
-import { Button } from "../../general/Button";
-import Confirmation from "../../general/Confirmation/Confirmation";
-import { DateInput, DateInputValue } from "../../general/DateInput";
-import {
-  NumberInput,
-  NumberInputValue,
-} from "../../general/NumberInput/NumberInput";
-import "./OrderInputForm.css";
+import { Button } from "../../ui/Button";
+import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
+import { DateInput, DateInputValue } from "../../ui/DateInput";
+import { NumberInput, NumberInputValue } from "../../ui/NumberInput";
+import { styles } from "./OrderInputForm.styles";
 import { useOrderValidation } from "./OrderInputForm.logic";
-
-const { bemElement } = bemHelper("order-input-form");
 
 export type OrderInputFormProps = Props<{
   portfolioName: string;
@@ -32,6 +26,7 @@ const DEFAULTS = {
 
 export function OrderInputForm({
   portfolioName,
+  className,
 }: OrderInputFormProps): ReactElement {
   const [isin, setAssetIsin] = useState(DEFAULTS.isin);
   const [pieces, setPieces] = useState<NumberInputValue>(DEFAULTS.pieces);
@@ -69,22 +64,20 @@ export function OrderInputForm({
   };
 
   return (
-    <Stack>
+    <div className={cn("flex flex-col gap-3", className)}>
       <AssetDropdown
-        className={bemElement("asset")}
+        className="mb-1"
         onChange={(isin) => setAssetIsin(isin || DEFAULTS.isin)}
         label="Asset"
         isMandatory={true}
       />
       <DateInput
-        className={bemElement("date")}
         onChange={setDate}
         label={"Order Date"}
         defaultDate={DEFAULTS.date}
         isMandatory={true}
       />
       <NumberInput
-        className={bemElement("pieces")}
         onChange={setPieces}
         label={"Pieces"}
         defaultValue={DEFAULTS.pieces}
@@ -92,7 +85,6 @@ export function OrderInputForm({
         autoComplete={"off"}
       />
       <NumberInput
-        className={bemElement("sharePrice")}
         onChange={setSharePrice}
         label={"Share Price"}
         defaultValue={DEFAULTS.sharePrice}
@@ -100,7 +92,6 @@ export function OrderInputForm({
         autoComplete={"off"}
       />
       <NumberInput
-        className={bemElement("fees")}
         onChange={setFees}
         label={"Fees"}
         defaultValue={DEFAULTS.fees}
@@ -108,30 +99,40 @@ export function OrderInputForm({
         autoComplete={"off"}
       />
       <NumberInput
-        className={bemElement("taxes")}
         onChange={setTaxes}
         label={"Taxes"}
         defaultValue={DEFAULTS.taxes}
         isMandatory={false}
         autoComplete={"off"}
       />
-      <div className={bemElement("summary")}>
+      <div className={styles.summary}>
         Summary:
-        <div className={bemElement("calculation")} title="Summary Text">
+        <div className={styles.calculation} title="Summary Text">
           {getOrderSummaryText({ pieces, sharePrice, fees })}
         </div>
       </div>
       <Button
-        sx={{ marginTop: "1rem" }}
-        className={bemElement("button")}
+        className="mt-4"
         onClick={submitHandler}
-        label={"Submit"}
-        isDisabled={!isFormValid || !isValid(orderToSubmit)}
-        isPrimary={true}
-      />
-      <DuplicationWarning
+        disabled={!isFormValid || !isValid(orderToSubmit)}
+      >
+        Submit
+      </Button>
+      <ConfirmationDialog
         open={isWarningOpen}
         onCancel={() => setIsWarningOpen(false)}
+        title="Duplicate Order Detected!"
+        body={
+          <>
+            <p>
+              This order seems to be a duplicate of an already registered order
+              for this portfolio. All values are equal.
+            </p>
+            <p>Do you still want to add this order?</p>
+          </>
+        }
+        confirmLabel="Add anyway"
+        cancelLabel="Cancel"
         onConfirm={() => {
           if (orderToSubmit) {
             addOrder(orderToSubmit);
@@ -139,7 +140,7 @@ export function OrderInputForm({
           setIsWarningOpen(false);
         }}
       />
-    </Stack>
+    </div>
   );
 }
 
@@ -159,36 +160,4 @@ function getOrderSummaryText({
     ).toFixed(2)}`;
   }
   return "undetermined";
-}
-
-type DuplicationWarningProps = {
-  onConfirm: () => void;
-  onCancel: () => void;
-  open: boolean;
-};
-
-function DuplicationWarning({
-  onCancel,
-  open,
-  onConfirm,
-}: DuplicationWarningProps) {
-  return (
-    <Confirmation
-      title={"Duplicate Order Detected!"}
-      open={open}
-      body={
-        <>
-          <p>
-            This order seems to be a duplicate of an already registered order
-            for this portfolio. All values are equal.
-          </p>
-          <p>Do you still want to add this order?</p>
-        </>
-      }
-      confirmLabel={"Add anyway"}
-      cancelLabel={"Cancel"}
-      onConfirm={onConfirm}
-      onCancel={onCancel}
-    />
-  );
 }

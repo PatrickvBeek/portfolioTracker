@@ -1,14 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
-import { componentHelpers } from "../../../testUtils/componentHelpers";
-import { NumberInput, NumberInputProps } from "./NumberInput";
+import { componentHelpers } from "../../testUtils/componentHelpers";
+import { NumberInput } from "./NumberInput";
+import type { NumberInputValue } from "./NumberInput";
 
 const LABEL = "test label";
 
 describe("the NumberInput component", () => {
-  const onChangeMock = vi.fn<(value: number | undefined) => void>();
-  const PROPS: NumberInputProps = { onChange: onChangeMock, label: LABEL };
+  const onChangeMock = vi.fn<(value: NumberInputValue) => void>();
+  const PROPS = { onChange: onChangeMock, label: LABEL };
   const user = userEvent.setup();
   const { fillNumberInput } = componentHelpers(user);
   const fillInput = async (value: string) => {

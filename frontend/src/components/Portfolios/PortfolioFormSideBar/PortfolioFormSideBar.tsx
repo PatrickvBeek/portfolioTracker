@@ -1,7 +1,6 @@
-import { Stack } from "@mui/material";
 import { ReactElement, useState } from "react";
 import { Heading } from "../../ui/Heading";
-import SelectionHeader from "../../general/SelectionHeader";
+import { Tabs } from "../../ui/Tabs";
 import { OrderInputForm } from "../OrderInputForm/OrderInputForm";
 import DividendForm from "./DividendForm/DividendForm";
 
@@ -13,30 +12,35 @@ const FORM = {
 } as const;
 type Forms = (typeof FORM)[keyof typeof FORM];
 
+const FORM_VALUES: readonly string[] = Object.values(FORM);
+
+function isForm(value: string): value is Forms {
+  return FORM_VALUES.includes(value);
+}
+
 function PortfolioFormSideBar({
   portfolioName,
 }: PortfolioFormSideBarProps): ReactElement {
   const [tab, setTab] = useState<Forms>(FORM.ORDER);
 
   return (
-    <Stack spacing={1}>
+    <div className="flex flex-col gap-3">
       <Heading level="h1">Add Data to Portfolio</Heading>
-      <Stack direction="row" sx={{ justifyContent: "center" }}>
-        <SelectionHeader
-          entries={[FORM.ORDER, FORM.DIVIDEND]}
-          selectedEntry={tab}
-          setSelectedEntry={(newValue: Forms) => {
+      <Tabs
+        entries={[FORM.ORDER, FORM.DIVIDEND]}
+        value={tab}
+        onValueChange={(newValue) => {
+          if (isForm(newValue)) {
             setTab(newValue);
-          }}
-        />
-      </Stack>
-
+          }
+        }}
+      />
       {tab === FORM.ORDER ? (
         <OrderInputForm portfolioName={portfolioName} />
       ) : (
         <DividendForm portfolioName={portfolioName} />
       )}
-    </Stack>
+    </div>
   );
 }
 

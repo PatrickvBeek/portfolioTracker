@@ -7,7 +7,11 @@ import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { cn } from "../../../utility/cn";
 import { Props } from "../../../utility/types";
 import { InputProps } from "../../general/types";
-import { assetDropdownTriggerVariants, styles } from "./AssetSelect.styles";
+import {
+  assetDropdownTriggerVariants,
+  styles,
+  triggerLayout,
+} from "./AssetSelect.styles";
 
 type AssetDropdownProps = Pick<
   InputProps,
@@ -54,12 +58,8 @@ const AssetDropdown = ({
   return (
     <div className={className}>
       {label && (
-        <label
-          htmlFor={selectId}
-          className="block text-sm font-medium text-text-muted mb-1.5"
-        >
+        <label htmlFor={selectId} className={styles.label}>
           {label}
-          {isMandatory && <span className="text-danger ml-0.5">*</span>}
         </label>
       )}
       <Popover.Root open={open} onOpenChange={setOpen}>
@@ -71,7 +71,10 @@ const AssetDropdown = ({
             aria-label={label || placeholder}
             aria-invalid={hasError || undefined}
             aria-describedby={errorId || undefined}
-            className={cn(assetDropdownTriggerVariants({ state }))}
+            className={cn(
+              triggerLayout,
+              assetDropdownTriggerVariants({ state, mandatory: !!isMandatory })
+            )}
           >
             {selectedAsset ? selectedAsset.displayName : placeholder}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-text-muted" />
@@ -131,7 +134,7 @@ const AssetDropdown = ({
         </Popover.Portal>
       </Popover.Root>
       {hasError && (
-        <p id={errorId} className="mt-1 text-xs text-danger" role="alert">
+        <p id={errorId} className={styles.errorMessage} role="alert">
           {errorMessage}
         </p>
       )}

@@ -1,23 +1,12 @@
-import { cva } from "class-variance-authority";
+import { inputFieldVariants } from "../../ui/input-field.styles";
 
-export const assetDropdownTriggerVariants = cva(
-  "w-full flex items-center justify-between px-3 py-2.5 rounded-md text-sm bg-bg-input border text-text focus:outline-none transition-colors duration-150",
-  {
-    variants: {
-      state: {
-        default:
-          "border-border focus:border-border-focus focus:ring-1 focus:ring-border-focus",
-        error:
-          "border-danger focus:border-danger focus:ring-1 focus:ring-danger",
-      },
-    },
-    defaultVariants: {
-      state: "default",
-    },
-  }
-);
+export { inputFieldVariants as assetDropdownTriggerVariants };
+
+export const triggerLayout = "flex items-center justify-between";
 
 export const styles = {
+  label: "block text-sm font-medium text-text-muted mb-1.5",
+  errorMessage: "mt-1 text-xs text-danger",
   popoverContent:
     "w-[var(--radix-popover-trigger-width)] rounded-md border border-border bg-bg-card shadow-md p-0",
   commandRoot: "flex flex-col overflow-hidden",

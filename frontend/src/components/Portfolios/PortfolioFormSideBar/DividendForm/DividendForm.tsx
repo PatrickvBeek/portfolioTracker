@@ -2,22 +2,16 @@ import { DividendPayout } from "pt-domain";
 import { ReactElement, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { useAddDividendPayoutToPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
-import { bemHelper } from "../../../../utility/bemHelper";
 import { Props } from "../../../../utility/types";
 import AssetDropdown from "../../../Assets/AssetDropdown/AssetSelect";
-import { Button } from "../../../general/Button";
-import { DateInput, DateInputValue } from "../../../general/DateInput";
-import {
-  NumberInput,
-  NumberInputValue,
-} from "../../../general/NumberInput/NumberInput";
-import "./DividendForm.css";
+import { Button } from "../../../ui/Button";
+import { DateInput, type DateInputValue } from "../../../ui/DateInput";
+import { NumberInput, type NumberInputValue } from "../../../ui/NumberInput";
+import { styles } from "./DividendForm.styles";
 
 type DividendFormProps = Props<{
   portfolioName: string;
 }>;
-
-const { bemBlock } = bemHelper("dividend-form");
 
 type FormState = {
   asset: string;
@@ -61,7 +55,7 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
       : undefined;
 
   return (
-    <div className={bemBlock(undefined)}>
+    <div className={styles.container}>
       <AssetDropdown
         onChange={(isin) =>
           setFormState({ ...formState, asset: isin || DEFAULTS.asset })
@@ -91,10 +85,10 @@ function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
       />
       <Button
         onClick={() => payout && addDividendPayout(payout)}
-        label={"Submit"}
-        isDisabled={!payout}
-        isPrimary={true}
-      />
+        disabled={!payout}
+      >
+        Submit
+      </Button>
     </div>
   );
 }
