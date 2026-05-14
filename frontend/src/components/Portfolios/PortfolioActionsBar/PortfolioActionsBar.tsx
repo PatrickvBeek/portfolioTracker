@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { useDeletePortfolio } from "../../../hooks/portfolios/portfolioHooks";
-import { bemHelper } from "../../../utility/bemHelper";
+import { cn } from "../../../utility/cn";
 import { Props } from "../../../utility/types";
-import Confirmation from "../../general/Confirmation/Confirmation";
-import "./PortfolioActionsBar.css";
-
-const { bemBlock, bemElement } = bemHelper("portfolio-actions-bar");
+import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
+import { styles } from "./PortfolioActionsBar.styles";
 
 type PortfolioViewSideBarProps = Props<{
   portfolioName: string;
@@ -19,22 +17,21 @@ const PortfolioActionsBar = ({
   const deletePortfolio = useDeletePortfolio();
 
   return (
-    <div className={bemBlock(className)}>
-      <div role={"columnheader"} className={bemElement("heading")}>
-        {"Actions"}
-      </div>
+    <div className={cn(styles.container, className)}>
+      <h2 className={styles.heading}>{"Actions"}</h2>
       <div
-        className={bemElement("entry")}
+        className={cn(styles.entry)}
         onClick={() => setIsDeleteOverlayOpen(true)}
       >
         {"Delete Portfolio"}
       </div>
-      <Confirmation
+      <ConfirmationDialog
         open={isDeleteOverlayOpen}
         title={`Delete ${portfolioName}?`}
         body={`You are about to delete the portfolio '${portfolioName}'. This will delete also all associated transaction data. Do you want to continue?`}
         confirmLabel={"Delete"}
         cancelLabel={"Cancel"}
+        confirmIntent="danger"
         onConfirm={() => {
           deletePortfolio(portfolioName);
           setIsDeleteOverlayOpen(false);

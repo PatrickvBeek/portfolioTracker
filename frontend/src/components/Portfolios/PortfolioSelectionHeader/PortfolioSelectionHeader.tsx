@@ -1,10 +1,10 @@
-import { Add } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { Plus } from "lucide-react";
 import { useState } from "react";
-import Overlay from "../../general/Overlay/Overlay";
-import SelectionHeader from "../../general/SelectionHeader";
+import { Button } from "../../ui/Button";
+import { Dialog } from "../../ui/Dialog";
+import { Tabs } from "../../ui/Tabs";
 import PortfolioInputForm from "../PortfolioFormSideBar/PortfolioInputForm/PortfolioInputForm";
-import styles from "./PortfolioSelectionHeader.module.less";
+import { styles } from "./PortfolioSelectionHeader.styles";
 
 type PortfolioSelectionHeaderProps = {
   portfolioNames: string[];
@@ -22,30 +22,29 @@ const PortfolioSelectionHeader = ({
   return (
     <div className={styles.container}>
       <div className={styles.tabsContainer}>
-        <SelectionHeader
+        <Tabs
           entries={portfolioNames}
-          selectedEntry={selectedPortfolio}
-          setSelectedEntry={setSelectedPortfolio}
+          value={selectedPortfolio}
+          onValueChange={setSelectedPortfolio}
         />
       </div>
       <div className={styles.addButton}>
-        <IconButton
-          color="primary"
+        <Button
+          intent="ghost"
           aria-label="add portfolio"
           onClick={() => setIsAddOverlayOpen(true)}
-          size="small"
         >
-          <Add />
-        </IconButton>
+          <Plus size={18} />
+        </Button>
       </div>
 
-      <Overlay
+      <Dialog
         open={isAddOverlayOpen}
+        onOpenChange={setIsAddOverlayOpen}
         title="Add a new Portfolio"
-        onClose={() => setIsAddOverlayOpen(false)}
       >
         <PortfolioInputForm onConfirm={() => setIsAddOverlayOpen(false)} />
-      </Overlay>
+      </Dialog>
     </div>
   );
 };
