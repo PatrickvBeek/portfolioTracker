@@ -10,6 +10,7 @@ This file provides guidance to agents when working with code in this repository.
 - **Type checking**: `pnpm tsc` (root), `cd domain && pnpm tsc`, `cd frontend && pnpm tsc`
 - **Linting**: `pnpm lint` (runs oxlint on all files)
 - **Lint fix**: `pnpm lint:fix` (auto-fixes linting issues)
+- **Dead code check**: `pnpm knip` (check for unused dependencies, files, exports)
 - **Architecture validation**: `pnpm architecture-tests` (runs dependency-cruiser to enforce domain isolation)
 - **Format check**: `pnpm fmt:check`
 - **Format fix**: `pnpm fmt`
@@ -17,6 +18,15 @@ This file provides guidance to agents when working with code in this repository.
 - **Start dev server**: `pnpm start` or `pnpm --filter frontend start`
 
 ## Code Style Guidelines
+
+### Commits
+
+- New commits should follow conventional commit style
+- Commit titles should never be longer than 72 characters
+- Do not list in detail what you did in the body
+  - Straightforward commits might not need a body at all
+  - **If** you add one, shortly mention what the commit achieves
+  - **Why** decisions where taken is more important that what happened
 
 ### Imports
 
@@ -64,6 +74,10 @@ This file provides guidance to agents when working with code in this repository.
 - Use optional chaining and nullish coalescing for safe access
 - API failures should display user-friendly error messages
 - LocalStorage errors should be handled gracefully (e.g., userDataContext)
+
+## Dead Code Check
+
+- **Always** run knip before considering your work done
 
 ## Critical Architecture Rules
 
