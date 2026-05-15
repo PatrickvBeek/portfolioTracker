@@ -71,14 +71,16 @@ describe("ActivityList overselling prevention", () => {
       expect(screen.getByText("Portfolio Activity")).toBeInTheDocument();
     });
 
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
-    expect(deleteButtons).toHaveLength(3);
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    expect(deleteButtons).toHaveLength(6); // 3 desktop + 3 mobile
 
     await user.click(deleteButtons[2]);
 
     expect(screen.getByText("Delete Activity?")).toBeInTheDocument();
 
-    const confirmDeleteButton = screen.getByRole("button", { name: /delete/i });
+    const confirmDeleteButton = screen.getByRole("button", {
+      name: /^delete$/i,
+    });
     await user.click(confirmDeleteButton);
 
     expect(screen.getByText("Cannot Delete Transaction")).toBeInTheDocument();
@@ -134,14 +136,16 @@ describe("ActivityList overselling prevention", () => {
 
     expect(screen.getByText("Portfolio Activity")).toBeInTheDocument();
 
-    const deleteButtons = screen.getAllByRole("button", { name: "Delete" });
-    expect(deleteButtons).toHaveLength(2);
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    expect(deleteButtons).toHaveLength(4); // 2 desktop + 2 mobile
 
     await user.click(deleteButtons[0]); // order are rendered in reverse order
 
     expect(screen.getByText("Delete Activity?")).toBeInTheDocument();
 
-    const confirmDeleteButton = screen.getByRole("button", { name: /delete/i });
+    const confirmDeleteButton = screen.getByRole("button", {
+      name: /^delete$/i,
+    });
     await user.click(confirmDeleteButton);
 
     expect(
@@ -150,6 +154,6 @@ describe("ActivityList overselling prevention", () => {
 
     expect(screen.queryByText("Delete Activity?")).not.toBeInTheDocument();
 
-    expect(screen.getAllByRole("button", { name: "Delete" })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /delete/i })).toHaveLength(2); // 1 desktop + 1 mobile
   });
 });
