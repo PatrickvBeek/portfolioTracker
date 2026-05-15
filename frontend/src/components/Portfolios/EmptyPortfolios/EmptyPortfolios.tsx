@@ -1,9 +1,6 @@
-import { bemHelper } from "../../../utility/bemHelper";
 import Tile from "../../general/Tile";
 import PortfolioInputForm from "../PortfolioFormSideBar/PortfolioInputForm/PortfolioInputForm";
-import "./EmptyPortfolios.css";
-
-const { bemBlock, bemElement } = bemHelper("empty-portfolios");
+import { styles } from "./EmptyPortfolios.styles";
 
 const Message = ({ className }: { className?: string }) => (
   <div className={className}>
@@ -17,8 +14,8 @@ const Message = ({ className }: { className?: string }) => (
 const EmptyPortfolios = () => {
   return (
     <Tile header={"No Portfolios Found..."}>
-      <div className={bemBlock(undefined)}>
-        <Message className={bemElement("message")} />
+      <div className={styles.container}>
+        <Message className={styles.message} />
         <PortfolioInputForm />
       </div>
     </Tile>

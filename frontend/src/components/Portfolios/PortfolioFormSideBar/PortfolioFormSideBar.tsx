@@ -25,7 +25,7 @@ function PortfolioFormSideBar({
 
   return (
     <div className="flex flex-col gap-3">
-      <Heading level="h1">Add Data to Portfolio</Heading>
+      <Heading level="h1">Add Data</Heading>
       <Tabs
         entries={[FORM.ORDER, FORM.DIVIDEND]}
         value={tab}

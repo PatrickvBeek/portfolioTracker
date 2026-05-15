@@ -8,7 +8,7 @@ export const buttonVariants = cva(
         primary:
           "px-5 py-2 bg-accent text-white hover:bg-accent-hover focus:ring-2 focus:ring-border-focus focus:ring-offset-2 focus:ring-offset-bg",
         ghost:
-          "px-4 py-2 bg-transparent border border-border text-text-muted hover:bg-bg-elevated hover:text-text focus:ring-2 focus:ring-border-focus focus:ring-offset-2 focus:ring-offset-bg",
+          "px-4 py-2 bg-transparent text-text-muted hover:bg-bg-elevated hover:text-text focus:ring-2 focus:ring-border-focus focus:ring-offset-2 focus:ring-offset-bg",
         danger:
           "px-4 py-2 bg-danger text-white hover:bg-danger-hover focus:ring-2 focus:ring-danger focus:ring-offset-2 focus:ring-offset-bg-card",
         "danger-ghost":

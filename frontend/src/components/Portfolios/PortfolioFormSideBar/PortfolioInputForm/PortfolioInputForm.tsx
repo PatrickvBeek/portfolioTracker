@@ -1,40 +1,46 @@
-import { Stack } from "@mui/material";
 import { newPortfolioFromName } from "pt-domain";
 import { useState } from "react";
 import { useAddPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
-import { Button } from "../../../general/Button";
-import { TextInput } from "../../../general/TextInput";
+import { Button } from "../../../ui/Button";
+import { Input } from "../../../ui/Input";
+import { styles } from "./PortfolioInputForm.styles";
 
 const PortfolioInputForm = ({ onConfirm }: { onConfirm?: () => void }) => {
   const [fieldContent, setFieldContent] = useState("");
   const addPortfolio = useAddPortfolio();
+
+  const handleSubmit = () => {
+    if (fieldContent) {
+      addPortfolio(newPortfolioFromName(fieldContent));
+    }
+    setFieldContent("");
+    if (onConfirm) {
+      onConfirm();
+    }
+  };
+
   return (
-    <Stack direction={"row"} spacing={1} sx={{ alignItems: "flex-start" }}>
-      <TextInput
-        text={fieldContent}
-        onChange={(element) => setFieldContent(element.target.value)}
+    <div className={styles.container}>
+      <Input
+        value={fieldContent}
+        onChange={(e) => setFieldContent(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && fieldContent.length > 0) {
+            handleSubmit();
+          }
+        }}
         placeholder={"New Portfolio Name..."}
         label={"Name"}
         autoFocus={true}
       />
-      <div>
-        <Button
-          sx={{ marginTop: "1.25rem" }}
-          onClick={() => {
-            if (fieldContent) {
-              addPortfolio(newPortfolioFromName(fieldContent));
-            }
-            setFieldContent("");
-            if (onConfirm) {
-              onConfirm();
-            }
-          }}
-          label={"Add"}
-          isDisabled={fieldContent.length === 0}
-          isPrimary={true}
-        />
-      </div>
-    </Stack>
+      <Button
+        intent="primary"
+        disabled={fieldContent.length === 0}
+        onClick={handleSubmit}
+      >
+        {"Add"}
+      </Button>
+    </div>
   );
 };
 

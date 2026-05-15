@@ -49,8 +49,8 @@ export function ConfirmationDialog({
           <AlertDialog.Title className={styles.title}>
             {title}
           </AlertDialog.Title>
-          <AlertDialog.Description className={styles.description}>
-            {body}
+          <AlertDialog.Description asChild className={styles.description}>
+            <div>{body}</div>
           </AlertDialog.Description>
           <div className={styles.buttonRow}>
             <AlertDialog.Cancel asChild>
