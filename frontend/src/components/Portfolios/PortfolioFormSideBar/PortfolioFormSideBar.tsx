@@ -27,7 +27,16 @@ function PortfolioFormSideBar({
     <div className="flex flex-col gap-3">
       <Heading level="h1">Add Data</Heading>
       <Tabs
-        entries={[FORM.ORDER, FORM.DIVIDEND]}
+        entries={[
+          {
+            value: FORM.ORDER,
+            content: <OrderInputForm portfolioName={portfolioName} />,
+          },
+          {
+            value: FORM.DIVIDEND,
+            content: <DividendForm portfolioName={portfolioName} />,
+          },
+        ]}
         value={tab}
         onValueChange={(newValue) => {
           if (isForm(newValue)) {
@@ -35,11 +44,6 @@ function PortfolioFormSideBar({
           }
         }}
       />
-      {tab === FORM.ORDER ? (
-        <OrderInputForm portfolioName={portfolioName} />
-      ) : (
-        <DividendForm portfolioName={portfolioName} />
-      )}
     </div>
   );
 }
