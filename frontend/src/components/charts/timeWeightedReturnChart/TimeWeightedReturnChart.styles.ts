@@ -1,7 +1,6 @@
 export const styles = {
-  benchmarkSelect: "w-96 mr-1 ml-4 max-md:w-[calc(100%-4px)] max-md:ml-0",
-  controls:
-    "flex items-center max-md:flex-col max-md:items-start max-md:w-full",
-  header:
-    "flex items-center justify-between max-md:flex-col max-md:items-start max-md:gap-4",
+  container: "flex flex-col gap-4",
+  benchmarkSelect: "w-48",
+  controls: "flex items-center gap-3 flex-wrap",
+  header: "flex items-center justify-between flex-wrap gap-2",
 } as const;

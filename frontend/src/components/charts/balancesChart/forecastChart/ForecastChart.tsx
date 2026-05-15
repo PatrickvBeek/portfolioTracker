@@ -16,6 +16,7 @@ import {
   usePortfolioAge,
 } from "../../../Portfolios/portfolioSummary/PortfolioSummary.logic";
 import { ChartContainer } from "../../ChartContainer";
+import { ChartRange } from "../../chartRange.types";
 import {
   asLocaleEuro,
   DEFAULT_LINE_PROPS,
@@ -29,9 +30,10 @@ import {
 } from "./ForecastChart.logic";
 import { ForecastParametersPanel } from "./ForecastParametersPanel";
 
-export const ForecastChart: FC<{ portfolioNames: string[] }> = ({
-  portfolioNames,
-}) => {
+export const ForecastChart: FC<{
+  portfolioNames: string[];
+  range: ChartRange;
+}> = ({ portfolioNames }) => {
   const cashFlow = useCashFlow(portfolioNames);
   const portfolioAge = usePortfolioAge(portfolioNames);
   const [params, setParams] = useState<ForecastParameters>({
