@@ -76,9 +76,6 @@ export const componentHelpers = (user: UserEvent) => ({
   },
 });
 
-export const getTextWithNonBreakingSpaceReplaced = (element: HTMLElement) =>
-  element.textContent?.replace(/\u00A0/g, " ");
-
 export const customWaitFor = (handler: () => void): Promise<void> =>
   waitFor(handler, { interval: 10 });
 

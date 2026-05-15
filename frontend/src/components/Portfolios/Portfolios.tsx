@@ -13,8 +13,7 @@ import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import styles from "./Portfolios.module.less";
 import PortfolioSelectionHeader from "./PortfolioSelectionHeader/PortfolioSelectionHeader";
 import { PortfolioSummary } from "./portfolioSummary/PortfolioSummary";
-import { ClosedPositionsList } from "./PositionList/ClosedPositionsList/ClosedPositionsList";
-import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPositionsList";
+import { Positions } from "./Positions/Positions";
 
 type PortfolioProps = Props;
 
@@ -54,8 +53,7 @@ function Portfolios({ className }: PortfolioProps) {
         <PortfolioSummary portfolioNames={[selectedPortfolio]} />
         <PortfolioBalancesChart portfolioNames={[selectedPortfolio]} />
         <TimeWeightedReturnChart portfolioNames={[selectedPortfolio]} />
-        <OpenPositionsList portfolioName={selectedPortfolio} />
-        <ClosedPositionsList portfolioName={selectedPortfolio} />
+        <Positions portfolioName={selectedPortfolio} />
         <ActivityList portfolio={selectedPortfolio} />
       </div>
 

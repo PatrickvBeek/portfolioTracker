@@ -8,8 +8,8 @@ import { Button } from "../../ui/Button";
 import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
 import { DateInput, DateInputValue } from "../../ui/DateInput";
 import { NumberInput, NumberInputValue } from "../../ui/NumberInput";
-import { styles } from "./OrderInputForm.styles";
 import { useOrderValidation } from "./OrderInputForm.logic";
+import { styles } from "./OrderInputForm.styles";
 
 export type OrderInputFormProps = Props<{
   portfolioName: string;
