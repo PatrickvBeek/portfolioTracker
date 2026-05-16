@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const buttonVariants = cva(
-  "rounded-md text-sm font-medium focus:outline-none transition-colors duration-150",
+  "inline-flex items-center rounded-md text-sm font-medium focus:outline-none transition-colors duration-150",
   {
     variants: {
       intent: {

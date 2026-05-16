@@ -1,11 +1,10 @@
 import { ReactElement } from "react";
 import { cn } from "../../../utility/cn";
 import { toPrice } from "../../../utility/prices";
-import { Props } from "../../../utility/types";
 
-type BalanceProps = Props<{ value: number; suffix?: string }>;
+type BalanceProps = { value: number; suffix?: string };
 
-function Balance({ className, value }: BalanceProps): ReactElement {
+function Balance({ value }: BalanceProps): ReactElement {
   const displayNumber = Number(value.toFixed(2));
   const sign =
     displayNumber === 0 ? "" : displayNumber > 0 ? "positive" : "negative";
@@ -13,8 +12,7 @@ function Balance({ className, value }: BalanceProps): ReactElement {
     <div
       className={cn(
         sign === "positive" && "text-success",
-        sign === "negative" && "text-danger",
-        className
+        sign === "negative" && "text-danger"
       )}
     >{`${sign === "positive" ? "+" : ""}${toPrice(value)}`}</div>
   );

@@ -1,50 +1,25 @@
-import styled from "@emotion/styled";
-import {
-  Box,
-  Divider,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-} from "@mui/material";
 import React from "react";
-import { InfoDialog } from "../../general/InfoDialog/InfoDialog";
+import { Upload, Download, KeyRound } from "lucide-react";
+import { Sheet } from "../../ui/Sheet";
+import { Button } from "../../ui/Button";
+import { Dialog } from "../../ui/Dialog";
+import { cn } from "../../../utility/cn";
 import ApiKeysOverlay from "../apiKeys/ApiKeysOverlay";
 import { useApiKeysManager } from "../apiKeys/useApiKeysManager";
 import { useDataExport } from "../userData/dataExport/useDataExport";
 import { useDataImport } from "../userData/dataImport/useDataImport";
-import styles from "./MobileMenuDrawer.module.less";
 
 interface MobileMenuDrawerProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   tabs: string[];
   selectedTab: string;
   onTabSelect: (tab: string) => void;
 }
 
-const StyledIcon = styled.i`
-  color: var(--theme);
-`;
-
-const StyledTabText = styled(ListItemText)`
-  .MuiListItemText-primary {
-    font-size: var(--font-large1);
-  }
-`;
-
-const StyledSelectedTabText = styled(ListItemText)`
-  .MuiListItemText-primary {
-    font-size: var(--font-large1);
-    color: var(--theme);
-    font-weight: 600;
-  }
-`;
-
 const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
   open,
-  onClose,
+  onOpenChange,
   tabs,
   selectedTab,
   onTabSelect,
@@ -63,99 +38,77 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
 
   const handleTabClick = (tab: string) => {
     onTabSelect(tab);
-    onClose();
+    onOpenChange(false);
   };
 
   const handleExportClick = () => {
     exportData();
-    onClose();
+    onOpenChange(false);
   };
 
   const handleImportClick = () => {
     triggerFileImport();
-    onClose();
+    onOpenChange(false);
   };
 
   const handleApiKeysClick = () => {
     openApiKeys();
-    onClose();
+    onOpenChange(false);
   };
 
   return (
     <>
-      <Drawer
-        anchor="right"
-        open={open}
-        onClose={onClose}
-        classes={{
-          paper: styles.drawerPaper,
-        }}
-      >
-        <Box className={styles.drawerContent} role="presentation">
-          {/* Navigation Section */}
-          <List className={styles.navigationSection}>
+      <Sheet open={open} onOpenChange={onOpenChange} side="right">
+        <div className="flex flex-col h-full">
+          <nav className="mb-4">
             {tabs.map((tab) => (
-              <ListItem key={tab} disablePadding>
-                <ListItemButton
-                  selected={tab === selectedTab}
-                  onClick={() => handleTabClick(tab)}
-                  className={`${styles.menuItem} ${tab === selectedTab ? styles.selectedTab : ""}`}
-                >
-                  {tab === selectedTab ? (
-                    <StyledSelectedTabText primary={tab} />
-                  ) : (
-                    <StyledTabText primary={tab} />
-                  )}
-                </ListItemButton>
-              </ListItem>
+              <button
+                key={tab}
+                onClick={() => handleTabClick(tab)}
+                className={cn(
+                  "w-full text-left px-4 py-3 text-base font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-border-focus",
+                  tab === selectedTab
+                    ? "text-accent bg-accent-soft font-semibold"
+                    : "text-text-muted hover:text-text hover:bg-bg-elevated"
+                )}
+              >
+                {tab}
+              </button>
             ))}
-          </List>
+          </nav>
 
-          <Divider />
+          <div className="border-t border-border my-2" />
 
-          {/* Action Section */}
-          <List className={styles.actionSection}>
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={handleImportClick}
-                className={styles.menuItem}
-              >
-                <StyledIcon className="fa-solid fa-file-arrow-up" />
-                <ListItemText
-                  primary="Import Data"
-                  classes={{ primary: styles.actionText }}
-                />
-              </ListItemButton>
-            </ListItem>
+          <div className="flex flex-col gap-1">
+            <Button
+              intent="ghost"
+              onClick={handleImportClick}
+              className="w-full justify-start gap-3 px-4 py-3"
+            >
+              <Upload size={20} />
+              <span className="text-base">Import Data</span>
+            </Button>
 
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={handleExportClick}
-                className={styles.menuItem}
-              >
-                <StyledIcon className="fa-solid fa-file-arrow-down" />
-                <ListItemText
-                  primary="Export Data"
-                  classes={{ primary: styles.actionText }}
-                />
-              </ListItemButton>
-            </ListItem>
+            <Button
+              intent="ghost"
+              onClick={handleExportClick}
+              className="w-full justify-start gap-3 px-4 py-3"
+            >
+              <Download size={20} />
+              <span className="text-base">Export Data</span>
+            </Button>
 
-            <ListItem disablePadding>
-              <ListItemButton
-                onClick={handleApiKeysClick}
-                className={styles.menuItem}
-              >
-                <StyledIcon className="fa-solid fa-key" />
-                <ListItemText
-                  primary="Manage API Keys"
-                  classes={{ primary: styles.actionText }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </List>
-        </Box>
-      </Drawer>
+            <Button
+              intent="ghost"
+              onClick={handleApiKeysClick}
+              className="w-full justify-start gap-3 px-4 py-3"
+            >
+              <KeyRound size={20} />
+              <span className="text-base">Manage API Keys</span>
+            </Button>
+          </div>
+        </div>
+      </Sheet>
 
       <ApiKeysOverlay
         open={isOverlayOpen}
@@ -165,18 +118,25 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
         onSubmit={handleSubmit}
       />
 
-      <InfoDialog
+      <Dialog
         open={isErrorDialogOpen}
-        onClose={() => setIsErrorDialogOpen(false)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsErrorDialogOpen(false);
+          }
+        }}
         title="Error parsing file"
-        message={
-          <div>
-            Oh no! 😢 <br />
-            An unknown error occurred while reading the selected file.
-          </div>
-        }
-        actionLabel="Okay"
-      />
+      >
+        <div className="text-text">
+          Oh no! 😢 <br />
+          An unknown error occurred while reading the selected file.
+        </div>
+        <div className="mt-6 flex justify-end">
+          <Button intent="ghost" onClick={() => setIsErrorDialogOpen(false)}>
+            Okay
+          </Button>
+        </div>
+      </Dialog>
     </>
   );
 };

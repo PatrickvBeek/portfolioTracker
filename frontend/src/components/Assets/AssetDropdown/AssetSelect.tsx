@@ -5,24 +5,21 @@ import { useState, useId } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { cn } from "../../../utility/cn";
-import { Props } from "../../../utility/types";
-import { InputProps } from "../../general/types";
 import {
   assetDropdownTriggerVariants,
   styles,
   triggerLayout,
 } from "./AssetSelect.styles";
 
-type AssetDropdownProps = Pick<
-  InputProps,
-  "isValid" | "errorMessage" | "isMandatory"
-> &
-  Props<{
-    onChange: (isin: string | undefined) => void;
-    filterAssets?: (asset: Asset) => boolean;
-    label?: string;
-    placeholder?: string;
-  }>;
+type AssetDropdownProps = {
+  onChange: (isin: string | undefined) => void;
+  filterAssets?: (asset: Asset) => boolean;
+  label?: string;
+  placeholder?: string;
+  isValid?: boolean;
+  errorMessage?: string;
+  isMandatory?: boolean;
+};
 
 const AssetDropdown = ({
   onChange,
@@ -32,7 +29,6 @@ const AssetDropdown = ({
   isValid,
   errorMessage,
   isMandatory,
-  className,
 }: AssetDropdownProps) => {
   const [open, setOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | undefined>(
@@ -56,7 +52,7 @@ const AssetDropdown = ({
   };
 
   return (
-    <div className={className}>
+    <div>
       {label && (
         <label htmlFor={selectId} className={styles.label}>
           {label}

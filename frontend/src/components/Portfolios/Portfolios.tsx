@@ -1,7 +1,6 @@
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
-import { Props } from "../../utility/types";
 import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
 import { Button } from "../ui/Button";
@@ -14,9 +13,7 @@ import PortfolioSelectionHeader from "./PortfolioSelectionHeader/PortfolioSelect
 import { PortfolioSummary } from "./portfolioSummary/PortfolioSummary";
 import { Positions } from "./Positions/Positions";
 
-type PortfolioProps = Props;
-
-function Portfolios({ className }: PortfolioProps) {
+function Portfolios() {
   const portfolioLib = useGetPortfolios();
   const [selectedPortfolio, setSelectedPortfolio] = useState<
     string | undefined
@@ -39,7 +36,7 @@ function Portfolios({ className }: PortfolioProps) {
   }
 
   return (
-    <div className={`${styles.container} ${className || ""}`}>
+    <div className={styles.container}>
       <div className={styles.header}>
         <PortfolioSelectionHeader
           portfolioNames={Object.keys(portfolioLib)}

@@ -1,18 +1,17 @@
 import { Library } from "lucide-react";
 import { useGetAssets } from "../../hooks/assets/assetHooks";
-import { cn } from "../../utility/cn";
 import { AssetInputForm } from "./AssetInputForm/AssetInputForm";
 import { AssetTable } from "./AssetTable/AssetTable";
 import { styles } from "./Assets.styles";
 import { Heading } from "../ui/Heading";
 import { styles as headingStyles } from "../ui/heading.styles";
 
-export function Assets({ className }: { className?: string }) {
+export function Assets() {
   const assetLibrary = useGetAssets();
   const assetCount = assetLibrary ? Object.keys(assetLibrary).length : 0;
 
   return (
-    <div className={cn(styles.pageWrapper, className)}>
+    <div className={styles.pageWrapper}>
       <div className={styles.contentContainer}>
         <div className={styles.header}>
           <div className={styles.headerRow}>

@@ -30,6 +30,7 @@
 
   --animate-accordion-slide-down: accordion-slide-down 200ms ease-out;
   --animate-accordion-slide-up: accordion-slide-up 200ms ease-out;
+  --animate-fade-in: fadeIn 150ms ease-out;
 }
 
 @layer base {
@@ -172,5 +173,16 @@ code {
   }
   to {
     transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

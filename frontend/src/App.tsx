@@ -1,4 +1,3 @@
-import { ThemeProvider } from "@mui/material/styles";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactElement, StrictMode, useState } from "react";
 import "./App.less";
@@ -7,12 +6,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import { Header } from "./components/header/Header";
 import Portfolios from "./components/Portfolios/Portfolios";
 import { queryClientConfig } from "./queryClient/config";
-import theme from "./theme/theme";
 import { UserDataProvider } from "./userDataContext";
-import { bemHelper } from "./utility/bemHelper";
-import { GeneralComponentProps } from "./utility/types";
-
-const { bemBlock, bemElement } = bemHelper("app");
 
 const queryClient = new QueryClient(queryClientConfig);
 
@@ -20,34 +14,29 @@ function App() {
   const TABS = ["Dashboard", "Portfolios", "Assets"];
   const [selectedTab, setSelectedTab] = useState(TABS[0]);
 
-  const componentByTabName: Record<
-    string,
-    ({ className }: GeneralComponentProps) => ReactElement
-  > = {
+  const TabToRender: Record<string, () => ReactElement> = {
     Dashboard: Dashboard,
     Portfolios: Portfolios,
     Assets: Assets,
   };
 
-  const TabToRender = componentByTabName[selectedTab];
+  const Content = TabToRender[selectedTab];
 
   return (
-    <div className={bemBlock("")}>
-      <StrictMode>
-        <ThemeProvider theme={theme}>
-          <UserDataProvider>
-            <QueryClientProvider client={queryClient}>
-              <Header
-                tabs={TABS}
-                selectedTab={selectedTab}
-                onSelect={setSelectedTab}
-              />
-              <TabToRender className={bemElement("tab-content")} />
-            </QueryClientProvider>
-          </UserDataProvider>
-        </ThemeProvider>
-      </StrictMode>
-    </div>
+    <StrictMode>
+      <UserDataProvider>
+        <QueryClientProvider client={queryClient}>
+          <Header
+            tabs={TABS}
+            selectedTab={selectedTab}
+            onSelect={setSelectedTab}
+          />
+          <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-8">
+            <Content />
+          </main>
+        </QueryClientProvider>
+      </UserDataProvider>
+    </StrictMode>
   );
 }
 

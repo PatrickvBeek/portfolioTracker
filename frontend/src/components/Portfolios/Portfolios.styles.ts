@@ -1,5 +1,5 @@
 export const styles = {
-  container: "w-full px-6 py-6 lg:px-8",
+  container: "w-full",
   header: "mb-6",
   main: "flex gap-8",
   content: "flex-1 min-w-0 flex flex-col gap-8",

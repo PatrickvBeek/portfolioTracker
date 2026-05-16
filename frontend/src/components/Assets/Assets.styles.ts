@@ -1,6 +1,6 @@
 export const styles = {
-  pageWrapper: "min-h-screen bg-bg",
-  contentContainer: "max-w-6xl mx-auto px-4 py-8 md:py-12",
+  pageWrapper: "w-full",
+  contentContainer: "w-full",
   iconBadge: "p-2 rounded-lg bg-accent-soft",
   header: "mb-8",
   headerRow: "flex items-center gap-3 mb-2",

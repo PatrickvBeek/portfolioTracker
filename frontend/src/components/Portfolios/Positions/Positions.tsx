@@ -10,7 +10,6 @@ import { styles } from "./Positions.styles";
 
 type PositionsProps = {
   portfolioName: string;
-  className?: string;
 };
 
 type TabValue = "Open Positions" | "Closed Positions";
@@ -57,7 +56,7 @@ function PositionsContent({
   );
 }
 
-export function Positions({ portfolioName, className }: PositionsProps) {
+export function Positions({ portfolioName }: PositionsProps) {
   const [activeTab, setActiveTab] = useState<TabValue>("Open Positions");
 
   const handleTabChange = (value: string) => {
@@ -67,7 +66,7 @@ export function Positions({ portfolioName, className }: PositionsProps) {
   };
 
   return (
-    <div className={className}>
+    <div>
       <Heading level="h1">Positions</Heading>
       <Tabs
         entries={[

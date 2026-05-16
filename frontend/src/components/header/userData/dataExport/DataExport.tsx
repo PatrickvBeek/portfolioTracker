@@ -1,6 +1,6 @@
-import { IconButton, Tooltip } from "@mui/material";
 import { FC, ReactElement } from "react";
-import { StyledIcon } from "../../../general/StyledComponents";
+import { Download } from "lucide-react";
+import { Tooltip } from "../../../ui/Tooltip";
 import { useDataExport } from "./useDataExport";
 
 export const DataExport: FC = (): ReactElement | null => {
@@ -11,10 +11,14 @@ export const DataExport: FC = (): ReactElement | null => {
   }
 
   return (
-    <Tooltip title={"Export all data into a file"}>
-      <IconButton onClick={exportData}>
-        <StyledIcon className="fa-solid fa-file-arrow-down fa-lg" />
-      </IconButton>
+    <Tooltip content="Export all data into a file" side="bottom">
+      <button
+        className="inline-flex items-center justify-center rounded-md p-2 text-text-muted hover:text-text hover:bg-bg-elevated transition-colors focus:outline-none focus:ring-2 focus:ring-border-focus"
+        onClick={exportData}
+        aria-label="Export all data into a file"
+      >
+        <Download size={18} />
+      </button>
     </Tooltip>
   );
 };

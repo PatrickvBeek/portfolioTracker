@@ -1,8 +1,7 @@
 import React from "react";
-import { Button } from "../../general/Button";
-import Overlay from "../../general/Overlay/Overlay";
-import { TextInput } from "../../general/TextInput";
-import styles from "./ApiKeysOverlay.module.less";
+import { Button } from "../../ui/Button";
+import { Dialog } from "../../ui/Dialog";
+import { Input } from "../../ui/Input";
 
 interface ApiKeysOverlayProps {
   open: boolean;
@@ -20,35 +19,37 @@ const ApiKeysOverlay: React.FC<ApiKeysOverlayProps> = ({
   onSubmit,
 }) => {
   return (
-    <Overlay open={open} onClose={onClose} title={"Manage API Keys"}>
-      <div className={styles.form}>
-        <TextInput
-          label={"Yahoo Finance API Key"}
-          text={yahooKey}
+    <Dialog open={open} onOpenChange={onClose} title="Manage API Keys">
+      <div className="flex flex-col max-w-[30em]">
+        <Input
+          label="Yahoo Finance API Key"
+          value={yahooKey}
           onChange={(e) => onYahooKeyChange(e.target.value)}
         />
-        <div className={styles.info}>
-          <div className={styles.infoText}>
+        <div className="my-4 text-sm">
+          <div className="mb-2">
             You can get a free API key from{" "}
             <a
               href="https://financeapi.net"
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.link}
+              className="text-accent hover:underline"
             >
               financeapi.net
             </a>
           </div>
-          <div className={styles.benefit}>
+          <div className="text-text-muted">
             With YH API access the app provides more fine granular price updates
             and higher request limits. Otherwise it will try to use AlphaVantage
             as a fallback with only weekly prices information and throttled
             request rate.
           </div>
         </div>
-        <Button onClick={onSubmit} label={"Submit"} isPrimary />
+        <Button intent="primary" onClick={onSubmit}>
+          Submit
+        </Button>
       </div>
-    </Overlay>
+    </Dialog>
   );
 };
 

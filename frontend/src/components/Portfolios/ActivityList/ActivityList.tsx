@@ -8,7 +8,6 @@ import {
 } from "../../../hooks/portfolios/portfolioHooks";
 import { cn } from "../../../utility/cn";
 import { toPrice } from "../../../utility/prices";
-import { Props } from "../../../utility/types";
 import { Button } from "../../ui/Button";
 import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
 import { Dialog } from "../../ui/Dialog";
@@ -20,9 +19,9 @@ import {
 } from "./ActivityList.logic";
 import { nodeVariants, styles } from "./ActivityList.styles";
 
-type ActivityListProps = Props<{
+type ActivityListProps = {
   portfolio: string;
-}>;
+};
 
 function DesktopActivityRow({
   rowData,
