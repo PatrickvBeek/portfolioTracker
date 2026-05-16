@@ -1,5 +1,5 @@
 import moment from "moment";
-import { FC, useState } from "react";
+import { FC } from "react";
 import {
   Area,
   AreaChart,
@@ -12,7 +12,6 @@ import {
 import { ChartContainer } from "../../ChartContainer";
 import { getSplitColorGradientDef } from "../../chartElements";
 import { ChartRange } from "../../chartRange.types";
-import { ChartRangeSelector } from "../../ChartRangeSelector";
 import {
   DEFAULT_LINE_PROPS,
   filterChartDataByRange,
@@ -20,12 +19,11 @@ import {
   getTimeAxisProps,
 } from "../../chartUtils";
 import { useProfitHistory } from "./ProfitChart.logic";
-import { styles } from "./ProfitChart.styles";
 
-export const ProfitChart: FC<{ portfolioNames: string[] }> = ({
-  portfolioNames,
-}) => {
-  const [range, setRange] = useState<ChartRange>("Max");
+export const ProfitChart: FC<{
+  portfolioNames: string[];
+  range: ChartRange;
+}> = ({ portfolioNames, range }) => {
   const { isLoading, data } = useProfitHistory(portfolioNames);
 
   const chartData = filterChartDataByRange(data ?? [], range);
@@ -37,9 +35,6 @@ export const ProfitChart: FC<{ portfolioNames: string[] }> = ({
 
   return (
     <div>
-      <div className={styles.header}>
-        <ChartRangeSelector value={range} onChange={setRange} />
-      </div>
       <ChartContainer isLoading={isLoading}>
         <AreaChart data={chartData} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />

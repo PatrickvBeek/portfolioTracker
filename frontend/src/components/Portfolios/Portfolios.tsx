@@ -1,20 +1,18 @@
-import CloseIcon from "@mui/icons-material/Close";
-import MenuIcon from "@mui/icons-material/Menu";
-import { Box, Divider, Drawer, IconButton, Stack, styled } from "@mui/material";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
 import { Props } from "../../utility/types";
 import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
+import { Button } from "../ui/Button";
+import { Sheet } from "../ui/Sheet";
 import ActivityList from "./ActivityList/ActivityList";
 import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
-import PortfolioActionsBar from "./PortfolioActionsBar/PortfolioActionsBar";
 import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
-import styles from "./Portfolios.module.less";
+import { styles } from "./Portfolios.styles";
 import PortfolioSelectionHeader from "./PortfolioSelectionHeader/PortfolioSelectionHeader";
 import { PortfolioSummary } from "./portfolioSummary/PortfolioSummary";
-import { ClosedPositionsList } from "./PositionList/ClosedPositionsList/ClosedPositionsList";
-import { OpenPositionsList } from "./PositionList/OpenPositionsList/OpenPositionsList";
+import { Positions } from "./Positions/Positions";
 
 type PortfolioProps = Props;
 
@@ -23,7 +21,7 @@ function Portfolios({ className }: PortfolioProps) {
   const [selectedPortfolio, setSelectedPortfolio] = useState<
     string | undefined
   >(Object.keys(portfolioLib)[0]);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   useEffect(() => {
     const portfolios = Object.keys(portfolioLib || {});
@@ -47,75 +45,38 @@ function Portfolios({ className }: PortfolioProps) {
           portfolioNames={Object.keys(portfolioLib)}
           selectedPortfolio={selectedPortfolio}
           setSelectedPortfolio={setSelectedPortfolio}
+          portfolioName={selectedPortfolio}
         />
       </div>
 
-      <div className={styles.content}>
-        <PortfolioSummary portfolioNames={[selectedPortfolio]} />
-        <PortfolioBalancesChart portfolioNames={[selectedPortfolio]} />
-        <TimeWeightedReturnChart portfolioNames={[selectedPortfolio]} />
-        <OpenPositionsList portfolioName={selectedPortfolio} />
-        <ClosedPositionsList portfolioName={selectedPortfolio} />
-        <ActivityList portfolio={selectedPortfolio} />
+      <div className={styles.main}>
+        <div className={styles.content}>
+          <PortfolioSummary portfolioNames={[selectedPortfolio]} />
+          <PortfolioBalancesChart portfolioNames={[selectedPortfolio]} />
+          <TimeWeightedReturnChart portfolioNames={[selectedPortfolio]} />
+          <Positions portfolioName={selectedPortfolio} />
+          <ActivityList portfolio={selectedPortfolio} />
+        </div>
+
+        <div className={styles.formSidebar}>
+          <PortfolioFormSideBar portfolioName={selectedPortfolio} />
+        </div>
       </div>
 
-      <Box className={styles.orderSideBar}>
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <PortfolioFormSideBar portfolioName={selectedPortfolio} />
-      </Box>
+      </Sheet>
 
-      <PortfolioActionsBar
-        className={styles.sideBar}
-        portfolioName={selectedPortfolio}
-      />
-
-      <Drawer
-        anchor="right"
-        open={mobileDrawerOpen}
-        onClose={() => setMobileDrawerOpen(false)}
+      <Button
+        className={styles.sheetTrigger}
+        intent="primary"
+        onClick={() => setSheetOpen(true)}
+        aria-label="Add portfolio data"
       >
-        <div className={styles.drawerContent}>
-          <Stack spacing={2}>
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <IconButton
-                onClick={() => setMobileDrawerOpen(false)}
-                aria-label="Close drawer"
-              >
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            <PortfolioFormSideBar portfolioName={selectedPortfolio} />
-            <Divider />
-            <PortfolioActionsBar portfolioName={selectedPortfolio} />
-          </Stack>
-        </div>
-      </Drawer>
-
-      <StyledFloatingButton
-        onClick={() => setMobileDrawerOpen(true)}
-        aria-label="Open portfolio menu"
-      >
-        <MenuIcon />
-      </StyledFloatingButton>
+        <Plus size={30} />
+      </Button>
     </div>
   );
 }
-
-const StyledFloatingButton = styled(IconButton)(({ theme }) => ({
-  position: "fixed",
-  bottom: theme.spacing(2),
-  right: theme.spacing(2),
-  left: "auto",
-  top: "auto",
-  width: "56px",
-  height: "56px",
-  borderRadius: "50%",
-  backgroundColor: theme.palette.primary.main,
-  color: "white",
-  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-  fontWeight: "bold",
-  [theme.breakpoints.up("lg")]: {
-    display: "none",
-  },
-}));
 
 export default Portfolios;

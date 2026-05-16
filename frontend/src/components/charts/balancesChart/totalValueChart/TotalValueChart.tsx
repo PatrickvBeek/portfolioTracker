@@ -1,5 +1,5 @@
 import moment from "moment";
-import { FC, useState } from "react";
+import { FC } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -11,7 +11,6 @@ import {
 } from "recharts";
 import { ChartContainer } from "../../ChartContainer";
 import { ChartRange } from "../../chartRange.types";
-import { ChartRangeSelector } from "../../ChartRangeSelector";
 import {
   DEFAULT_LINE_PROPS,
   filterChartDataByRange,
@@ -22,21 +21,17 @@ import {
   BalancesChartDataSets,
   useGetPortfolioHistoryChartData,
 } from "./TotalValueChart.logic";
-import { styles } from "./TotalValueChart.styles";
 
-export const TotalValueChart: FC<{ portfolioNames: string[] }> = ({
-  portfolioNames,
-}) => {
-  const [range, setRange] = useState<ChartRange>("Max");
+export const TotalValueChart: FC<{
+  portfolioNames: string[];
+  range: ChartRange;
+}> = ({ portfolioNames, range }) => {
   const { data, isLoading } = useGetPortfolioHistoryChartData(portfolioNames);
 
   const chartData = filterChartDataByRange(data || [], range);
 
   return (
     <div>
-      <div className={styles.header}>
-        <ChartRangeSelector value={range} onChange={setRange} />
-      </div>
       <ChartContainer isLoading={isLoading}>
         <LineChart data={chartData} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />

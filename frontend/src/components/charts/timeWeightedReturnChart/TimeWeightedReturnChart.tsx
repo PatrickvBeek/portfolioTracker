@@ -45,14 +45,14 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
   );
 
   return (
-    <div>
+    <div className={styles.container}>
       <div className={styles.header}>
-        <Heading level="h1">Performance: Time Weighted Return</Heading>
+        <Heading level="h1">Time Weighted Return</Heading>
         <div className={styles.controls}>
           <ChartRangeSelector value={range} onChange={setRange} />
           <AssetDropdown
             onChange={(isin) => setBenchmark(isin || "")}
-            label="Benchmark"
+            placeholder="Benchmark"
             className={styles.benchmarkSelect}
             filterAssets={(a) => !!a.symbol}
           />

@@ -1,10 +1,7 @@
 import { ReactElement } from "react";
-import { bemHelper } from "../../../utility/bemHelper";
+import { cn } from "../../../utility/cn";
 import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
-import "./Balance.css";
-
-const { bemBlock } = bemHelper("balance");
 
 type BalanceProps = Props<{ value: number; suffix?: string }>;
 
@@ -13,9 +10,13 @@ function Balance({ className, value }: BalanceProps): ReactElement {
   const sign =
     displayNumber === 0 ? "" : displayNumber > 0 ? "positive" : "negative";
   return (
-    <div className={bemBlock(className, sign)}>{`${
-      sign === "positive" ? "+" : ""
-    }${toPrice(value)}`}</div>
+    <div
+      className={cn(
+        sign === "positive" && "text-success",
+        sign === "negative" && "text-danger",
+        className
+      )}
+    >{`${sign === "positive" ? "+" : ""}${toPrice(value)}`}</div>
   );
 }
 

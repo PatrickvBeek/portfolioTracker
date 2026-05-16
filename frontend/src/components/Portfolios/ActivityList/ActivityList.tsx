@@ -1,40 +1,166 @@
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { Trash2 } from "lucide-react";
 import moment from "moment";
-import {
-  canDeleteActivity,
-  getDividendVolume,
-  getOrderVolume,
-  isOrder,
-  PortfolioActivity,
-} from "pt-domain";
-import { ReactElement, useState } from "react";
-import { useGetAssets } from "../../../hooks/assets/assetHooks";
+import { canDeleteActivity, isOrder, PortfolioActivity } from "pt-domain";
+import { useState } from "react";
 import {
   useDeleteDividendPayoutFromPortfolio,
   useDeleteOrderFromPortfolio,
-  useGetPortfolio,
-  useGetPortfolioActivity,
 } from "../../../hooks/portfolios/portfolioHooks";
+import { cn } from "../../../utility/cn";
 import { toPrice } from "../../../utility/prices";
 import { Props } from "../../../utility/types";
-import { Button } from "../../general/Button";
-import CustomTable from "../../general/CustomTable/CustomTable";
-import DeleteButtonWithConfirmation from "../../general/DeleteButtonWithConfirm/DeleteButtonWithConfirmation";
+import { Button } from "../../ui/Button";
+import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
+import { Dialog } from "../../ui/Dialog";
 import { Heading } from "../../ui/Heading";
-import { InfoDialog } from "../../general/InfoDialog/InfoDialog";
-import styles from "./ActivityList.module.less";
+import {
+  ActivityRowData,
+  toActivityRowData,
+  useActivityListData,
+} from "./ActivityList.logic";
+import { nodeVariants, styles } from "./ActivityList.styles";
 
 type ActivityListProps = Props<{
   portfolio: string;
 }>;
 
-function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
+function DesktopActivityRow({
+  rowData,
+  isLast,
+  onDelete,
+}: {
+  rowData: ActivityRowData;
+  isLast: boolean;
+  onDelete: () => void;
+}) {
+  const {
+    activity,
+    activityType,
+    label,
+    icon: Icon,
+    assetName,
+    amount,
+    pricePerShare,
+    fees,
+    taxes,
+  } = rowData;
+
+  return (
+    <div className={cn(styles.item, !isLast && "mb-3")}>
+      <div className={styles.rail}>
+        <div
+          className={cn(nodeVariants({ type: activityType }))}
+          aria-label={label}
+        >
+          <Icon className="w-4 h-4" />
+        </div>
+        {!isLast && <div className={styles.connector} />}
+      </div>
+      <div className={styles.card}>
+        <div className={styles.cardInner}>
+          <span className={styles.dateCell}>
+            {moment(activity.timestamp).format("ll")}
+          </span>
+          <span className={styles.assetCell}>{assetName}</span>
+          {isOrder(activity) && (
+            <span className={styles.piecesCell}>{activity.pieces} pcs</span>
+          )}
+          <span className={styles.amountCell}>{amount}</span>
+          <span className={styles.priceCell}>@ {pricePerShare}/sh</span>
+          <span className={styles.feeCell}>Fees: {fees}</span>
+          <span className={styles.taxCell}>Tax: {taxes}</span>
+          <div className={styles.actionCell}>
+            <Button
+              intent="danger-ghost"
+              onClick={onDelete}
+              aria-label={`Delete ${label} of ${assetName}`}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileActivityRow({
+  rowData,
+  isLast,
+  onDelete,
+}: {
+  rowData: ActivityRowData;
+  isLast: boolean;
+  onDelete: () => void;
+}) {
+  const {
+    activity,
+    activityType,
+    label,
+    icon: Icon,
+    assetName,
+    amount,
+    pricePerShare,
+    fees,
+    taxes,
+  } = rowData;
+
+  return (
+    <div className={cn(styles.item, !isLast && "mb-3")}>
+      <div className={styles.rail}>
+        <div
+          className={cn(nodeVariants({ type: activityType }))}
+          aria-label={label}
+        >
+          <Icon className="w-4 h-4" />
+        </div>
+        {!isLast && <div className={styles.connector} />}
+      </div>
+      <div className={styles.mobileCard}>
+        <div className={styles.mobileCardInner}>
+          <div className={styles.mobileHeader}>
+            <span className={styles.mobileAssetName}>{assetName}</span>
+            <span className={styles.mobileDate}>
+              {moment(activity.timestamp).format("ll")}
+            </span>
+          </div>
+          <div className={styles.mobileDetails}>
+            <div className={styles.mobileDetailItem}>
+              <span className={styles.mobileDetailValue}>
+                {isOrder(activity)
+                  ? `${activity.pieces} pcs`
+                  : `${toPrice(activity.dividendPerShare)}/sh`}
+              </span>{" "}
+              {isOrder(activity) && `@ ${pricePerShare}/sh`}
+            </div>
+          </div>
+          <div className={styles.mobileSecondaryDetails}>
+            <span>Fees: {fees}</span>
+            <span>Tax: {taxes}</span>
+          </div>
+          <div className={styles.mobileAmountSection}>
+            <span className={styles.mobileAmount}>{amount}</span>
+            <Button
+              intent="danger-ghost"
+              onClick={onDelete}
+              aria-label={`Delete ${label} of ${assetName}`}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ActivityList({ portfolio }: ActivityListProps) {
   const [showAll, setShowAll] = useState(false);
   const [showInvalidDeletionDialog, setShowInvalidDeletionDialog] =
     useState(false);
-  const activity = useGetPortfolioActivity(portfolio);
-  const portfolioData = useGetPortfolio(portfolio);
-  const assetsLib = useGetAssets();
+  const [activityToDelete, setActivityToDelete] =
+    useState<PortfolioActivity | null>(null);
+  const { activity, portfolioData, assetsLib } = useActivityListData(portfolio);
   const deleteOrder = useDeleteOrderFromPortfolio(portfolio);
   const deleteDividendPayout = useDeleteDividendPayoutFromPortfolio(portfolio);
 
@@ -42,16 +168,29 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
     return null;
   }
 
-  const handleDeleteActivity = (activity: PortfolioActivity) => {
-    if (!canDeleteActivity(portfolioData, activity)) {
+  if (activity.length === 0) {
+    return (
+      <div className={styles.container}>
+        <Heading level="h1">Portfolio Activity</Heading>
+        <div className={styles.emptyState}>
+          <p className={styles.emptyStatePrimary}>No activity yet.</p>
+          <p className={styles.emptyStateSecondary}>
+            Add orders or dividend payouts to see them here.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleDeleteActivity = (a: PortfolioActivity) => {
+    if (!canDeleteActivity(portfolioData, a)) {
       setShowInvalidDeletionDialog(true);
       return;
     }
-
-    if (isOrder(activity)) {
-      deleteOrder(activity);
+    if (isOrder(a)) {
+      deleteOrder(a);
     } else {
-      deleteDividendPayout(activity);
+      deleteDividendPayout(a);
     }
   };
 
@@ -60,121 +199,91 @@ function ActivityList({ portfolio }: ActivityListProps): ReactElement | null {
     : activity.toReversed().slice(0, 10);
   const assets = assetsLib;
 
-  const columnHelper = createColumnHelper<PortfolioActivity>();
-
-  // oxlint-disable-next-line typescript-eslint/no-explicit-any
-  const defs: ColumnDef<PortfolioActivity, any>[] = [
-    columnHelper.accessor((a) => a, {
-      id: "type",
-      header: "Type",
-      cell: (activity) =>
-        isOrder(activity.getValue()) ? (
-          <i
-            className={`fa fa-${activity.getValue().pieces > 0 ? "plus" : "minus"}`}
-          />
-        ) : (
-          <i className={"fa fa-euro-sign"} />
-        ),
-      meta: {
-        align: "center",
-      },
-    }),
-    columnHelper.accessor((a) => a.timestamp, {
-      header: "Date",
-      cell: (props) => (
-        <span>{moment(props.cell.getValue()).format("ll")}</span>
-      ),
-    }),
-    columnHelper.accessor("asset", {
-      header: "Asset",
-      cell: (a) => assets[a.getValue()]?.displayName || "asset not found",
-    }),
-    columnHelper.accessor("pieces", {
-      header: "Pieces",
-      cell: (p) => p.getValue(),
-      meta: {
-        align: "right",
-      },
-    }),
-    columnHelper.accessor((a) => a, {
-      header: "Value per Share",
-      cell: (props) => {
-        const activity = props.getValue();
-        return isOrder(activity)
-          ? toPrice(activity.sharePrice)
-          : toPrice(activity.dividendPerShare);
-      },
-      meta: {
-        align: "right",
-      },
-    }),
-    columnHelper.accessor((a) => a, {
-      header: "Amount",
-      cell: (props) => {
-        const activity = props.getValue();
-        return isOrder(activity)
-          ? toPrice(getOrderVolume(activity))
-          : toPrice(getDividendVolume(activity));
-      },
-      meta: {
-        align: "right",
-      },
-    }),
-    columnHelper.accessor((a) => a, {
-      header: "Fees",
-      cell: (a) => {
-        const activity = a.getValue();
-        return isOrder(activity) ? toPrice(activity.orderFee) : toPrice(0);
-      },
-      meta: {
-        align: "right",
-      },
-    }),
-    columnHelper.accessor("taxes", {
-      header: "Taxes",
-      cell: (props) => toPrice(props.getValue()),
-      meta: {
-        align: "right",
-      },
-    }),
-    columnHelper.accessor((a) => a, {
-      header: "Actions",
-      cell: (props) => {
-        const activity = props.getValue();
-        return (
-          <DeleteButtonWithConfirmation
-            deleteHandler={() => handleDeleteActivity(activity)}
-            title={"Delete Activity?"}
-            body={`Are you sure you want to delete this activity?`}
-          />
-        );
-      },
-      meta: {
-        align: "center",
-      },
-    }),
-  ];
+  const rowDataMap = new Map(
+    tableData.map((a) => [a.uuid, toActivityRowData(a, assets)])
+  );
 
   return (
-    <div>
-      <Heading level="h1" className={styles.headline}>
-        Portfolio Activity
-      </Heading>
-      <CustomTable columns={defs} data={tableData} />
-      <div className={styles.showAllButton}>
-        <Button
-          onClick={() => setShowAll(!showAll)}
-          label={showAll ? "Show less" : "Show all"}
-        />
+    <div className={styles.container}>
+      <Heading level="h1">Portfolio Activity</Heading>
+
+      <div className={styles.timeline}>
+        {tableData.map((a, i) => (
+          <div
+            key={a.uuid}
+            className="md:block hidden"
+            data-testid="desktop-row"
+          >
+            <DesktopActivityRow
+              rowData={rowDataMap.get(a.uuid)!}
+              isLast={i === tableData.length - 1}
+              onDelete={() => setActivityToDelete(a)}
+            />
+          </div>
+        ))}
+
+        {tableData.map((a, i) => (
+          <div
+            key={`mobile-${a.uuid}`}
+            className="md:hidden"
+            data-testid="mobile-row"
+          >
+            <MobileActivityRow
+              rowData={rowDataMap.get(a.uuid)!}
+              isLast={i === tableData.length - 1}
+              onDelete={() => setActivityToDelete(a)}
+            />
+          </div>
+        ))}
       </div>
-      <InfoDialog
+
+      {activity.length > 10 && (
+        <div className={styles.showAllButton}>
+          <Button intent="ghost" onClick={() => setShowAll(!showAll)}>
+            {showAll ? "Show less" : "Show all"}
+          </Button>
+        </div>
+      )}
+
+      {activityToDelete && (
+        <ConfirmationDialog
+          open={!!activityToDelete}
+          onCancel={() => setActivityToDelete(null)}
+          onConfirm={() => {
+            handleDeleteActivity(activityToDelete);
+            setActivityToDelete(null);
+          }}
+          title="Delete Activity?"
+          body="Are you sure you want to delete this activity?"
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          confirmIntent="danger"
+        />
+      )}
+
+      <Dialog
         open={showInvalidDeletionDialog}
-        onClose={() => setShowInvalidDeletionDialog(false)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowInvalidDeletionDialog(false);
+          }
+        }}
         title="Cannot Delete Transaction"
-        message="This transaction cannot be deleted because it would cause a situation, where at least one transaction attempts to sell more pieces than available at this point in time."
-      />
+      >
+        <p className={styles.infoDialogBody}>
+          This transaction cannot be deleted because it would cause a situation,
+          where at least one transaction attempts to sell more pieces than
+          available at this point in time.
+        </p>
+        <div className={styles.infoDialogActions}>
+          <Button
+            intent="primary"
+            onClick={() => setShowInvalidDeletionDialog(false)}
+          >
+            OK
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 }
-
-export default ActivityList;

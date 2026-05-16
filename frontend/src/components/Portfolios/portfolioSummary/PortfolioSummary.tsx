@@ -98,7 +98,7 @@ const SummaryTile: FC<{
   entries: { label: string; value: ReactNode; sumRow?: boolean }[];
   title: string;
 }> = ({ entries, title }) => (
-  <Tile header={title}>
+  <Tile header={title} className={styles.tile}>
     <div className={styles.rows}>
       {entries.map(({ label, value, sumRow }) => (
         <SummaryTileRow

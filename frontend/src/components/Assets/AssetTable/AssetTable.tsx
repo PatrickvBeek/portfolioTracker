@@ -10,7 +10,7 @@ import { useMemo, useState } from "react";
 import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
 import { Trash2 } from "lucide-react";
 import { Button } from "../../ui/Button";
-import { DeleteAlertDialog } from "./DeleteAlertDialog";
+import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
 import { SymbolConnectionIndicator } from "./SymbolConnectionIndicator";
 import { styles } from "./AssetTable.styles";
 
@@ -167,14 +167,18 @@ export function AssetTable() {
       </div>
 
       {assetToDelete && (
-        <DeleteAlertDialog
+        <ConfirmationDialog
           open={!!assetToDelete}
-          onOpenChange={(open) => !open && setAssetToDelete(null)}
+          onCancel={() => setAssetToDelete(null)}
           onConfirm={() => {
             deleteAsset(assetToDelete);
+            setAssetToDelete(null);
           }}
           title={`Delete Asset '${assetToDelete.displayName}'?`}
           body={`Do you really want to delete the asset '${assetToDelete.displayName}' from your library?`}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          confirmIntent="danger"
         />
       )}
     </div>

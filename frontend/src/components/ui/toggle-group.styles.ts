@@ -1,6 +1,8 @@
 import { cva } from "class-variance-authority";
 
-export const toggleGroupVariants = cva("inline-flex items-center rounded-md");
+export const toggleGroupVariants = cva(
+  "isolate inline-flex items-center rounded-md"
+);
 
 export const toggleItemVariants = cva(
   "px-3 py-1 text-sm font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-border-focus focus:ring-offset-2 focus:ring-offset-bg border first:rounded-l-md last:rounded-r-md -ml-px first:ml-0",
