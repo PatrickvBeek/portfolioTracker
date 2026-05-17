@@ -13,6 +13,15 @@ import { ChartData, ChartDataPoint } from "./chartTypes";
 const MARGIN = 0.05;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+export const CHART_GRID_STROKE = "var(--color-border)";
+
+export const TOOLTIP_STYLE: React.CSSProperties = {
+  background: "var(--color-bg-card)",
+  border: "1px solid var(--color-border)",
+  borderRadius: "0.375rem",
+  color: "var(--color-text)",
+};
+
 export const filterChartDataByRange = <Keys extends string>(
   chartData: ChartData<Keys>,
   range: ChartRange
@@ -46,6 +55,7 @@ export function getAxisProps(
   const diff = yMax - yMin;
 
   return {
+    tick: { fill: "var(--color-text)" },
     tickFormatter: scale.tickFormat(nTicks),
     ticks: scale.ticks(nTicks),
     type: "number",
@@ -66,6 +76,7 @@ export function getTimeAxisProps(
 
   return {
     dataKey: "timestamp",
+    tick: { fill: "var(--color-text)" },
     tickFormatter: tScale.tickFormat(nTicks),
     ticks: tScale.ticks(nTicks).map((tick) => tick.getTime()),
     type: "number",

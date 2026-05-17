@@ -17,6 +17,8 @@ import { ChartRange } from "../chartRange.types";
 import { ChartRangeSelector } from "../ChartRangeSelector";
 import {
   DEFAULT_LINE_PROPS,
+  CHART_GRID_STROKE,
+  TOOLTIP_STYLE,
   filterChartDataByRange,
   getAxisProps,
   getTimeAxisProps,
@@ -69,7 +71,7 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
               tickFormatter={(value) => Number(value).toFixed(0)}
               unit={" %"}
             />
-            <CartesianGrid stroke="#ccc" />
+            <CartesianGrid stroke={CHART_GRID_STROKE} />
             {gradientDefinition}
             <Area
               {...DEFAULT_LINE_PROPS}
@@ -87,11 +89,12 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
                 dataKey={"benchmark" satisfies PerformanceChartDataSets}
                 name={"Benchmark"}
                 strokeOpacity={0.55}
-                stroke="grey"
+                stroke="var(--color-text-dim)"
                 fillOpacity={0}
               />
             ) : null}
             <Tooltip
+              contentStyle={TOOLTIP_STYLE}
               formatter={(value, name) => [
                 Number(value).toLocaleString(undefined, {
                   maximumFractionDigits: 1,

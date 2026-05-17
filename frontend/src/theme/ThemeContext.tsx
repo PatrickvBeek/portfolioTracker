@@ -5,6 +5,7 @@ import {
   PropsWithChildren,
   useState,
   useEffect,
+  useCallback,
 } from "react";
 
 type Theme = "system" | "light" | "dark";
@@ -49,29 +50,33 @@ function readThemeFromLocalStorage(): Theme {
 
 export const ThemeProvider: FC<PropsWithChildren> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(readThemeFromLocalStorage);
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
+    resolveTheme(readThemeFromLocalStorage())
+  );
 
-  const resolvedTheme = resolveTheme(theme);
+  const updateResolvedTheme = useCallback((currentTheme: Theme) => {
+    const resolved = resolveTheme(currentTheme);
+    setResolvedTheme(resolved);
+    applyThemeClass(resolved);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  useEffect(() => {
-    applyThemeClass(resolvedTheme);
-  }, [resolvedTheme]);
+    updateResolvedTheme(theme);
+  }, [theme, updateResolvedTheme]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     const handleChange = () => {
       if (theme === "system") {
-        applyThemeClass(getSystemPreference());
+        updateResolvedTheme("system");
       }
     };
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [theme]);
+  }, [theme, updateResolvedTheme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>

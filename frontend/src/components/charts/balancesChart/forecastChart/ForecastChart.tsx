@@ -20,6 +20,8 @@ import { ChartRange } from "../../chartRange.types";
 import {
   asLocaleEuro,
   DEFAULT_LINE_PROPS,
+  CHART_GRID_STROKE,
+  TOOLTIP_STYLE,
   getAxisProps,
   getTimeAxisProps,
 } from "../../chartUtils";
@@ -64,14 +66,14 @@ export const ForecastChart: FC<{
             tickFormatter={(value) => (value / 1000).toString()}
             unit={" k€"}
           />
-          <CartesianGrid stroke="#ccc" />
+          <CartesianGrid stroke={CHART_GRID_STROKE} />
 
           <Area
             {...DEFAULT_LINE_PROPS}
             dataKey="uncertaintyBand"
             type="monotone"
             stroke="none"
-            fill="rgba(22, 163, 74, 0.35)"
+            fill="var(--color-success-soft)"
             connectNulls
             name={`Confidence Interval (${params.confidenceLevel}%)`}
           />
@@ -106,6 +108,7 @@ export const ForecastChart: FC<{
           />
 
           <Tooltip
+            contentStyle={TOOLTIP_STYLE}
             formatter={(value, name) =>
               isArray(value)
                 ? [

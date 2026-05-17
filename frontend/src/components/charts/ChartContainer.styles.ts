@@ -1,5 +1,5 @@
 export const styles = {
   container: "relative w-full",
   overlay:
-    "absolute w-full h-full bg-white/75 z-10 flex justify-center items-center",
+    "absolute w-full h-full bg-bg-card/75 z-10 flex justify-center items-center",
 } as const;

@@ -14,6 +14,8 @@ import { getSplitColorGradientDef } from "../../chartElements";
 import { ChartRange } from "../../chartRange.types";
 import {
   DEFAULT_LINE_PROPS,
+  CHART_GRID_STROKE,
+  TOOLTIP_STYLE,
   filterChartDataByRange,
   getAxisProps,
   getTimeAxisProps,
@@ -44,7 +46,7 @@ export const ProfitChart: FC<{
             tickFormatter={(value) => (value / 1000).toString()}
             unit={" k€"}
           />
-          <CartesianGrid stroke="#ccc" />
+          <CartesianGrid stroke={CHART_GRID_STROKE} />
           {gradientDefinition}
           <Area
             {...DEFAULT_LINE_PROPS}
@@ -57,6 +59,7 @@ export const ProfitChart: FC<{
             fillOpacity={1}
           />
           <Tooltip
+            contentStyle={TOOLTIP_STYLE}
             formatter={(value, name) => [
               Number(value).toLocaleString(undefined, {
                 maximumFractionDigits: 2,
