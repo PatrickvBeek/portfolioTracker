@@ -24,6 +24,9 @@
   --color-danger-hover: #b91c1c;
   --color-warning: #d97706;
 
+  --container-content: 72rem;
+  --spacing-page-section: 3rem;
+
   --font-display: "DM Sans", sans-serif;
   --font-body: "DM Sans", sans-serif;
   --font-mono: "JetBrains Mono", monospace;

@@ -12,7 +12,7 @@ export function Assets() {
 
   return (
     <div className={styles.pageWrapper}>
-      <div className={styles.contentContainer}>
+      <div className={styles.contentCard}>
         <div className={styles.header}>
           <div className={styles.headerRow}>
             <div className={styles.iconBadge}>
@@ -27,17 +27,15 @@ export function Assets() {
           </p>
         </div>
 
-        <div className={styles.contentCard}>
-          <div className={styles.contentBody}>
-            <div className={styles.formSection}>
-              <Heading level="section">Add New Asset</Heading>
-              <AssetInputForm />
-            </div>
+        <div className={styles.contentBody}>
+          <div className={styles.formSection}>
+            <Heading level="section">Add New Asset</Heading>
+            <AssetInputForm />
+          </div>
 
-            <div>
-              <Heading level="section">Your Assets</Heading>
-              <AssetTable />
-            </div>
+          <div>
+            <Heading level="section">Your Assets</Heading>
+            <AssetTable />
           </div>
         </div>
       </div>

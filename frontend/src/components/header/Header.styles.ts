@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 const headerVariants = cva(
-  "sticky top-0 z-50 bg-bg-card border-b border-border",
+  "sticky px-4 md:px-6 py-3 top-0 z-50 bg-bg-card border-b border-border",
   {
     variants: {},
     defaultVariants: {},
@@ -10,8 +10,7 @@ const headerVariants = cva(
 
 export const styles = {
   header: headerVariants,
-  content:
-    "flex items-center justify-between px-4 md:px-6 py-3 max-w-7xl mx-auto",
+  content: "flex items-center justify-between max-w-content mx-auto",
   logo: "text-lg font-bold text-text",
   desktopNav: "hidden md:flex",
   mobileMenuButton:

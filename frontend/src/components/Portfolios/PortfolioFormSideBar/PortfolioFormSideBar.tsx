@@ -38,6 +38,7 @@ function PortfolioFormSideBar({
           },
         ]}
         value={tab}
+        contentClassName="mt-4"
         onValueChange={(newValue) => {
           if (isForm(newValue)) {
             setTab(newValue);

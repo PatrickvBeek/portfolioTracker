@@ -31,7 +31,7 @@ function App() {
             selectedTab={selectedTab}
             onSelect={setSelectedTab}
           />
-          <main className="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-8">
+          <main className="w-full px-4 md:px-6 py-6 md:py-8">
             <Content />
           </main>
         </QueryClientProvider>
