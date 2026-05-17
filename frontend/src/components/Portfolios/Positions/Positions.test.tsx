@@ -90,7 +90,7 @@ describe("the Positions component", () => {
       });
 
       const openTab = await screen.findByRole("tab", {
-        name: /Open Positions/,
+        name: /Open/,
       });
       expect(openTab).toHaveAttribute("aria-selected", "true");
     });
@@ -146,9 +146,9 @@ describe("the Positions component", () => {
       const summaryBar = await screen.findByTestId("position-summary");
 
       expect(within(summaryBar).getByText("1")).toBeInTheDocument();
-      expect(within(summaryBar).getByText("Total:")).toBeInTheDocument();
-      expect(within(summaryBar).getByText("Realized:")).toBeInTheDocument();
-      expect(within(summaryBar).getByText("Profit:")).toBeInTheDocument();
+      expect(within(summaryBar).getByText("Total")).toBeInTheDocument();
+      expect(within(summaryBar).getByText("Realized")).toBeInTheDocument();
+      expect(within(summaryBar).getByText("Profit")).toBeInTheDocument();
     });
 
     it("can expand to show open batches", async () => {
@@ -195,7 +195,7 @@ describe("the Positions component", () => {
       });
 
       const closedTab = await screen.findByRole("tab", {
-        name: /Closed Positions/,
+        name: /Closed/,
       });
 
       await user.click(closedTab);
@@ -223,7 +223,7 @@ describe("the Positions component", () => {
       });
 
       const closedTab = await screen.findByRole("tab", {
-        name: /Closed Positions/,
+        name: /Closed/,
       });
 
       await user.click(closedTab);
@@ -233,9 +233,9 @@ describe("the Positions component", () => {
       const summaryBar = await screen.findByTestId("position-summary");
 
       expect(within(summaryBar).getByText("1")).toBeInTheDocument();
-      expect(within(summaryBar).getByText("Total:")).toBeInTheDocument();
-      expect(within(summaryBar).getByText("Realized:")).toBeInTheDocument();
-      expect(within(summaryBar).getByText("Profit:")).toBeInTheDocument();
+      expect(within(summaryBar).getByText("Total")).toBeInTheDocument();
+      expect(within(summaryBar).getByText("Realized")).toBeInTheDocument();
+      expect(within(summaryBar).getByText("Profit")).toBeInTheDocument();
     });
 
     it("can expand to show closed batches", async () => {
@@ -244,7 +244,7 @@ describe("the Positions component", () => {
       });
 
       const closedTab = await screen.findByRole("tab", {
-        name: /Closed Positions/,
+        name: /Closed/,
       });
 
       await user.click(closedTab);

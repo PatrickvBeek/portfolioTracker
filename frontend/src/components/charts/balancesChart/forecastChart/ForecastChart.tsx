@@ -20,6 +20,8 @@ import { ChartRange } from "../../chartRange.types";
 import {
   asLocaleEuro,
   DEFAULT_LINE_PROPS,
+  CHART_GRID_STROKE,
+  TOOLTIP_STYLE,
   getAxisProps,
   getTimeAxisProps,
 } from "../../chartUtils";
@@ -64,14 +66,14 @@ export const ForecastChart: FC<{
             tickFormatter={(value) => (value / 1000).toString()}
             unit={" k€"}
           />
-          <CartesianGrid stroke="#ccc" />
+          <CartesianGrid stroke={CHART_GRID_STROKE} />
 
           <Area
             {...DEFAULT_LINE_PROPS}
             dataKey="uncertaintyBand"
             type="monotone"
             stroke="none"
-            fill="rgba(0, 122, 48, 0.35)"
+            fill="var(--color-success-soft)"
             connectNulls
             name={`Confidence Interval (${params.confidenceLevel}%)`}
           />
@@ -80,7 +82,7 @@ export const ForecastChart: FC<{
             {...DEFAULT_LINE_PROPS}
             dataKey={"cashFlow" satisfies ForecastChartDataSets}
             name={"Cash Flow"}
-            stroke="var(--theme-highlight)"
+            stroke="var(--color-accent-hover)"
             strokeDasharray="8 4"
             strokeWidth={2}
           />
@@ -89,7 +91,7 @@ export const ForecastChart: FC<{
             {...DEFAULT_LINE_PROPS}
             dataKey={"median" satisfies ForecastChartDataSets}
             name={"Market Value (Median)"}
-            stroke="var(--green)"
+            stroke="var(--color-success)"
             strokeDasharray="8 4"
             strokeWidth={2}
             type={"linear"}
@@ -99,13 +101,14 @@ export const ForecastChart: FC<{
             {...DEFAULT_LINE_PROPS}
             dataKey={"mean" satisfies ForecastChartDataSets}
             name={"Market Value (Mean)"}
-            stroke="var(--dark-red)"
+            stroke="var(--color-danger-hover)"
             strokeDasharray="8 4"
             strokeWidth={2}
             type={"linear"}
           />
 
           <Tooltip
+            contentStyle={TOOLTIP_STYLE}
             formatter={(value, name) =>
               isArray(value)
                 ? [

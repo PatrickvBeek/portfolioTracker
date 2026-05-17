@@ -1,6 +1,10 @@
+import { pageLayout } from "../ui/page-layout.styles";
+
 export const styles = {
-  container: "w-full max-w-6xl px-8 flex gap-8 flex-col",
+  container: pageLayout.pageContainer,
   portfolioSelection: "flex gap-2 flex-wrap",
   headline: "mb-4",
   emptyState: "text-center p-12",
+  sectionCard: pageLayout.sectionCard,
+  sectionBody: pageLayout.sectionBody,
 } as const;

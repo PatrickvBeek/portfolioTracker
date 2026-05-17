@@ -33,20 +33,20 @@ const Dashboard = () => {
 
   return (
     <div className={styles.container}>
-      <div>
-        <Heading level="h1" className={styles.headline}>
-          Included Portfolios
-        </Heading>
-        <div className={styles.portfolioSelection}>
-          {portfolioNames.map((name) => (
-            <Tag
-              key={name}
-              selected={selectedPortfolios.includes(name)}
-              onClick={() => togglePortfolio(name)}
-            >
-              {name}
-            </Tag>
-          ))}
+      <div className={styles.sectionCard}>
+        <div className={styles.sectionBody}>
+          <Heading level="section">Included Portfolios</Heading>
+          <div className={styles.portfolioSelection}>
+            {portfolioNames.map((name) => (
+              <Tag
+                key={name}
+                selected={selectedPortfolios.includes(name)}
+                onClick={() => togglePortfolio(name)}
+              >
+                {name}
+              </Tag>
+            ))}
+          </div>
         </div>
       </div>
 

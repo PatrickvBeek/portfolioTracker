@@ -2,27 +2,24 @@ import * as Popover from "@radix-ui/react-popover";
 import { Command } from "cmdk";
 import { Asset } from "pt-domain";
 import { useState, useId } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { cn } from "../../../utility/cn";
-import { Props } from "../../../utility/types";
-import { InputProps } from "../../general/types";
 import {
   assetDropdownTriggerVariants,
   styles,
   triggerLayout,
 } from "./AssetSelect.styles";
 
-type AssetDropdownProps = Pick<
-  InputProps,
-  "isValid" | "errorMessage" | "isMandatory"
-> &
-  Props<{
-    onChange: (isin: string | undefined) => void;
-    filterAssets?: (asset: Asset) => boolean;
-    label?: string;
-    placeholder?: string;
-  }>;
+type AssetDropdownProps = {
+  onChange: (isin: string | undefined) => void;
+  filterAssets?: (asset: Asset) => boolean;
+  label?: string;
+  placeholder?: string;
+  isValid?: boolean;
+  errorMessage?: string;
+  isMandatory?: boolean;
+};
 
 const AssetDropdown = ({
   onChange,
@@ -32,7 +29,6 @@ const AssetDropdown = ({
   isValid,
   errorMessage,
   isMandatory,
-  className,
 }: AssetDropdownProps) => {
   const [open, setOpen] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<Asset | undefined>(
@@ -56,7 +52,7 @@ const AssetDropdown = ({
   };
 
   return (
-    <div className={className}>
+    <div>
       {label && (
         <label htmlFor={selectId} className={styles.label}>
           {label}
@@ -77,7 +73,18 @@ const AssetDropdown = ({
             )}
           >
             {selectedAsset ? selectedAsset.displayName : placeholder}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-text-muted" />
+            {selectedAsset ? (
+              <X
+                className="ml-2 h-4 w-4 shrink-0 text-text-muted hover:text-text"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setSelectedAsset(undefined);
+                  onChange(undefined);
+                }}
+              />
+            ) : (
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-text-muted" />
+            )}
           </button>
         </Popover.Trigger>
         <Popover.Portal>

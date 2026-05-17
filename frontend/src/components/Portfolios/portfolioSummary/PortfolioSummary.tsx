@@ -3,7 +3,7 @@ import { cn } from "../../../utility/cn";
 import Balance from "../../general/Balance/Balance";
 import { Heading } from "../../ui/Heading";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
-import Tile from "../../general/Tile";
+import { pageLayout } from "../../ui/page-layout.styles";
 import {
   useCashFlow,
   useMarketValue,
@@ -27,7 +27,7 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
 
   return (
     <div>
-      <Heading level="h1" className={styles.headline}>
+      <Heading level="section" className={styles.headline}>
         Summary
       </Heading>
       <div className={styles.tiles}>
@@ -98,18 +98,21 @@ const SummaryTile: FC<{
   entries: { label: string; value: ReactNode; sumRow?: boolean }[];
   title: string;
 }> = ({ entries, title }) => (
-  <Tile header={title} className={styles.tile}>
-    <div className={styles.rows}>
-      {entries.map(({ label, value, sumRow }) => (
-        <SummaryTileRow
-          key={label}
-          label={label}
-          value={value}
-          sumRow={sumRow}
-        />
-      ))}
+  <div className={cn(pageLayout.sectionCard, styles.tile)}>
+    <div className={pageLayout.sectionBody}>
+      <Heading level="section">{title}</Heading>
+      <div className={styles.rows}>
+        {entries.map(({ label, value, sumRow }) => (
+          <SummaryTileRow
+            key={label}
+            label={label}
+            value={value}
+            sumRow={sumRow}
+          />
+        ))}
+      </div>
     </div>
-  </Tile>
+  </div>
 );
 
 const SummaryTileRow: FC<{

@@ -2,28 +2,25 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { ChevronDown } from "lucide-react";
 import { ReactElement } from "react";
 import { BatchType } from "pt-domain";
-import { cn } from "../../../utility/cn";
 import { toPrice } from "../../../utility/prices";
-import { Props } from "../../../utility/types";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import Balance from "../../general/Balance/Balance";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
 import { usePositionData } from "./Positions.logic";
 import { styles } from "./PositionCard.styles";
 
-type PositionCardProps = Props<{
+type PositionCardProps = {
   isin: string;
   portfolioName: string;
   batchType: BatchType;
   children: React.ReactNode;
-}>;
+};
 
 export function PositionCard({
   isin,
   portfolioName,
   batchType,
   children,
-  className,
 }: PositionCardProps): ReactElement {
   const assets = useGetAssets();
   const assetName = assets?.[isin]?.displayName ?? "Asset not found...";
@@ -38,7 +35,7 @@ export function PositionCard({
   const { data: profit, isLoading: isProfitLoading } = positionData.profit;
 
   return (
-    <div className={cn(styles.card, className)} aria-label={`position-${isin}`}>
+    <div className={styles.card} aria-label={`position-${isin}`}>
       <div className={styles.cardBody}>
         <div className={styles.header}>
           <span className={styles.assetName}>{assetName}</span>

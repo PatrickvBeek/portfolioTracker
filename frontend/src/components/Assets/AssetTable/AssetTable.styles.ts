@@ -18,7 +18,6 @@ export const styles = {
     "p-4 rounded-lg border border-border bg-bg-card hover:border-border-focus transition-colors duration-150",
   mobileCardInner: "space-y-3",
   mobileLabel: "text-xs text-text-muted mb-1",
-  mobileDeleteSection: "pt-3 border-t border-border",
   footer: "mt-4 text-sm text-text-muted",
   footerCount: "font-medium text-text",
 } as const;

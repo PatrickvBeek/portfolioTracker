@@ -11,7 +11,7 @@ export const inputFieldVariants = cva(
           "border-danger focus:border-danger focus:ring-1 focus:ring-danger",
       },
       mandatory: {
-        true: "border-l-4 border-l-accent",
+        true: "border-l-3 border-l-accent",
         false: "",
       },
     },

@@ -2,16 +2,15 @@ import { DividendPayout } from "pt-domain";
 import { ReactElement, useState } from "react";
 import { v4 as uuid } from "uuid";
 import { useAddDividendPayoutToPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
-import { Props } from "../../../../utility/types";
 import AssetDropdown from "../../../Assets/AssetDropdown/AssetSelect";
 import { Button } from "../../../ui/Button";
 import { DateInput, type DateInputValue } from "../../../ui/DateInput";
 import { NumberInput, type NumberInputValue } from "../../../ui/NumberInput";
 import { styles } from "./DividendForm.styles";
 
-type DividendFormProps = Props<{
+type DividendFormProps = {
   portfolioName: string;
-}>;
+};
 
 type FormState = {
   asset: string;

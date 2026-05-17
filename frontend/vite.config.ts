@@ -19,7 +19,6 @@ export default defineConfig(() => {
         optimizer: {
           client: {
             enabled: true,
-            include: ["@mui/icons-material"],
           },
         },
       },

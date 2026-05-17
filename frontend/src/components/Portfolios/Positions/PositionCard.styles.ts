@@ -1,12 +1,13 @@
+import { positionFirstCol } from "./positionLayout.styles";
+
 export const styles = {
   card: "border border-border rounded-lg bg-bg-card overflow-hidden",
   cardBody: "sm:flex sm:items-start sm:gap-6 px-4 py-3",
-  header:
-    "flex justify-between items-baseline sm:flex-col sm:justify-start sm:min-w-[140px] sm:shrink-0",
+  header: `flex justify-between items-baseline sm:flex-col sm:justify-start ${positionFirstCol}`,
   assetName: "text-text font-medium",
   pieces: "text-text font-mono text-sm",
   metricsGrid:
-    "grid grid-cols-2 gap-4 py-3 px-4 sm:flex sm:flex-row sm:gap-6 sm:py-0 sm:px-0 sm:flex-1",
+    "grid grid-cols-2 gap-4 py-3 sm:flex sm:flex-row sm:gap-6 sm:py-0 sm:flex-1",
   metricBlock: "sm:flex-1",
   metricLabel: "text-text-muted text-xs mb-1",
   metricValue: "text-text font-mono text-sm",

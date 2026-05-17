@@ -2,6 +2,7 @@ import { isNumber } from "radash";
 import { BatchType } from "pt-domain";
 import Balance from "../../general/Balance/Balance";
 import { toPrice } from "../../../utility/prices";
+import { cn } from "../../../utility/cn";
 import { usePositionSummary } from "./Positions.logic";
 import { styles } from "./PositionSummaryBar.styles";
 
@@ -42,7 +43,7 @@ export function PositionSummaryBar({
 
   if (isNumber(nonRealizedSum) && !isNaN(nonRealizedSum)) {
     metrics.push({
-      label: "Unrealized",
+      label: "Non-Realized",
       value: <Balance value={nonRealizedSum} />,
     });
   }
@@ -57,10 +58,12 @@ export function PositionSummaryBar({
   return (
     <div className={styles.bar} data-testid="position-summary">
       {metrics.map((metric, i) => (
-        <div key={metric.label} className={styles.metric}>
-          {i > 0 && <span className={styles.dot}>·</span>}
-          <span className={styles.label}>{metric.label}:</span>
-          <span>{metric.value}</span>
+        <div
+          key={metric.label}
+          className={cn(styles.metric, i === 0 && styles.firstCol)}
+        >
+          <span className={styles.label}>{metric.label}</span>
+          <span className={styles.value}>{metric.value}</span>
         </div>
       ))}
     </div>

@@ -10,12 +10,11 @@ import { styles } from "./Positions.styles";
 
 type PositionsProps = {
   portfolioName: string;
-  className?: string;
 };
 
-type TabValue = "Open Positions" | "Closed Positions";
+type TabValue = "Open" | "Closed";
 
-const TAB_VALUES: readonly string[] = ["Open Positions", "Closed Positions"];
+const TAB_VALUES: readonly string[] = ["Open", "Closed"];
 
 function isTabValue(value: string): value is TabValue {
   return TAB_VALUES.includes(value);
@@ -40,25 +39,30 @@ function PositionsContent({
 
   return (
     <>
-      <div className={styles.cardGrid}>
-        {items.map((isin) => (
-          <PositionCard
-            key={isin}
-            isin={isin}
+      <div className={styles.cardList}>
+        <>
+          {items.map((isin) => (
+            <PositionCard
+              key={isin}
+              isin={isin}
+              portfolioName={portfolioName}
+              batchType={batchType}
+            >
+              <PositionBatchDetail isin={isin} portfolioName={portfolioName} />
+            </PositionCard>
+          ))}
+          <PositionSummaryBar
             portfolioName={portfolioName}
             batchType={batchType}
-          >
-            <PositionBatchDetail isin={isin} portfolioName={portfolioName} />
-          </PositionCard>
-        ))}
+          />
+        </>
       </div>
-      <PositionSummaryBar portfolioName={portfolioName} batchType={batchType} />
     </>
   );
 }
 
-export function Positions({ portfolioName, className }: PositionsProps) {
-  const [activeTab, setActiveTab] = useState<TabValue>("Open Positions");
+export function Positions({ portfolioName }: PositionsProps) {
+  const [activeTab, setActiveTab] = useState<TabValue>("Open");
 
   const handleTabChange = (value: string) => {
     if (isTabValue(value)) {
@@ -67,33 +71,35 @@ export function Positions({ portfolioName, className }: PositionsProps) {
   };
 
   return (
-    <div className={className}>
-      <Heading level="h1">Positions</Heading>
-      <Tabs
-        entries={[
-          {
-            value: "Open Positions",
-            content: (
-              <PositionsContent
-                portfolioName={portfolioName}
-                batchType="open"
-              />
-            ),
-          },
-          {
-            value: "Closed Positions",
-            content: (
-              <PositionsContent
-                portfolioName={portfolioName}
-                batchType="closed"
-              />
-            ),
-          },
-        ]}
-        value={activeTab}
-        onValueChange={handleTabChange}
-        contentClassName={styles.tabContent}
-      />
+    <div className={styles.container}>
+      <div className={styles.sectionBody}>
+        <Heading level="section">Positions</Heading>
+        <Tabs
+          entries={[
+            {
+              value: "Open",
+              content: (
+                <PositionsContent
+                  portfolioName={portfolioName}
+                  batchType="open"
+                />
+              ),
+            },
+            {
+              value: "Closed",
+              content: (
+                <PositionsContent
+                  portfolioName={portfolioName}
+                  batchType="closed"
+                />
+              ),
+            },
+          ]}
+          value={activeTab}
+          onValueChange={handleTabChange}
+          contentClassName={styles.tabContent}
+        />
+      </div>
     </div>
   );
 }

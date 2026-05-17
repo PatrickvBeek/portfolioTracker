@@ -219,7 +219,7 @@ describe("Assets tab", () => {
     setUserData({ assets: ASSET_LIB });
     const { user } = customRender({ component: <Assets /> });
 
-    await user.click(screen.getByLabelText("Delete Tesla"));
+    await user.click(within(assetTable()).getByLabelText("Delete Tesla"));
 
     expect(screen.getByText("Delete Asset 'Tesla'?")).toBeInTheDocument();
     expect(
@@ -233,7 +233,7 @@ describe("Assets tab", () => {
     setUserData({ assets: ASSET_LIB });
     const { user } = customRender({ component: <Assets /> });
 
-    await user.click(screen.getByLabelText("Delete Tesla"));
+    await user.click(within(assetTable()).getByLabelText("Delete Tesla"));
     await user.click(screen.getByRole("button", { name: "Delete" }));
 
     expect(screen.queryByText("Tesla")).not.toBeInTheDocument();
@@ -246,7 +246,7 @@ describe("Assets tab", () => {
     setUserData({ assets: ASSET_LIB });
     const { user } = customRender({ component: <Assets /> });
 
-    await user.click(screen.getByLabelText("Delete Tesla"));
+    await user.click(within(assetTable()).getByLabelText("Delete Tesla"));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(

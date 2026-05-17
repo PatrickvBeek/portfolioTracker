@@ -17,6 +17,8 @@ import { ChartRange } from "../chartRange.types";
 import { ChartRangeSelector } from "../ChartRangeSelector";
 import {
   DEFAULT_LINE_PROPS,
+  CHART_GRID_STROKE,
+  TOOLTIP_STYLE,
   filterChartDataByRange,
   getAxisProps,
   getTimeAxisProps,
@@ -46,63 +48,67 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <Heading level="h1">Time Weighted Return</Heading>
-        <div className={styles.controls}>
-          <ChartRangeSelector value={range} onChange={setRange} />
-          <AssetDropdown
-            onChange={(isin) => setBenchmark(isin || "")}
-            placeholder="Benchmark"
-            className={styles.benchmarkSelect}
-            filterAssets={(a) => !!a.symbol}
-          />
+      <div className={styles.sectionBody}>
+        <div className={styles.header}>
+          <Heading level="section">Time Weighted Return</Heading>
+          <div className={styles.controls}>
+            <ChartRangeSelector value={range} onChange={setRange} />
+            <div className={styles.benchmarkSelect}>
+              <AssetDropdown
+                onChange={(isin) => setBenchmark(isin || "")}
+                placeholder="Benchmark"
+                filterAssets={(a) => !!a.symbol}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <ChartContainer isLoading={isLoading}>
-        <AreaChart data={chartData} margin={{ bottom: 30 }}>
-          <Legend verticalAlign="bottom" />
-          <XAxis {...getTimeAxisProps(chartData)} />
-          <YAxis
-            {...getAxisProps(chartData)}
-            tickFormatter={(value) => Number(value).toFixed(0)}
-            unit={" %"}
-          />
-          <CartesianGrid stroke="#ccc" />
-          {gradientDefinition}
-          <Area
-            {...DEFAULT_LINE_PROPS}
-            type={"linear"}
-            dataKey={"portfolio" satisfies PerformanceChartDataSets}
-            name={"Your Portfolio"}
-            stroke={strokeUrl}
-            fill={fillUrl}
-            fillOpacity={1}
-          />
-          {benchmark ? (
+        <ChartContainer isLoading={isLoading}>
+          <AreaChart data={chartData} margin={{ bottom: 30 }}>
+            <Legend verticalAlign="bottom" />
+            <XAxis {...getTimeAxisProps(chartData)} />
+            <YAxis
+              {...getAxisProps(chartData)}
+              tickFormatter={(value) => Number(value).toFixed(0)}
+              unit={" %"}
+            />
+            <CartesianGrid stroke={CHART_GRID_STROKE} />
+            {gradientDefinition}
             <Area
               {...DEFAULT_LINE_PROPS}
               type={"linear"}
-              dataKey={"benchmark" satisfies PerformanceChartDataSets}
-              name={"Benchmark"}
-              strokeOpacity={0.55}
-              stroke="grey"
-              fillOpacity={0}
+              dataKey={"portfolio" satisfies PerformanceChartDataSets}
+              name={"Your Portfolio"}
+              stroke={strokeUrl}
+              fill={fillUrl}
+              fillOpacity={1}
             />
-          ) : null}
-          <Tooltip
-            formatter={(value, name) => [
-              Number(value).toLocaleString(undefined, {
-                maximumFractionDigits: 1,
-                minimumFractionDigits: 1,
-              }) + " %",
-              name,
-            ]}
-            labelFormatter={(value) =>
-              moment(new Date(Number(value))).format("ddd DD.MM.YYYY")
-            }
-          />
-        </AreaChart>
-      </ChartContainer>
+            {benchmark ? (
+              <Area
+                {...DEFAULT_LINE_PROPS}
+                type={"linear"}
+                dataKey={"benchmark" satisfies PerformanceChartDataSets}
+                name={"Benchmark"}
+                strokeOpacity={0.55}
+                stroke="var(--color-text-dim)"
+                fillOpacity={0}
+              />
+            ) : null}
+            <Tooltip
+              contentStyle={TOOLTIP_STYLE}
+              formatter={(value, name) => [
+                Number(value).toLocaleString(undefined, {
+                  maximumFractionDigits: 1,
+                  minimumFractionDigits: 1,
+                }) + " %",
+                name,
+              ]}
+              labelFormatter={(value) =>
+                moment(new Date(Number(value))).format("ddd DD.MM.YYYY")
+              }
+            />
+          </AreaChart>
+        </ChartContainer>
+      </div>
     </div>
   );
 };

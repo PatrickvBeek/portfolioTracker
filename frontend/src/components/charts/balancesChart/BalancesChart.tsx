@@ -1,7 +1,6 @@
 import { FC, useState } from "react";
 import { Select } from "../../ui/Select";
 import { ToggleGroup, ToggleItem } from "../../ui/ToggleGroup";
-import { useBreakpoint } from "../../../theme/breakpoints";
 import { ChartRange } from "../chartRange.types";
 import { ChartRangeSelector } from "../ChartRangeSelector";
 import { Heading } from "../../ui/Heading";
@@ -23,7 +22,6 @@ const SubChartComponents: Record<
 export const PortfolioBalancesChart: FC<{ portfolioNames: string[] }> = ({
   portfolioNames,
 }) => {
-  const { isMobile } = useBreakpoint();
   const [viewMode, setViewMode] = useState<ViewMode>("total");
   const [range, setRange] = useState<ChartRange>("Max");
 
@@ -43,53 +41,56 @@ export const PortfolioBalancesChart: FC<{ portfolioNames: string[] }> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.headingContainer}>
-        <Heading level="h1">Balances</Heading>
-        <div className={styles.controls}>
-          {showRangeSelector && (
-            <ChartRangeSelector value={range} onChange={setRange} />
-          )}
-          {isMobile ? (
-            <Select
-              name="chart-view-mode"
-              value={viewMode}
-              onChange={handleMobileChange}
-            >
-              <option value="total">Total Value</option>
-              <option value="profitLoss">Profit / Loss</option>
-              <option value="forecast">Forecast</option>
-            </Select>
-          ) : (
-            <ToggleGroup aria-label="chart view mode">
-              <ToggleItem
-                value="total"
-                selected={viewMode === "total"}
-                onSelect={handleSelect}
-                aria-label="total value"
+      <div className={styles.sectionBody}>
+        <div className={styles.header}>
+          <Heading level="section">Balances</Heading>
+          <div className={styles.controls}>
+            {showRangeSelector && (
+              <ChartRangeSelector value={range} onChange={setRange} />
+            )}
+            <div className="md:hidden">
+              <Select
+                name="chart-view-mode"
+                value={viewMode}
+                onChange={handleMobileChange}
               >
-                Total Value
-              </ToggleItem>
-              <ToggleItem
-                value="profitLoss"
-                selected={viewMode === "profitLoss"}
-                onSelect={handleSelect}
-                aria-label="profit/loss"
-              >
-                Profit / Loss
-              </ToggleItem>
-              <ToggleItem
-                value="forecast"
-                selected={viewMode === "forecast"}
-                onSelect={handleSelect}
-                aria-label="forecast"
-              >
-                Forecast
-              </ToggleItem>
-            </ToggleGroup>
-          )}
+                <option value="total">Total Value</option>
+                <option value="profitLoss">Profit / Loss</option>
+                <option value="forecast">Forecast</option>
+              </Select>
+            </div>
+            <div className="hidden md:inline-flex">
+              <ToggleGroup aria-label="chart view mode">
+                <ToggleItem
+                  value="total"
+                  selected={viewMode === "total"}
+                  onSelect={handleSelect}
+                  aria-label="total value"
+                >
+                  Total Value
+                </ToggleItem>
+                <ToggleItem
+                  value="profitLoss"
+                  selected={viewMode === "profitLoss"}
+                  onSelect={handleSelect}
+                  aria-label="profit/loss"
+                >
+                  Profit / Loss
+                </ToggleItem>
+                <ToggleItem
+                  value="forecast"
+                  selected={viewMode === "forecast"}
+                  onSelect={handleSelect}
+                  aria-label="forecast"
+                >
+                  Forecast
+                </ToggleItem>
+              </ToggleGroup>
+            </div>
+          </div>
         </div>
+        <SubChart portfolioNames={portfolioNames} range={range} />
       </div>
-      <SubChart portfolioNames={portfolioNames} range={range} />
     </div>
   );
 };

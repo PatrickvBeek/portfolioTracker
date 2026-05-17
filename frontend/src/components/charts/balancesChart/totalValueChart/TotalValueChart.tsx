@@ -13,6 +13,8 @@ import { ChartContainer } from "../../ChartContainer";
 import { ChartRange } from "../../chartRange.types";
 import {
   DEFAULT_LINE_PROPS,
+  CHART_GRID_STROKE,
+  TOOLTIP_STYLE,
   filterChartDataByRange,
   getAxisProps,
   getTimeAxisProps,
@@ -41,30 +43,31 @@ export const TotalValueChart: FC<{
             tickFormatter={(value) => (value / 1000).toString()}
             unit={" k€"}
           />
-          <CartesianGrid stroke="#ccc" />
+          <CartesianGrid stroke={CHART_GRID_STROKE} />
           <Line
             {...DEFAULT_LINE_PROPS}
             dataKey={"cashFlow" satisfies BalancesChartDataSets}
             name={"Cash Flow"}
-            stroke="var(--theme-highlight)"
+            stroke="var(--color-accent-hover)"
             strokeOpacity={chartData.length ? 1 : 0.5}
           />
           <Line
             {...DEFAULT_LINE_PROPS}
             dataKey={"buyValue" satisfies BalancesChartDataSets}
             name={"Buy Value"}
-            stroke="var(--orange)"
+            stroke="var(--color-warning)"
             strokeOpacity={chartData.length ? 1 : 0.5}
           />
           <Line
             {...DEFAULT_LINE_PROPS}
             dataKey={"marketValue" satisfies BalancesChartDataSets}
             name={"Market Value"}
-            stroke="var(--green)"
+            stroke="var(--color-success)"
             type={"linear"}
             strokeOpacity={chartData.length ? 1 : 0.5}
           />
           <Tooltip
+            contentStyle={TOOLTIP_STYLE}
             formatter={(value, name) => [
               Number(value).toLocaleString(undefined, {
                 maximumFractionDigits: 2,

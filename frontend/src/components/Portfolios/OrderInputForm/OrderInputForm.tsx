@@ -1,8 +1,7 @@
 import { ReactElement, useState } from "react";
 import { v4 as uuidV4 } from "uuid";
 import { useAddOrderToPortfolio } from "../../../hooks/portfolios/portfolioHooks";
-import { cn } from "../../../utility/cn";
-import { Props, isNotNil } from "../../../utility/types";
+import { isNotNil } from "../../../utility/types";
 import AssetDropdown from "../../Assets/AssetDropdown/AssetSelect";
 import { Button } from "../../ui/Button";
 import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
@@ -11,9 +10,9 @@ import { NumberInput, NumberInputValue } from "../../ui/NumberInput";
 import { useOrderValidation } from "./OrderInputForm.logic";
 import { styles } from "./OrderInputForm.styles";
 
-export type OrderInputFormProps = Props<{
+export type OrderInputFormProps = {
   portfolioName: string;
-}>;
+};
 
 const DEFAULTS = {
   isin: "",
@@ -26,7 +25,6 @@ const DEFAULTS = {
 
 export function OrderInputForm({
   portfolioName,
-  className,
 }: OrderInputFormProps): ReactElement {
   const [isin, setAssetIsin] = useState(DEFAULTS.isin);
   const [pieces, setPieces] = useState<NumberInputValue>(DEFAULTS.pieces);
@@ -64,13 +62,14 @@ export function OrderInputForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
-      <AssetDropdown
-        className="mb-1"
-        onChange={(isin) => setAssetIsin(isin || DEFAULTS.isin)}
-        label="Asset"
-        isMandatory={true}
-      />
+    <div className="flex flex-col gap-3">
+      <div className="mb-1">
+        <AssetDropdown
+          onChange={(isin) => setAssetIsin(isin || DEFAULTS.isin)}
+          label="Asset"
+          isMandatory={true}
+        />
+      </div>
       <DateInput
         onChange={setDate}
         label={"Order Date"}

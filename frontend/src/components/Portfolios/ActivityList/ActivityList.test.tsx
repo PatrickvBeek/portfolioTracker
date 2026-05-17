@@ -72,7 +72,7 @@ describe("ActivityList overselling prevention", () => {
     });
 
     const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
-    expect(deleteButtons).toHaveLength(6); // 3 desktop + 3 mobile
+    expect(deleteButtons).toHaveLength(3);
 
     await user.click(deleteButtons[2]);
 
@@ -137,9 +137,9 @@ describe("ActivityList overselling prevention", () => {
     expect(screen.getByText("Portfolio Activity")).toBeInTheDocument();
 
     const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
-    expect(deleteButtons).toHaveLength(4); // 2 desktop + 2 mobile
+    expect(deleteButtons).toHaveLength(2);
 
-    await user.click(deleteButtons[0]); // order are rendered in reverse order
+    await user.click(deleteButtons[0]);
 
     expect(screen.getByText("Delete Activity?")).toBeInTheDocument();
 
@@ -154,6 +154,6 @@ describe("ActivityList overselling prevention", () => {
 
     expect(screen.queryByText("Delete Activity?")).not.toBeInTheDocument();
 
-    expect(screen.getAllByRole("button", { name: /delete/i })).toHaveLength(2); // 1 desktop + 1 mobile
+    expect(screen.getAllByRole("button", { name: /delete/i })).toHaveLength(1);
   });
 });
