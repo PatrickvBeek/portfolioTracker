@@ -71,7 +71,7 @@ export const ForecastChart: FC<{
             dataKey="uncertaintyBand"
             type="monotone"
             stroke="none"
-            fill="rgba(0, 122, 48, 0.35)"
+            fill="rgba(22, 163, 74, 0.35)"
             connectNulls
             name={`Confidence Interval (${params.confidenceLevel}%)`}
           />
@@ -80,7 +80,7 @@ export const ForecastChart: FC<{
             {...DEFAULT_LINE_PROPS}
             dataKey={"cashFlow" satisfies ForecastChartDataSets}
             name={"Cash Flow"}
-            stroke="var(--theme-highlight)"
+            stroke="var(--color-accent-hover)"
             strokeDasharray="8 4"
             strokeWidth={2}
           />
@@ -89,7 +89,7 @@ export const ForecastChart: FC<{
             {...DEFAULT_LINE_PROPS}
             dataKey={"median" satisfies ForecastChartDataSets}
             name={"Market Value (Median)"}
-            stroke="var(--green)"
+            stroke="var(--color-success)"
             strokeDasharray="8 4"
             strokeWidth={2}
             type={"linear"}
@@ -99,7 +99,7 @@ export const ForecastChart: FC<{
             {...DEFAULT_LINE_PROPS}
             dataKey={"mean" satisfies ForecastChartDataSets}
             name={"Market Value (Mean)"}
-            stroke="var(--dark-red)"
+            stroke="var(--color-danger-hover)"
             strokeDasharray="8 4"
             strokeWidth={2}
             type={"linear"}
