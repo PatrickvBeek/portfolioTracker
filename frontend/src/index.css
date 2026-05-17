@@ -36,6 +36,31 @@
   --animate-fade-in: fadeIn 150ms ease-out;
 }
 
+.dark {
+  --color-bg: #0f1117;
+  --color-bg-elevated: #1a1d27;
+  --color-bg-card: #1e2130;
+  --color-bg-input: #252838;
+  --color-border: #2e3348;
+  --color-border-focus: #6b85f9;
+
+  --color-text: #e8eaf0;
+  --color-text-muted: #9ca3bf;
+  --color-text-dim: #6b7394;
+
+  --color-accent: #6b85f9;
+  --color-accent-hover: #8196fb;
+  --color-accent-soft: rgba(107, 133, 249, 0.12);
+  --color-accent-muted: rgba(107, 133, 249, 0.22);
+
+  --color-success: #22c55e;
+  --color-success-soft: rgba(34, 197, 94, 0.12);
+  --color-danger: #ef4444;
+  --color-danger-soft: rgba(239, 68, 68, 0.12);
+  --color-danger-hover: #f87171;
+  --color-warning: #f59e0b;
+}
+
 @layer base {
   /* DM Sans - latin-ext */
   @font-face {

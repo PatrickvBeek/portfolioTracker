@@ -5,6 +5,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import { Header } from "./components/header/Header";
 import Portfolios from "./components/Portfolios/Portfolios";
 import { queryClientConfig } from "./queryClient/config";
+import { ThemeProvider } from "./theme/ThemeContext";
 import { UserDataProvider } from "./userDataContext";
 
 const queryClient = new QueryClient(queryClientConfig);
@@ -23,18 +24,20 @@ function App() {
 
   return (
     <StrictMode>
-      <UserDataProvider>
-        <QueryClientProvider client={queryClient}>
-          <Header
-            tabs={TABS}
-            selectedTab={selectedTab}
-            onSelect={setSelectedTab}
-          />
-          <main className="w-full px-4 md:px-6 py-6 md:py-8">
-            <Content />
-          </main>
-        </QueryClientProvider>
-      </UserDataProvider>
+      <ThemeProvider>
+        <UserDataProvider>
+          <QueryClientProvider client={queryClient}>
+            <Header
+              tabs={TABS}
+              selectedTab={selectedTab}
+              onSelect={setSelectedTab}
+            />
+            <main className="w-full px-4 md:px-6 py-6 md:py-8">
+              <Content />
+            </main>
+          </QueryClientProvider>
+        </UserDataProvider>
+      </ThemeProvider>
     </StrictMode>
   );
 }

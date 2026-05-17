@@ -1,6 +1,8 @@
 import { Menu } from "lucide-react";
 import React, { useState } from "react";
+import { useTheme } from "../../theme/ThemeContext";
 import { Tabs } from "../ui/Tabs";
+import { ThemeToggle } from "../ui/ThemeToggle";
 import { Tooltip } from "../ui/Tooltip";
 import { ApiKeys } from "./apiKeys/ApiKeys";
 import { styles } from "./Header.styles";
@@ -16,6 +18,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ tabs, selectedTab, onSelect }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const handleMobileMenuToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -31,6 +34,7 @@ const Header: React.FC<HeaderProps> = ({ tabs, selectedTab, onSelect }) => {
         </nav>
 
         <div className={styles.actionStack}>
+          <ThemeToggle theme={theme} onThemeChange={setTheme} />
           <ApiKeys />
           <DataExport />
           <DataImport />
