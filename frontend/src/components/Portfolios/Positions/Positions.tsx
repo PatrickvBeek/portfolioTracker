@@ -12,9 +12,9 @@ type PositionsProps = {
   portfolioName: string;
 };
 
-type TabValue = "Open Positions" | "Closed Positions";
+type TabValue = "Open" | "Closed";
 
-const TAB_VALUES: readonly string[] = ["Open Positions", "Closed Positions"];
+const TAB_VALUES: readonly string[] = ["Open", "Closed"];
 
 function isTabValue(value: string): value is TabValue {
   return TAB_VALUES.includes(value);
@@ -39,25 +39,30 @@ function PositionsContent({
 
   return (
     <>
-      <div className={styles.cardGrid}>
-        {items.map((isin) => (
-          <PositionCard
-            key={isin}
-            isin={isin}
+      <div className={styles.cardList}>
+        <>
+          {items.map((isin) => (
+            <PositionCard
+              key={isin}
+              isin={isin}
+              portfolioName={portfolioName}
+              batchType={batchType}
+            >
+              <PositionBatchDetail isin={isin} portfolioName={portfolioName} />
+            </PositionCard>
+          ))}
+          <PositionSummaryBar
             portfolioName={portfolioName}
             batchType={batchType}
-          >
-            <PositionBatchDetail isin={isin} portfolioName={portfolioName} />
-          </PositionCard>
-        ))}
+          />
+        </>
       </div>
-      <PositionSummaryBar portfolioName={portfolioName} batchType={batchType} />
     </>
   );
 }
 
 export function Positions({ portfolioName }: PositionsProps) {
-  const [activeTab, setActiveTab] = useState<TabValue>("Open Positions");
+  const [activeTab, setActiveTab] = useState<TabValue>("Open");
 
   const handleTabChange = (value: string) => {
     if (isTabValue(value)) {
@@ -72,7 +77,7 @@ export function Positions({ portfolioName }: PositionsProps) {
         <Tabs
           entries={[
             {
-              value: "Open Positions",
+              value: "Open",
               content: (
                 <PositionsContent
                   portfolioName={portfolioName}
@@ -81,7 +86,7 @@ export function Positions({ portfolioName }: PositionsProps) {
               ),
             },
             {
-              value: "Closed Positions",
+              value: "Closed",
               content: (
                 <PositionsContent
                   portfolioName={portfolioName}

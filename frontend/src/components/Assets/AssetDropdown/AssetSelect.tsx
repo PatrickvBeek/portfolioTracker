@@ -2,7 +2,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Command } from "cmdk";
 import { Asset } from "pt-domain";
 import { useState, useId } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import { cn } from "../../../utility/cn";
 import {
@@ -73,7 +73,18 @@ const AssetDropdown = ({
             )}
           >
             {selectedAsset ? selectedAsset.displayName : placeholder}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-text-muted" />
+            {selectedAsset ? (
+              <X
+                className="ml-2 h-4 w-4 shrink-0 text-text-muted hover:text-text"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setSelectedAsset(undefined);
+                  onChange(undefined);
+                }}
+              />
+            ) : (
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-text-muted" />
+            )}
           </button>
         </Popover.Trigger>
         <Popover.Portal>

@@ -146,15 +146,12 @@ export function AssetTable() {
                     )}
                   </div>
                 </div>
-              </div>
-              <div className={styles.mobileDeleteSection}>
                 <Button
-                  intent="danger"
+                  intent="danger-ghost"
                   onClick={() => setAssetToDelete(row.original)}
-                  className="w-full"
+                  aria-label={`Delete ${row.original.displayName}`}
                 >
                   <Trash2 className="w-4 h-4" />
-                  Delete Asset
                 </Button>
               </div>
             </div>

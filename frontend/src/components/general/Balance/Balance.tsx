@@ -11,6 +11,7 @@ function Balance({ value }: BalanceProps): ReactElement {
   return (
     <div
       className={cn(
+        "font-mono text-sm",
         sign === "positive" && "text-success",
         sign === "negative" && "text-danger"
       )}
