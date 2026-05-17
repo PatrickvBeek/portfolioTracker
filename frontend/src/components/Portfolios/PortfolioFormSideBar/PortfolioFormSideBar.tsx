@@ -3,6 +3,7 @@ import { Heading } from "../../ui/Heading";
 import { Tabs } from "../../ui/Tabs";
 import { OrderInputForm } from "../OrderInputForm/OrderInputForm";
 import DividendForm from "./DividendForm/DividendForm";
+import { styles } from "./PortfolioFormSideBar.styles";
 
 type PortfolioFormSideBarProps = { portfolioName: string };
 
@@ -24,27 +25,29 @@ function PortfolioFormSideBar({
   const [tab, setTab] = useState<Forms>(FORM.ORDER);
 
   return (
-    <div className="flex flex-col gap-3">
-      <Heading level="h1">Add Data</Heading>
-      <Tabs
-        entries={[
-          {
-            value: FORM.ORDER,
-            content: <OrderInputForm portfolioName={portfolioName} />,
-          },
-          {
-            value: FORM.DIVIDEND,
-            content: <DividendForm portfolioName={portfolioName} />,
-          },
-        ]}
-        value={tab}
-        contentClassName="mt-4"
-        onValueChange={(newValue) => {
-          if (isForm(newValue)) {
-            setTab(newValue);
-          }
-        }}
-      />
+    <div className={styles.container}>
+      <div className={styles.sectionBody}>
+        <Heading level="section">Add Data</Heading>
+        <Tabs
+          entries={[
+            {
+              value: FORM.ORDER,
+              content: <OrderInputForm portfolioName={portfolioName} />,
+            },
+            {
+              value: FORM.DIVIDEND,
+              content: <DividendForm portfolioName={portfolioName} />,
+            },
+          ]}
+          value={tab}
+          contentClassName={styles.tabContent}
+          onValueChange={(newValue) => {
+            if (isForm(newValue)) {
+              setTab(newValue);
+            }
+          }}
+        />
+      </div>
     </div>
   );
 }

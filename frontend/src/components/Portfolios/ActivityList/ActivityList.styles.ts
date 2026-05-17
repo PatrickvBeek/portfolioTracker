@@ -1,4 +1,5 @@
 import { cva } from "class-variance-authority";
+import { pageLayout } from "../../ui/page-layout.styles";
 
 export const nodeVariants = cva(
   "relative z-10 flex items-center justify-center w-8 h-8 rounded-full shrink-0",
@@ -17,7 +18,8 @@ export const nodeVariants = cva(
 );
 
 export const styles = {
-  container: "w-full",
+  container: pageLayout.sectionCard,
+  sectionBody: pageLayout.sectionBody,
   timeline: "relative mt-4",
   item: "flex gap-4",
   rail: "relative flex flex-col items-center shrink-0",

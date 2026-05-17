@@ -5,4 +5,6 @@ export const styles = {
   portfolioSelection: "flex gap-2 flex-wrap",
   headline: "mb-4",
   emptyState: "text-center p-12",
+  sectionCard: pageLayout.sectionCard,
+  sectionBody: pageLayout.sectionBody,
 } as const;

@@ -66,33 +66,35 @@ export function Positions({ portfolioName }: PositionsProps) {
   };
 
   return (
-    <div>
-      <Heading level="h1">Positions</Heading>
-      <Tabs
-        entries={[
-          {
-            value: "Open Positions",
-            content: (
-              <PositionsContent
-                portfolioName={portfolioName}
-                batchType="open"
-              />
-            ),
-          },
-          {
-            value: "Closed Positions",
-            content: (
-              <PositionsContent
-                portfolioName={portfolioName}
-                batchType="closed"
-              />
-            ),
-          },
-        ]}
-        value={activeTab}
-        onValueChange={handleTabChange}
-        contentClassName={styles.tabContent}
-      />
+    <div className={styles.container}>
+      <div className={styles.sectionBody}>
+        <Heading level="section">Positions</Heading>
+        <Tabs
+          entries={[
+            {
+              value: "Open Positions",
+              content: (
+                <PositionsContent
+                  portfolioName={portfolioName}
+                  batchType="open"
+                />
+              ),
+            },
+            {
+              value: "Closed Positions",
+              content: (
+                <PositionsContent
+                  portfolioName={portfolioName}
+                  batchType="closed"
+                />
+              ),
+            },
+          ]}
+          value={activeTab}
+          onValueChange={handleTabChange}
+          contentClassName={styles.tabContent}
+        />
+      </div>
     </div>
   );
 }

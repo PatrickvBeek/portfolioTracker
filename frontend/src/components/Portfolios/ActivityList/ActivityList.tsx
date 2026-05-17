@@ -170,12 +170,14 @@ export default function ActivityList({ portfolio }: ActivityListProps) {
   if (activity.length === 0) {
     return (
       <div className={styles.container}>
-        <Heading level="h1">Portfolio Activity</Heading>
-        <div className={styles.emptyState}>
-          <p className={styles.emptyStatePrimary}>No activity yet.</p>
-          <p className={styles.emptyStateSecondary}>
-            Add orders or dividend payouts to see them here.
-          </p>
+        <div className={styles.sectionBody}>
+          <Heading level="section">Portfolio Activity</Heading>
+          <div className={styles.emptyState}>
+            <p className={styles.emptyStatePrimary}>No activity yet.</p>
+            <p className={styles.emptyStateSecondary}>
+              Add orders or dividend payouts to see them here.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -204,45 +206,47 @@ export default function ActivityList({ portfolio }: ActivityListProps) {
 
   return (
     <div className={styles.container}>
-      <Heading level="h1">Portfolio Activity</Heading>
+      <div className={styles.sectionBody}>
+        <Heading level="section">Portfolio Activity</Heading>
 
-      <div className={styles.timeline}>
-        {tableData.map((a, i) => (
-          <div
-            key={a.uuid}
-            className="md:block hidden"
-            data-testid="desktop-row"
-          >
-            <DesktopActivityRow
-              rowData={rowDataMap.get(a.uuid)!}
-              isLast={i === tableData.length - 1}
-              onDelete={() => setActivityToDelete(a)}
-            />
-          </div>
-        ))}
+        <div className={styles.timeline}>
+          {tableData.map((a, i) => (
+            <div
+              key={a.uuid}
+              className="md:block hidden"
+              data-testid="desktop-row"
+            >
+              <DesktopActivityRow
+                rowData={rowDataMap.get(a.uuid)!}
+                isLast={i === tableData.length - 1}
+                onDelete={() => setActivityToDelete(a)}
+              />
+            </div>
+          ))}
 
-        {tableData.map((a, i) => (
-          <div
-            key={`mobile-${a.uuid}`}
-            className="md:hidden"
-            data-testid="mobile-row"
-          >
-            <MobileActivityRow
-              rowData={rowDataMap.get(a.uuid)!}
-              isLast={i === tableData.length - 1}
-              onDelete={() => setActivityToDelete(a)}
-            />
-          </div>
-        ))}
-      </div>
-
-      {activity.length > 10 && (
-        <div className={styles.showAllButton}>
-          <Button intent="ghost" onClick={() => setShowAll(!showAll)}>
-            {showAll ? "Show less" : "Show all"}
-          </Button>
+          {tableData.map((a, i) => (
+            <div
+              key={`mobile-${a.uuid}`}
+              className="md:hidden"
+              data-testid="mobile-row"
+            >
+              <MobileActivityRow
+                rowData={rowDataMap.get(a.uuid)!}
+                isLast={i === tableData.length - 1}
+                onDelete={() => setActivityToDelete(a)}
+              />
+            </div>
+          ))}
         </div>
-      )}
+
+        {activity.length > 10 && (
+          <div className={styles.showAllButton}>
+            <Button intent="ghost" onClick={() => setShowAll(!showAll)}>
+              {showAll ? "Show less" : "Show all"}
+            </Button>
+          </div>
+        )}
+      </div>
 
       {activityToDelete && (
         <ConfirmationDialog
