@@ -12,6 +12,7 @@ import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioH
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { usePortfolioPriceData } from "../../chartHooks";
 import { ChartDataPoint } from "../../chartTypes";
+import { ChartRange } from "../../chartRange.types";
 import { historiesToChartData } from "../../chartUtils";
 import { usePortfolioTimeAxis } from "../shared/balancesChart.utils";
 
@@ -20,18 +21,29 @@ export type BalancesChartDataSets = "buyValue" | "cashFlow" | "marketValue";
 type BalancesChartData = ChartDataPoint<BalancesChartDataSets>[];
 
 export const useGetPortfolioHistoryChartData = (
-  portfolioNames: string[]
+  portfolioNames: string[],
+  range: ChartRange
 ): CustomQuery<BalancesChartData> => {
   const buyValueHistory = useGetBuyValueHistory(portfolioNames);
   const cashFlowHistory = useGetCashFlowHistory(portfolioNames);
-  const marketValueHistory = useGetMarketValueHistory(portfolioNames);
+  const marketValueHistory = useGetMarketValueHistory(portfolioNames, range);
+  const timeAxis = usePortfolioTimeAxis(portfolioNames, range);
+
+  const buyValueOnAxis = timeAxis.map((timestamp) => ({
+    timestamp,
+    value: pickValueFromHistory(buyValueHistory, timestamp)?.value ?? 0,
+  }));
+  const cashFlowOnAxis = timeAxis.map((timestamp) => ({
+    timestamp,
+    value: pickValueFromHistory(cashFlowHistory, timestamp)?.value ?? 0,
+  }));
 
   return {
     isLoading: marketValueHistory.isLoading,
     isError: marketValueHistory.isError,
     data: historiesToChartData<BalancesChartDataSets>([
-      { history: extendToToday(buyValueHistory), newKey: "buyValue" },
-      { history: extendToToday(cashFlowHistory), newKey: "cashFlow" },
+      { history: extendToToday(buyValueOnAxis), newKey: "buyValue" },
+      { history: extendToToday(cashFlowOnAxis), newKey: "cashFlow" },
       { history: marketValueHistory.data || [], newKey: "marketValue" },
     ]),
   };
@@ -65,11 +77,12 @@ const useGetCashFlowHistory = (portfolioNames: string[]) => {
 };
 
 const useGetMarketValueHistory = (
-  portfolioNames: string[]
+  portfolioNames: string[],
+  range: ChartRange
 ): CustomQuery<History<number>> => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const merged = combinePortfolios(portfolios);
-  const timeAxis = usePortfolioTimeAxis(portfolioNames);
+  const timeAxis = usePortfolioTimeAxis(portfolioNames, range);
   const priceQuery = usePortfolioPriceData(portfolioNames);
 
   return {

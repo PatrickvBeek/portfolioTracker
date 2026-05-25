@@ -6,9 +6,13 @@ import {
 import { unique } from "radash";
 import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
 import { isNotNil } from "../../../../utility/types";
-import { getDefaultTimeAxis } from "../../chartUtils";
+import { ChartRange } from "../../chartRange.types";
+import { getDefaultTimeAxis, getRangeStart } from "../../chartUtils";
 
-export const usePortfolioTimeAxis = (portfolioNames: string[]): number[] => {
+export const usePortfolioTimeAxis = (
+  portfolioNames: string[],
+  range: ChartRange
+): number[] => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
 
   if (portfolios.length === 0) {
@@ -25,9 +29,14 @@ export const usePortfolioTimeAxis = (portfolioNames: string[]): number[] => {
     return [];
   }
 
-  const portfolioTimestamps = allActivities.map(getNumericDateTime);
+  const rangeStart = getRangeStart(xMin, range);
+
+  const portfolioTimestamps = allActivities
+    .map(getNumericDateTime)
+    .filter((t) => t >= rangeStart);
+
   return unique(
-    getDefaultTimeAxis(xMin)
+    getDefaultTimeAxis(xMin, range)
       .concat(portfolioTimestamps)
       .concat(Date.now())
       .toSorted((a, b) => a - b)

@@ -16,7 +16,6 @@ import {
   DEFAULT_LINE_PROPS,
   CHART_GRID_STROKE,
   TOOLTIP_STYLE,
-  filterChartDataByRange,
   getAxisProps,
   getTimeAxisProps,
 } from "../../chartUtils";
@@ -26,23 +25,21 @@ export const ProfitChart: FC<{
   portfolioNames: string[];
   range: ChartRange;
 }> = ({ portfolioNames, range }) => {
-  const { isLoading, data } = useProfitHistory(portfolioNames);
-
-  const chartData = filterChartDataByRange(data ?? [], range);
+  const { isLoading, data } = useProfitHistory(portfolioNames, range);
 
   const { fillUrl, strokeUrl, gradientDefinition } = getSplitColorGradientDef(
-    chartData,
+    data ?? [],
     "value"
   );
 
   return (
     <div>
       <ChartContainer isLoading={isLoading}>
-        <AreaChart data={chartData} margin={{ bottom: 30 }}>
+        <AreaChart data={data ?? []} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />
-          <XAxis {...getTimeAxisProps(chartData)} />
+          <XAxis {...getTimeAxisProps(data ?? [])} />
           <YAxis
-            {...getAxisProps(chartData)}
+            {...getAxisProps(data ?? [])}
             tickFormatter={(value) => (value / 1000).toString()}
             unit={" k€"}
           />

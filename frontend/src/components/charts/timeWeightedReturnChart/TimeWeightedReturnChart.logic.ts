@@ -14,8 +14,9 @@ import {
   rel2percentage,
   useTimeWeightedReturnHistory,
 } from "../chartHooks";
+import { ChartRange } from "../chartRange.types";
 import { ChartData } from "../chartTypes";
-import { historiesToChartData } from "../chartUtils";
+import { getRangeStart, historiesToChartData } from "../chartUtils";
 
 const usePerformanceBenchmark = (
   portfolioNames: string[],
@@ -49,19 +50,36 @@ const usePerformanceBenchmark = (
   });
 };
 
+const anchorHistoryToRangeStart = (
+  history: History<number>,
+  anchorPoint: History<number>[number] | undefined,
+  rangeStart: number
+): History<number> =>
+  anchorPoint
+    ? select(
+        history,
+        getHistoryPointMapper((p) =>
+          rel2percentage(percentage2rel(p) / percentage2rel(anchorPoint.value))
+        ),
+        (p) => p.timestamp >= rangeStart
+      )
+    : history.filter((p) => p.timestamp >= rangeStart);
+
 export type PerformanceChartDataSets = "portfolio" | "benchmark";
 
 export const usePerformanceChartData = (
   portfolioNames: string[],
-  benchmarkIsin: string
+  benchmarkIsin: string,
+  range: ChartRange
 ): CustomQuery<ChartData<PerformanceChartDataSets>> => {
-  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioNames);
+  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioNames, range);
   const benchmarkHistoryQuery = usePerformanceBenchmark(
     portfolioNames,
     benchmarkIsin
   );
 
   const twrHistory = twrHistoryQuery?.data ?? [];
+  // priceHistory from API is in descending order
   const benchmarkHistory = benchmarkHistoryQuery?.data ?? [];
 
   const benchmarkStart = last(benchmarkHistory)?.timestamp;
@@ -80,14 +98,40 @@ export const usePerformanceChartData = (
       )
     : twrHistory;
 
+  const rangeStart = getRangeStart(-Infinity, range);
+
+  // TWR history is ascending (from domain), benchmark history is descending
+  // (from API) — hence the different order modes for pickValueFromHistory.
+  const twrAtRangeStart = pickValueFromHistory(
+    adjustedTwrHistory,
+    rangeStart,
+    "ascending"
+  );
+  const benchmarkAtRangeStart = pickValueFromHistory(
+    benchmarkHistory,
+    rangeStart,
+    "descending"
+  );
+
+  const rangeAnchoredTwr = anchorHistoryToRangeStart(
+    adjustedTwrHistory,
+    twrAtRangeStart,
+    rangeStart
+  );
+  const rangeAnchoredBenchmark = anchorHistoryToRangeStart(
+    benchmarkHistory,
+    benchmarkAtRangeStart,
+    rangeStart
+  );
+
   return {
     isLoading:
       twrHistoryQuery?.isLoading || benchmarkHistoryQuery?.isLoading || false,
     isError:
       twrHistoryQuery?.isError || benchmarkHistoryQuery?.isError || false,
     data: historiesToChartData([
-      { history: adjustedTwrHistory, newKey: "portfolio" },
-      { history: benchmarkHistory, newKey: "benchmark" },
+      { history: rangeAnchoredTwr, newKey: "portfolio" },
+      { history: rangeAnchoredBenchmark, newKey: "benchmark" },
     ]),
   };
 };

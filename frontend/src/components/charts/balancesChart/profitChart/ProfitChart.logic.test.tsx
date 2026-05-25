@@ -49,7 +49,7 @@ describe("useProfitHistory", () => {
 
   it("handles a missing portfolio gracefully", () => {
     const { result } = customRenderHook(() =>
-      useProfitHistory(["I don't exist"])
+      useProfitHistory(["I don't exist"], "Max")
     );
 
     expect(result.current.data).toEqual([]);
@@ -69,7 +69,7 @@ describe("useProfitHistory", () => {
     );
 
     const { result } = customRenderHook(() =>
-      useProfitHistory(["emptyPortfolio"])
+      useProfitHistory(["emptyPortfolio"], "Max")
     );
 
     expect(result.current).toEqual({
@@ -107,7 +107,7 @@ describe("useProfitHistory", () => {
     );
 
     const result = await renderAndAwaitQueryHook(() =>
-      useProfitHistory(["singleOrderPortfolio"])
+      useProfitHistory(["singleOrderPortfolio"], "Max")
     );
 
     expect(result).toEqual({
@@ -117,6 +117,18 @@ describe("useProfitHistory", () => {
         {
           timestamp: TIMESTAMPS[0],
           value: 0,
+        },
+        {
+          timestamp: TIMESTAMPS[1],
+          value: 1,
+        },
+        {
+          timestamp: TIMESTAMPS[2],
+          value: 2,
+        },
+        {
+          timestamp: TIMESTAMPS[3],
+          value: 3,
         },
         {
           timestamp: TIMESTAMPS[4],
@@ -162,7 +174,7 @@ describe("useProfitHistory", () => {
     );
 
     const result = await renderAndAwaitQueryHook(() =>
-      useProfitHistory(["multipleOrdersSameDayPortfolio"])
+      useProfitHistory(["multipleOrdersSameDayPortfolio"], "Max")
     );
 
     expect(result).toEqual({
@@ -172,6 +184,18 @@ describe("useProfitHistory", () => {
         {
           timestamp: TIMESTAMPS[0],
           value: 1, // this behavior is actually a little hard to define if one day is the smallest timescale that the app considers
+        },
+        {
+          timestamp: TIMESTAMPS[1],
+          value: 1,
+        },
+        {
+          timestamp: TIMESTAMPS[2],
+          value: 3,
+        },
+        {
+          timestamp: TIMESTAMPS[3],
+          value: 5,
         },
         {
           timestamp: TIMESTAMPS[4],
@@ -233,7 +257,7 @@ describe("useProfitHistory", () => {
     );
 
     const result = await renderAndAwaitQueryHook(() =>
-      useProfitHistory(["consecutiveDaysPortfolio"])
+      useProfitHistory(["consecutiveDaysPortfolio"], "Max")
     );
 
     expect(result.data).toEqual([
@@ -296,7 +320,7 @@ describe("useProfitHistory", () => {
     );
 
     const result = await renderAndAwaitQueryHook(() =>
-      useProfitHistory(["nonConsecutiveDaysPortfolio"])
+      useProfitHistory(["nonConsecutiveDaysPortfolio"], "Max")
     );
 
     expect(result.data).toEqual([
@@ -305,8 +329,16 @@ describe("useProfitHistory", () => {
         value: 0,
       },
       {
+        timestamp: TIMESTAMPS[1],
+        value: 1,
+      },
+      {
         timestamp: TIMESTAMPS[2],
         value: 2,
+      },
+      {
+        timestamp: TIMESTAMPS[3],
+        value: 4,
       },
       {
         timestamp: TIMESTAMPS[4],

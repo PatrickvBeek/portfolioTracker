@@ -15,7 +15,6 @@ import {
   DEFAULT_LINE_PROPS,
   CHART_GRID_STROKE,
   TOOLTIP_STYLE,
-  filterChartDataByRange,
   getAxisProps,
   getTimeAxisProps,
 } from "../../chartUtils";
@@ -28,18 +27,19 @@ export const TotalValueChart: FC<{
   portfolioNames: string[];
   range: ChartRange;
 }> = ({ portfolioNames, range }) => {
-  const { data, isLoading } = useGetPortfolioHistoryChartData(portfolioNames);
-
-  const chartData = filterChartDataByRange(data || [], range);
+  const { data, isLoading } = useGetPortfolioHistoryChartData(
+    portfolioNames,
+    range
+  );
 
   return (
     <div>
       <ChartContainer isLoading={isLoading}>
-        <LineChart data={chartData} margin={{ bottom: 30 }}>
+        <LineChart data={data || []} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />
-          <XAxis {...getTimeAxisProps(chartData)} />
+          <XAxis {...getTimeAxisProps(data || [])} />
           <YAxis
-            {...getAxisProps(chartData)}
+            {...getAxisProps(data || [])}
             tickFormatter={(value) => (value / 1000).toString()}
             unit={" k€"}
           />
@@ -49,14 +49,14 @@ export const TotalValueChart: FC<{
             dataKey={"cashFlow" satisfies BalancesChartDataSets}
             name={"Cash Flow"}
             stroke="var(--color-accent-hover)"
-            strokeOpacity={chartData.length ? 1 : 0.5}
+            strokeOpacity={data?.length ? 1 : 0.5}
           />
           <Line
             {...DEFAULT_LINE_PROPS}
             dataKey={"buyValue" satisfies BalancesChartDataSets}
             name={"Buy Value"}
             stroke="var(--color-warning)"
-            strokeOpacity={chartData.length ? 1 : 0.5}
+            strokeOpacity={data?.length ? 1 : 0.5}
           />
           <Line
             {...DEFAULT_LINE_PROPS}
@@ -64,7 +64,7 @@ export const TotalValueChart: FC<{
             name={"Market Value"}
             stroke="var(--color-success)"
             type={"linear"}
-            strokeOpacity={chartData.length ? 1 : 0.5}
+            strokeOpacity={data?.length ? 1 : 0.5}
           />
           <Tooltip
             contentStyle={TOOLTIP_STYLE}
