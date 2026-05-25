@@ -11,7 +11,6 @@ import { CHART_RANGE_DAYS, ChartRange } from "./chartRange.types";
 import { ChartData, ChartDataPoint } from "./chartTypes";
 
 const MARGIN = 0.05;
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 export const CHART_GRID_STROKE = "var(--color-border)";
 
@@ -20,21 +19,6 @@ export const TOOLTIP_STYLE: React.CSSProperties = {
   border: "1px solid var(--color-border)",
   borderRadius: "0.375rem",
   color: "var(--color-text)",
-};
-
-export const filterChartDataByRange = <Keys extends string>(
-  chartData: ChartData<Keys>,
-  range: ChartRange
-): ChartData<Keys> => {
-  const days = CHART_RANGE_DAYS[range];
-  if (range === "Max" || chartData.length === 0 || days == null) {
-    return chartData;
-  }
-
-  const now = moment().startOf("day").valueOf();
-  const rangeStart = now - days * MS_PER_DAY;
-
-  return chartData.filter((point) => point.timestamp >= rangeStart);
 };
 
 export function getAxisProps(
@@ -127,13 +111,24 @@ export const DEFAULT_LINE_PROPS = {
 } as const;
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
+const DAILY_THRESHOLD_DAYS = 365;
 
-export const getDefaultTimeAxis = (xMin: number) =>
-  unique(
-    Array.from(range(xMin, Date.now(), (i) => i, 7 * DAY_IN_MS)).concat(
-      Date.now()
-    )
+export const getRangeStart = (xMin: number, range: ChartRange): number => {
+  const days = CHART_RANGE_DAYS[range];
+  return days != null ? Math.max(xMin, Date.now() - days * DAY_IN_MS) : xMin;
+};
+
+export const getDefaultTimeAxis = (xMin: number, chartRange: ChartRange) => {
+  const rangeStart = getRangeStart(xMin, chartRange);
+
+  const effectiveSpanDays = (Date.now() - rangeStart) / DAY_IN_MS;
+  const step =
+    effectiveSpanDays <= DAILY_THRESHOLD_DAYS ? DAY_IN_MS : 7 * DAY_IN_MS;
+
+  return unique(
+    Array.from(range(rangeStart, Date.now(), (i) => i, step)).concat(Date.now())
   );
+};
 
 export function calculateGradientOffset<T>(
   data: T[],

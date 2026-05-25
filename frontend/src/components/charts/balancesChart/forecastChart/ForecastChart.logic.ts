@@ -74,8 +74,10 @@ export const useForecastScenarioParams = (
   portfolioNames: string[],
   scenario: ForecastScenario
 ): ScenarioDetails | undefined => {
-  const portfolioGbmParams =
-    usePortfolioGeometricBrownianMotionParams(portfolioNames);
+  const portfolioGbmParams = usePortfolioGeometricBrownianMotionParams(
+    portfolioNames,
+    "Max"
+  );
 
   return useMemo(() => {
     if (scenario === "market") {

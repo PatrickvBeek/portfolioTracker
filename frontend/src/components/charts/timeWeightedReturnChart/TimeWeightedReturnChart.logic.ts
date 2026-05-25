@@ -14,8 +14,9 @@ import {
   rel2percentage,
   useTimeWeightedReturnHistory,
 } from "../chartHooks";
+import { ChartRange } from "../chartRange.types";
 import { ChartData } from "../chartTypes";
-import { historiesToChartData } from "../chartUtils";
+import { getRangeStart, historiesToChartData } from "../chartUtils";
 
 const usePerformanceBenchmark = (
   portfolioNames: string[],
@@ -53,9 +54,10 @@ export type PerformanceChartDataSets = "portfolio" | "benchmark";
 
 export const usePerformanceChartData = (
   portfolioNames: string[],
-  benchmarkIsin: string
+  benchmarkIsin: string,
+  range: ChartRange
 ): CustomQuery<ChartData<PerformanceChartDataSets>> => {
-  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioNames);
+  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioNames, range);
   const benchmarkHistoryQuery = usePerformanceBenchmark(
     portfolioNames,
     benchmarkIsin
@@ -80,14 +82,23 @@ export const usePerformanceChartData = (
       )
     : twrHistory;
 
+  const rangeStart = getRangeStart(-Infinity, range);
+
+  const rangeFilteredTwr = adjustedTwrHistory.filter(
+    (p) => p.timestamp >= rangeStart
+  );
+  const rangeFilteredBenchmark = benchmarkHistory.filter(
+    (p) => p.timestamp >= rangeStart
+  );
+
   return {
     isLoading:
       twrHistoryQuery?.isLoading || benchmarkHistoryQuery?.isLoading || false,
     isError:
       twrHistoryQuery?.isError || benchmarkHistoryQuery?.isError || false,
     data: historiesToChartData([
-      { history: adjustedTwrHistory, newKey: "portfolio" },
-      { history: benchmarkHistory, newKey: "benchmark" },
+      { history: rangeFilteredTwr, newKey: "portfolio" },
+      { history: rangeFilteredBenchmark, newKey: "benchmark" },
     ]),
   };
 };

@@ -13,6 +13,7 @@ import {
   CustomQuery,
   useGetPricesForIsins,
 } from "../../hooks/prices/priceHooks";
+import { ChartRange } from "./chartRange.types";
 import { getDefaultTimeAxis } from "./chartUtils";
 
 export const usePortfolioPriceData = (portfolioNames: string[]) => {
@@ -22,7 +23,8 @@ export const usePortfolioPriceData = (portfolioNames: string[]) => {
 };
 
 export const useTimeWeightedReturnHistory = (
-  portfolioNames: string[]
+  portfolioNames: string[],
+  range: ChartRange
 ): CustomQuery<History<number>> | undefined => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const merged = combinePortfolios(portfolios);
@@ -35,15 +37,16 @@ export const useTimeWeightedReturnHistory = (
     data: getTimeWeightedReturnHistory(
       merged,
       priceMapQuery.data,
-      xMin ? getDefaultTimeAxis(xMin) : undefined
+      xMin ? getDefaultTimeAxis(xMin, range) : undefined
     ).map(getHistoryPointMapper(rel2percentage)),
   };
 };
 
 export const usePortfolioGeometricBrownianMotionParams = (
-  portfolioNames: string[]
+  portfolioNames: string[],
+  range: ChartRange
 ): GbmParameters | undefined => {
-  const twrHistory = useTimeWeightedReturnHistory(portfolioNames);
+  const twrHistory = useTimeWeightedReturnHistory(portfolioNames, range);
   const data = twrHistory?.data || [];
 
   return getGeometricBrownianMotionParams(

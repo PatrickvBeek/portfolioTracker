@@ -36,6 +36,8 @@ mockNetwork({
   ]),
 });
 
+const DAY_IN_MS = 1000 * 60 * 60 * 24;
+
 describe("useGetPortfolioHistoryChartData", () => {
   const TIMESTAMPS = [DAY1, DAY2, DAY3, DAY4].map((d) =>
     moment(d).startOf("day").valueOf()
@@ -43,7 +45,7 @@ describe("useGetPortfolioHistoryChartData", () => {
 
   it("handles a missing portfolio gracefully", async () => {
     const result = await renderAndAwaitQueryHook(() =>
-      useGetPortfolioHistoryChartData(["I don't exist"])
+      useGetPortfolioHistoryChartData(["I don't exist"], "Max")
     );
 
     expect(result.data).toEqual([]);
@@ -102,7 +104,7 @@ describe("useGetPortfolioHistoryChartData", () => {
     );
 
     const result = renderAndAwaitQueryHook(() =>
-      useGetPortfolioHistoryChartData(["p1"])
+      useGetPortfolioHistoryChartData(["p1"], "Max")
     );
 
     expect((await result).data).toEqual([
@@ -137,6 +139,107 @@ describe("useGetPortfolioHistoryChartData", () => {
         timestamp: moment(TODAY).startOf("day").valueOf(),
       },
     ]);
+  });
+
+  it("includes buyValue and cashFlow for short range when orders predate the range", async () => {
+    // Use a "1M" range but set system time far enough ahead that the
+    // order at DAY1 is outside the 30-day window.
+    // DAY1 = 2020-03-01, we need "today" to be > 30 days after DAY1.
+    vi.setSystemTime("2020-04-10");
+
+    const portfolio = getTestPortfolio({
+      name: "rangeTestPortfolio",
+      orders: getTestOrdersGroupedByAsset([
+        {
+          asset: "a1",
+          pieces: 1,
+          sharePrice: 100,
+          taxes: 0,
+          orderFee: 0,
+          timestamp: DAY1,
+        },
+      ]),
+    });
+
+    const assets: AssetLibrary = {
+      a1: { isin: "a1", symbol: "ABC", displayName: "asset 1" },
+    };
+
+    localStorage.setItem("assets", JSON.stringify(assets));
+    localStorage.setItem(
+      "portfolios",
+      JSON.stringify({ rangeTestPortfolio: portfolio })
+    );
+
+    const result = await renderAndAwaitQueryHook(() =>
+      useGetPortfolioHistoryChartData(["rangeTestPortfolio"], "1M")
+    );
+
+    const chartData = result.data ?? [];
+
+    // Every point within the range should carry buyValue and cashFlow
+    // (carried forward from the pre-range order via pickValueFromHistory)
+    const hasBuyValueAtEveryPoint = chartData.every(
+      (point) => point.buyValue !== undefined
+    );
+    const hasCashFlowAtEveryPoint = chartData.every(
+      (point) => point.cashFlow !== undefined
+    );
+    expect(hasBuyValueAtEveryPoint).toBe(true);
+    expect(hasCashFlowAtEveryPoint).toBe(true);
+
+    // Values should be carried forward from the original order
+    chartData.forEach((point) => {
+      expect(point.buyValue).toBe(100);
+      expect(point.cashFlow).toBe(100);
+    });
+
+    vi.setSystemTime(TODAY);
+  });
+
+  it("does not include pre-range order timestamps in chart data", async () => {
+    // Use a "1M" range with system time far enough ahead that
+    // the order at DAY1 falls outside the 30-day window.
+    vi.setSystemTime("2020-04-10");
+
+    const portfolio = getTestPortfolio({
+      name: "rangeExcludePortfolio",
+      orders: getTestOrdersGroupedByAsset([
+        {
+          asset: "a1",
+          pieces: 1,
+          sharePrice: 100,
+          taxes: 0,
+          orderFee: 0,
+          timestamp: DAY1,
+        },
+      ]),
+    });
+
+    const assets: AssetLibrary = {
+      a1: { isin: "a1", symbol: "ABC", displayName: "asset 1" },
+    };
+
+    localStorage.setItem("assets", JSON.stringify(assets));
+    localStorage.setItem(
+      "portfolios",
+      JSON.stringify({ rangeExcludePortfolio: portfolio })
+    );
+
+    const result = await renderAndAwaitQueryHook(() =>
+      useGetPortfolioHistoryChartData(["rangeExcludePortfolio"], "1M")
+    );
+
+    const chartData = result.data ?? [];
+    const rangeStart =
+      moment("2020-04-10").startOf("day").valueOf() - 30 * DAY_IN_MS;
+
+    const preRangePoints = chartData.filter(
+      (point) => point.timestamp < rangeStart
+    );
+    expect(preRangePoints).toEqual([]);
+
+    vi.setSystemTime(TODAY);
   });
 });
 

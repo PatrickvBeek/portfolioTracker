@@ -19,7 +19,6 @@ import {
   DEFAULT_LINE_PROPS,
   CHART_GRID_STROKE,
   TOOLTIP_STYLE,
-  filterChartDataByRange,
   getAxisProps,
   getTimeAxisProps,
 } from "../chartUtils";
@@ -36,13 +35,12 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
   const [range, setRange] = useState<ChartRange>("Max");
   const { isLoading, data } = usePerformanceChartData(
     portfolioNames,
-    benchmark
+    benchmark,
+    range
   );
 
-  const chartData = filterChartDataByRange(data || [], range);
-
   const { gradientDefinition, fillUrl, strokeUrl } = getSplitColorGradientDef(
-    chartData,
+    data || [],
     "portfolio"
   );
 
@@ -63,11 +61,11 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
           </div>
         </div>
         <ChartContainer isLoading={isLoading}>
-          <AreaChart data={chartData} margin={{ bottom: 30 }}>
+          <AreaChart data={data || []} margin={{ bottom: 30 }}>
             <Legend verticalAlign="bottom" />
-            <XAxis {...getTimeAxisProps(chartData)} />
+            <XAxis {...getTimeAxisProps(data || [])} />
             <YAxis
-              {...getAxisProps(chartData)}
+              {...getAxisProps(data || [])}
               tickFormatter={(value) => Number(value).toFixed(0)}
               unit={" %"}
             />
