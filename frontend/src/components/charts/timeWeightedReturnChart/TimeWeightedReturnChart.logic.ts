@@ -50,6 +50,21 @@ const usePerformanceBenchmark = (
   });
 };
 
+const anchorHistoryToRangeStart = (
+  history: History<number>,
+  anchorPoint: History<number>[number] | undefined,
+  rangeStart: number
+): History<number> =>
+  anchorPoint
+    ? select(
+        history,
+        getHistoryPointMapper((p) =>
+          rel2percentage(percentage2rel(p) / percentage2rel(anchorPoint.value))
+        ),
+        (p) => p.timestamp >= rangeStart
+      )
+    : history.filter((p) => p.timestamp >= rangeStart);
+
 export type PerformanceChartDataSets = "portfolio" | "benchmark";
 
 export const usePerformanceChartData = (
@@ -64,6 +79,7 @@ export const usePerformanceChartData = (
   );
 
   const twrHistory = twrHistoryQuery?.data ?? [];
+  // priceHistory from API is in descending order
   const benchmarkHistory = benchmarkHistoryQuery?.data ?? [];
 
   const benchmarkStart = last(benchmarkHistory)?.timestamp;
@@ -84,11 +100,28 @@ export const usePerformanceChartData = (
 
   const rangeStart = getRangeStart(-Infinity, range);
 
-  const rangeFilteredTwr = adjustedTwrHistory.filter(
-    (p) => p.timestamp >= rangeStart
+  // TWR history is ascending (from domain), benchmark history is descending
+  // (from API) — hence the different order modes for pickValueFromHistory.
+  const twrAtRangeStart = pickValueFromHistory(
+    adjustedTwrHistory,
+    rangeStart,
+    "ascending"
   );
-  const rangeFilteredBenchmark = benchmarkHistory.filter(
-    (p) => p.timestamp >= rangeStart
+  const benchmarkAtRangeStart = pickValueFromHistory(
+    benchmarkHistory,
+    rangeStart,
+    "descending"
+  );
+
+  const rangeAnchoredTwr = anchorHistoryToRangeStart(
+    adjustedTwrHistory,
+    twrAtRangeStart,
+    rangeStart
+  );
+  const rangeAnchoredBenchmark = anchorHistoryToRangeStart(
+    benchmarkHistory,
+    benchmarkAtRangeStart,
+    rangeStart
   );
 
   return {
@@ -97,8 +130,8 @@ export const usePerformanceChartData = (
     isError:
       twrHistoryQuery?.isError || benchmarkHistoryQuery?.isError || false,
     data: historiesToChartData([
-      { history: rangeFilteredTwr, newKey: "portfolio" },
-      { history: rangeFilteredBenchmark, newKey: "benchmark" },
+      { history: rangeAnchoredTwr, newKey: "portfolio" },
+      { history: rangeAnchoredBenchmark, newKey: "benchmark" },
     ]),
   };
 };
