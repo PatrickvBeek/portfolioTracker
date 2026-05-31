@@ -162,3 +162,13 @@ This file provides guidance to agents when working with code in this repository.
 - **syncpack**: Uses `.syncpackrc.yml` configuration with workspace packages ignored via `versionGroups`
 - **pnpm-lock.yaml**: Single lockfile at root for all workspaces
 - **node_modules**: pnpm uses symlinks and shared content-addressable storage for efficiency
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues for `PatrickvBeek/portfolioTracker`, managed via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
