@@ -7,7 +7,7 @@ import {
   runGeometricBrownianMotionForecast,
 } from "pt-domain";
 import { useMemo } from "react";
-import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import {
   useCashFlow,

@@ -1,3 +1,3 @@
-import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
+import { useGetPortfolios } from "../../userDataContext";
 
 export const usePortfolioNames = () => Object.keys(useGetPortfolios());

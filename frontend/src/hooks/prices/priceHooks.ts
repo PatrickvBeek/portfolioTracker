@@ -1,8 +1,7 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { History } from "pt-domain";
 import { unique, zipToObject } from "radash";
-import { useGetApiKeys } from "../apiKeys/apiKeyHooks";
-import { useGetAssets, useSymbol } from "../assets/assetHooks";
+import { useGetApiKeys, useGetAssets, useSymbol } from "../../userDataContext";
 import { getPricesFromAlphaVantage } from "./alphaVantage";
 import { getPricesFromYahooFinance } from "./yahooFinance";
 
@@ -15,7 +14,7 @@ export type CustomQuery<T = number> = {
 };
 
 const useGetPriceProvider = () => {
-  const yhKey = useGetApiKeys()?.yahoo;
+  const yhKey = useGetApiKeys().yahoo;
 
   return yhKey ? getPricesFromYahooFinance(yhKey) : getPricesFromAlphaVantage;
 };

@@ -1,5 +1,5 @@
 import { Library } from "lucide-react";
-import { useGetAssets } from "../../hooks/assets/assetHooks";
+import { useGetAssets } from "../../userDataContext";
 import { Heading } from "../ui/Heading";
 import { styles as headingStyles } from "../ui/heading.styles";
 import { AssetInputForm } from "./AssetInputForm/AssetInputForm";

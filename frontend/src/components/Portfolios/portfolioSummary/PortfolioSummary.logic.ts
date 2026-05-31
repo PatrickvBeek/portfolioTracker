@@ -11,7 +11,7 @@ import {
   getTotalCashFlowHistory,
 } from "pt-domain";
 import { min, sum } from "radash";
-import { useGetPortfoliosByNames } from "../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../../userDataContext";
 import {
   CustomQuery,
   useGetPricesForIsins,

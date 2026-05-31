@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useGetPortfolios } from "../../hooks/portfolios/portfolioHooks";
+import { useGetPortfolios } from "../../userDataContext";
 import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
 import { Button } from "../ui/Button";

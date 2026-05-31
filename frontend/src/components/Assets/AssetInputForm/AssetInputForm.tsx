@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAddAsset } from "../../../hooks/assets/assetHooks";
+import { useAddAsset } from "../../../userDataContext";
 import { SymbolConnectionIndicator } from "../AssetTable/SymbolConnectionIndicator";
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/Input";

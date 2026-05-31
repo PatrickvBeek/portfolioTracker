@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useDeletePortfolio } from "../../../hooks/portfolios/portfolioHooks";
+import { useDeletePortfolio } from "../../../userDataContext";
 import { Button } from "../../ui/Button";
 import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
 import { Dialog } from "../../ui/Dialog";

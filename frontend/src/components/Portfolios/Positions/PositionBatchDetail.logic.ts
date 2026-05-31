@@ -6,7 +6,7 @@ import {
   OpenBatch,
 } from "pt-domain";
 import { sum } from "radash";
-import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfolio } from "../../../userDataContext";
 import { useCurrentPriceByIsin } from "../../../hooks/prices/priceHooks";
 
 const sumBy = <T extends OpenBatchListItem | ClosedBatchListItem>(

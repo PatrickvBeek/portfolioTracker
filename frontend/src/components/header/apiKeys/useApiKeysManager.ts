@@ -1,8 +1,5 @@
 import { useState } from "react";
-import {
-  useGetApiKeys,
-  useSetApiKey,
-} from "../../../hooks/apiKeys/apiKeyHooks";
+import { useGetApiKeys, useSetApiKey } from "../../../userDataContext";
 
 export const useApiKeysManager = () => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);

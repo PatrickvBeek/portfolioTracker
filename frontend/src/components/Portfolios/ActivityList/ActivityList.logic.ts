@@ -5,11 +5,11 @@ import {
   isOrder,
   PortfolioActivity,
 } from "pt-domain";
-import { useGetAssets } from "../../../hooks/assets/assetHooks";
 import {
+  useGetAssets,
   useGetPortfolio,
   useGetPortfolioActivity,
-} from "../../../hooks/portfolios/portfolioHooks";
+} from "../../../userDataContext";
 import { toPrice } from "../../../utility/prices";
 
 export type ActivityType = "buy" | "sell" | "dividend";

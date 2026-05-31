@@ -3,7 +3,7 @@ import {
   isOrderValidForPortfolio,
   portfolioContainsOrder,
 } from "pt-domain";
-import { usePortfolioSelector } from "../../../hooks/portfolios/portfolioHooks";
+import { usePortfolioSelector } from "../../../userDataContext";
 
 export const useOrderValidation = (portfolioName: string) =>
   usePortfolioSelector(portfolioName, (portfolio) => {

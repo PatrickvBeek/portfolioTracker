@@ -3,7 +3,7 @@ import { Command } from "cmdk";
 import { Asset } from "pt-domain";
 import { useState, useId } from "react";
 import { Check, ChevronsUpDown, X } from "lucide-react";
-import { useGetAssets } from "../../../hooks/assets/assetHooks";
+import { useGetAssets } from "../../../userDataContext";
 import { cn } from "../../../utility/cn";
 import {
   assetDropdownTriggerVariants,
