@@ -8,7 +8,7 @@ import {
   removeDuplicatesAtSameTimeStamp,
 } from "pt-domain";
 import { sum, unique } from "radash";
-import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { usePortfolioPriceData } from "../../chartHooks";
 import { ChartDataPoint } from "../../chartTypes";

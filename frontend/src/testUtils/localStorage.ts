@@ -1,4 +1,4 @@
-import { UserData } from "../components/header/userData/userData";
+import { UserData } from "../userDataContext";
 
 export const setUserData = (
   userData: Partial<Omit<UserData, "meta">>

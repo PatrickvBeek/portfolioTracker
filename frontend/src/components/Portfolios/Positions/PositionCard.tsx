@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { ReactElement } from "react";
 import { BatchType } from "pt-domain";
 import { toPrice } from "../../../utility/prices";
-import { useGetAssets } from "../../../hooks/assets/assetHooks";
+import { useGetAssets } from "../../../userDataContext";
 import Balance from "../../general/Balance/Balance";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
 import { usePositionData } from "./Positions.logic";

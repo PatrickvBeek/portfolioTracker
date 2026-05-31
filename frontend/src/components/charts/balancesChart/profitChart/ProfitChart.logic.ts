@@ -1,5 +1,5 @@
 import { combinePortfolios, getProfitHistory, History } from "pt-domain";
-import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { ChartRange } from "../../chartRange.types";
 import { usePortfolioPriceData } from "../../chartHooks";

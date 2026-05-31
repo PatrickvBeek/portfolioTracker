@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-table";
 import { Asset } from "pt-domain";
 import { useMemo, useState } from "react";
-import { useDeleteAsset, useGetAssets } from "../../../hooks/assets/assetHooks";
+import { useDeleteAsset, useGetAssets } from "../../../userDataContext";
 import { Trash2 } from "lucide-react";
 import { Button } from "../../ui/Button";
 import { ConfirmationDialog } from "../../ui/ConfirmationDialog";

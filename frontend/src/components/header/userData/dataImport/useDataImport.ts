@@ -1,13 +1,8 @@
 import { useCallback, useState } from "react";
-import { useSetApiKeys } from "../../../../hooks/apiKeys/apiKeyHooks";
-import { useSetAssets } from "../../../../hooks/assets/assetHooks";
-import { useSetPortfolios } from "../../../../hooks/portfolios/portfolioHooks";
-import { parseUserData } from "../userData";
+import { parseUserData, useSetAllUserData } from "../../../../userDataContext";
 
 export const useDataImport = () => {
-  const setPortfolios = useSetPortfolios();
-  const setAssets = useSetAssets();
-  const setApiKeys = useSetApiKeys();
+  const setAllUserData = useSetAllUserData();
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
 
   const importData = useCallback(
@@ -22,9 +17,7 @@ export const useDataImport = () => {
         if (typeof readingResult === "string") {
           try {
             const parsedUserData = parseUserData(readingResult);
-            setPortfolios(parsedUserData.portfolios);
-            setAssets(parsedUserData.assets);
-            setApiKeys(parsedUserData.apiKeys);
+            setAllUserData(parsedUserData);
           } catch (e) {
             console.log(e);
             setIsErrorDialogOpen(true);
@@ -35,7 +28,7 @@ export const useDataImport = () => {
         }
       });
     },
-    [setPortfolios, setAssets, setApiKeys]
+    [setAllUserData]
   );
 
   const handleFileInputChange = useCallback(

@@ -5,8 +5,7 @@ import {
   pickValueFromHistory,
 } from "pt-domain";
 import { last, min, select } from "radash";
-import { useSymbol } from "../../../hooks/assets/assetHooks";
-import { useGetPortfoliosByNames } from "../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames, useSymbol } from "../../../userDataContext";
 import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
 import { isNotNil } from "../../../utility/types";
 import {

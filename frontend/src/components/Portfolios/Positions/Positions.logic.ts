@@ -9,7 +9,7 @@ import {
   getSoldValueOfClosedBatches,
 } from "pt-domain";
 import { sort, sum } from "radash";
-import { useGetPortfolio } from "../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfolio } from "../../../userDataContext";
 import {
   useCurrentPriceByIsin,
   useGetPricesForIsins,

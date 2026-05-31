@@ -5,7 +5,7 @@ import { useState } from "react";
 import {
   useDeleteDividendPayoutFromPortfolio,
   useDeleteOrderFromPortfolio,
-} from "../../../hooks/portfolios/portfolioHooks";
+} from "../../../userDataContext";
 import { cn } from "../../../utility/cn";
 import { Button } from "../../ui/Button";
 import { ConfirmationDialog } from "../../ui/ConfirmationDialog";

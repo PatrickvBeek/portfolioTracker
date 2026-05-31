@@ -1,9 +1,9 @@
+import { Download, KeyRound, Upload } from "lucide-react";
 import React from "react";
-import { Upload, Download, KeyRound } from "lucide-react";
-import { Sheet } from "../../ui/Sheet";
+import { cn } from "../../../utility/cn";
 import { Button } from "../../ui/Button";
 import { Dialog } from "../../ui/Dialog";
-import { cn } from "../../../utility/cn";
+import { Sheet } from "../../ui/Sheet";
 import ApiKeysOverlay from "../apiKeys/ApiKeysOverlay";
 import { useApiKeysManager } from "../apiKeys/useApiKeysManager";
 import { useDataExport } from "../userData/dataExport/useDataExport";
@@ -24,7 +24,7 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
   selectedTab,
   onTabSelect,
 }) => {
-  const { exportData } = useDataExport();
+  const exportData = useDataExport();
   const { triggerFileImport, isErrorDialogOpen, setIsErrorDialogOpen } =
     useDataImport();
   const {

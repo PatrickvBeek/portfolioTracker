@@ -1,14 +1,10 @@
-import { FC, ReactElement } from "react";
 import { Download } from "lucide-react";
+import { FC, ReactElement } from "react";
 import { Tooltip } from "../../../ui/Tooltip";
 import { useDataExport } from "./useDataExport";
 
 export const DataExport: FC = (): ReactElement | null => {
-  const { exportData, canExport } = useDataExport();
-
-  if (!canExport) {
-    return null;
-  }
+  const exportData = useDataExport();
 
   return (
     <Tooltip content="Export all data into a file" side="bottom">

@@ -1,7 +1,7 @@
 import { DividendPayout } from "pt-domain";
 import { ReactElement, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { useAddDividendPayoutToPortfolio } from "../../../../hooks/portfolios/portfolioHooks";
+import { useAddDividendPayoutToPortfolio } from "../../../../userDataContext";
 import AssetDropdown from "../../../Assets/AssetDropdown/AssetSelect";
 import { Button } from "../../../ui/Button";
 import { DateInput, type DateInputValue } from "../../../ui/DateInput";

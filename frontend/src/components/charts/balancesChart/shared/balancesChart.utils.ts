@@ -4,7 +4,7 @@ import {
   getNumericDateTime,
 } from "pt-domain";
 import { unique } from "radash";
-import { useGetPortfoliosByNames } from "../../../../hooks/portfolios/portfolioHooks";
+import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import { isNotNil } from "../../../../utility/types";
 import { ChartRange } from "../../chartRange.types";
 import { getDefaultTimeAxis, getRangeStart } from "../../chartUtils";
