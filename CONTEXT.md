@@ -44,6 +44,22 @@ _Avoid_: user state, app state
 An adapter that fetches price history for a ticker symbol (e.g. Yahoo Finance, AlphaVantage).
 _Avoid_: price service, price API
 
+**Price Baseline**:
+The price at the start of a selected time range, used as the reference point for color-splitting an asset price chart (green above baseline, red below) and for computing return.
+_Avoid_: base price, reference price
+
+**Annualized Return**:
+The mean of log returns over a period, annualized (×12). Derived from price history for a single asset, or from TWR history for a portfolio.
+_Avoid_: total return, simple return
+
+**Annualized Volatility**:
+The standard deviation of log returns over a period, annualized (×√12). Derived from price history for a single asset, or from TWR history for a portfolio.
+_Avoid_: sigma, risk
+
+**Return/Volatility Ratio**:
+Annualized return divided by annualized volatility. A dimensionless measure of risk-adjusted performance for a single asset, based on market price data alone.
+_Avoid_: Sharpe ratio, risk-adjusted return
+
 **Time-Weighted Return (TWR)**:
 A portfolio return metric that neutralizes the effect of cash flows, computed from market value and cash flow history.
 
