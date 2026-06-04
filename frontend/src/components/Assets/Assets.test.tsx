@@ -257,6 +257,23 @@ describe("Assets tab", () => {
     ).toBeInTheDocument();
   });
 
+  // --- Current price display ---
+
+  it("shows the formatted current price for a connected asset in the table", async () => {
+    setUserData({ assets: ASSET_LIB });
+    customRender({ component: <Assets /> });
+
+    const table = assetTable();
+    expect(await within(table).findByText(/175\.00\s€/)).toBeInTheDocument();
+  });
+
+  it("does not show a price for a disconnected asset in the table", () => {
+    setUserData({ assets: { [TESLA.isin]: TESLA } });
+    customRender({ component: <Assets /> });
+
+    expect(screen.queryByText(/€/)).not.toBeInTheDocument();
+  });
+
   // --- Check Symbol ---
 
   it("disables the Check Symbol button when the symbol field is empty", () => {

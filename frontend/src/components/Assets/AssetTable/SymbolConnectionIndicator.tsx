@@ -1,4 +1,5 @@
 import { useCurrentPrice } from "../../../hooks/prices/priceHooks";
+import { toPrice } from "../../../utility/prices";
 import { cn } from "../../../utility/cn";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
 import { Link2, Link2Off } from "lucide-react";
@@ -26,6 +27,11 @@ export function SymbolConnectionIndicator({
   return (
     <div className="flex items-center gap-2">
       <span className="text-text">{symbol}</span>
+      {isConnected && priceQuery.data != null && (
+        <span className="text-text-muted text-sm">
+          {toPrice(priceQuery.data)}
+        </span>
+      )}
       <div
         className={cn(
           "relative flex items-center justify-center w-5 h-5 rounded-full",
