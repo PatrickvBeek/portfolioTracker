@@ -131,7 +131,7 @@ export function AssetTable() {
                   {row.getValue("displayName")}
                 </div>
               </div>
-              <div className="flex justify-between items-center">
+              <div className="flex flex-wrap justify-between items-center gap-x-4 gap-y-2">
                 <div>
                   <div className={styles.mobileLabel}>ISIN</div>
                   <div className={styles.cellIsin}>{row.getValue("isin")}</div>
