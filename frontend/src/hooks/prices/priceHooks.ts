@@ -21,7 +21,8 @@ const useGetPriceProvider = () => {
 
 export const usePriceQuery = <T>(
   symbol: string,
-  selector?: (prices: History<number>) => T
+  selector?: (prices: History<number>) => T,
+  options?: { enabled?: boolean }
 ) => {
   const fetchingFunction = useGetPriceProvider();
   return useQuery({
@@ -29,6 +30,7 @@ export const usePriceQuery = <T>(
     queryFn: async () => fetchingFunction(symbol),
     select: selector,
     retry: false,
+    enabled: options?.enabled ?? !!symbol,
   });
 };
 
