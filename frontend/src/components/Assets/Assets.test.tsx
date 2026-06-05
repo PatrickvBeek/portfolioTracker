@@ -4,6 +4,13 @@ import { customRender } from "../../testUtils/componentHelpers";
 import { setUserData } from "../../testUtils/localStorage";
 import { getPriceResponse, mockNetwork } from "../../testUtils/networkMock";
 import { Assets } from "./Assets";
+import { vi } from "vitest";
+
+vi.mock("../charts/ChartContainer", () => ({
+  ChartContainer: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+}));
 
 const TESLA = { displayName: "Tesla", isin: "US88160R1014" };
 const GOOGLE = {
@@ -318,5 +325,86 @@ describe("Assets tab", () => {
     expect(symbolInput()).toHaveValue("");
     expect(nameInput()).toHaveValue("");
     expect(isinInput()).toHaveValue("");
+  });
+
+  // --- Expandable rows with price history ---
+
+  it("expands a row with a symbol to show a price history chart", async () => {
+    setUserData({ assets: ASSET_LIB });
+    const { user } = customRender({ component: <Assets /> });
+
+    const table = assetTable();
+    await user.click(within(table).getByRole("cell", { name: "Alphabet" }));
+
+    expect(
+      await within(table).findByRole("region", { name: "Price history" })
+    ).toBeInTheDocument();
+  });
+
+  it("collapses an expanded row when clicked again", async () => {
+    setUserData({ assets: ASSET_LIB });
+    const { user } = customRender({ component: <Assets /> });
+
+    const table = assetTable();
+    await user.click(within(table).getByRole("cell", { name: "Alphabet" }));
+
+    expect(
+      await within(table).findByRole("region", { name: "Price history" })
+    ).toBeVisible();
+
+    await user.click(within(table).getByRole("cell", { name: "Alphabet" }));
+
+    expect(
+      within(table).queryByRole("region", { name: "Price history" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("expands a row without a symbol to show a hint instead of a chart", async () => {
+    setUserData({ assets: { [TESLA.isin]: TESLA } });
+    const { user } = customRender({ component: <Assets /> });
+
+    const table = assetTable();
+    await user.click(within(table).getByRole("cell", { name: "Tesla" }));
+
+    const panel = await within(table).findByRole("region", {
+      name: "Price history",
+    });
+    expect(
+      within(panel).getByText(
+        "No symbol connected — price history unavailable."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("does not expand a row when clicking the delete button", async () => {
+    setUserData({ assets: ASSET_LIB });
+    const { user } = customRender({ component: <Assets /> });
+
+    const table = assetTable();
+    expect(
+      within(table).queryByRole("region", { name: "Price history" })
+    ).not.toBeInTheDocument();
+
+    await user.click(within(table).getByLabelText("Delete Alphabet"));
+
+    expect(screen.getByText("Delete Asset 'Alphabet'?")).toBeInTheDocument();
+    expect(
+      within(table).queryByRole("region", { name: "Price history" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows a chart range selector in the expanded panel", async () => {
+    setUserData({ assets: ASSET_LIB });
+    const { user } = customRender({ component: <Assets /> });
+
+    const table = assetTable();
+    await user.click(within(table).getByRole("cell", { name: "Alphabet" }));
+
+    const panel = await within(table).findByRole("region", {
+      name: "Price history",
+    });
+    expect(
+      within(panel).getByRole("group", { name: "time range" })
+    ).toBeInTheDocument();
   });
 });

@@ -1,14 +1,18 @@
 import { uid } from "radash";
 import { calculateGradientOffset } from "./chartUtils";
 
-export function getSplitColorGradientDef<T>(data: T[], dataKey: keyof T) {
-  const offset = calculateGradientOffset(data, dataKey);
+export function getSplitColorGradientDef<T>(
+  data: T[],
+  dataKey: keyof T,
+  options?: { baseline?: number }
+) {
+  const offset = calculateGradientOffset(data, dataKey, options);
 
   const id = uid(3);
   const fillId = `splitFill-${id}`;
   const strokeId = `splitStroke-${id}`;
 
-  const fillUrl = `url(#${fillId}`;
+  const fillUrl = `url(#${fillId})`;
   const strokeUrl = `url(#${strokeId})`;
 
   const gradientDefinition = (

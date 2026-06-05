@@ -1,3 +1,4 @@
+import * as Collapsible from "@radix-ui/react-collapsible";
 import {
   ColumnDef,
   createColumnHelper,
@@ -5,14 +6,15 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { ChevronDown, Trash2 } from "lucide-react";
 import { Asset } from "pt-domain";
 import { useMemo, useState } from "react";
 import { useDeleteAsset, useGetAssets } from "../../../userDataContext";
-import { Trash2 } from "lucide-react";
 import { Button } from "../../ui/Button";
 import { ConfirmationDialog } from "../../ui/ConfirmationDialog";
-import { SymbolConnectionIndicator } from "./SymbolConnectionIndicator";
+import { AssetPriceHistory } from "./AssetPriceHistory";
 import { styles } from "./AssetTable.styles";
+import { SymbolConnectionIndicator } from "./SymbolConnectionIndicator";
 
 // oxlint-disable-next-line typescript-eslint/no-explicit-any TanStack Table meta is unknown by design
 const columnHelper = createColumnHelper<Asset>();
@@ -21,6 +23,11 @@ export function AssetTable() {
   const deleteAsset = useDeleteAsset();
   const assetLibrary = useGetAssets();
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+  const toggleRow = (isin: string) => {
+    setExpandedRow((prev) => (prev === isin ? null : isin));
+  };
 
   const columns = useMemo<ColumnDef<Asset, any>[]>(
     () => [
@@ -52,7 +59,10 @@ export function AssetTable() {
         cell: (info) => (
           <Button
             intent="danger-ghost"
-            onClick={() => setAssetToDelete(info.getValue())}
+            onClick={(e) => {
+              e.stopPropagation();
+              setAssetToDelete(info.getValue());
+            }}
             aria-label={`Delete ${info.getValue().displayName}`}
           >
             <Trash2 className="w-4 h-4" />
@@ -108,55 +118,111 @@ export function AssetTable() {
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className={styles.tableRow}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className={styles.tableCell}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {table.getRowModel().rows.map((row) => {
+              const isExpanded = expandedRow === row.original.isin;
+
+              return (
+                <ExpandableRowGroup
+                  key={row.id}
+                  isExpanded={isExpanded}
+                  onToggle={() => toggleRow(row.original.isin)}
+                  symbol={row.original.symbol}
+                  columnCount={table.getAllLeafColumns().length}
+                >
+                  <tr
+                    className={styles.tableRowExpandable}
+                    onClick={() => toggleRow(row.original.isin)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className={styles.tableCell}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                </ExpandableRowGroup>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       <div className="md:hidden space-y-3">
-        {table.getRowModel().rows.map((row) => (
-          <div key={row.id} className={styles.mobileCard}>
-            <div className={styles.mobileCardInner}>
-              <div>
-                <div className={styles.mobileLabel}>Name</div>
-                <div className={styles.cellName}>
-                  {row.getValue("displayName")}
-                </div>
-              </div>
-              <div className="flex flex-wrap justify-between items-center gap-x-4 gap-y-2">
-                <div>
-                  <div className={styles.mobileLabel}>ISIN</div>
-                  <div className={styles.cellIsin}>{row.getValue("isin")}</div>
-                </div>
-                <div>
-                  <div className={styles.mobileLabel}>Symbol</div>
-                  <div>
-                    {row.original.symbol ? (
-                      <SymbolConnectionIndicator symbol={row.original.symbol} />
-                    ) : (
-                      <span className={styles.cellEmpty}>—</span>
-                    )}
+        {table.getRowModel().rows.map((row) => {
+          const isExpanded = expandedRow === row.original.isin;
+
+          return (
+            <Collapsible.Root
+              key={row.id}
+              open={isExpanded}
+              onOpenChange={(open) =>
+                setExpandedRow(open ? row.original.isin : null)
+              }
+            >
+              <div
+                className={
+                  isExpanded
+                    ? styles.mobileCardExpanded
+                    : styles.mobileCardExpandable
+                }
+              >
+                <Collapsible.Trigger asChild>
+                  <div className={styles.mobileCardInner}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className={styles.mobileLabel}>Name</div>
+                        <div className={styles.cellName}>
+                          {row.getValue("displayName")}
+                        </div>
+                      </div>
+                      <ChevronDown
+                        className={styles.chevron({
+                          isExpanded,
+                        })}
+                      />
+                    </div>
+                    <div className="flex flex-wrap justify-between items-center gap-x-4 gap-y-2">
+                      <div>
+                        <div className={styles.mobileLabel}>ISIN</div>
+                        <div className={styles.cellIsin}>
+                          {row.getValue("isin")}
+                        </div>
+                      </div>
+                      <div>
+                        <div className={styles.mobileLabel}>Symbol</div>
+                        <div>
+                          {row.original.symbol ? (
+                            <SymbolConnectionIndicator
+                              symbol={row.original.symbol}
+                            />
+                          ) : (
+                            <span className={styles.cellEmpty}>—</span>
+                          )}
+                        </div>
+                      </div>
+                      <Button
+                        intent="danger-ghost"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setAssetToDelete(row.original);
+                        }}
+                        aria-label={`Delete ${row.original.displayName}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <Button
-                  intent="danger-ghost"
-                  onClick={() => setAssetToDelete(row.original)}
-                  aria-label={`Delete ${row.original.displayName}`}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                </Collapsible.Trigger>
+                <Collapsible.Content className={styles.collapsibleContent}>
+                  <AssetPriceHistory symbol={row.original.symbol} />
+                </Collapsible.Content>
               </div>
-            </div>
-          </div>
-        ))}
+            </Collapsible.Root>
+          );
+        })}
       </div>
 
       <div className={styles.footer}>
@@ -179,5 +245,37 @@ export function AssetTable() {
         />
       )}
     </div>
+  );
+}
+
+function ExpandableRowGroup({
+  isExpanded,
+  symbol,
+  columnCount,
+  onToggle,
+  children,
+}: {
+  isExpanded: boolean;
+  symbol?: string;
+  columnCount: number;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      {children}
+      <tr>
+        <td
+          colSpan={columnCount}
+          className={isExpanded ? styles.expandedCell : "p-0"}
+        >
+          <Collapsible.Root open={isExpanded} onOpenChange={onToggle}>
+            <Collapsible.Content className={styles.collapsibleContent}>
+              <AssetPriceHistory symbol={symbol} />
+            </Collapsible.Content>
+          </Collapsible.Root>
+        </td>
+      </tr>
+    </>
   );
 }

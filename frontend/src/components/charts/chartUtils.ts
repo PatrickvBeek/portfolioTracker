@@ -132,20 +132,22 @@ export const getDefaultTimeAxis = (xMin: number, chartRange: ChartRange) => {
 
 export function calculateGradientOffset<T>(
   data: T[],
-  valueKey: keyof T
+  valueKey: keyof T,
+  options?: { baseline?: number }
 ): number {
+  const baseline = options?.baseline ?? 0;
   const values = data.map((item) => Number(item[valueKey]) || 0);
   const dataMax = Math.max(...values);
   const dataMin = Math.min(...values);
 
-  if (dataMax <= 0) {
+  if (dataMax <= baseline) {
     return 0;
   }
-  if (dataMin >= 0) {
+  if (dataMin >= baseline) {
     return 1;
   }
 
-  return dataMax / (dataMax - dataMin);
+  return (dataMax - baseline) / (dataMax - dataMin);
 }
 
 const asLocale = (value: number | string, digits: number): string =>

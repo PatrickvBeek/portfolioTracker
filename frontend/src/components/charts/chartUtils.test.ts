@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import { CHART_RANGE_DAYS } from "./chartRange.types";
-import { getDefaultTimeAxis } from "./chartUtils";
+import { calculateGradientOffset, getDefaultTimeAxis } from "./chartUtils";
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const TODAY = "2020-03-05";
@@ -77,5 +77,51 @@ describe("getDefaultTimeAxis", () => {
   it("returns no duplicate timestamps", () => {
     const axis = getDefaultTimeAxis(xMin, "1M");
     expect(new Set(axis).size).toBe(axis.length);
+  });
+});
+
+describe("calculateGradientOffset", () => {
+  it("returns 1 when all values are above zero", () => {
+    const data = [{ v: 10 }, { v: 20 }, { v: 30 }];
+    expect(calculateGradientOffset(data, "v")).toBe(1);
+  });
+
+  it("returns 0 when all values are below zero", () => {
+    const data = [{ v: -10 }, { v: -20 }, { v: -30 }];
+    expect(calculateGradientOffset(data, "v")).toBe(0);
+  });
+
+  it("computes zero-crossing offset for mixed values", () => {
+    const data = [{ v: -50 }, { v: 50 }];
+    expect(calculateGradientOffset(data, "v")).toBeCloseTo(0.5);
+  });
+
+  it("returns 1 when all values are above baseline", () => {
+    const data = [{ v: 10 }, { v: 20 }, { v: 30 }];
+    expect(calculateGradientOffset(data, "v", { baseline: 5 })).toBe(1);
+  });
+
+  it("returns 0 when all values are below baseline", () => {
+    const data = [{ v: 10 }, { v: 20 }, { v: 30 }];
+    expect(calculateGradientOffset(data, "v", { baseline: 40 })).toBe(0);
+  });
+
+  it("computes baseline-crossing offset for values spanning baseline", () => {
+    const data = [{ v: 100 }, { v: 200 }, { v: 300 }];
+    expect(calculateGradientOffset(data, "v", { baseline: 200 })).toBeCloseTo(
+      1 / 2
+    );
+  });
+
+  it("treats values equal to baseline as above", () => {
+    const data = [{ v: 100 }, { v: 200 }, { v: 300 }];
+    expect(calculateGradientOffset(data, "v", { baseline: 100 })).toBe(1);
+  });
+
+  it("defaults baseline to 0 for backward compatibility", () => {
+    const data = [{ v: -10 }, { v: 10 }];
+    expect(calculateGradientOffset(data, "v")).toEqual(
+      calculateGradientOffset(data, "v", { baseline: 0 })
+    );
   });
 });
