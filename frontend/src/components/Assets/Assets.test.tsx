@@ -1,10 +1,10 @@
 import { screen, within } from "@testing-library/react";
 import { AssetLibrary } from "pt-domain";
+import { vi } from "vitest";
 import { customRender } from "../../testUtils/componentHelpers";
 import { setUserData } from "../../testUtils/localStorage";
 import { getPriceResponse, mockNetwork } from "../../testUtils/networkMock";
 import { Assets } from "./Assets";
-import { vi } from "vitest";
 
 vi.mock("../charts/ChartContainer", () => ({
   ChartContainer: ({ children }: { children: React.ReactNode }) => (
@@ -31,7 +31,16 @@ const ASSET_LIB: AssetLibrary = {
 const assetTable = () => screen.getByRole("table");
 
 describe("Assets tab", () => {
-  mockNetwork({ prices: getPriceResponse("GOOGL", [[new Date(), 175]]) });
+  const NOW = Date.now();
+  const DAY_MS = 1000 * 60 * 60 * 24;
+  mockNetwork({
+    prices: getPriceResponse("GOOGL", [
+      [new Date(NOW), 175],
+      [new Date(NOW - 30 * DAY_MS), 172],
+      [new Date(NOW - 60 * DAY_MS), 168],
+      [new Date(NOW - 90 * DAY_MS), 160],
+    ]),
+  });
 
   afterEach(() => {
     localStorage.clear();
@@ -406,5 +415,38 @@ describe("Assets tab", () => {
     expect(
       within(panel).getByRole("group", { name: "time range" })
     ).toBeInTheDocument();
+  });
+
+  it("shows a stat bar with return, volatility, and ratio in the expanded panel", async () => {
+    setUserData({ assets: ASSET_LIB });
+    const { user } = customRender({ component: <Assets /> });
+
+    const table = assetTable();
+    await user.click(within(table).getByRole("cell", { name: "Alphabet" }));
+
+    const panel = await within(table).findByRole("region", {
+      name: "Price history",
+    });
+    expect(
+      within(panel).getByRole("region", { name: "Return / Volatility stats" })
+    ).toBeInTheDocument();
+    expect(within(panel).getByText(/Return/)).toBeInTheDocument();
+    expect(within(panel).getByText(/Volatility/)).toBeInTheDocument();
+    expect(within(panel).getByText(/R\/V/)).toBeInTheDocument();
+  });
+
+  it("does not show the stat bar when there is no symbol", async () => {
+    setUserData({ assets: { [TESLA.isin]: TESLA } });
+    const { user } = customRender({ component: <Assets /> });
+
+    const table = assetTable();
+    await user.click(within(table).getByRole("cell", { name: "Tesla" }));
+
+    const panel = await within(table).findByRole("region", {
+      name: "Price history",
+    });
+    expect(
+      within(panel).queryByRole("region", { name: "Return / Volatility stats" })
+    ).not.toBeInTheDocument();
   });
 });

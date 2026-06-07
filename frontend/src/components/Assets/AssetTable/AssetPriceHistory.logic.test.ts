@@ -1,10 +1,19 @@
 import { History } from "pt-domain";
+import { waitFor } from "@testing-library/react";
 import { vi } from "vitest";
-import { getFilteredPriceHistory } from "./AssetPriceHistory.logic";
+import {
+  getFilteredPriceHistory,
+  useAssetPriceChartData,
+} from "./AssetPriceHistory.logic";
+import { customRenderHook } from "../../../testUtils/componentHelpers";
+import { getPriceResponse, mockNetwork } from "../../../testUtils/networkMock";
+import { CHART_RANGES } from "../../charts/chartRange.types";
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const NOW = new Date("2024-06-15").getTime();
 vi.setSystemTime(NOW);
+
+const msPerMonth = 1000 * 60 * 60 * 24 * 30.44;
 
 const makeHistory = (daysAgo: number[], value: number = 100): History<number> =>
   daysAgo.map((d) => ({ timestamp: NOW - d * DAY_IN_MS, value }));
@@ -48,5 +57,67 @@ describe("getFilteredPriceHistory", () => {
 
     expect(result.data).toHaveLength(0);
     expect(result.baseline).toBe(0);
+  });
+});
+
+const GOOGL_PRICES = getPriceResponse("GOOGL", [
+  [new Date(NOW - 12 * msPerMonth), 100],
+  [new Date(NOW - 11 * msPerMonth), 102],
+  [new Date(NOW - 10 * msPerMonth), 104.04],
+  [new Date(NOW - 9 * msPerMonth), 106.12],
+  [new Date(NOW - 8 * msPerMonth), 108.24],
+  [new Date(NOW - 7 * msPerMonth), 110.41],
+  [new Date(NOW - 6 * msPerMonth), 112.62],
+  [new Date(NOW - 5 * msPerMonth), 114.87],
+  [new Date(NOW - 4 * msPerMonth), 117.17],
+  [new Date(NOW - 3 * msPerMonth), 119.51],
+  [new Date(NOW - 2 * msPerMonth), 121.9],
+  [new Date(NOW - 1 * msPerMonth), 124.34],
+  [new Date(NOW), 126.82],
+]);
+
+describe("useAssetPriceChartData", () => {
+  mockNetwork({ prices: GOOGL_PRICES });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it("returns chart data and stats for a symbol with price data", async () => {
+    const { result } = customRenderHook(() =>
+      useAssetPriceChartData("GOOGL", CHART_RANGES.Max)
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.data).toBeDefined();
+    expect(result.current.data.length).toBeGreaterThan(0);
+    expect(result.current.stats).toBeDefined();
+    expect(result.current.stats!.annualizedReturn).toBeDefined();
+    expect(result.current.stats!.annualizedVolatility).toBeDefined();
+    expect(result.current.stats!.ratio).toBeDefined();
+  });
+
+  it("returns undefined stats when there is insufficient data", async () => {
+    const singlePoint = getPriceResponse("SINGLE", [[new Date(NOW), 100]]);
+    mockNetwork({ prices: singlePoint });
+
+    const { result } = customRenderHook(() =>
+      useAssetPriceChartData("SINGLE", CHART_RANGES.Max)
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.stats).toBeUndefined();
+  });
+
+  it("returns baseline from the filtered range", async () => {
+    const { result } = customRenderHook(() =>
+      useAssetPriceChartData("GOOGL", CHART_RANGES.Max)
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.baseline).toBeDefined();
   });
 });

@@ -1,5 +1,5 @@
+import { AssetReturnAndVolatility } from "pt-domain";
 import moment from "moment";
-import { History } from "pt-domain";
 import { useState } from "react";
 import {
   Area,
@@ -9,7 +9,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { usePriceQuery } from "../../../hooks/prices/priceHooks";
 import { ChartContainer } from "../../charts/ChartContainer";
 import { getSplitColorGradientDef } from "../../charts/chartElements";
 import { CHART_RANGES, ChartRange } from "../../charts/chartRange.types";
@@ -22,7 +21,7 @@ import {
   getTimeAxisProps,
 } from "../../charts/chartUtils";
 import { Select } from "../../ui/Select";
-import { getFilteredPriceHistory } from "./AssetPriceHistory.logic";
+import { useAssetPriceChartData } from "./AssetPriceHistory.logic";
 import { styles } from "./AssetPriceHistory.styles";
 
 const chartRangeValues = Object.values(CHART_RANGES) as string[];
@@ -31,11 +30,39 @@ function isChartRange(value: string): value is ChartRange {
   return chartRangeValues.includes(value);
 }
 
+function AssetStatBar({ stats }: { stats: AssetReturnAndVolatility }) {
+  return (
+    <div
+      className={styles.statBar}
+      role="region"
+      aria-label="Return / Volatility stats"
+    >
+      <div className={styles.statItem}>
+        <span className={styles.statLabel}>Return</span>
+        <span className={styles.statValue}>
+          {stats.annualizedReturn.toFixed(2)}%
+        </span>
+      </div>
+      <div className={styles.statItem}>
+        <span className={styles.statLabel}>Volatility</span>
+        <span className={styles.statValue}>
+          {stats.annualizedVolatility.toFixed(2)}%
+        </span>
+      </div>
+      <div className={styles.statItem}>
+        <span className={styles.statLabel}>R/V</span>
+        <span className={styles.statValue}>{stats.ratio.toFixed(2)}</span>
+      </div>
+    </div>
+  );
+}
+
 export function AssetPriceHistory({ symbol }: { symbol?: string }) {
   const [range, setRange] = useState<ChartRange>(CHART_RANGES.Max);
-  const priceQuery = usePriceQuery<History<number>>(symbol ?? "", undefined, {
-    enabled: !!symbol,
-  });
+  const { isLoading, isError, data, baseline, stats } = useAssetPriceChartData(
+    symbol,
+    range
+  );
 
   if (!symbol) {
     return (
@@ -51,7 +78,7 @@ export function AssetPriceHistory({ symbol }: { symbol?: string }) {
     );
   }
 
-  if (priceQuery.isError) {
+  if (isError) {
     return (
       <div
         className={styles.container}
@@ -62,8 +89,6 @@ export function AssetPriceHistory({ symbol }: { symbol?: string }) {
       </div>
     );
   }
-
-  const { data, baseline } = getFilteredPriceHistory(priceQuery.data, range);
 
   const { fillUrl, strokeUrl, gradientDefinition } = getSplitColorGradientDef(
     data,
@@ -98,7 +123,7 @@ export function AssetPriceHistory({ symbol }: { symbol?: string }) {
           </Select>
         </div>
       </div>
-      <ChartContainer isLoading={priceQuery.isLoading}>
+      <ChartContainer isLoading={isLoading}>
         <AreaChart data={data} margin={{ bottom: 30 }}>
           <XAxis {...getTimeAxisProps(data)} />
           <YAxis
@@ -138,6 +163,7 @@ export function AssetPriceHistory({ symbol }: { symbol?: string }) {
           />
         </AreaChart>
       </ChartContainer>
+      {stats && <AssetStatBar stats={stats} />}
     </div>
   );
 }

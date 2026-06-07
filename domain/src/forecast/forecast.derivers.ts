@@ -9,6 +9,7 @@ import {
   RandomShockParams,
   SimulationResult,
 } from "./forecast.entities";
+import { getLogReturnStats } from "./logReturnStats";
 
 const generateRandomNormalShocks = (params: RandomShockParams): number[][] => {
   const { mean, standardDeviation, simulationCount, timePeriodsCount } = params;
@@ -139,36 +140,13 @@ export const runGeometricBrownianMotionForecast = (
 export const getGeometricBrownianMotionParams = (
   twrHistory: History<number>
 ): GbmParameters | undefined => {
-  if (twrHistory.length < 2) {
+  const stats = getLogReturnStats(twrHistory);
+  if (!stats) {
     return undefined;
   }
 
-  // Calculate log returns assuming evenly spaced (!) data
-  const logReturns: number[] = [];
-  for (let i = 1; i < twrHistory.length; i++) {
-    const logReturn = Math.log(twrHistory[i].value / twrHistory[i - 1].value);
-    logReturns.push(logReturn);
-  }
-
-  const muRaw = calculateMean(logReturns);
-
-  const meanSquaredDifference = logReturns.reduce((acc, value) => {
-    const diff = value - muRaw;
-    return acc + diff * diff;
-  }, 0);
-
-  const varianceRaw = meanSquaredDifference / logReturns.length;
-  const sigmaRaw = Math.sqrt(varianceRaw);
-
-  const totalTimeMs =
-    twrHistory[twrHistory.length - 1].timestamp - twrHistory[0].timestamp;
-  const numberOfSteps = twrHistory.length - 1;
-  const averageStepMs = totalTimeMs / numberOfSteps;
-  const averageStepsPerMonth = (1000 * 60 * 60 * 24 * 30.44) / averageStepMs; // Convert ms to months (avg days per month)
-
-  // Normalize to monthly parameters
-  const mu = muRaw * averageStepsPerMonth;
-  const sigma = sigmaRaw * Math.sqrt(averageStepsPerMonth);
+  const mu = stats.meanLogReturn * stats.stepsPerMonth;
+  const sigma = stats.stdLogReturn * Math.sqrt(stats.stepsPerMonth);
 
   return { mu, sigma };
 };
