@@ -145,18 +145,11 @@ export const getGeometricBrownianMotionParams = (
     return undefined;
   }
 
-  const mu = stats.meanLogReturn * stats.stepsPerMonth;
-  const sigma = stats.stdLogReturn * Math.sqrt(stats.stepsPerMonth);
-
-  return { mu, sigma };
+  return {
+    mu: stats.monthlyMu,
+    sigma: stats.monthlySigma,
+  };
 };
-
-export const gbmParamsToAnnualPercentage = (
-  params: GbmParameters | undefined
-) => ({
-  mu: params && 100 * (Math.exp(12 * params.mu) - 1),
-  sigma: params && 100 * (Math.exp(Math.sqrt(12) * params.sigma) - 1),
-});
 
 export const applyInflationDiscount = (
   result: ForecastResult,

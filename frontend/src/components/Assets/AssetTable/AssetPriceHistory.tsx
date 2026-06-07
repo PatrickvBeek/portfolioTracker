@@ -51,7 +51,9 @@ function AssetStatBar({ stats }: { stats: AssetReturnAndVolatility }) {
       </div>
       <div className={styles.statItem}>
         <span className={styles.statLabel}>R/V</span>
-        <span className={styles.statValue}>{stats.ratio.toFixed(2)}</span>
+        <span className={styles.statValue}>
+          {Number.isFinite(stats.ratio) ? stats.ratio.toFixed(2) : "—"}
+        </span>
       </div>
     </div>
   );
