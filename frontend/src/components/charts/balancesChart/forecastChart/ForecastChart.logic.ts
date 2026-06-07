@@ -3,12 +3,12 @@ import {
   ForecastInput,
   ForecastResult,
   GbmParameters,
-  gbmParamsToAnnualPercentage,
+  logReturnToPercentage,
   runGeometricBrownianMotionForecast,
 } from "pt-domain";
 import { useMemo } from "react";
-import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
+import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import {
   useCashFlow,
   useMarketValue,
@@ -51,9 +51,19 @@ export interface ForecastParameters {
   inflationRate: number;
 }
 
+const MU_MARKET = 0.00721;
+const SIGMA_MARKET = 0.044;
+
+const MARKET_PARAMS: GbmParameters = {
+  mu: MU_MARKET,
+  sigma: SIGMA_MARKET,
+  annualizedReturn: logReturnToPercentage(12 * MU_MARKET),
+  annualizedVolatility: logReturnToPercentage(Math.sqrt(12) * SIGMA_MARKET),
+};
+
 const FORECAST_SCENARIOS = {
   market: {
-    params: { mu: 0.00721, sigma: 0.044 },
+    params: MARKET_PARAMS,
     name: "Market (S&P 500)",
     description: "Based on historical S&P 500 performance since 1985",
   },
@@ -82,28 +92,26 @@ export const useForecastScenarioParams = (
   return useMemo(() => {
     if (scenario === "market") {
       const marketScenario = FORECAST_SCENARIOS.market;
-      const annualParams = gbmParamsToAnnualPercentage(marketScenario.params);
       return {
         params: marketScenario.params,
         displayInfo: {
           name: marketScenario.name,
           description: marketScenario.description,
-          annualReturn: `${annualParams.mu?.toFixed(1)}%`,
-          volatility: `${annualParams.sigma?.toFixed(1)}%`,
+          annualReturn: `${marketScenario.params.annualizedReturn.toFixed(1)}%`,
+          volatility: `${marketScenario.params.annualizedVolatility.toFixed(1)}%`,
           isAvailable: true,
         },
       };
     }
 
     if (scenario === "portfolio" && portfolioGbmParams) {
-      const annualParams = gbmParamsToAnnualPercentage(portfolioGbmParams);
       return {
         params: portfolioGbmParams,
         displayInfo: {
           name: "Your Portfolio",
           description: "Based on your portfolio's historical performance",
-          annualReturn: `${annualParams.mu?.toFixed(1)}%`,
-          volatility: `${annualParams.sigma?.toFixed(1)}%`,
+          annualReturn: `${portfolioGbmParams.annualizedReturn.toFixed(1)}%`,
+          volatility: `${portfolioGbmParams.annualizedVolatility.toFixed(1)}%`,
           isAvailable: true,
         },
       };

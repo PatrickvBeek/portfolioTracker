@@ -35,4 +35,6 @@ export interface ForecastConfig {
 export type GbmParameters = {
   mu: number;
   sigma: number;
+  annualizedReturn: number;
+  annualizedVolatility: number;
 };

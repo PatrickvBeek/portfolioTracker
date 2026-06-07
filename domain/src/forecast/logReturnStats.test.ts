@@ -27,6 +27,13 @@ describe("getLogReturnStats", () => {
     expect(result.meanLogReturn).toBeCloseTo(Math.log(1.05), 10);
     expect(result.stdLogReturn).toBeCloseTo(0, 4);
     expect(result.stepsPerMonth).toBeCloseTo(1, 4);
+    expect(result.monthlyMu).toBeCloseTo(Math.log(1.05), 10);
+    expect(result.monthlySigma).toBeCloseTo(0, 4);
+    expect(result.annualizedReturn).toBeCloseTo(
+      100 * (Math.exp(12 * Math.log(1.05)) - 1),
+      4
+    );
+    expect(result.annualizedVolatility).toBeCloseTo(0, 4);
   });
 
   it("computes mean and sigma for varying monthly returns", () => {
@@ -42,6 +49,28 @@ describe("getLogReturnStats", () => {
     expect(result.meanLogReturn).toBeDefined();
     expect(result.stdLogReturn).toBeGreaterThan(0);
     expect(result.stepsPerMonth).toBeCloseTo(1, 4);
+    expect(result.monthlyMu).toBeDefined();
+    expect(result.monthlySigma).toBeGreaterThan(0);
+    expect(result.annualizedReturn).toBeDefined();
+    expect(result.annualizedVolatility).toBeGreaterThan(0);
+  });
+
+  it("uses Bessel correction (n-1) for variance", () => {
+    const history: History<number> = [
+      { timestamp: 0, value: 100 },
+      { timestamp: msPerMonth, value: 110 },
+      { timestamp: 2 * msPerMonth, value: 99 },
+    ];
+
+    const result = getLogReturnStats(history)!;
+    const lr0 = Math.log(110 / 100);
+    const lr1 = Math.log(99 / 110);
+    const mean = (lr0 + lr1) / 2;
+    const popVariance = ((lr0 - mean) ** 2 + (lr1 - mean) ** 2) / 2;
+    const sampleVariance = ((lr0 - mean) ** 2 + (lr1 - mean) ** 2) / 1;
+
+    expect(result.stdLogReturn).toBeCloseTo(Math.sqrt(sampleVariance), 10);
+    expect(result.stdLogReturn).not.toBeCloseTo(Math.sqrt(popVariance), 10);
   });
 
   it("handles quarterly time intervals correctly", () => {
@@ -55,13 +84,15 @@ describe("getLogReturnStats", () => {
 
     expect(result.stepsPerMonth).toBeCloseTo(1 / 3, 4);
     expect(result.meanLogReturn).toBeCloseTo(Math.log(1.1576), 4);
+    expect(result.monthlyMu).toBeCloseTo(Math.log(1.1576) / 3, 4);
   });
 
   it("handles descending timestamp order (as from price APIs)", () => {
+    const r = 1.05;
     const history: History<number> = [
-      { timestamp: 3 * msPerMonth, value: 100 * 1.05 * 1.05 * 1.05 },
-      { timestamp: 2 * msPerMonth, value: 100 * 1.05 * 1.05 },
-      { timestamp: msPerMonth, value: 100 * 1.05 },
+      { timestamp: 3 * msPerMonth, value: 100 * r * r * r },
+      { timestamp: 2 * msPerMonth, value: 100 * r * r },
+      { timestamp: msPerMonth, value: 100 * r },
       { timestamp: 0, value: 100 },
     ];
 

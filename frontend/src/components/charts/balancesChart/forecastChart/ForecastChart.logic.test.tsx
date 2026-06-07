@@ -49,7 +49,12 @@ describe("ForecastChart.logic", () => {
       );
 
       expect(result.current).toEqual({
-        params: { mu: 0.00721, sigma: 0.044 },
+        params: {
+          mu: 0.00721,
+          sigma: 0.044,
+          annualizedReturn: 100 * (Math.exp(12 * 0.00721) - 1),
+          annualizedVolatility: 100 * (Math.exp(Math.sqrt(12) * 0.044) - 1),
+        },
         displayInfo: {
           name: "Market (S&P 500)",
           description: "Based on historical S&P 500 performance since 1985",
