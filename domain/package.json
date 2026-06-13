@@ -11,12 +11,12 @@
     "@stdlib/random": "^0.3.3",
     "moment": "^2.30.1",
     "radash": "^12.1.1",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.2"
   },
   "devDependencies": {
-    "typescript": "^6.0.2",
-    "vite": "^8.0.8",
-    "vitest": "^4.1.4"
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   },
   "private": true,
   "scripts": {

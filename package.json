@@ -16,17 +16,17 @@
     "knip": "knip"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.0.1",
-    "@commitlint/config-conventional": "^21.0.1",
-    "dependency-cruiser": "^17.3.10",
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "dependency-cruiser": "^17.4.3",
     "husky": "^9.1.7",
-    "knip": "^6.4.1",
+    "knip": "^6.16.1",
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.44.0",
-    "oxlint": "^1.59.0",
-    "oxlint-tsgolint": "^0.20.0",
-    "syncpack": "^14.3.0",
-    "typescript": "^6.0.2"
+    "oxlint": "^1.69.0",
+    "oxlint-tsgolint": "^0.23.0",
+    "syncpack": "^14.3.1",
+    "typescript": "^6.0.3"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
