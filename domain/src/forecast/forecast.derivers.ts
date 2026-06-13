@@ -9,7 +9,7 @@ import {
   RandomShockParams,
   SimulationResult,
 } from "./forecast.entities";
-import { getLogReturnStats } from "./logReturnStats";
+import { getLogReturnStats } from "../logReturns";
 
 const generateRandomNormalShocks = (params: RandomShockParams): number[][] => {
   const { mean, standardDeviation, simulationCount, timePeriodsCount } = params;

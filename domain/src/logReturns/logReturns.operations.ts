@@ -1,14 +1,5 @@
 import { History } from "../portfolioHistory/history.entities";
-
-type LogReturnStats = {
-  meanLogReturn: number;
-  stdLogReturn: number;
-  stepsPerMonth: number;
-  monthlyMu: number;
-  monthlySigma: number;
-  annualizedReturn: number;
-  annualizedVolatility: number;
-};
+import { LogReturnStats } from "./logReturns.entities";
 
 export const getLogReturnStats = (
   history: History<number>
@@ -68,29 +59,3 @@ export const getLogReturnStats = (
 
 export const logReturnToPercentage = (logReturn: number): number =>
   100 * (Math.exp(logReturn) - 1);
-
-export type AssetReturnAndVolatility = {
-  annualizedReturn: number;
-  annualizedVolatility: number;
-  ratio: number;
-};
-
-export const getAssetReturnAndVolatility = (
-  prices: History<number>
-): AssetReturnAndVolatility | undefined => {
-  const stats = getLogReturnStats(prices);
-  if (!stats) {
-    return undefined;
-  }
-
-  const ratio =
-    stats.annualizedVolatility > 1e-10
-      ? stats.annualizedReturn / stats.annualizedVolatility
-      : NaN;
-
-  return {
-    annualizedReturn: stats.annualizedReturn,
-    annualizedVolatility: stats.annualizedVolatility,
-    ratio,
-  };
-};

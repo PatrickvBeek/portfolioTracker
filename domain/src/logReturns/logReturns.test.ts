@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { History } from "../portfolioHistory/history.entities";
-import {
-  getAssetReturnAndVolatility,
-  getLogReturnStats,
-} from "./logReturnStats";
+import { getAssetReturnAndVolatility } from "./logReturns.derivers";
+import { getLogReturnStats } from "./logReturns.operations";
 
 const msPerMonth = 1000 * 60 * 60 * 24 * 30.44;
 
