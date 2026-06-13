@@ -15,10 +15,12 @@ const fetchPricesFromAlphaVantage = async (
   const prices = (await response.json()) as AlphaVantageDailyResult;
 
   const entries = Object.entries(prices["Weekly Time Series"]);
-  return entries.map(([dateString, price]) => ({
-    timestamp: new Date(dateString).getTime(),
-    value: parseFloat(price["4. close"]),
-  }));
+  return entries
+    .map(([dateString, price]) => ({
+      timestamp: new Date(dateString).getTime(),
+      value: parseFloat(price["4. close"]),
+    }))
+    .toSorted((a, b) => a.timestamp - b.timestamp);
 };
 
 const isTest = import.meta.env.MODE === "test";

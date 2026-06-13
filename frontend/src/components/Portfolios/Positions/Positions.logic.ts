@@ -105,7 +105,7 @@ export function usePositionSummary(
   }
 
   const onlinePriceByIsin = (isin: string) =>
-    pricesQuery.data?.[isin]?.[0]?.value;
+    pricesQuery.data?.[isin]?.at(-1)?.value;
 
   const totalValue = sum(
     isins.map((isin) => {

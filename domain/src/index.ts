@@ -4,6 +4,7 @@ export * from "./batch";
 export * from "./dataHelpers";
 export * from "./dividendPayouts";
 export * from "./forecast";
+export * from "./logReturns";
 export * from "./order";
 export * from "./portfolio";
 export * from "./portfolioHistory";

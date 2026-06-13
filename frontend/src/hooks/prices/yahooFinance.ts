@@ -27,9 +27,9 @@ export const getPricesFromYahooFinance =
         parsed.chart.result[0]?.indicators.adjclose[0]?.adjclose
       )
         .map(([t_in_s, price]) => ({ timestamp: t_in_s * 1000, value: price }))
-        .toReversed()
         // Unfortunately,there can be 'null' values...
         .filter((point) => typeof point.value === "number")
+        .toSorted((a, b) => a.timestamp - b.timestamp)
     );
   };
 

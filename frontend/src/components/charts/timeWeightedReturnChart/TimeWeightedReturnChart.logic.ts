@@ -4,7 +4,7 @@ import {
   History,
   pickValueFromHistory,
 } from "pt-domain";
-import { last, min, select } from "radash";
+import { min, select } from "radash";
 import { useGetPortfoliosByNames, useSymbol } from "../../../userDataContext";
 import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
 import { isNotNil } from "../../../utility/types";
@@ -29,9 +29,7 @@ const usePerformanceBenchmark = (
   const symbol = useSymbol(isin);
 
   return usePriceQuery(symbol, (priceHistory) => {
-    // pickValueFromHistory is not used since order timestamps are at
-    // start of day and we want to find a point on the same day.
-    const startPoint = priceHistory.findLast(
+    const startPoint = priceHistory.find(
       (p) => p.timestamp >= portfolioStartTime
     );
 
@@ -78,10 +76,9 @@ export const usePerformanceChartData = (
   );
 
   const twrHistory = twrHistoryQuery?.data ?? [];
-  // priceHistory from API is in descending order
   const benchmarkHistory = benchmarkHistoryQuery?.data ?? [];
 
-  const benchmarkStart = last(benchmarkHistory)?.timestamp;
+  const benchmarkStart = benchmarkHistory[0]?.timestamp;
   const twrAtBenchmarkStart =
     benchmarkStart && pickValueFromHistory(twrHistory, benchmarkStart);
 
@@ -99,17 +96,10 @@ export const usePerformanceChartData = (
 
   const rangeStart = getRangeStart(-Infinity, range);
 
-  // TWR history is ascending (from domain), benchmark history is descending
-  // (from API) — hence the different order modes for pickValueFromHistory.
-  const twrAtRangeStart = pickValueFromHistory(
-    adjustedTwrHistory,
-    rangeStart,
-    "ascending"
-  );
+  const twrAtRangeStart = pickValueFromHistory(adjustedTwrHistory, rangeStart);
   const benchmarkAtRangeStart = pickValueFromHistory(
     benchmarkHistory,
-    rangeStart,
-    "descending"
+    rangeStart
   );
 
   const rangeAnchoredTwr = anchorHistoryToRangeStart(
