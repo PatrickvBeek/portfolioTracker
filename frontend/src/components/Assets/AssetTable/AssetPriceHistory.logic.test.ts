@@ -16,7 +16,9 @@ vi.setSystemTime(NOW);
 const msPerMonth = 1000 * 60 * 60 * 24 * 30.44;
 
 const makeHistory = (daysAgo: number[], value: number = 100): History<number> =>
-  daysAgo.map((d) => ({ timestamp: NOW - d * DAY_IN_MS, value }));
+  [...daysAgo]
+    .toSorted((a, b) => b - a)
+    .map((d) => ({ timestamp: NOW - d * DAY_IN_MS, value }));
 
 describe("getFilteredPriceHistory", () => {
   it("returns all data for Max range", () => {
@@ -43,9 +45,9 @@ describe("getFilteredPriceHistory", () => {
 
   it("returns the oldest price in range as baseline", () => {
     const prices: History<number> = [
-      { timestamp: NOW - 5 * DAY_IN_MS, value: 150 },
-      { timestamp: NOW - 15 * DAY_IN_MS, value: 120 },
       { timestamp: NOW - 25 * DAY_IN_MS, value: 100 },
+      { timestamp: NOW - 15 * DAY_IN_MS, value: 120 },
+      { timestamp: NOW - 5 * DAY_IN_MS, value: 150 },
     ];
     const result = getFilteredPriceHistory(prices, "1M");
 

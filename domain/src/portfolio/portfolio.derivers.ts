@@ -276,7 +276,7 @@ export const getPriceAtTimestamp = (
 ): number =>
   getOrdersForIsin(portfolio, isin).find((o) => getNumericDateTime(o) === t)
     ?.sharePrice ??
-  pickValueFromHistory(priceMap[isin], t, "descending")?.value ??
+  pickValueFromHistory(priceMap[isin], t)?.value ??
   getOrdersForIsin(portfolio, isin).findLast((o) => getNumericDateTime(o) <= t)
     ?.sharePrice ??
   returnNaNAndLogWarning(isin, t);

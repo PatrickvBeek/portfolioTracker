@@ -1,4 +1,3 @@
-import { sort } from "radash";
 import { History } from "../portfolioHistory/history.entities";
 
 type LogReturnStats = {
@@ -18,20 +17,19 @@ export const getLogReturnStats = (
     return undefined;
   }
 
-  const sorted = sort(history, (p) => p.timestamp);
-
-  if (sorted.some((p) => p.value <= 0)) {
+  if (history.some((p) => p.value <= 0)) {
     return undefined;
   }
 
-  const totalTimeMs = sorted[sorted.length - 1].timestamp - sorted[0].timestamp;
+  const totalTimeMs =
+    history[history.length - 1].timestamp - history[0].timestamp;
   if (totalTimeMs === 0) {
     return undefined;
   }
 
   const logReturns: number[] = [];
-  for (let i = 1; i < sorted.length; i++) {
-    logReturns.push(Math.log(sorted[i].value / sorted[i - 1].value));
+  for (let i = 1; i < history.length; i++) {
+    logReturns.push(Math.log(history[i].value / history[i - 1].value));
   }
 
   const meanLogReturn =
@@ -45,7 +43,7 @@ export const getLogReturnStats = (
     logReturns.length === 1 ? 0 : meanSquaredDiff / (logReturns.length - 1);
   const stdLogReturn = Math.sqrt(varianceLogReturn);
 
-  const numberOfSteps = sorted.length - 1;
+  const numberOfSteps = history.length - 1;
   const averageStepMs = totalTimeMs / numberOfSteps;
   const stepsPerMonth = (1000 * 60 * 60 * 24 * 30.44) / averageStepMs;
 

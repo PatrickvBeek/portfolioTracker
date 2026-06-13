@@ -10,8 +10,7 @@ export function getFilteredPriceHistory(
   range: ChartRange
 ) {
   const filtered = filterByRange(prices ?? [], range);
-  const baseline =
-    filtered.length > 0 ? filtered[filtered.length - 1].value : 0;
+  const baseline = filtered.length > 0 ? filtered[0].value : 0;
 
   return { data: filtered, baseline };
 }

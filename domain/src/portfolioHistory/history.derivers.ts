@@ -39,14 +39,8 @@ export const getHistoryMapper =
 export const removeDuplicatesAtSameTimeStamp = <T>(series: History<T>) =>
   unique(series.toReversed(), (dataPoint) => dataPoint.timestamp).toReversed();
 
-export const pickValueFromHistory = <T>(
-  history: History<T>,
-  t: number,
-  historyOrder: "ascending" | "descending" = "ascending"
-) =>
-  historyOrder === "ascending"
-    ? history.findLast((point) => point.timestamp <= t)
-    : history.find((point) => point.timestamp <= t);
+export const pickValueFromHistory = <T>(history: History<T>, t: number) =>
+  history.findLast((point) => point.timestamp <= t);
 
 export const getPiecesAtTimeStamp = (
   batchesHistory: History<Batches>,

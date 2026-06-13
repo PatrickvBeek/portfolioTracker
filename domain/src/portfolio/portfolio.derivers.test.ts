@@ -426,18 +426,18 @@ describe("The Portfolio deriver", () => {
       const portfolio = getTestPortfolio({ orders });
       const priceMap: Record<string, History<number>> = {
         a1: [
-          { timestamp: xAxis[4], value: 104 },
-          { timestamp: xAxis[3], value: 103 },
-          { timestamp: xAxis[2], value: 102 },
-          { timestamp: xAxis[1], value: 101 },
           { timestamp: xAxis[0], value: 100 },
+          { timestamp: xAxis[1], value: 101 },
+          { timestamp: xAxis[2], value: 102 },
+          { timestamp: xAxis[3], value: 103 },
+          { timestamp: xAxis[4], value: 104 },
         ],
         a2: [
-          { timestamp: xAxis[4], value: 10.4 },
-          { timestamp: xAxis[3], value: 10.3 },
-          { timestamp: xAxis[2], value: 10.2 },
-          { timestamp: xAxis[1], value: 10.1 },
           { timestamp: xAxis[0], value: 10.0 },
+          { timestamp: xAxis[1], value: 10.1 },
+          { timestamp: xAxis[2], value: 10.2 },
+          { timestamp: xAxis[3], value: 10.3 },
+          { timestamp: xAxis[4], value: 10.4 },
         ],
       };
 
@@ -461,11 +461,11 @@ describe("The Portfolio deriver", () => {
       const priceMap: Record<string, History<number>> = {
         a1: [],
         a2: [
-          { timestamp: xAxis[4], value: 10.4 },
-          { timestamp: xAxis[3], value: 10.3 },
-          { timestamp: xAxis[2], value: 10.2 },
-          { timestamp: xAxis[1], value: 10.1 },
           { timestamp: xAxis[0], value: 10.0 },
+          { timestamp: xAxis[1], value: 10.1 },
+          { timestamp: xAxis[2], value: 10.2 },
+          { timestamp: xAxis[3], value: 10.3 },
+          { timestamp: xAxis[4], value: 10.4 },
         ],
       };
 

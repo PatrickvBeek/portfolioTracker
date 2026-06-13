@@ -35,7 +35,7 @@ export const usePriceQuery = <T>(
 };
 
 export const useCurrentPrice = (symbol: string) =>
-  usePriceQuery(symbol, (prices = []) => prices.at(0)?.value);
+  usePriceQuery(symbol, (prices = []) => prices.at(-1)?.value);
 
 export const useCurrentPriceByIsin = (isin: string) =>
   useCurrentPrice(useSymbol(isin));

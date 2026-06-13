@@ -87,22 +87,6 @@ describe("getLogReturnStats", () => {
     expect(result.monthlyMu).toBeCloseTo(Math.log(1.1576) / 3, 4);
   });
 
-  it("handles descending timestamp order (as from price APIs)", () => {
-    const r = 1.05;
-    const history: History<number> = [
-      { timestamp: 3 * msPerMonth, value: 100 * r * r * r },
-      { timestamp: 2 * msPerMonth, value: 100 * r * r },
-      { timestamp: msPerMonth, value: 100 * r },
-      { timestamp: 0, value: 100 },
-    ];
-
-    const result = getLogReturnStats(history)!;
-
-    expect(result.meanLogReturn).toBeCloseTo(Math.log(1.05), 10);
-    expect(result.stdLogReturn).toBeCloseTo(0, 4);
-    expect(result.stepsPerMonth).toBeCloseTo(1, 4);
-  });
-
   it("returns undefined for history with zero time span", () => {
     const history: History<number> = [
       { timestamp: 1000, value: 100 },
@@ -246,29 +230,5 @@ describe("getAssetReturnAndVolatility", () => {
       { timestamp: msPerMonth, value: 0 },
     ];
     expect(getAssetReturnAndVolatility(history)).toBeUndefined();
-  });
-
-  it("produces valid results for descending timestamp order (as from price APIs)", () => {
-    const ascending: History<number> = [
-      { timestamp: 0, value: 100 },
-      { timestamp: msPerMonth, value: 110 },
-      { timestamp: 2 * msPerMonth, value: 99 },
-      { timestamp: 3 * msPerMonth, value: 108.9 },
-    ];
-    const descending = ascending.toReversed();
-
-    const ascResult = getAssetReturnAndVolatility(ascending)!;
-    const descResult = getAssetReturnAndVolatility(descending)!;
-
-    expect(descResult.annualizedReturn).toBeCloseTo(
-      ascResult.annualizedReturn,
-      6
-    );
-    expect(descResult.annualizedVolatility).toBeCloseTo(
-      ascResult.annualizedVolatility,
-      6
-    );
-    expect(descResult.ratio).toBeCloseTo(ascResult.ratio, 4);
-    expect(Number.isNaN(descResult.annualizedVolatility)).toBe(false);
   });
 });
