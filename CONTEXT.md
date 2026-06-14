@@ -66,6 +66,14 @@ A portfolio return metric that neutralizes the effect of cash flows, computed fr
 **GBM Forecast**:
 A Monte Carlo simulation using Geometric Brownian Motion to project future portfolio values with confidence bands.
 
+**Inflation Index**:
+A time series of consumer price levels (e.g. German CPI), used to deflate nominal values into real values.
+_Avoid_: CPI series, inflation data, inflation rate
+
+**Real Return**:
+A return metric that has been deflated by an inflation index, expressing purchasing-power gain rather than nominal gain.
+_Avoid_: inflation-adjusted return, inflation-corrected return
+
 ## Workspace Structure
 
 - **`domain/`** (`pt-domain`): Pure functional domain logic — no I/O, no React, no side effects. Types, operations (CRUD), and derivers (computed values).

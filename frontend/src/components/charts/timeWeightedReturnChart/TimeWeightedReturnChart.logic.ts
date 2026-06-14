@@ -5,14 +5,11 @@ import {
   pickValueFromHistory,
 } from "pt-domain";
 import { min, select } from "radash";
-import { useGetPortfoliosByNames, useSymbol } from "../../../userDataContext";
 import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
+import { useGetPortfoliosByNames, useSymbol } from "../../../userDataContext";
+import { percentage2rel, rel2percentage } from "../../../utility/percent";
 import { isNotNil } from "../../../utility/types";
-import {
-  percentage2rel,
-  rel2percentage,
-  useTimeWeightedReturnHistory,
-} from "../chartHooks";
+import { useTimeWeightedReturnHistory } from "../chartHooks";
 import { ChartRange } from "../chartRange.types";
 import { ChartData } from "../chartTypes";
 import { getRangeStart, historiesToChartData } from "../chartUtils";

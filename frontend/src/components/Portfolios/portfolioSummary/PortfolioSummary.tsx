@@ -1,5 +1,6 @@
 import { FC, ReactNode } from "react";
 import { cn } from "../../../utility/cn";
+import { rel2percentage } from "../../../utility/percent";
 import Balance from "../../general/Balance/Balance";
 import { Heading } from "../../ui/Heading";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
@@ -9,6 +10,7 @@ import {
   useMarketValue,
   useNonRealizedGains,
   usePortfolioAge,
+  useRealAnnualizedReturn,
   useRealizedGains,
   useTimeWeightedReturn,
 } from "./PortfolioSummary.logic";
@@ -24,6 +26,7 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
   const portfolioAge = usePortfolioAge(portfolioNames);
   const twr = useTimeWeightedReturn(portfolioNames);
   const twrA = twr?.data && Math.pow(twr.data, 1 / portfolioAge);
+  const realReturn = useRealAnnualizedReturn(portfolioNames);
 
   return (
     <div>
@@ -76,7 +79,7 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
               value: twr?.isLoading ? (
                 <LoadingIndicator />
               ) : (
-                `${twr?.data ? ((twr.data - 1) * 100).toFixed(1) : NaN} %`
+                `${twr?.data ? rel2percentage(twr.data).toFixed(1) : NaN} %`
               ),
             },
             {
@@ -84,7 +87,15 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
               value: twr?.isLoading ? (
                 <LoadingIndicator />
               ) : (
-                `${twrA ? ((twrA - 1) * 100).toFixed(1) : NaN} %`
+                `${twrA ? rel2percentage(twrA).toFixed(1) : NaN} %`
+              ),
+            },
+            {
+              label: "Real Annualized Return",
+              value: realReturn?.isLoading ? (
+                <LoadingIndicator />
+              ) : (
+                `${realReturn?.data !== undefined ? realReturn.data.toFixed(1) : NaN} %`
               ),
             },
           ]}
