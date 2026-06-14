@@ -7,40 +7,42 @@ function getTestOrder(overrides: Partial<Order>): Order {
   return { ...TEST_ORDER_TESLA, ...overrides };
 }
 
+function getTestOrders(orderProps: Partial<Order>[]): Order[] {
+  return orderProps.map((prop) => getTestOrder(prop));
+}
+
+function getDefaultOpenBatch(): OpenBatch {
+  return {
+    pieces: TEST_ORDER_TESLA.pieces,
+    buyPrice: TEST_ORDER_TESLA.sharePrice,
+    buyDate: TEST_ORDER_TESLA.timestamp,
+    orderFee: TEST_ORDER_TESLA.orderFee,
+    dividendPayouts: [],
+    taxes: 0,
+  };
+}
+
+function getExpectBatches(batches: {
+  open: Partial<OpenBatch>[];
+  closed: Partial<ClosedBatch>[];
+}): Batches {
+  return {
+    open: batches.open.map((o) => ({
+      ...getDefaultOpenBatch(),
+      ...o,
+    })),
+    closed: batches.closed.map((closed) => ({
+      ...getDefaultOpenBatch(),
+      sellDate: closed.sellDate || TEST_ORDER_TESLA.timestamp,
+      sellPrice: closed.sellPrice || TEST_ORDER_TESLA.sharePrice,
+      orderFee: closed.orderFee || 2 * TEST_ORDER_TESLA.orderFee,
+      ...closed,
+    })),
+  };
+}
+
 describe("the portfolio deriver", () => {
-  function getTestOrders(orderProps: Partial<Order>[]): Order[] {
-    return orderProps.map((prop) => getTestOrder(prop));
-  }
-
   describe("getBatches", () => {
-    function getExpectBatches(batches: {
-      open: Partial<OpenBatch>[];
-      closed: Partial<ClosedBatch>[];
-    }): Batches {
-      const getDefaultOpenBatch: () => OpenBatch = () => ({
-        pieces: TEST_ORDER_TESLA.pieces,
-        buyPrice: TEST_ORDER_TESLA.sharePrice,
-        buyDate: TEST_ORDER_TESLA.timestamp,
-        orderFee: TEST_ORDER_TESLA.orderFee,
-        dividendPayouts: [],
-        taxes: 0,
-      });
-
-      return {
-        open: batches.open.map((o) => ({
-          ...getDefaultOpenBatch(),
-          ...o,
-        })),
-        closed: batches.closed.map((closed) => ({
-          ...getDefaultOpenBatch(),
-          sellDate: closed.sellDate || TEST_ORDER_TESLA.timestamp,
-          sellPrice: closed.sellPrice || TEST_ORDER_TESLA.sharePrice,
-          orderFee: closed.orderFee || 2 * TEST_ORDER_TESLA.orderFee,
-          ...closed,
-        })),
-      };
-    }
-
     describe("returns the correct batches when", () => {
       it("buying 1, selling 1", () => {
         const orders = getTestOrders([

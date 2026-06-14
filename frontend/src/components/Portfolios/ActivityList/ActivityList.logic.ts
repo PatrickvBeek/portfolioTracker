@@ -12,7 +12,7 @@ import {
 } from "../../../userDataContext";
 import { toPrice } from "../../../utility/prices";
 
-export type ActivityType = "buy" | "sell" | "dividend";
+type ActivityType = "buy" | "sell" | "dividend";
 
 const typeConfig: Record<
   ActivityType,

@@ -98,6 +98,20 @@ export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
 const purgeEmptyArrays = <T>(obj: Record<string, T[]>): Record<string, T[]> =>
   shake(obj, (value) => !value.length);
 
+const mergeActivityArrays = <T extends PortfolioActivity>(
+  target: Record<string, T[]>,
+  source: Record<string, T[]>
+): Record<string, T[]> => {
+  const merged = { ...target };
+  for (const [asset, items] of Object.entries(source)) {
+    merged[asset] = sort(
+      [...(merged[asset] || []), ...items],
+      getNumericDateTime
+    );
+  }
+  return merged;
+};
+
 /**
  * Combines multiple portfolios into a single portfolio view.
  *
@@ -108,20 +122,6 @@ const purgeEmptyArrays = <T>(obj: Record<string, T[]>): Record<string, T[]> =>
  * between buy and sell like total value, profit history, and cash flow calculations.
  */
 export function combinePortfolios(portfolios: Portfolio[]): Portfolio {
-  const mergeActivityArrays = <T extends PortfolioActivity>(
-    target: Record<string, T[]>,
-    source: Record<string, T[]>
-  ): Record<string, T[]> => {
-    const merged = { ...target };
-    for (const [asset, items] of Object.entries(source)) {
-      merged[asset] = sort(
-        [...(merged[asset] || []), ...items],
-        getNumericDateTime
-      );
-    }
-    return merged;
-  };
-
   return portfolios.reduce(
     (combined, portfolio) => ({
       ...combined,

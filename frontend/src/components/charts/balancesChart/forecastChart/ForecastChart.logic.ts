@@ -24,7 +24,7 @@ export const FORECAST_HORIZONS = {
   "20Y": "20Y",
   "30Y": "30Y",
 } as const;
-export type ForecastHorizon =
+type ForecastHorizon =
   (typeof FORECAST_HORIZONS)[keyof typeof FORECAST_HORIZONS];
 
 export type ForecastScenario = "market" | "portfolio";
@@ -40,7 +40,7 @@ export const FORECAST_CONFIDENCE_LEVELS = {
   "68": 68,
   "90": 90,
 } as const;
-export type ForecastConfidenceLevel =
+type ForecastConfidenceLevel =
   (typeof FORECAST_CONFIDENCE_LEVELS)[keyof typeof FORECAST_CONFIDENCE_LEVELS];
 
 export interface ForecastParameters {

@@ -115,7 +115,7 @@ const DAILY_THRESHOLD_DAYS = 365;
 
 export const getRangeStart = (xMin: number, range: ChartRange): number => {
   const days = CHART_RANGE_DAYS[range];
-  return days != null ? Math.max(xMin, Date.now() - days * DAY_IN_MS) : xMin;
+  return days !== null ? Math.max(xMin, Date.now() - days * DAY_IN_MS) : xMin;
 };
 
 export const getDefaultTimeAxis = (xMin: number, chartRange: ChartRange) => {

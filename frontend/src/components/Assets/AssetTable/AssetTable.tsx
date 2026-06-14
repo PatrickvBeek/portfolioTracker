@@ -1,6 +1,6 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import {
-  ColumnDef,
+  CellContext,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -16,8 +16,69 @@ import { AssetPriceHistory } from "./AssetPriceHistory";
 import { styles } from "./AssetTable.styles";
 import { SymbolConnectionIndicator } from "./SymbolConnectionIndicator";
 
-// oxlint-disable-next-line typescript-eslint/no-explicit-any TanStack Table meta is unknown by design
 const columnHelper = createColumnHelper<Asset>();
+
+function DisplayNameCell({ info }: { info: CellContext<Asset, string> }) {
+  return <span className={styles.cellName}>{info.getValue()}</span>;
+}
+
+function IsinCell({ info }: { info: CellContext<Asset, string> }) {
+  return <span className={styles.cellIsin}>{info.getValue()}</span>;
+}
+
+function SymbolCell({
+  info,
+}: {
+  info: CellContext<Asset, string | undefined>;
+}) {
+  const symbol = info.getValue();
+  return symbol ? (
+    <SymbolConnectionIndicator symbol={symbol} />
+  ) : (
+    <span className={styles.cellEmpty}>—</span>
+  );
+}
+
+function ActionsCell({
+  info,
+  onDelete,
+}: {
+  info: CellContext<Asset, Asset>;
+  onDelete: (asset: Asset) => void;
+}) {
+  const value = info.getValue();
+  return (
+    <Button
+      intent="danger-ghost"
+      onClick={(e) => {
+        e.stopPropagation();
+        onDelete(value);
+      }}
+      aria-label={`Delete ${value.displayName}`}
+    >
+      <Trash2 className="w-4 h-4" />
+    </Button>
+  );
+}
+
+const getColumns = (onDeleteAsset: (asset: Asset) => void) => [
+  columnHelper.accessor("displayName", {
+    header: "Name",
+    cell: (info) => <DisplayNameCell info={info} />,
+  }),
+  columnHelper.accessor("isin", {
+    header: "ISIN",
+    cell: (info) => <IsinCell info={info} />,
+  }),
+  columnHelper.accessor("symbol", {
+    header: "Symbol",
+    cell: (info) => <SymbolCell info={info} />,
+  }),
+  columnHelper.accessor((a) => a, {
+    header: "Actions",
+    cell: (info) => <ActionsCell info={info} onDelete={onDeleteAsset} />,
+  }),
+];
 
 export function AssetTable() {
   const deleteAsset = useDeleteAsset();
@@ -29,49 +90,7 @@ export function AssetTable() {
     setExpandedRow((prev) => (prev === isin ? null : isin));
   };
 
-  const columns = useMemo<ColumnDef<Asset, any>[]>(
-    () => [
-      columnHelper.accessor("displayName", {
-        header: "Name",
-        cell: (info) => (
-          <span className={styles.cellName}>{info.getValue()}</span>
-        ),
-      }),
-      columnHelper.accessor("isin", {
-        header: "ISIN",
-        cell: (info) => (
-          <span className={styles.cellIsin}>{info.getValue()}</span>
-        ),
-      }),
-      columnHelper.accessor("symbol", {
-        header: "Symbol",
-        cell: (info) => {
-          const symbol = info.getValue();
-          return symbol ? (
-            <SymbolConnectionIndicator symbol={symbol} />
-          ) : (
-            <span className={styles.cellEmpty}>—</span>
-          );
-        },
-      }),
-      columnHelper.accessor((a) => a, {
-        header: "Actions",
-        cell: (info) => (
-          <Button
-            intent="danger-ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              setAssetToDelete(info.getValue());
-            }}
-            aria-label={`Delete ${info.getValue().displayName}`}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        ),
-      }),
-    ],
-    []
-  );
+  const columns = useMemo(() => getColumns(setAssetToDelete), []);
 
   const data = useMemo(
     () => (assetLibrary ? Object.values(assetLibrary) : []),
