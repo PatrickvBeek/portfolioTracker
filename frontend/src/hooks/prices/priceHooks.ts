@@ -19,11 +19,23 @@ const useGetPriceProvider = () => {
   return yhKey ? getPricesFromYahooFinance(yhKey) : getPricesFromAlphaVantage;
 };
 
-export const usePriceQuery = <T>(
+// Overloads avoid a single type parameter that only appears once (oxlint: no-unnecessary-type-parameters),
+// while still propagating the selector's return type to callers.
+export function usePriceQuery<T>(
   symbol: string,
-  selector?: (prices: History<number>) => T,
+  selector: (prices: History<number>) => T,
   options?: { enabled?: boolean }
-) => {
+): ReturnType<typeof useQuery<T>>;
+export function usePriceQuery(
+  symbol: string,
+  selector?: undefined,
+  options?: { enabled?: boolean }
+): ReturnType<typeof useQuery<History<number>>>;
+export function usePriceQuery(
+  symbol: string,
+  selector?: (prices: History<number>) => unknown,
+  options?: { enabled?: boolean }
+) {
   const fetchingFunction = useGetPriceProvider();
   return useQuery({
     queryKey: [PRICE_BASE_QUERY_KEY, symbol],
@@ -32,10 +44,10 @@ export const usePriceQuery = <T>(
     retry: false,
     enabled: options?.enabled ?? !!symbol,
   });
-};
+}
 
 export const useCurrentPrice = (symbol: string) =>
-  usePriceQuery(symbol, (prices = []) => prices.at(-1)?.value);
+  usePriceQuery(symbol, (prices) => prices.at(-1)?.value);
 
 export const useCurrentPriceByIsin = (isin: string) =>
   useCurrentPrice(useSymbol(isin));

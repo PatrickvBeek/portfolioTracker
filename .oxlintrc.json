@@ -23,9 +23,14 @@
     "react/react-in-jsx-scope": "off",
     "react/exhaustive-deps": "error",
     "react/rules-of-hooks": "error",
+    "typescript/no-explicit-any": "error",
     "import/no-unassigned-import": "off",
     "no-shadow": "off",
-    "curly": "error"
+    "eqeqeq": "error",
+    "no-eq-null": "error",
+    "curly": "error",
+    "jest/expect-expect": "off",
+    "vitest/expect-expect": "off"
   },
   "options": {
     "typeAware": true

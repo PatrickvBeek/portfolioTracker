@@ -15,6 +15,23 @@ import {
   deleteOrderFromPortfolio,
 } from "./portfolio.operations";
 
+const getOrder = (date: string): Order =>
+  getTestOrder({
+    timestamp: date,
+    asset: "asset-1",
+    pieces: 10,
+    sharePrice: 150,
+    orderFee: 5,
+  });
+
+const getDividend = (date: string): DividendPayout =>
+  getTestDividendPayout({
+    timestamp: date,
+    asset: "asset-1",
+    dividendPerShare: 1,
+    pieces: 10,
+  });
+
 describe("The portfolio deriver", () => {
   describe("addOrderToPortfolio", () => {
     it("can add order to a portfolio without existing orders of same isin", () => {
@@ -41,23 +58,6 @@ describe("The portfolio deriver", () => {
   });
 
   describe("combinePortfolios", () => {
-    const getOrder = (date: string): Order =>
-      getTestOrder({
-        timestamp: date,
-        asset: "asset-1",
-        pieces: 10,
-        sharePrice: 150,
-        orderFee: 5,
-      });
-
-    const getDividend = (date: string): DividendPayout =>
-      getTestDividendPayout({
-        timestamp: date,
-        asset: "asset-1",
-        dividendPerShare: 1,
-        pieces: 10,
-      });
-
     it("combines two empty portfolios", () => {
       const portfolio1 = getTestPortfolio({ orders: {}, dividendPayouts: {} });
       const portfolio2 = getTestPortfolio({ orders: {}, dividendPayouts: {} });

@@ -24,7 +24,7 @@ function filterByRange(
   }
 
   const days = CHART_RANGE_DAYS[range];
-  if (days == null) {
+  if (days === null) {
     return prices;
   }
 
@@ -36,7 +36,7 @@ export function useAssetPriceChartData(
   symbol: string | undefined,
   range: ChartRange
 ) {
-  const priceQuery = usePriceQuery<History<number>>(symbol ?? "", undefined, {
+  const priceQuery = usePriceQuery(symbol ?? "", undefined, {
     enabled: !!symbol,
   });
 
