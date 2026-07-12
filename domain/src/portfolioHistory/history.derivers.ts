@@ -1,5 +1,6 @@
-import { group, sum, unique } from "radash";
+import { group, select, sum, unique } from "radash";
 import { Batches } from "../batch/batch.entities";
+import { percentage2rel, rel2percentage } from "../utils/percent";
 import { History, HistoryPoint } from "./history.entities";
 
 export const differentiateNumberHistory = (
@@ -59,5 +60,63 @@ export const mergePointsAtSameTimestamp = (
       timestamp: parseInt(timestamp),
       value: sum(values || [], (values) => values.value),
     })
+  );
+};
+
+export const anchorHistoryToRangeStart = (
+  history: History<number>,
+  anchorPoint: HistoryPoint<number> | undefined,
+  rangeStart: number
+): History<number> =>
+  anchorPoint
+    ? reanchorHistory(history, anchorPoint, rangeStart)
+    : history.filter((p) => p.timestamp >= rangeStart);
+
+export const anchorHistoryToBenchmarkStart = (
+  history: History<number>,
+  benchmarkHistory: History<number>
+): History<number> => {
+  const benchmarkStart = benchmarkHistory[0]?.timestamp;
+  const anchorPoint =
+    benchmarkStart !== undefined
+      ? pickValueFromHistory(history, benchmarkStart)
+      : undefined;
+
+  return anchorPoint
+    ? reanchorHistory(history, anchorPoint, anchorPoint.timestamp)
+    : history;
+};
+
+const reanchorHistory = (
+  history: History<number>,
+  anchorPoint: HistoryPoint<number>,
+  filterStart: number
+): History<number> =>
+  select(
+    history,
+    getHistoryPointMapper((p) =>
+      rel2percentage(percentage2rel(p) / percentage2rel(anchorPoint.value))
+    ),
+    (p) => p.timestamp >= filterStart
+  );
+
+export const getBenchmarkHistory = (
+  priceHistory: History<number>,
+  portfolioStartTime: number
+): History<number> => {
+  const startPoint = priceHistory.find(
+    (p) => p.timestamp >= portfolioStartTime
+  );
+
+  if (!startPoint) {
+    return [];
+  }
+
+  const { timestamp, value } = startPoint;
+
+  return select(
+    priceHistory,
+    getHistoryPointMapper((p) => rel2percentage(p / value)),
+    (p) => p.timestamp >= timestamp
   );
 };

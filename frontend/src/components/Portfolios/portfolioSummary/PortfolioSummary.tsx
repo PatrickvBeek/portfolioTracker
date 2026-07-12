@@ -1,7 +1,7 @@
 import { Info } from "lucide-react";
 import { FC, ReactNode } from "react";
+import { rel2percentage } from "pt-domain";
 import { cn } from "../../../utility/cn";
-import { rel2percentage } from "../../../utility/percent";
 import Balance from "../../general/Balance/Balance";
 import { LoadingIndicator } from "../../general/LoadingIndicator/LoadingIndicator";
 import { Heading } from "../../ui/Heading";

@@ -1,13 +1,14 @@
 import {
+  anchorHistoryToBenchmarkStart,
+  anchorHistoryToRangeStart,
+  getBenchmarkHistory,
   getFirstOrderTimeStamp,
-  getHistoryPointMapper,
   History,
   pickValueFromHistory,
 } from "pt-domain";
-import { min, select } from "radash";
+import { min } from "radash";
 import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
 import { useGetPortfoliosByNames, useSymbol } from "../../../userDataContext";
-import { percentage2rel, rel2percentage } from "../../../utility/percent";
 import { isNotNil } from "../../../utility/types";
 import { useTimeWeightedReturnHistory } from "../chartHooks";
 import { ChartRange } from "../chartRange.types";
@@ -25,39 +26,10 @@ const usePerformanceBenchmark = (
 
   const symbol = useSymbol(isin);
 
-  return usePriceQuery(symbol, (priceHistory) => {
-    const startPoint = priceHistory.find(
-      (p) => p.timestamp >= portfolioStartTime
-    );
-
-    if (!startPoint) {
-      return [];
-    }
-
-    const { timestamp, value } = startPoint;
-
-    return select(
-      priceHistory,
-      getHistoryPointMapper((p) => rel2percentage(p / value)),
-      (p) => p.timestamp >= timestamp
-    );
-  });
+  return usePriceQuery(symbol, (priceHistory) =>
+    getBenchmarkHistory(priceHistory, portfolioStartTime)
+  );
 };
-
-const anchorHistoryToRangeStart = (
-  history: History<number>,
-  anchorPoint: History<number>[number] | undefined,
-  rangeStart: number
-): History<number> =>
-  anchorPoint
-    ? select(
-        history,
-        getHistoryPointMapper((p) =>
-          rel2percentage(percentage2rel(p) / percentage2rel(anchorPoint.value))
-        ),
-        (p) => p.timestamp >= rangeStart
-      )
-    : history.filter((p) => p.timestamp >= rangeStart);
 
 export type PerformanceChartDataSets = "portfolio" | "benchmark";
 
@@ -75,21 +47,10 @@ export const usePerformanceChartData = (
   const twrHistory = twrHistoryQuery?.data ?? [];
   const benchmarkHistory = benchmarkHistoryQuery?.data ?? [];
 
-  const benchmarkStart = benchmarkHistory[0]?.timestamp;
-  const twrAtBenchmarkStart =
-    benchmarkStart && pickValueFromHistory(twrHistory, benchmarkStart);
-
-  const adjustedTwrHistory = twrAtBenchmarkStart
-    ? select(
-        twrHistory,
-        getHistoryPointMapper((p) =>
-          rel2percentage(
-            percentage2rel(p) / percentage2rel(twrAtBenchmarkStart.value)
-          )
-        ),
-        (p) => p.timestamp >= twrAtBenchmarkStart.timestamp
-      )
-    : twrHistory;
+  const adjustedTwrHistory = anchorHistoryToBenchmarkStart(
+    twrHistory,
+    benchmarkHistory
+  );
 
   const rangeStart = getRangeStart(-Infinity, range);
 

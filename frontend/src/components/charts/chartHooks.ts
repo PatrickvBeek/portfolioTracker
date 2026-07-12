@@ -7,13 +7,14 @@ import {
   getIsins,
   getTimeWeightedReturnHistory,
   History,
+  percentage2rel,
+  rel2percentage,
 } from "pt-domain";
 import {
   CustomQuery,
   useGetPricesForIsins,
 } from "../../hooks/prices/priceHooks";
 import { useGetPortfoliosByNames } from "../../userDataContext";
-import { percentage2rel, rel2percentage } from "../../utility/percent";
 import { ChartRange } from "./chartRange.types";
 import { getDefaultTimeAxis } from "./chartUtils";
 
