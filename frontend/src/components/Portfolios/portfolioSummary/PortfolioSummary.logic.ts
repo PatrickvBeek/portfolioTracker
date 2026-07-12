@@ -1,6 +1,8 @@
 import {
   combinePortfolios,
+  deflateByIndex,
   getActivitiesForPortfolio,
+  getFirstOrderTimeStamp,
   getIsins,
   getNonRealizedGains,
   getNumericDateTime,
@@ -8,6 +10,7 @@ import {
   getPriceAtTimestamp,
   getRealizedGains,
   getTimeWeightedReturn,
+  getTimeWeightedReturnHistory,
   getTotalCashFlowHistory,
 } from "pt-domain";
 import { min, sum } from "radash";
@@ -16,6 +19,8 @@ import {
   CustomQuery,
   useGetPricesForIsins,
 } from "../../../hooks/prices/priceHooks";
+import { useInflationIndex } from "../../../hooks/inflation/inflationHooks";
+import { rel2percentage } from "../../../utility/percent";
 import { isNotNil } from "../../../utility/types";
 
 const toYear = (ms: number): number => {
@@ -122,5 +127,37 @@ export const useTimeWeightedReturn = (
     isLoading: priceMapQuery.isLoading,
     isError: priceMapQuery.isError,
     data: getTimeWeightedReturn(merged, priceMapQuery.data),
+  };
+};
+
+export const useRealAnnualizedReturn = (
+  portfolioNames: string[]
+): CustomQuery<number | undefined> => {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  const isins = getIsins(merged);
+  const priceMapQuery = useGetPricesForIsins(isins);
+  const portfolioAge = usePortfolioAge(portfolioNames);
+
+  const startDate = getFirstOrderTimeStamp(merged) ?? undefined;
+  const inflationIndex = useInflationIndex(startDate);
+
+  if (portfolios.length === 0) {
+    return { isLoading: false, isError: false, data: undefined };
+  }
+
+  const twrHistory = priceMapQuery.data
+    ? getTimeWeightedReturnHistory(merged, priceMapQuery.data)
+    : [];
+  const realTwr = deflateByIndex(twrHistory, inflationIndex).at(-1)?.value;
+  const realAnnualizedReturn =
+    realTwr !== undefined && portfolioAge > 0
+      ? rel2percentage(Math.pow(realTwr, 1 / portfolioAge))
+      : undefined;
+
+  return {
+    isLoading: priceMapQuery.isLoading,
+    isError: priceMapQuery.isError,
+    data: realAnnualizedReturn,
   };
 };

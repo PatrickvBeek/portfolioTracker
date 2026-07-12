@@ -1,4 +1,8 @@
-import { getTestOrdersGroupedByAsset, getTestPortfolio } from "pt-domain";
+import {
+  generateConstantRateInflationIndex,
+  getTestOrdersGroupedByAsset,
+  getTestPortfolio,
+} from "pt-domain";
 import { vi } from "vitest";
 import {
   customRenderHook,
@@ -12,6 +16,7 @@ import {
   useNonRealizedGains,
   usePortfolioAge,
   useRealizedGains,
+  useRealAnnualizedReturn,
   useTimeWeightedReturn,
 } from "./PortfolioSummary.logic";
 
@@ -158,6 +163,46 @@ describe("PortfolioSummary hooks", () => {
 
       expect(result.current?.data).toBeCloseTo(1.145);
     });
+
+    it("useRealAnnualizedReturn matches hand-computed deflated TWR", async () => {
+      const twr = customRenderHook(() =>
+        useTimeWeightedReturn([portfolioName])
+      );
+      const { result } = customRenderHook(() =>
+        useRealAnnualizedReturn([portfolioName])
+      );
+
+      await customWaitFor(() => {
+        expect(result.current?.isLoading).toBe(false);
+        expect(twr.result.current?.isLoading).toBe(false);
+      });
+
+      const twrValue = twr.result.current?.data;
+      if (twrValue === undefined) {
+        throw new Error("TWR should be defined");
+      }
+      const realAnnualized = result.current?.data;
+      if (realAnnualized === undefined) {
+        throw new Error("real annualized return should be defined");
+      }
+
+      const startDate = new Date("2000-03-01").getTime();
+      const now = new Date("2000-07-01").getTime();
+      const age = (now - startDate) / (1000 * 60 * 60 * 24 * 365);
+      const inflationIndex = generateConstantRateInflationIndex(
+        startDate,
+        now,
+        0.02
+      );
+      const inflationFactor = inflationIndex[inflationIndex.length - 1].value;
+      const expectedRealTwr = twrValue / inflationFactor;
+      const expectedRealAnnualized =
+        (Math.pow(expectedRealTwr, 1 / age) - 1) * 100;
+
+      expect(realAnnualized).toBeCloseTo(expectedRealAnnualized, 1);
+      const nominalAnnualized = (Math.pow(twrValue, 1 / age) - 1) * 100;
+      expect(realAnnualized).toBeLessThan(nominalAnnualized);
+    });
   });
 
   describe("with empty portfolio array", () => {
@@ -196,6 +241,15 @@ describe("PortfolioSummary hooks", () => {
 
     it("useTimeWeightedReturn returns undefined", () => {
       const { result } = customRenderHook(() => useTimeWeightedReturn([]));
+      expect(result.current).toEqual({
+        isLoading: false,
+        isError: false,
+        data: undefined,
+      });
+    });
+
+    it("useRealAnnualizedReturn returns undefined", () => {
+      const { result } = customRenderHook(() => useRealAnnualizedReturn([]));
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
@@ -317,6 +371,18 @@ describe("PortfolioSummary hooks", () => {
 
       expect(combined.current).toBe(single1.current);
     });
+
+    it("useRealAnnualizedReturn returns a value for combined portfolios", async () => {
+      const { result } = customRenderHook(() =>
+        useRealAnnualizedReturn([portfolio1Name, portfolio2Name])
+      );
+
+      await customWaitFor(() => {
+        expect(result.current?.isLoading).toBe(false);
+      });
+
+      expect(result.current?.data).toBeDefined();
+    });
   });
 
   describe("with non-existent portfolio", () => {
@@ -340,6 +406,22 @@ describe("PortfolioSummary hooks", () => {
       );
 
       expect(result.current).toBe(existing.current);
+    });
+
+    it("useRealAnnualizedReturn ignores non-existent portfolios", async () => {
+      const { result } = customRenderHook(() =>
+        useRealAnnualizedReturn([portfolioName, "non-existent"])
+      );
+      const { result: existing } = customRenderHook(() =>
+        useRealAnnualizedReturn([portfolioName])
+      );
+
+      await customWaitFor(() => {
+        expect(result.current?.isLoading).toBe(false);
+        expect(existing.current?.isLoading).toBe(false);
+      });
+
+      expect(result.current?.data).toBe(existing.current?.data);
     });
   });
 });

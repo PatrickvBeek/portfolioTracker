@@ -8,11 +8,12 @@ import {
   getTimeWeightedReturnHistory,
   History,
 } from "pt-domain";
-import { useGetPortfoliosByNames } from "../../userDataContext";
 import {
   CustomQuery,
   useGetPricesForIsins,
 } from "../../hooks/prices/priceHooks";
+import { useGetPortfoliosByNames } from "../../userDataContext";
+import { percentage2rel, rel2percentage } from "../../utility/percent";
 import { ChartRange } from "./chartRange.types";
 import { getDefaultTimeAxis } from "./chartUtils";
 
@@ -53,6 +54,3 @@ export const usePortfolioGeometricBrownianMotionParams = (
     data.map(getHistoryPointMapper(percentage2rel))
   );
 };
-
-export const rel2percentage = (value: number) => (value - 1) * 100;
-export const percentage2rel = (value: number) => value / 100 + 1;
