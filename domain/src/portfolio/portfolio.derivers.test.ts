@@ -21,6 +21,7 @@ import {
 import {
   getAnnualizedReturn,
   getBuyValueHistoryForPortfolio,
+  getCombinedBuyValueHistory,
   getAssetsForBatchType,
   getCurrentPrice,
   getLatestPriceFromTransactions,
@@ -897,6 +898,117 @@ describe("The Portfolio deriver", () => {
           { timestamp: DAY3, value: 20 },
         ])
       );
+    });
+  });
+
+  describe("getCombinedBuyValueHistory", () => {
+    const DAY1 = "2023-01-01";
+    const DAY2 = "2023-01-02";
+    const DAY3 = "2023-01-03";
+    const DAY4 = "2023-01-04";
+
+    it("returns the single portfolio's buy value history modulo deduplication for a single portfolio", () => {
+      const portfolio = getTestPortfolio({
+        name: "p1",
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a1", pieces: 2, sharePrice: 10, timestamp: DAY1 },
+          { asset: "a2", pieces: 1, sharePrice: 5, timestamp: DAY2 },
+          { asset: "a1", pieces: -1, sharePrice: 11, timestamp: DAY3 },
+        ]),
+      });
+
+      expect(getCombinedBuyValueHistory([portfolio])).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 20 },
+          { timestamp: DAY2, value: 25 },
+          { timestamp: DAY3, value: 15 },
+        ])
+      );
+    });
+
+    it("sums values across portfolios with overlapping timestamps", () => {
+      const portfolio1 = getTestPortfolio({
+        name: "p1",
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a1", pieces: 10, sharePrice: 100, timestamp: DAY1 },
+        ]),
+      });
+      const portfolio2 = getTestPortfolio({
+        name: "p2",
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a2", pieces: 5, sharePrice: 50, timestamp: DAY1 },
+        ]),
+      });
+
+      expect(getCombinedBuyValueHistory([portfolio1, portfolio2])).toEqual(
+        getValuesAsHistory([{ timestamp: DAY1, value: 1250 }])
+      );
+    });
+
+    it("merges non-overlapping timestamps by carrying forward each portfolio's latest value", () => {
+      const portfolio1 = getTestPortfolio({
+        name: "p1",
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a1", pieces: 10, sharePrice: 100, timestamp: DAY1 },
+        ]),
+      });
+      const portfolio2 = getTestPortfolio({
+        name: "p2",
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a2", pieces: 5, sharePrice: 50, timestamp: DAY2 },
+        ]),
+      });
+
+      expect(getCombinedBuyValueHistory([portfolio1, portfolio2])).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 1000 },
+          { timestamp: DAY2, value: 1250 },
+        ])
+      );
+    });
+
+    it("returns the merged history for interleaved orders across portfolios", () => {
+      const portfolio1 = getTestPortfolio({
+        name: "p1",
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a1", pieces: 10, sharePrice: 100, timestamp: DAY1 },
+          { asset: "a1", pieces: -10, sharePrice: 120, timestamp: DAY3 },
+        ]),
+      });
+      const portfolio2 = getTestPortfolio({
+        name: "p2",
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a1", pieces: 10, sharePrice: 150, timestamp: DAY2 },
+          { asset: "a1", pieces: -10, sharePrice: 160, timestamp: DAY4 },
+        ]),
+      });
+
+      expect(getCombinedBuyValueHistory([portfolio1, portfolio2])).toEqual(
+        getValuesAsHistory([
+          { timestamp: DAY1, value: 1000 },
+          { timestamp: DAY2, value: 2500 },
+          { timestamp: DAY3, value: 1500 },
+          { timestamp: DAY4, value: 0 },
+        ])
+      );
+    });
+
+    it("ignores empty portfolios in the list", () => {
+      const portfolio1 = getTestPortfolio({
+        name: "p1",
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a1", pieces: 5, sharePrice: 200, timestamp: DAY1 },
+        ]),
+      });
+      const emptyPortfolio = getTestPortfolio({ name: "p2", orders: {} });
+
+      expect(getCombinedBuyValueHistory([portfolio1, emptyPortfolio])).toEqual(
+        getValuesAsHistory([{ timestamp: DAY1, value: 1000 }])
+      );
+    });
+
+    it("returns an empty history for an empty portfolio list", () => {
+      expect(getCombinedBuyValueHistory([])).toEqual([]);
     });
   });
 

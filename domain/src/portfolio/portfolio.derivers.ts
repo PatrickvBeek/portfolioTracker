@@ -1,4 +1,4 @@
-import { last, mapValues, min, partial, sort, sum } from "radash";
+import { last, mapValues, min, partial, sort, sum, unique } from "radash";
 import {
   getActivityCashFlow,
   getCashFlowHistoryForActivities,
@@ -24,6 +24,7 @@ import {
   getPiecesAtTimeStamp,
   mergePointsAtSameTimestamp,
   pickValueFromHistory,
+  removeDuplicatesAtSameTimeStamp,
 } from "../portfolioHistory/history.derivers";
 import { deflateByIndex } from "../portfolioHistory/inflation";
 import { History } from "../portfolioHistory/history.entities";
@@ -451,6 +452,26 @@ export const getBuyValueHistoryForPortfolio = (
       value: prev.value + current.value,
     })
   );
+};
+
+export const getCombinedBuyValueHistory = (
+  portfolios: Portfolio[]
+): History<number> => {
+  const allHistories = portfolios.map(getBuyValueHistoryForPortfolio);
+
+  const allTimestamps = unique(
+    allHistories.flat().map((p) => p.timestamp)
+  ).toSorted((a, b) => a - b);
+
+  const merged = allTimestamps.map((timestamp) => ({
+    timestamp,
+    value: sum(
+      allHistories,
+      (history) => pickValueFromHistory(history, timestamp)?.value ?? 0
+    ),
+  }));
+
+  return removeDuplicatesAtSameTimeStamp(merged);
 };
 
 export const getProfitHistory = (
