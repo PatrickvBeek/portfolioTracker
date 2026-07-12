@@ -1,14 +1,17 @@
 import {
   BatchType,
+  EMPTY_POSITION_SUMMARY,
   getAssetsForBatchType,
   getCurrentValueOfOpenBatches,
   getLatestPriceFromTransactions,
   getNonRealizedGainsForIsin,
   getPiecesOfIsinInPortfolio,
+  getPositionSummary,
   getRealizedGainsForIsin,
   getSoldValueOfClosedBatches,
+  PositionSummary,
 } from "pt-domain";
-import { sort, sum } from "radash";
+import { sort } from "radash";
 import { useGetPortfolio } from "../../../userDataContext";
 import {
   useCurrentPriceByIsin,
@@ -21,14 +24,6 @@ type PositionData = {
   realizedGains: number;
   nonRealizedGains: { data: number | undefined; isLoading: boolean };
   profit: { data: number | undefined; isLoading: boolean };
-};
-
-type PositionSummary = {
-  count: number;
-  totalValue: number | undefined;
-  realizedGains: number | undefined;
-  nonRealizedGains: number | undefined;
-  profit: number | undefined;
 };
 
 export function useGetPositionListItems(
@@ -95,65 +90,13 @@ export function usePositionSummary(
   const pricesQuery = useGetPricesForIsins(isins || []);
 
   if (!isins || !portfolio) {
-    return {
-      count: 0,
-      totalValue: undefined,
-      realizedGains: undefined,
-      nonRealizedGains: undefined,
-      profit: undefined,
-    };
+    return EMPTY_POSITION_SUMMARY;
   }
 
-  const onlinePriceByIsin = (isin: string) =>
-    pricesQuery.data?.[isin]?.at(-1)?.value;
-
-  const totalValue = sum(
-    isins.map((isin) => {
-      const currentPrice =
-        onlinePriceByIsin(isin) ??
-        getLatestPriceFromTransactions(portfolio, isin) ??
-        NaN;
-      return batchType === "open"
-        ? getCurrentValueOfOpenBatches(portfolio, isin, currentPrice)
-        : getSoldValueOfClosedBatches(portfolio, isin);
-    })
+  return getPositionSummary(
+    portfolio,
+    isins,
+    batchType,
+    pricesQuery.data || {}
   );
-
-  const realizedGains = sum(
-    isins.map((isin) => getRealizedGainsForIsin(portfolio, isin))
-  );
-
-  const nonRealizedGains = sum(
-    isins.map((isin) => {
-      const currentPrice =
-        onlinePriceByIsin(isin) ??
-        getLatestPriceFromTransactions(portfolio, isin) ??
-        NaN;
-      return getNonRealizedGainsForIsin(portfolio, isin, currentPrice);
-    })
-  );
-
-  const profit = sum(
-    isins.map((isin) => {
-      const currentPrice =
-        onlinePriceByIsin(isin) ??
-        getLatestPriceFromTransactions(portfolio, isin) ??
-        NaN;
-      const nonRealized = getNonRealizedGainsForIsin(
-        portfolio,
-        isin,
-        currentPrice
-      );
-      const realized = getRealizedGainsForIsin(portfolio, isin);
-      return realized + nonRealized;
-    })
-  );
-
-  return {
-    count: isins.length,
-    totalValue,
-    realizedGains,
-    nonRealizedGains,
-    profit,
-  };
 }

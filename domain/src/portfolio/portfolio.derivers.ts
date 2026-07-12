@@ -33,6 +33,22 @@ import { Portfolio } from "./portfolio.entities";
 
 type PriceMap = Record<string, History<number>>;
 
+export type PositionSummary = {
+  count: number;
+  totalValue: number | undefined;
+  realizedGains: number | undefined;
+  nonRealizedGains: number | undefined;
+  profit: number | undefined;
+};
+
+export const EMPTY_POSITION_SUMMARY: PositionSummary = {
+  count: 0,
+  totalValue: undefined,
+  realizedGains: undefined,
+  nonRealizedGains: undefined,
+  profit: undefined,
+};
+
 export const EMPTY_PORTFOLIO = {
   name: "",
   orders: {},
@@ -178,6 +194,57 @@ export const getNonRealizedGainsForIsin = (
     getProfitForOpenBatch(batch, currentPrice)
   );
 
+export const getPositionSummary = (
+  portfolio: Portfolio,
+  isins: string[],
+  batchType: BatchType,
+  priceMap: PriceMap
+): PositionSummary => {
+  const totalValue = sum(
+    isins.map((isin) => {
+      const currentPrice = getCurrentPrice(portfolio, isin, priceMap);
+      return batchType === "open"
+        ? getCurrentValueOfOpenBatches(portfolio, isin, currentPrice)
+        : getSoldValueOfClosedBatches(portfolio, isin);
+    })
+  );
+
+  const realizedGains = sum(
+    isins.map((isin) => getRealizedGainsForIsin(portfolio, isin))
+  );
+
+  const nonRealizedGains = sum(
+    isins.map((isin) =>
+      getNonRealizedGainsForIsin(
+        portfolio,
+        isin,
+        getCurrentPrice(portfolio, isin, priceMap)
+      )
+    )
+  );
+
+  const profit = sum(
+    isins.map((isin) => {
+      const currentPrice = getCurrentPrice(portfolio, isin, priceMap);
+      const nonRealized = getNonRealizedGainsForIsin(
+        portfolio,
+        isin,
+        currentPrice
+      );
+      const realized = getRealizedGainsForIsin(portfolio, isin);
+      return realized + nonRealized;
+    })
+  );
+
+  return {
+    count: isins.length,
+    totalValue,
+    realizedGains,
+    nonRealizedGains,
+    profit,
+  };
+};
+
 export const portfolioContainsOrder = (
   portfolio: Portfolio,
   order: Order
@@ -217,6 +284,15 @@ export const getLatestPriceFromTransactions = (
   sort(getOrdersForIsin(portfolio, isin), getNumericDateTime).findLast(
     (a) => a.sharePrice
   )?.sharePrice;
+
+export const getCurrentPrice = (
+  portfolio: Portfolio,
+  isin: string,
+  priceMap: PriceMap
+): number =>
+  priceMap[isin]?.at(-1)?.value ??
+  getLatestPriceFromTransactions(portfolio, isin) ??
+  NaN;
 
 export const getCurrentValueOfOpenBatches = (
   portfolio: Portfolio,

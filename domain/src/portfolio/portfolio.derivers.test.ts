@@ -21,11 +21,15 @@ import {
 import {
   getAnnualizedReturn,
   getBuyValueHistoryForPortfolio,
+  getAssetsForBatchType,
+  getCurrentPrice,
   getLatestPriceFromTransactions,
   getMarketValue,
   getMarketValueHistory,
   getNonRealizedGainsForIsin,
   getOrderFeesOfIsinInPortfolio,
+  getPiecesOfIsinInPortfolio,
+  getPositionSummary,
   getPortfolioAgeYears,
   getRealAnnualizedReturn,
   getRealizedGainsForIsin,
@@ -328,6 +332,222 @@ describe("The Portfolio deriver", () => {
       );
 
       expect(getNonRealizedGainsForIsin(portfolio, "asset", 110)).toEqual(23);
+    });
+  });
+
+  describe("getCurrentPrice", () => {
+    const DAY1 = "2024-06-01";
+    const DAY2 = "2024-06-02";
+    const portfolio = getTestPortfolio({
+      orders: getTestOrdersGroupedByAsset([
+        { asset: "asset", timestamp: DAY1, pieces: 1, sharePrice: 10 },
+        { asset: "asset", timestamp: DAY2, pieces: 1, sharePrice: 20 },
+      ]),
+    });
+
+    it("uses the latest online price when available", () => {
+      const priceMap: Record<string, History<number>> = {
+        asset: [{ timestamp: new Date(DAY2).getTime(), value: 42 }],
+      };
+
+      expect(getCurrentPrice(portfolio, "asset", priceMap)).toBe(42);
+    });
+
+    it("falls back to the latest transaction price when online price is missing", () => {
+      const priceMap: Record<string, History<number>> = { asset: [] };
+
+      expect(getCurrentPrice(portfolio, "asset", priceMap)).toBe(20);
+    });
+
+    it("returns NaN when neither online nor transaction price is available", () => {
+      const priceMap: Record<string, History<number>> = {};
+
+      expect(getCurrentPrice(portfolio, "unknown-asset", priceMap)).toBeNaN();
+    });
+  });
+
+  describe("getPositionSummary", () => {
+    const DAY1 = "2024-06-01";
+    const DAY2 = "2024-06-02";
+    const DAY3 = "2024-06-03";
+
+    it("aggregates totalValue, realizedGains, nonRealizedGains and profit for open batches", () => {
+      const portfolio = createTestPortfolio(
+        [
+          {
+            asset: "asset",
+            sharePrice: 100,
+            pieces: 10,
+            orderFee: 2,
+            taxes: 0,
+            timestamp: DAY1,
+          },
+          {
+            asset: "asset",
+            sharePrice: 110,
+            pieces: 10,
+            orderFee: 4,
+            taxes: 0,
+            timestamp: DAY2,
+          },
+          {
+            asset: "asset",
+            sharePrice: 115,
+            pieces: -15,
+            orderFee: 1,
+            taxes: 3,
+            timestamp: DAY3,
+          },
+        ],
+        []
+      );
+      const isins = getAssetsForBatchType(portfolio, "open");
+      const priceMap: Record<string, History<number>> = {};
+
+      const summary = getPositionSummary(portfolio, isins, "open", priceMap);
+
+      const currentPrice = getLatestPriceFromTransactions(portfolio, "asset");
+      const pieces = getPiecesOfIsinInPortfolio(portfolio, "asset", "open");
+      const expectedTotalValue = pieces * currentPrice!;
+      const expectedRealized = getRealizedGainsForIsin(portfolio, "asset");
+      const expectedNonRealized = getNonRealizedGainsForIsin(
+        portfolio,
+        "asset",
+        currentPrice!
+      );
+
+      expect(summary.count).toBe(1);
+      expect(summary.totalValue).toBeCloseTo(expectedTotalValue, 6);
+      expect(summary.realizedGains).toBeCloseTo(expectedRealized, 6);
+      expect(summary.nonRealizedGains).toBeCloseTo(expectedNonRealized, 6);
+      expect(summary.profit).toBeCloseTo(
+        expectedRealized + expectedNonRealized,
+        6
+      );
+    });
+
+    it("uses online prices when available, preferring them over transaction prices", () => {
+      const portfolio = createTestPortfolio(
+        [
+          {
+            asset: "asset",
+            sharePrice: 100,
+            pieces: 10,
+            orderFee: 0,
+            taxes: 0,
+            timestamp: DAY1,
+          },
+        ],
+        []
+      );
+      const isins = getAssetsForBatchType(portfolio, "open");
+      const onlinePrice = 150;
+      const priceMap: Record<string, History<number>> = {
+        asset: [{ timestamp: new Date(DAY1).getTime(), value: onlinePrice }],
+      };
+
+      const summary = getPositionSummary(portfolio, isins, "open", priceMap);
+
+      expect(summary.totalValue).toBe(10 * onlinePrice);
+      expect(summary.nonRealizedGains).toBe(10 * onlinePrice - 10 * 100);
+    });
+
+    it("aggregates sold value for closed batches", () => {
+      const portfolio = createTestPortfolio(
+        [
+          {
+            asset: "asset",
+            sharePrice: 100,
+            pieces: 10,
+            orderFee: 1,
+            taxes: 0,
+            timestamp: DAY1,
+          },
+          {
+            asset: "asset",
+            sharePrice: 130,
+            pieces: -10,
+            orderFee: 1,
+            taxes: 3,
+            timestamp: DAY2,
+          },
+        ],
+        []
+      );
+      const isins = getAssetsForBatchType(portfolio, "closed");
+      const priceMap: Record<string, History<number>> = {};
+
+      const summary = getPositionSummary(portfolio, isins, "closed", priceMap);
+
+      expect(summary.count).toBe(1);
+      expect(summary.totalValue).toBe(130 * 10);
+      expect(summary.realizedGains).toBe(
+        getRealizedGainsForIsin(portfolio, "asset")
+      );
+      expect(summary.nonRealizedGains).toBe(0);
+      expect(summary.profit).toBe(summary.realizedGains);
+    });
+
+    it("returns zero/NaN totals for an empty isin list", () => {
+      const portfolio = getTestPortfolio({});
+      const priceMap: Record<string, History<number>> = {};
+
+      const summary = getPositionSummary(portfolio, [], "open", priceMap);
+
+      expect(summary.count).toBe(0);
+      expect(summary.totalValue).toBe(0);
+      expect(summary.realizedGains).toBe(0);
+      expect(summary.nonRealizedGains).toBe(0);
+      expect(summary.profit).toBe(0);
+    });
+
+    it("aggregates across multiple isins of the same batch type", () => {
+      const portfolio = createTestPortfolio(
+        [
+          {
+            asset: "a1",
+            sharePrice: 100,
+            pieces: 2,
+            orderFee: 0,
+            taxes: 0,
+            timestamp: DAY1,
+          },
+          {
+            asset: "a2",
+            sharePrice: 50,
+            pieces: 4,
+            orderFee: 0,
+            taxes: 0,
+            timestamp: DAY2,
+          },
+          {
+            asset: "a1",
+            sharePrice: 110,
+            pieces: -1,
+            orderFee: 0,
+            taxes: 0,
+            timestamp: DAY3,
+          },
+        ],
+        []
+      );
+      const isins = getAssetsForBatchType(portfolio, "open");
+      const priceMap: Record<string, History<number>> = {};
+
+      const summary = getPositionSummary(portfolio, isins, "open", priceMap);
+
+      const expectedTotalValue =
+        getPiecesOfIsinInPortfolio(portfolio, "a1", "open") *
+          getLatestPriceFromTransactions(portfolio, "a1")! +
+        getPiecesOfIsinInPortfolio(portfolio, "a2", "open") *
+          getLatestPriceFromTransactions(portfolio, "a2")!;
+
+      expect(summary.count).toBe(2);
+      expect(summary.totalValue).toBeCloseTo(expectedTotalValue, 6);
+      expect(summary.realizedGains).toBe(
+        getRealizedGainsForIsin(portfolio, "a1") +
+          getRealizedGainsForIsin(portfolio, "a2")
+      );
     });
   });
 
