@@ -229,6 +229,9 @@ export const getTotalCashFlowHistory = (portfolio: Portfolio) =>
     sort(getActivitiesForPortfolio(portfolio), (o) => getNumericDateTime(o))
   );
 
+export const getTotalCashFlow = (portfolio: Portfolio): number =>
+  last(getTotalCashFlowHistory(portfolio))?.value ?? 0;
+
 const getCashFlowsMergedAtSameTimestamp = (
   portfolio: Portfolio
 ): History<number> => {
@@ -263,6 +266,19 @@ export const getMarketValueHistory = (
     ),
   }));
 };
+
+export const getMarketValue = (
+  portfolio: Portfolio,
+  priceMap: PriceMap,
+  timestamp: number = Date.now()
+): number =>
+  sum(
+    getIsins(portfolio).map(
+      (isin) =>
+        getPiecesOfIsinInPortfolio(portfolio, isin) *
+        (getPriceAtTimestamp(portfolio, isin, timestamp, priceMap) ?? NaN)
+    )
+  );
 
 /**
  * First, try to find the price of an asset by an exact match in the transactions.

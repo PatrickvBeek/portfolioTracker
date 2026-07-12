@@ -22,12 +22,14 @@ import {
   getAnnualizedReturn,
   getBuyValueHistoryForPortfolio,
   getLatestPriceFromTransactions,
+  getMarketValue,
   getMarketValueHistory,
   getNonRealizedGainsForIsin,
   getOrderFeesOfIsinInPortfolio,
   getPortfolioAgeYears,
   getRealAnnualizedReturn,
   getRealizedGainsForIsin,
+  getTotalCashFlow,
   isOrderValidForPortfolio,
   portfolioContainsOrder,
 } from "./portfolio.derivers";
@@ -480,6 +482,124 @@ describe("The Portfolio deriver", () => {
         { timestamp: xAxis[3], value: 10.3 },
         { timestamp: xAxis[4], value: 10.4 },
       ]);
+    });
+  });
+
+  describe("getTotalCashFlow", () => {
+    it("returns the final accumulated cash flow of the portfolio", () => {
+      const portfolio = getTestPortfolio({
+        orders: getTestOrdersGroupedByAsset([
+          {
+            asset: "a1",
+            timestamp: "2024-01-01",
+            sharePrice: 100,
+            pieces: 10,
+            orderFee: 1,
+            taxes: 0,
+          },
+          {
+            asset: "a1",
+            timestamp: "2024-02-01",
+            sharePrice: 110,
+            pieces: -5,
+            orderFee: 2,
+            taxes: 3,
+          },
+        ]),
+        dividendPayouts: getTestDividendPayoutsGroupedByAsset([
+          {
+            asset: "a1",
+            pieces: 5,
+            dividendPerShare: 2,
+            taxes: 1,
+            timestamp: "2024-01-15",
+          },
+        ]),
+      });
+
+      // buy: +(100*10 + 1) = 1001
+      // dividend: -(5*2 - 1) = -9
+      // sell: +(-110*5 + 2 + 3) = -545
+      const expected = 1001 - 9 - 545;
+
+      expect(getTotalCashFlow(portfolio)).toEqual(expected);
+    });
+
+    it("returns 0 for a portfolio with no orders", () => {
+      expect(getTotalCashFlow(getTestPortfolio({}))).toBe(0);
+    });
+  });
+
+  describe("getMarketValue", () => {
+    const DAY1 = "2020-03-01";
+    const DAY2 = "2020-03-02";
+    const DAY3 = "2020-03-03";
+    const DAY4 = "2020-03-04";
+    const DAY5 = "2020-03-05";
+
+    it("sums pieces times price across isins at the given timestamp", () => {
+      const orders = getTestOrdersGroupedByAsset([
+        { asset: "a1", pieces: 1, sharePrice: 100, timestamp: DAY1 },
+        { asset: "a2", pieces: 1, sharePrice: 10, timestamp: DAY2 },
+        { asset: "a1", pieces: -1, sharePrice: 103, timestamp: DAY4 },
+      ]);
+
+      const portfolio = getTestPortfolio({ orders });
+      const priceMap: Record<string, History<number>> = {
+        a1: [
+          { timestamp: new Date(DAY1).getTime(), value: 100 },
+          { timestamp: new Date(DAY2).getTime(), value: 101 },
+          { timestamp: new Date(DAY3).getTime(), value: 102 },
+          { timestamp: new Date(DAY4).getTime(), value: 103 },
+          { timestamp: new Date(DAY5).getTime(), value: 104 },
+        ],
+        a2: [
+          { timestamp: new Date(DAY1).getTime(), value: 10.0 },
+          { timestamp: new Date(DAY2).getTime(), value: 10.1 },
+          { timestamp: new Date(DAY3).getTime(), value: 10.2 },
+          { timestamp: new Date(DAY4).getTime(), value: 10.3 },
+          { timestamp: new Date(DAY5).getTime(), value: 10.4 },
+        ],
+      };
+
+      // a1 was sold (0 pieces open), a2 has 1 piece @ 10.4
+      expect(
+        getMarketValue(portfolio, priceMap, new Date(DAY5).getTime())
+      ).toBeCloseTo(10.4, 6);
+    });
+
+    it("uses the latest transaction price when online prices are missing", () => {
+      const orders = getTestOrdersGroupedByAsset([
+        { asset: "a1", pieces: 10, sharePrice: 100, timestamp: DAY1 },
+        { asset: "b1", pieces: 5, sharePrice: 200, timestamp: DAY2 },
+      ]);
+
+      const portfolio = getTestPortfolio({ orders });
+      const priceMap: Record<string, History<number>> = {
+        a1: [],
+        b1: [],
+      };
+
+      expect(
+        getMarketValue(portfolio, priceMap, new Date(DAY5).getTime())
+      ).toBe(10 * 100 + 5 * 200);
+    });
+
+    it("defaults timestamp to Date.now()", () => {
+      vi.setSystemTime(DAY5);
+
+      const orders = getTestOrdersGroupedByAsset([
+        { asset: "a1", pieces: 2, sharePrice: 50, timestamp: DAY1 },
+      ]);
+
+      const portfolio = getTestPortfolio({ orders });
+      const priceMap: Record<string, History<number>> = {
+        a1: [{ timestamp: new Date(DAY5).getTime(), value: 42 }],
+      };
+
+      expect(getMarketValue(portfolio, priceMap)).toBe(2 * 42);
+
+      vi.useRealTimers();
     });
   });
 

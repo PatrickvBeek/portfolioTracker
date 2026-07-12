@@ -3,14 +3,13 @@ import {
   getAnnualizedReturn,
   getFirstOrderTimeStamp,
   getIsins,
+  getMarketValue,
   getNonRealizedGains,
-  getPiecesOfIsinInPortfolio,
   getPortfolioAgeYears,
-  getPriceAtTimestamp,
   getRealAnnualizedReturn,
   getRealizedGains,
   getTimeWeightedReturn,
-  getTotalCashFlowHistory,
+  getTotalCashFlow,
 } from "pt-domain";
 import { max, sum } from "radash";
 import { useGetPortfoliosByNames } from "../../../userDataContext";
@@ -26,9 +25,7 @@ const sumNullableNumberArray = (values: (number | undefined)[]): number =>
 
 export const useCashFlow = (portfolioNames: string[]): number => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
-  const cashFlows = portfolios.map(
-    (p) => getTotalCashFlowHistory(p).at(-1)?.value
-  );
+  const cashFlows = portfolios.map((p) => getTotalCashFlow(p));
   return sumNullableNumberArray(cashFlows);
 };
 
@@ -71,21 +68,9 @@ export const useMarketValue = (
     return { isLoading: false, isError: false, data: 0 };
   }
 
-  const marketValuePerPortfolio = portfolios.map((portfolio) => {
-    const isins = getIsins(portfolio);
-    return sum(
-      isins.map(
-        (isin) =>
-          getPiecesOfIsinInPortfolio(portfolio, isin) *
-          (getPriceAtTimestamp(
-            portfolio,
-            isin,
-            Date.now(),
-            priceMapQuery.data
-          ) ?? NaN)
-      )
-    );
-  });
+  const marketValuePerPortfolio = portfolios.map((portfolio) =>
+    getMarketValue(portfolio, priceMapQuery.data)
+  );
 
   return {
     isLoading: priceMapQuery.isLoading,
