@@ -1,4 +1,5 @@
 import { it, vi } from "vitest";
+import { generateConstantRateInflationIndex } from "../portfolioHistory/inflation";
 import {
   getElementsGroupedByAsset,
   getTestDividendPayout,
@@ -18,11 +19,14 @@ import {
   TEST_ORDER_TESLA,
 } from "../testConstants";
 import {
+  getAnnualizedReturn,
   getBuyValueHistoryForPortfolio,
   getLatestPriceFromTransactions,
   getMarketValueHistory,
   getNonRealizedGainsForIsin,
   getOrderFeesOfIsinInPortfolio,
+  getPortfolioAgeYears,
+  getRealAnnualizedReturn,
   getRealizedGainsForIsin,
   isOrderValidForPortfolio,
   portfolioContainsOrder,
@@ -553,6 +557,169 @@ describe("The Portfolio deriver", () => {
           { timestamp: DAY3, value: 20 },
         ])
       );
+    });
+  });
+
+  describe("getPortfolioAgeYears", () => {
+    beforeEach(() => vi.setSystemTime("2024-01-01"));
+
+    it("returns the age in years since the first order", () => {
+      const portfolio = getTestPortfolio({
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a1", timestamp: "2022-01-01", pieces: 1, sharePrice: 10 },
+        ]),
+      });
+
+      expect(getPortfolioAgeYears(portfolio)).toBeCloseTo(2, 1);
+    });
+
+    it("returns undefined for a portfolio with no orders", () => {
+      expect(getPortfolioAgeYears(getTestPortfolio({}))).toBeUndefined();
+    });
+
+    it("uses the earliest order timestamp", () => {
+      const portfolio = getTestPortfolio({
+        orders: getTestOrdersGroupedByAsset([
+          { asset: "a1", timestamp: "2023-01-01", pieces: 1, sharePrice: 10 },
+          { asset: "a2", timestamp: "2022-01-01", pieces: 1, sharePrice: 10 },
+        ]),
+      });
+
+      expect(getPortfolioAgeYears(portfolio)).toBeCloseTo(2, 1);
+    });
+  });
+
+  describe("getAnnualizedReturn", () => {
+    it("returns the geometric annualization of the total return", () => {
+      expect(getAnnualizedReturn(1.21, 2)).toBeCloseTo(1.1, 6);
+    });
+
+    it("returns undefined when age is zero", () => {
+      expect(getAnnualizedReturn(1.5, 0)).toBeUndefined();
+    });
+
+    it("returns undefined when age is negative", () => {
+      expect(getAnnualizedReturn(1.5, -1)).toBeUndefined();
+    });
+  });
+
+  describe("getRealAnnualizedReturn", () => {
+    const DAY1 = "2020-03-01";
+    beforeEach(() => vi.setSystemTime("2020-07-01"));
+
+    const portfolio = getTestPortfolio({
+      orders: getTestOrdersGroupedByAsset([
+        {
+          asset: "a1",
+          timestamp: DAY1,
+          pieces: 10,
+          sharePrice: 100,
+          orderFee: 1,
+          taxes: 0,
+        },
+        {
+          asset: "a1",
+          timestamp: "2020-04-01",
+          pieces: 10,
+          sharePrice: 110,
+          orderFee: 1,
+          taxes: 0,
+        },
+        {
+          asset: "b1",
+          timestamp: "2020-05-01",
+          pieces: 10,
+          sharePrice: 200,
+          orderFee: 1,
+          taxes: 0,
+        },
+        {
+          asset: "a1",
+          timestamp: "2020-05-01",
+          pieces: -10,
+          sharePrice: 115,
+          orderFee: 1,
+          taxes: 5,
+        },
+      ]),
+    });
+    const priceMap: Record<string, History<number>> = { a1: [], b1: [] };
+
+    it("matches hand-computed deflated TWR annualized", () => {
+      const now = new Date("2020-07-01").getTime();
+      const startDate = new Date(DAY1).getTime();
+      const inflationIndex = generateConstantRateInflationIndex(
+        startDate,
+        now,
+        0.02
+      );
+
+      // Hand-computed TWR for this portfolio (priceMap empty -> transaction prices):
+      //   t1=2020-03-01: buy  10 a1 @100  -> MV=1000, CF=1001
+      //   t2=2020-04-01: buy  10 a1 @110  -> MV=2200, CF=1101
+      //   t3=2020-05-01: buy  10 b1 @200, sell 10 a1 @115 -> MV=3150, CF=2001-1144=857
+      //   t4=2020-07-01: no cash flow     -> MV=3150, CF=0
+      //   r2 = (2200-1101)/1000 = 1.099
+      //   r3 = (3150- 857)/2200 = 1.0422727...
+      //   r4 = (3150-   0)/3150 = 1
+      //   twr = 1.099 * 1.0422727 * 1 = 1.1454577...
+      const twr = 1.1454577272727273;
+
+      // Inflation 2% p.a. over ~4 months (1/3 year):
+      //   inflationFactor = 1.02^(1/3) = 1.006636...
+      //   realTwr = twr / inflationFactor = 1.137906...
+      //   age = (t4 - t1) / (ms per 365.25-day year) = 0.334017...
+      //   realAnnualized = realTwr^(1/age) = 1.472225...
+      //   => 47.22% p.a.
+      const age = (now - startDate) / (1000 * 60 * 60 * 24 * 365.25);
+      const inflationFactor = Math.pow(1.02, age);
+      const realTwr = twr / inflationFactor;
+      const expectedRealAnnualized = Math.pow(realTwr, 1 / age);
+
+      const realAnnualized = getRealAnnualizedReturn(
+        portfolio,
+        priceMap,
+        inflationIndex,
+        now
+      );
+      expect(realAnnualized).toBeDefined();
+      expect(realAnnualized).toBeCloseTo(expectedRealAnnualized, 6);
+    });
+
+    it("is less than the nominal annualized return", () => {
+      const now = new Date("2020-07-01").getTime();
+      const startDate = new Date(DAY1).getTime();
+      const age = (now - startDate) / (1000 * 60 * 60 * 24 * 365.25);
+
+      const twr = 1.1454577272727273;
+      const nominalAnnualized = Math.pow(twr, 1 / age);
+
+      const inflationIndex = generateConstantRateInflationIndex(
+        startDate,
+        now,
+        0.02
+      );
+      const realAnnualized = getRealAnnualizedReturn(
+        portfolio,
+        priceMap,
+        inflationIndex,
+        now
+      );
+
+      expect(realAnnualized! < nominalAnnualized).toBe(true);
+    });
+
+    it("returns undefined when there are no orders", () => {
+      const emptyPortfolio = getTestPortfolio({});
+      const inflationIndex = generateConstantRateInflationIndex(
+        new Date("2020-01-01").getTime(),
+        new Date("2020-07-01").getTime(),
+        0.02
+      );
+
+      expect(
+        getRealAnnualizedReturn(emptyPortfolio, {}, inflationIndex)
+      ).toBeUndefined();
     });
   });
 });

@@ -1,31 +1,25 @@
 import {
   combinePortfolios,
-  deflateByIndex,
-  getActivitiesForPortfolio,
+  getAnnualizedReturn,
   getFirstOrderTimeStamp,
   getIsins,
   getNonRealizedGains,
-  getNumericDateTime,
   getPiecesOfIsinInPortfolio,
+  getPortfolioAgeYears,
   getPriceAtTimestamp,
+  getRealAnnualizedReturn,
   getRealizedGains,
   getTimeWeightedReturn,
-  getTimeWeightedReturnHistory,
   getTotalCashFlowHistory,
 } from "pt-domain";
-import { min, sum } from "radash";
+import { max, sum } from "radash";
 import { useGetPortfoliosByNames } from "../../../userDataContext";
 import {
   CustomQuery,
   useGetPricesForIsins,
 } from "../../../hooks/prices/priceHooks";
 import { useInflationIndex } from "../../../hooks/inflation/inflationHooks";
-import { rel2percentage } from "../../../utility/percent";
 import { isNotNil } from "../../../utility/types";
-
-const toYear = (ms: number): number => {
-  return ms / (1000 * 60 * 60 * 24 * 365);
-};
 
 const sumNullableNumberArray = (values: (number | undefined)[]): number =>
   sum(values.map((v) => v ?? 0));
@@ -101,14 +95,10 @@ export const useMarketValue = (
 };
 
 export const usePortfolioAge = (portfolioNames: string[]): number => {
-  const startDates = useGetPortfoliosByNames(portfolioNames)
-    .map(getActivitiesForPortfolio)
-    .map((activities) => activities[0])
-    .filter(isNotNil)
-    .map(getNumericDateTime);
-
-  const earliestStart = min(startDates);
-  return earliestStart ? toYear(Date.now() - earliestStart) : NaN;
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const ages = portfolios.map((p) => getPortfolioAgeYears(p)).filter(isNotNil);
+  const earliest = max(ages);
+  return earliest ?? NaN;
 };
 
 export const useTimeWeightedReturn = (
@@ -130,6 +120,28 @@ export const useTimeWeightedReturn = (
   };
 };
 
+export const useAnnualizedReturn = (
+  portfolioNames: string[]
+): CustomQuery<number | undefined> => {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  const isins = getIsins(merged);
+  const priceMapQuery = useGetPricesForIsins(isins);
+  const age = usePortfolioAge(portfolioNames);
+
+  if (portfolios.length === 0) {
+    return { isLoading: false, isError: false, data: undefined };
+  }
+
+  const twr = getTimeWeightedReturn(merged, priceMapQuery.data);
+
+  return {
+    isLoading: priceMapQuery.isLoading,
+    isError: priceMapQuery.isError,
+    data: twr !== undefined ? getAnnualizedReturn(twr, age) : undefined,
+  };
+};
+
 export const useRealAnnualizedReturn = (
   portfolioNames: string[]
 ): CustomQuery<number | undefined> => {
@@ -137,8 +149,8 @@ export const useRealAnnualizedReturn = (
   const merged = combinePortfolios(portfolios);
   const isins = getIsins(merged);
   const priceMapQuery = useGetPricesForIsins(isins);
-  const portfolioAge = usePortfolioAge(portfolioNames);
 
+  const now = Date.now();
   const startDate = getFirstOrderTimeStamp(merged) ?? undefined;
   const inflationIndex = useInflationIndex(startDate);
 
@@ -146,18 +158,14 @@ export const useRealAnnualizedReturn = (
     return { isLoading: false, isError: false, data: undefined };
   }
 
-  const twrHistory = priceMapQuery.data
-    ? getTimeWeightedReturnHistory(merged, priceMapQuery.data)
-    : [];
-  const realTwr = deflateByIndex(twrHistory, inflationIndex).at(-1)?.value;
-  const realAnnualizedReturn =
-    realTwr !== undefined && portfolioAge > 0
-      ? rel2percentage(Math.pow(realTwr, 1 / portfolioAge))
-      : undefined;
-
   return {
     isLoading: priceMapQuery.isLoading,
     isError: priceMapQuery.isError,
-    data: realAnnualizedReturn,
+    data: getRealAnnualizedReturn(
+      merged,
+      priceMapQuery.data,
+      inflationIndex,
+      now
+    ),
   };
 };

@@ -8,6 +8,7 @@ import { Heading } from "../../ui/Heading";
 import { Tooltip } from "../../ui/Tooltip";
 import { pageLayout } from "../../ui/page-layout.styles";
 import {
+  useAnnualizedReturn,
   useCashFlow,
   useMarketValue,
   useNonRealizedGains,
@@ -27,7 +28,7 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
   const marketValue = useMarketValue(portfolioNames);
   const portfolioAge = usePortfolioAge(portfolioNames);
   const twr = useTimeWeightedReturn(portfolioNames);
-  const twrA = twr?.data && Math.pow(twr.data, 1 / portfolioAge);
+  const annualizedReturn = useAnnualizedReturn(portfolioNames);
   const realReturn = useRealAnnualizedReturn(portfolioNames);
 
   return (
@@ -91,10 +92,10 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
           },
           {
             label: "\u2B91 Annualized",
-            value: twr?.isLoading ? (
+            value: annualizedReturn?.isLoading ? (
               <LoadingIndicator />
             ) : (
-              `${twrA ? rel2percentage(twrA).toFixed(1) : NaN} %`
+              `${annualizedReturn?.data !== undefined ? rel2percentage(annualizedReturn.data).toFixed(1) : NaN} %`
             ),
           },
           {
@@ -102,7 +103,7 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
             value: realReturn?.isLoading ? (
               <LoadingIndicator />
             ) : (
-              `${realReturn?.data !== undefined ? realReturn.data.toFixed(1) : NaN} %`
+              `${realReturn?.data !== undefined ? rel2percentage(realReturn.data).toFixed(1) : NaN} %`
             ),
             info: "The annualized return adjusted for inflation, showing the real purchasing power gained or lost over time. Inflation is assumed to be 2% p.a., as this is the EZB's target rate.",
           },

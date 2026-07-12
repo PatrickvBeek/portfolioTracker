@@ -25,6 +25,7 @@ import {
   mergePointsAtSameTimestamp,
   pickValueFromHistory,
 } from "../portfolioHistory/history.derivers";
+import { deflateByIndex } from "../portfolioHistory/inflation";
 import { History } from "../portfolioHistory/history.entities";
 import { updateBy } from "../utils/arrays";
 import { isFloatPositive } from "../utils/floats";
@@ -378,4 +379,35 @@ export const getProfitHistory = (
       value: marketValuePoint.value - latestCashFlow,
     };
   });
+};
+
+const MS_PER_YEAR = 1000 * 60 * 60 * 24 * 365.25;
+
+export const getPortfolioAgeYears = (
+  portfolio: Portfolio,
+  now: number = Date.now()
+): number | undefined => {
+  const firstOrder = getFirstOrderTimeStamp(portfolio);
+  return firstOrder ? (now - firstOrder) / MS_PER_YEAR : undefined;
+};
+
+export const getAnnualizedReturn = (
+  totalReturn: number,
+  ageYears: number
+): number | undefined =>
+  ageYears > 0 ? Math.pow(totalReturn, 1 / ageYears) : undefined;
+
+export const getRealAnnualizedReturn = (
+  portfolio: Portfolio,
+  priceMap: PriceMap,
+  inflationIndex: History<number>,
+  now: number = Date.now()
+): number | undefined => {
+  const twrHistory = getTimeWeightedReturnHistory(portfolio, priceMap, [now]);
+  const realTwr = last(deflateByIndex(twrHistory, inflationIndex))?.value;
+  const age = getPortfolioAgeYears(portfolio, now);
+
+  return realTwr !== undefined && age !== undefined
+    ? getAnnualizedReturn(realTwr, age)
+    : undefined;
 };
