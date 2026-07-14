@@ -24,19 +24,23 @@ import {
 } from "../chartUtils";
 import {
   PerformanceChartDataSets,
+  TwrMode,
   usePerformanceChartData,
 } from "./TimeWeightedReturnChart.logic";
 import { styles } from "./TimeWeightedReturnChart.styles";
+import { TwrModeSelector } from "./TwrModeSelector";
 
 export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
   portfolioNames,
 }) => {
   const [benchmark, setBenchmark] = useState("");
   const [range, setRange] = useState<ChartRange>("Max");
+  const [twrMode, setTwrMode] = useState<TwrMode>("nominal");
   const { isLoading, data } = usePerformanceChartData(
     portfolioNames,
     benchmark,
-    range
+    range,
+    twrMode
   );
 
   const { gradientDefinition, fillUrl, strokeUrl } = getSplitColorGradientDef(
@@ -51,6 +55,7 @@ export const TimeWeightedReturnChart: FC<{ portfolioNames: string[] }> = ({
           <Heading level="section">Time Weighted Return</Heading>
           <div className={styles.controls}>
             <ChartRangeSelector value={range} onChange={setRange} />
+            <TwrModeSelector value={twrMode} onChange={setTwrMode} />
             <div className={styles.benchmarkSelect}>
               <AssetDropdown
                 onChange={(isin) => setBenchmark(isin || "")}
