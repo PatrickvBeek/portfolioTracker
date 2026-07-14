@@ -1,4 +1,4 @@
-import { last, mapValues, min, partial, sort, sum } from "radash";
+import { last, mapValues, min, partial, sort, sum, unique } from "radash";
 import {
   getActivityCashFlow,
   getCashFlowHistoryForActivities,
@@ -24,13 +24,31 @@ import {
   getPiecesAtTimeStamp,
   mergePointsAtSameTimestamp,
   pickValueFromHistory,
+  removeDuplicatesAtSameTimeStamp,
 } from "../portfolioHistory/history.derivers";
+import { deflateByIndex } from "../portfolioHistory/inflation";
 import { History } from "../portfolioHistory/history.entities";
 import { updateBy } from "../utils/arrays";
 import { isFloatPositive } from "../utils/floats";
 import { Portfolio } from "./portfolio.entities";
 
 type PriceMap = Record<string, History<number>>;
+
+export type PositionSummary = {
+  count: number;
+  totalValue: number | undefined;
+  realizedGains: number | undefined;
+  nonRealizedGains: number | undefined;
+  profit: number | undefined;
+};
+
+export const EMPTY_POSITION_SUMMARY: PositionSummary = {
+  count: 0,
+  totalValue: undefined,
+  realizedGains: undefined,
+  nonRealizedGains: undefined,
+  profit: undefined,
+};
 
 export const EMPTY_PORTFOLIO = {
   name: "",
@@ -177,6 +195,57 @@ export const getNonRealizedGainsForIsin = (
     getProfitForOpenBatch(batch, currentPrice)
   );
 
+export const getPositionSummary = (
+  portfolio: Portfolio,
+  isins: string[],
+  batchType: BatchType,
+  priceMap: PriceMap
+): PositionSummary => {
+  const totalValue = sum(
+    isins.map((isin) => {
+      const currentPrice = getCurrentPrice(portfolio, isin, priceMap);
+      return batchType === "open"
+        ? getCurrentValueOfOpenBatches(portfolio, isin, currentPrice)
+        : getSoldValueOfClosedBatches(portfolio, isin);
+    })
+  );
+
+  const realizedGains = sum(
+    isins.map((isin) => getRealizedGainsForIsin(portfolio, isin))
+  );
+
+  const nonRealizedGains = sum(
+    isins.map((isin) =>
+      getNonRealizedGainsForIsin(
+        portfolio,
+        isin,
+        getCurrentPrice(portfolio, isin, priceMap)
+      )
+    )
+  );
+
+  const profit = sum(
+    isins.map((isin) => {
+      const currentPrice = getCurrentPrice(portfolio, isin, priceMap);
+      const nonRealized = getNonRealizedGainsForIsin(
+        portfolio,
+        isin,
+        currentPrice
+      );
+      const realized = getRealizedGainsForIsin(portfolio, isin);
+      return realized + nonRealized;
+    })
+  );
+
+  return {
+    count: isins.length,
+    totalValue,
+    realizedGains,
+    nonRealizedGains,
+    profit,
+  };
+};
+
 export const portfolioContainsOrder = (
   portfolio: Portfolio,
   order: Order
@@ -217,6 +286,15 @@ export const getLatestPriceFromTransactions = (
     (a) => a.sharePrice
   )?.sharePrice;
 
+export const getCurrentPrice = (
+  portfolio: Portfolio,
+  isin: string,
+  priceMap: PriceMap
+): number =>
+  priceMap[isin]?.at(-1)?.value ??
+  getLatestPriceFromTransactions(portfolio, isin) ??
+  NaN;
+
 export const getCurrentValueOfOpenBatches = (
   portfolio: Portfolio,
   isin: string,
@@ -227,6 +305,9 @@ export const getTotalCashFlowHistory = (portfolio: Portfolio) =>
   getCashFlowHistoryForActivities(
     sort(getActivitiesForPortfolio(portfolio), (o) => getNumericDateTime(o))
   );
+
+export const getTotalCashFlow = (portfolio: Portfolio): number =>
+  last(getTotalCashFlowHistory(portfolio))?.value ?? 0;
 
 const getCashFlowsMergedAtSameTimestamp = (
   portfolio: Portfolio
@@ -262,6 +343,19 @@ export const getMarketValueHistory = (
     ),
   }));
 };
+
+export const getMarketValue = (
+  portfolio: Portfolio,
+  priceMap: PriceMap,
+  timestamp: number = Date.now()
+): number =>
+  sum(
+    getIsins(portfolio).map(
+      (isin) =>
+        getPiecesOfIsinInPortfolio(portfolio, isin) *
+        (getPriceAtTimestamp(portfolio, isin, timestamp, priceMap) ?? NaN)
+    )
+  );
 
 /**
  * First, try to find the price of an asset by an exact match in the transactions.
@@ -360,6 +454,26 @@ export const getBuyValueHistoryForPortfolio = (
   );
 };
 
+export const getCombinedBuyValueHistory = (
+  portfolios: Portfolio[]
+): History<number> => {
+  const allHistories = portfolios.map(getBuyValueHistoryForPortfolio);
+
+  const allTimestamps = unique(
+    allHistories.flat().map((p) => p.timestamp)
+  ).toSorted((a, b) => a - b);
+
+  const merged = allTimestamps.map((timestamp) => ({
+    timestamp,
+    value: sum(
+      allHistories,
+      (history) => pickValueFromHistory(history, timestamp)?.value ?? 0
+    ),
+  }));
+
+  return removeDuplicatesAtSameTimeStamp(merged);
+};
+
 export const getProfitHistory = (
   portfolio: Portfolio,
   priceMap: PriceMap,
@@ -378,4 +492,35 @@ export const getProfitHistory = (
       value: marketValuePoint.value - latestCashFlow,
     };
   });
+};
+
+const MS_PER_YEAR = 1000 * 60 * 60 * 24 * 365.25;
+
+export const getPortfolioAgeYears = (
+  portfolio: Portfolio,
+  now: number = Date.now()
+): number | undefined => {
+  const firstOrder = getFirstOrderTimeStamp(portfolio);
+  return firstOrder ? (now - firstOrder) / MS_PER_YEAR : undefined;
+};
+
+export const getAnnualizedReturn = (
+  totalReturn: number,
+  ageYears: number
+): number | undefined =>
+  ageYears > 0 ? Math.pow(totalReturn, 1 / ageYears) : undefined;
+
+export const getRealAnnualizedReturn = (
+  portfolio: Portfolio,
+  priceMap: PriceMap,
+  inflationIndex: History<number>,
+  now: number = Date.now()
+): number | undefined => {
+  const twrHistory = getTimeWeightedReturnHistory(portfolio, priceMap, [now]);
+  const realTwr = last(deflateByIndex(twrHistory, inflationIndex))?.value;
+  const age = getPortfolioAgeYears(portfolio, now);
+
+  return realTwr !== undefined && age !== undefined
+    ? getAnnualizedReturn(realTwr, age)
+    : undefined;
 };

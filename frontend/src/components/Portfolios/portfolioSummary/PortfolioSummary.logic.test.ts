@@ -1,5 +1,6 @@
 import {
   generateConstantRateInflationIndex,
+  getRealAnnualizedReturn,
   getTestOrdersGroupedByAsset,
   getTestPortfolio,
 } from "pt-domain";
@@ -11,12 +12,13 @@ import {
 import { setUserData } from "../../../testUtils/localStorage";
 import { mockNetwork } from "../../../testUtils/networkMock";
 import {
+  useAnnualizedReturn,
   useCashFlow,
   useMarketValue,
   useNonRealizedGains,
   usePortfolioAge,
-  useRealizedGains,
   useRealAnnualizedReturn,
+  useRealizedGains,
   useTimeWeightedReturn,
 } from "./PortfolioSummary.logic";
 
@@ -164,44 +166,42 @@ describe("PortfolioSummary hooks", () => {
       expect(result.current?.data).toBeCloseTo(1.145);
     });
 
-    it("useRealAnnualizedReturn matches hand-computed deflated TWR", async () => {
-      const twr = customRenderHook(() =>
-        useTimeWeightedReturn([portfolioName])
+    it("useAnnualizedReturn", async () => {
+      const { result } = customRenderHook(() =>
+        useAnnualizedReturn([portfolioName])
       );
+
+      await customWaitFor(() => {
+        expect(result.current?.isLoading).toBe(false);
+      });
+
+      // TWR ≈ 1.145 over ~1/3 year → annualized = 1.145^3 ≈ 1.503
+      expect(result.current?.data).toBeCloseTo(Math.pow(1.145, 3), 1);
+    });
+
+    it("useRealAnnualizedReturn forwards domain result", async () => {
       const { result } = customRenderHook(() =>
         useRealAnnualizedReturn([portfolioName])
       );
 
       await customWaitFor(() => {
         expect(result.current?.isLoading).toBe(false);
-        expect(twr.result.current?.isLoading).toBe(false);
       });
-
-      const twrValue = twr.result.current?.data;
-      if (twrValue === undefined) {
-        throw new Error("TWR should be defined");
-      }
-      const realAnnualized = result.current?.data;
-      if (realAnnualized === undefined) {
-        throw new Error("real annualized return should be defined");
-      }
 
       const startDate = new Date("2000-03-01").getTime();
       const now = new Date("2000-07-01").getTime();
-      const age = (now - startDate) / (1000 * 60 * 60 * 24 * 365);
       const inflationIndex = generateConstantRateInflationIndex(
         startDate,
         now,
         0.02
       );
-      const inflationFactor = inflationIndex[inflationIndex.length - 1].value;
-      const expectedRealTwr = twrValue / inflationFactor;
-      const expectedRealAnnualized =
-        (Math.pow(expectedRealTwr, 1 / age) - 1) * 100;
+      const priceMap = Object.fromEntries(
+        Object.keys(testPortfolio.orders).map((isin) => [isin, []])
+      );
 
-      expect(realAnnualized).toBeCloseTo(expectedRealAnnualized, 1);
-      const nominalAnnualized = (Math.pow(twrValue, 1 / age) - 1) * 100;
-      expect(realAnnualized).toBeLessThan(nominalAnnualized);
+      expect(result.current?.data).toBe(
+        getRealAnnualizedReturn(testPortfolio, priceMap, inflationIndex, now)
+      );
     });
   });
 
@@ -241,6 +241,15 @@ describe("PortfolioSummary hooks", () => {
 
     it("useTimeWeightedReturn returns undefined", () => {
       const { result } = customRenderHook(() => useTimeWeightedReturn([]));
+      expect(result.current).toEqual({
+        isLoading: false,
+        isError: false,
+        data: undefined,
+      });
+    });
+
+    it("useAnnualizedReturn returns undefined", () => {
+      const { result } = customRenderHook(() => useAnnualizedReturn([]));
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
