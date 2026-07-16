@@ -8,7 +8,7 @@ export const styles = {
   label: "block text-sm font-medium text-text-muted mb-1.5",
   errorMessage: "mt-1 text-xs text-danger",
   popoverContent:
-    "w-[var(--radix-popover-trigger-width)] rounded-md border border-border bg-bg-card shadow-md p-0",
+    "z-[1300] w-[var(--radix-popover-trigger-width)] rounded-md border border-border bg-bg-card shadow-md p-0",
   commandRoot: "flex flex-col overflow-hidden",
   commandInput:
     "w-full px-3 py-2.5 text-sm bg-transparent text-text placeholder:text-text-dim focus:outline-none border-b border-border",
