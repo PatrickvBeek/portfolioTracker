@@ -58,7 +58,7 @@ const AssetDropdown = ({
           {label}
         </label>
       )}
-      <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Root open={open} onOpenChange={setOpen} modal>
         <Popover.Trigger asChild>
           <button
             id={selectId}
