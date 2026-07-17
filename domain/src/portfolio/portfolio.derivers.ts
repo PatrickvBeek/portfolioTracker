@@ -436,6 +436,26 @@ export const getTimeWeightedReturnHistory = (
   return twr;
 };
 
+/**
+ * Real (inflation-adjusted) TWR. Deflates the nominal TWR series pointwise by
+ * the inflation index. Both series start at 1.0, so divergence shows inflation
+ * erosion directly. A missing inflation index yields the nominal series
+ * unchanged (deflateByIndex returns [] for an empty index, so mirror that by
+ * falling back to the nominal history).
+ */
+export const getRealTimeWeightedReturn = (
+  portfolio: Portfolio,
+  priceMap: PriceMap,
+  inflationIndex: History<number>,
+  baseAxis: number[] = [Date.now()]
+): History<number> => {
+  const nominal = getTimeWeightedReturnHistory(portfolio, priceMap, baseAxis);
+  if (!inflationIndex.length) {
+    return nominal;
+  }
+  return deflateByIndex(nominal, inflationIndex);
+};
+
 export const getBuyValueHistoryForPortfolio = (
   portfolio: Portfolio
 ): History<number> => {
@@ -516,8 +536,13 @@ export const getRealAnnualizedReturn = (
   inflationIndex: History<number>,
   now: number = Date.now()
 ): number | undefined => {
-  const twrHistory = getTimeWeightedReturnHistory(portfolio, priceMap, [now]);
-  const realTwr = last(deflateByIndex(twrHistory, inflationIndex))?.value;
+  const realTwrHistory = getRealTimeWeightedReturn(
+    portfolio,
+    priceMap,
+    inflationIndex,
+    [now]
+  );
+  const realTwr = last(realTwrHistory)?.value;
   const age = getPortfolioAgeYears(portfolio, now);
 
   return realTwr !== undefined && age !== undefined

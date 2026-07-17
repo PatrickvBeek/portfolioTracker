@@ -1,5 +1,4 @@
 import { it, vi } from "vitest";
-import { generateConstantRateInflationIndex } from "../portfolioHistory/inflation";
 import {
   getElementsGroupedByAsset,
   getTestDividendPayout,
@@ -11,6 +10,7 @@ import {
 import { DividendPayout } from "../dividendPayouts/dividend.entities";
 import { Order } from "../order/order.entities";
 import { History } from "../portfolioHistory/history.entities";
+import { generateConstantRateInflationIndex } from "../portfolioHistory/inflation";
 import {
   TEST_ASSET_GOOGLE,
   TEST_ASSET_TESLA,
@@ -20,9 +20,9 @@ import {
 } from "../testConstants";
 import {
   getAnnualizedReturn,
+  getAssetsForBatchType,
   getBuyValueHistoryForPortfolio,
   getCombinedBuyValueHistory,
-  getAssetsForBatchType,
   getCurrentPrice,
   getLatestPriceFromTransactions,
   getMarketValue,
@@ -30,10 +30,12 @@ import {
   getNonRealizedGainsForIsin,
   getOrderFeesOfIsinInPortfolio,
   getPiecesOfIsinInPortfolio,
-  getPositionSummary,
   getPortfolioAgeYears,
+  getPositionSummary,
   getRealAnnualizedReturn,
   getRealizedGainsForIsin,
+  getRealTimeWeightedReturn,
+  getTimeWeightedReturnHistory,
   getTotalCashFlow,
   isOrderValidForPortfolio,
   portfolioContainsOrder,
@@ -1172,6 +1174,127 @@ describe("The Portfolio deriver", () => {
       expect(
         getRealAnnualizedReturn(emptyPortfolio, {}, inflationIndex)
       ).toBeUndefined();
+    });
+  });
+
+  describe("getRealTimeWeightedReturn", () => {
+    const ASSET = "asset";
+    const T0 = new Date("2020-01-01").getTime();
+    const T1 = new Date("2021-01-01").getTime();
+
+    const buildPortfolio = (buyTimestamp: string): Portfolio =>
+      getTestPortfolio({
+        orders: getTestOrdersGroupedByAsset([
+          {
+            asset: ASSET,
+            pieces: 1,
+            sharePrice: 100,
+            taxes: 0,
+            orderFee: 0,
+            timestamp: buyTimestamp,
+          },
+        ]),
+      });
+
+    const buildPriceMap = (price: number): Record<string, History<number>> => ({
+      [ASSET]: [
+        { timestamp: T0, value: price },
+        { timestamp: T1, value: price },
+      ],
+    });
+
+    it("real TWR is below nominal TWR by the expected inflation amount", () => {
+      const portfolio = buildPortfolio("2020-01-01");
+      const priceMap = buildPriceMap(100);
+      const inflationIndex = generateConstantRateInflationIndex(T0, T1, 0.02);
+
+      const nominal = getTimeWeightedReturnHistory(portfolio, priceMap, [T1]);
+      const real = getRealTimeWeightedReturn(
+        portfolio,
+        priceMap,
+        inflationIndex,
+        [T1]
+      );
+
+      const lastNominal = nominal.at(-1)!.value;
+      const lastReal = real.at(-1)!.value;
+
+      expect(lastReal).toBeLessThan(lastNominal);
+      expect(lastReal).toBeCloseTo(1 / 1.02, 2);
+    });
+
+    it("first real TWR point is normalized to 1.0", () => {
+      const portfolio = buildPortfolio("2020-01-01");
+      const priceMap = buildPriceMap(100);
+      const inflationIndex = generateConstantRateInflationIndex(T0, T1, 0.02);
+
+      const real = getRealTimeWeightedReturn(
+        portfolio,
+        priceMap,
+        inflationIndex,
+        [T1]
+      );
+
+      expect(real[0].value).toBeCloseTo(1, 10);
+    });
+
+    it("flat inflation (rate 0) yields real === nominal point for point", () => {
+      const portfolio = buildPortfolio("2020-01-01");
+      const priceMap = buildPriceMap(100);
+      const flatInflation = generateConstantRateInflationIndex(T0, T1, 0);
+
+      const nominal = getTimeWeightedReturnHistory(portfolio, priceMap, [T1]);
+      const real = getRealTimeWeightedReturn(
+        portfolio,
+        priceMap,
+        flatInflation,
+        [T1]
+      );
+
+      expect(real.length).toBe(nominal.length);
+      for (let i = 0; i < nominal.length; i++) {
+        expect(real[i].value).toBeCloseTo(nominal[i].value, 10);
+      }
+    });
+
+    it("empty inflation index falls back to the nominal series", () => {
+      const portfolio = buildPortfolio("2020-01-01");
+      const priceMap = buildPriceMap(100);
+
+      const nominal = getTimeWeightedReturnHistory(portfolio, priceMap, [T1]);
+      const real = getRealTimeWeightedReturn(portfolio, priceMap, [], [T1]);
+
+      expect(real).toEqual(nominal);
+    });
+
+    it("preserves the nominal TWR timestamps", () => {
+      const portfolio = buildPortfolio("2020-01-01");
+      const priceMap = buildPriceMap(100);
+      const inflationIndex = generateConstantRateInflationIndex(T0, T1, 0.02);
+
+      const nominal = getTimeWeightedReturnHistory(portfolio, priceMap, [T1]);
+      const real = getRealTimeWeightedReturn(
+        portfolio,
+        priceMap,
+        inflationIndex,
+        [T1]
+      );
+
+      expect(real.map((p) => p.timestamp)).toEqual(
+        nominal.map((p) => p.timestamp)
+      );
+    });
+
+    it("returns [] for an empty portfolio (no cash flows)", () => {
+      const emptyPortfolio = getTestPortfolio({});
+      const priceMap = buildPriceMap(100);
+      const inflationIndex = generateConstantRateInflationIndex(T0, T1, 0.02);
+
+      expect(
+        getRealTimeWeightedReturn(emptyPortfolio, priceMap, inflationIndex, [
+          T1,
+        ])
+      ).toEqual([]);
     });
   });
 });

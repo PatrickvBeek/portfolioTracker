@@ -1,23 +1,29 @@
 import {
   anchorHistoryToBenchmarkStart,
   anchorHistoryToRangeStart,
+  deflateByIndex,
   getBenchmarkHistory,
   getFirstOrderTimeStamp,
   History,
   pickValueFromHistory,
 } from "pt-domain";
 import { min } from "radash";
+import { useInflationIndex } from "../../../hooks/inflation/inflationHooks";
 import { CustomQuery, usePriceQuery } from "../../../hooks/prices/priceHooks";
 import { useGetPortfoliosByNames, useSymbol } from "../../../userDataContext";
 import { isNotNil } from "../../../utility/types";
-import { useTimeWeightedReturnHistory } from "../chartHooks";
+import {
+  useRealTimeWeightedReturnHistory,
+  useTimeWeightedReturnHistory,
+} from "../chartHooks";
 import { ChartRange } from "../chartRange.types";
 import { ChartData } from "../chartTypes";
 import { getRangeStart, historiesToChartData } from "../chartUtils";
 
 const usePerformanceBenchmark = (
   portfolioNames: string[],
-  isin: string
+  isin: string,
+  mode: TwrMode = "nominal"
 ): CustomQuery<History<number>> | undefined => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const portfolioStartTime =
@@ -25,23 +31,43 @@ const usePerformanceBenchmark = (
     -Infinity;
 
   const symbol = useSymbol(isin);
-
-  return usePriceQuery(symbol, (priceHistory) =>
-    getBenchmarkHistory(priceHistory, portfolioStartTime)
+  const inflationIndex = useInflationIndex(
+    portfolioStartTime === -Infinity ? undefined : portfolioStartTime
   );
+
+  return usePriceQuery(symbol, (priceHistory) => {
+    const realPriceHistory =
+      mode === "real" && inflationIndex.length
+        ? deflateByIndex(priceHistory, inflationIndex)
+        : priceHistory;
+    return getBenchmarkHistory(realPriceHistory, portfolioStartTime);
+  });
 };
 
 export type PerformanceChartDataSets = "portfolio" | "benchmark";
 
+export type TwrMode = "nominal" | "real";
+
 export const usePerformanceChartData = (
   portfolioNames: string[],
   benchmarkIsin: string,
-  range: ChartRange
+  range: ChartRange,
+  mode: TwrMode = "nominal"
 ): CustomQuery<ChartData<PerformanceChartDataSets>> => {
-  const twrHistoryQuery = useTimeWeightedReturnHistory(portfolioNames, range);
+  const nominalTwrHistoryQuery = useTimeWeightedReturnHistory(
+    portfolioNames,
+    range
+  );
+  const realTwrHistoryQuery = useRealTimeWeightedReturnHistory(
+    portfolioNames,
+    range
+  );
+  const twrHistoryQuery =
+    mode === "real" ? realTwrHistoryQuery : nominalTwrHistoryQuery;
   const benchmarkHistoryQuery = usePerformanceBenchmark(
     portfolioNames,
-    benchmarkIsin
+    benchmarkIsin,
+    mode
   );
 
   const twrHistory = twrHistoryQuery?.data ?? [];

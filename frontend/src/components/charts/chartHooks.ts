@@ -5,6 +5,7 @@ import {
   getGeometricBrownianMotionParams,
   getHistoryPointMapper,
   getIsins,
+  getRealTimeWeightedReturn,
   getTimeWeightedReturnHistory,
   History,
   percentage2rel,
@@ -14,6 +15,7 @@ import {
   CustomQuery,
   useGetPricesForIsins,
 } from "../../hooks/prices/priceHooks";
+import { useInflationIndex } from "../../hooks/inflation/inflationHooks";
 import { useGetPortfoliosByNames } from "../../userDataContext";
 import { ChartRange } from "./chartRange.types";
 import { getDefaultTimeAxis } from "./chartUtils";
@@ -39,6 +41,28 @@ export const useTimeWeightedReturnHistory = (
     data: getTimeWeightedReturnHistory(
       merged,
       priceMapQuery.data,
+      xMin ? getDefaultTimeAxis(xMin, range) : undefined
+    ).map(getHistoryPointMapper(rel2percentage)),
+  };
+};
+
+export const useRealTimeWeightedReturnHistory = (
+  portfolioNames: string[],
+  range: ChartRange
+): CustomQuery<History<number>> | undefined => {
+  const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const merged = combinePortfolios(portfolios);
+  const priceMapQuery = usePortfolioPriceData(portfolioNames);
+  const xMin = getFirstOrderTimeStamp(merged);
+  const inflationIndex = useInflationIndex(xMin ?? undefined);
+
+  return {
+    isLoading: priceMapQuery.isLoading,
+    isError: priceMapQuery.isError,
+    data: getRealTimeWeightedReturn(
+      merged,
+      priceMapQuery.data,
+      inflationIndex,
       xMin ? getDefaultTimeAxis(xMin, range) : undefined
     ).map(getHistoryPointMapper(rel2percentage)),
   };

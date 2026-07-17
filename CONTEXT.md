@@ -66,6 +66,10 @@ A portfolio return metric that neutralizes the effect of cash flows, computed fr
 **GBM Forecast**:
 A Monte Carlo simulation using Geometric Brownian Motion to project future portfolio values with confidence bands.
 
+**Benchmark**:
+A reference Asset whose price history is plotted alongside portfolio TWR to provide a comparison baseline.
+_Avoid_: reference asset, comparison asset
+
 **Inflation Index**:
 A time series of consumer price levels (e.g. German CPI), used to deflate nominal values into real values.
 _Avoid_: CPI series, inflation data, inflation rate

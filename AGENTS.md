@@ -4,10 +4,9 @@ This file provides guidance to agents when working with code in this repository.
 
 ## Build/Lint/Test Commands
 
-- **Single test**: `cd domain && pnpm vitest run <path>` or `cd frontend && pnpm vitest run <path>`
-- **Watch mode**: `cd domain && pnpm vitest watch` or `cd frontend && pnpm vitest watch`
+- **Single test file**: `cd domain && pnpm vitest run <path>` or `cd frontend && pnpm vitest run <path>`
 - **Full test suite**: `pnpm test` (runs both domain and frontend tests)
-- **Type checking**: `pnpm tsc` (root), `cd domain && pnpm tsc`, `cd frontend && pnpm tsc`
+- **Type checking**: `pnpm tsc` (root)
 - **Linting**: `pnpm lint` (runs oxlint on all files)
 - **Lint fix**: `pnpm lint:fix` (auto-fixes linting issues)
 - **Dead code check**: `pnpm knip` (check for unused dependencies, files, exports)
@@ -122,19 +121,10 @@ This file provides guidance to agents when working with code in this repository.
 - Never use CSS Modules (`.module.css`) for Tailwind-styled components
 - Always use `cn()` for composing classes: `cn(buttonVariants({ intent: "primary" }), className)`
 
-### MUI + LESS (legacy, being migrated)
-
-- **MUI components**: Customize via `frontend/src/theme/theme.ts`, never inline styles
-- **Custom styles**: Use `.module.less` files with CSS modules
-- **LESS variables**: Must use predefined variables from `frontend/src/theme/definitions.less`
-- **Deprecated pattern**: `bemHelper` + `.css` files → migrate to `.module.less` or RadixUI+Tailwind
-- **Import always at top**: `import styles from "./MyComponent.module.less"`
-
 ## Testing Patterns
 
-- **Framework**: Vitest with jsdom (frontend) and node (domain)
+- **Framework**: Vitest with happydom (frontend) and node (domain)
 - **Render helpers**: Use `customRender()` or `customRenderHook()` from `testUtils/componentHelpers.tsx`
-- **Test theme**: Uses `disableRipple: true` to prevent act() warnings with MUI
 - **Helper functions**: `customRender()` returns user + helpers (`fillNumberInput`, `selectAsset`)
 - **Test data**: Use helper functions from domain `dataHelpers.ts` (`getTestOrder`, `getTestPortfolio`)
 - **Test globals**: Automatically available: `describe`, `it`, `expect`, `test`, `beforeAll`, `beforeEach`, `afterAll`, `afterEach`, `vi`
