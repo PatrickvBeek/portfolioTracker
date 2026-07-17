@@ -206,6 +206,8 @@ describe("PortfolioSummary hooks", () => {
   });
 
   describe("with empty portfolio array", () => {
+    mockNetwork({ prices: {} });
+
     it("useCashFlow returns 0", () => {
       const { result } = customRenderHook(() => useCashFlow([]));
       expect(result.current).toBe(0);
@@ -257,8 +259,11 @@ describe("PortfolioSummary hooks", () => {
       });
     });
 
-    it("useRealAnnualizedReturn returns undefined", () => {
+    it("useRealAnnualizedReturn returns undefined", async () => {
       const { result } = customRenderHook(() => useRealAnnualizedReturn([]));
+      await customWaitFor(() => {
+        expect(result.current?.isLoading).toBe(false);
+      });
       expect(result.current).toEqual({
         isLoading: false,
         isError: false,
@@ -395,6 +400,8 @@ describe("PortfolioSummary hooks", () => {
   });
 
   describe("with non-existent portfolio", () => {
+    mockNetwork({ prices: {} });
+
     it("useCashFlow ignores non-existent portfolios", () => {
       const { result } = customRenderHook(() =>
         useCashFlow([portfolioName, "non-existent"])

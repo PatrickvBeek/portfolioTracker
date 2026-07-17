@@ -105,7 +105,7 @@ export const PortfolioSummary: FC<{ portfolioNames: string[] }> = ({
             ) : (
               `${realReturn?.data !== undefined ? rel2percentage(realReturn.data).toFixed(1) : NaN} %`
             ),
-            info: "The annualized return adjusted for inflation, showing the real purchasing power gained or lost over time. Inflation is assumed to be 2% p.a., as this is the EZB's target rate.",
+            info: "The annualized return adjusted for inflation, showing the real purchasing power gained or lost over time. Inflation is based on German CPI data from Destatis.",
           },
         ]}
       />
