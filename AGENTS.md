@@ -30,25 +30,11 @@ This file provides guidance to agents when working with code in this repository.
 ### Imports
 
 - Domain imports in frontend: Use alias `"pt-domain"` not relative paths (e.g., `import { Order } from "pt-domain"`)
-- Local imports: Prefer relative paths for same-package imports
-- Group imports: external libs → pt-domain → local modules
 - `pt-domain` is a workspace dependency linked via `"pt-domain": "workspace:*"` in frontend package.json
 
 ### Types
 
-- Use TypeScript strict mode (enforced)
 - Define types in `.entities.ts` files for domain models
-- Expect explicit type annotations, avoid `any` (oxlint enforces this)
-- Use union types for variants (e.g., `BatchType`)
-- Test types use pattern: `type NameProps = Props<{ required: string; optional?: number }>`
-
-### Naming Conventions
-
-- **Components**: PascalCase (`Dashboard`, `OrderInputForm`)
-- **Hooks**: camelCase with `use` prefix (`useOrderValidation`, `useGetAssets`)
-- **Utilities**: camelCase (`toPrice`, `fillNumberInput`)
-- **Constants**: UPPER_SNAKE_CASE (`TEST_PORTFOLIO`, `TEST_ASSET_TESLA`)
-- **CSS selectors**: kebab-case (`.container`, `.portfolio-selection`)
 
 ### Formatting
 
@@ -77,6 +63,13 @@ This file provides guidance to agents when working with code in this repository.
 ## Dead Code Check
 
 - **Always** run knip before considering your work done
+
+## Testing Approach
+
+- **Unit test domain logic**: the core domain functions carrying business logic have to be unit tested
+- **Integration style testing for UI**: Not every UI component needs a test. Treat them as integration style
+- **Refactor safety**: When wondering on which level a test should live, ask yourself how likely is it that a valid refactor breaks the test?
+  - likely? -> consider moving higher up
 
 ## Critical Architecture Rules
 
