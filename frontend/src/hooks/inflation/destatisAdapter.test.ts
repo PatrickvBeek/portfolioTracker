@@ -24,36 +24,36 @@ const QMU_CODE = "PREIS1$QMU";
 type CellValue = number | string | null;
 
 type BuildOptions = {
-  jahre: string[];
-  monate?: string[];
+  years: string[];
+  months?: string[];
   contentCodes?: string[];
   qmuCode?: string;
   qmuCells: Record<string, CellValue>;
   otherCellValue?: CellValue;
 };
 
-const cellKey = (monatCode: string, jahrCode: string): string =>
-  `${jahrCode}-${monatCode}`;
+const cellKey = (monthCode: string, yearCode: string): string =>
+  `${yearCode}-${monthCode}`;
 
 const buildResponse = (options: BuildOptions): DestatisTableResponse => {
-  const monate = options.monate ?? DEFAULT_MONATE;
+  const months = options.months ?? DEFAULT_MONATE;
   const contentCodes = options.contentCodes ?? DEFAULT_CONTENT_CODES;
   const qmuCode = options.qmuCode ?? QMU_CODE;
   const qmuPosition = contentCodes.indexOf(qmuCode);
   const other = options.otherCellValue ?? 0.0;
 
-  const yearsCount = options.jahre.length;
-  const monthsCount = monate.length;
+  const yearsCount = options.years.length;
+  const monthsCount = months.length;
   const perContentBlock = monthsCount * yearsCount;
   const total = contentCodes.length * perContentBlock;
 
   const fullValues: CellValue[] = [];
   for (let c = 0; c < contentCodes.length; c++) {
-    for (const monatCode of monate) {
-      for (const jahrCode of options.jahre) {
+    for (const monthCode of months) {
+      for (const yearCode of options.years) {
         if (c === qmuPosition) {
           fullValues.push(
-            options.qmuCells[cellKey(monatCode, jahrCode)] ?? 0.0
+            options.qmuCells[cellKey(monthCode, yearCode)] ?? 0.0
           );
         } else {
           fullValues.push(other);
@@ -68,11 +68,11 @@ const buildResponse = (options: BuildOptions): DestatisTableResponse => {
   const contentIndex: Record<string, number> = Object.fromEntries(
     contentCodes.map((code, i) => [code, i])
   );
-  const monatIndex: Record<string, number> = Object.fromEntries(
-    monate.map((code, i) => [code, i])
+  const monthIndex: Record<string, number> = Object.fromEntries(
+    months.map((code, i) => [code, i])
   );
-  const jahrIndex: Record<string, number> = Object.fromEntries(
-    options.jahre.map((code, i) => [code, i])
+  const yearIndex: Record<string, number> = Object.fromEntries(
+    options.years.map((code, i) => [code, i])
   );
 
   return {
@@ -85,25 +85,25 @@ const buildResponse = (options: BuildOptions): DestatisTableResponse => {
           statistic: { category: { index: { "61111": 0 } } },
           DINSG: { category: { index: { DG: 0 } } },
           content: { category: { index: contentIndex } },
-          MONAT: { category: { index: monatIndex } },
-          JAHR: { category: { index: jahrIndex } },
+          MONAT: { category: { index: monthIndex } },
+          JAHR: { category: { index: yearIndex } },
         },
       },
     ],
   };
 };
 
-const monatCode = (month: number) => `MONAT${String(month).padStart(2, "0")}`;
+const monthCode = (month: number) => `MONAT${String(month).padStart(2, "0")}`;
 
 const fillQmuCells = (
-  jahre: string[],
+  years: string[],
   values: CellValue[]
 ): Record<string, CellValue> => {
   const cells: Record<string, CellValue> = {};
   let i = 0;
-  for (const jahr of jahre) {
+  for (const year of years) {
     for (let m = 1; m <= 12; m++) {
-      cells[`${jahr}-${monatCode(m)}`] = values[i++];
+      cells[`${year}-${monthCode(m)}`] = values[i++];
     }
   }
   return cells;
@@ -112,15 +112,15 @@ const fillQmuCells = (
 describe("parseDestatisCpiResponse", () => {
   describe("content variant selection", () => {
     it("selects only the PREIS1$QMU content variant out of multiple", () => {
-      const jahre = ["2020", "2021"];
+      const years = ["2020", "2021"];
       const qmuValues = [
         100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113,
         114, 115, 116, 117, 118, 119, 120, 121, 122, 123,
       ];
 
       const response = buildResponse({
-        jahre,
-        qmuCells: fillQmuCells(jahre, qmuValues),
+        years,
+        qmuCells: fillQmuCells(years, qmuValues),
         otherCellValue: 9999,
       });
 
@@ -134,9 +134,9 @@ describe("parseDestatisCpiResponse", () => {
     });
 
     it("returns empty when PREIS1$QMU is not present", () => {
-      const jahre = ["2020"];
+      const years = ["2020"];
       const response = buildResponse({
-        jahre,
+        years,
         qmuCells: {},
         contentCodes: ["PREIS1$CH0004", "PREIS1$CH0005"],
         qmuCode: "PREIS1$QMU",
@@ -148,7 +148,7 @@ describe("parseDestatisCpiResponse", () => {
 
   describe("sentinel filtering", () => {
     it("drops 0.0, -100.0, null, and NaN values before normalization", () => {
-      const jahre = ["2020", "2021"];
+      const years = ["2020", "2021"];
       const qmuValues: CellValue[] = [
         100,
         101,
@@ -177,8 +177,8 @@ describe("parseDestatisCpiResponse", () => {
       ];
 
       const response = buildResponse({
-        jahre,
-        qmuCells: fillQmuCells(jahre, qmuValues),
+        years,
+        qmuCells: fillQmuCells(years, qmuValues),
       });
 
       const result = parseDestatisCpiResponse(response);
@@ -195,14 +195,14 @@ describe("parseDestatisCpiResponse", () => {
     });
 
     it("normalizes to the earliest surviving value, not the raw earliest cell", () => {
-      const jahre = ["2020"];
+      const years = ["2020"];
       const qmuValues: CellValue[] = [
         0.0, -100.0, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
       ];
 
       const response = buildResponse({
-        jahre,
-        qmuCells: fillQmuCells(jahre, qmuValues),
+        years,
+        qmuCells: fillQmuCells(years, qmuValues),
       });
 
       const result = parseDestatisCpiResponse(response);
@@ -215,7 +215,7 @@ describe("parseDestatisCpiResponse", () => {
 
   describe("output ordering and timestamps", () => {
     it("returns points sorted ascending by timestamp", () => {
-      const jahre = ["2022", "2020", "2021"];
+      const years = ["2022", "2020", "2021"];
       const qmuValues = [
         130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 100, 101,
         102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 118, 119, 120, 121,
@@ -223,8 +223,8 @@ describe("parseDestatisCpiResponse", () => {
       ];
 
       const response = buildResponse({
-        jahre,
-        qmuCells: fillQmuCells(jahre, qmuValues),
+        years,
+        qmuCells: fillQmuCells(years, qmuValues),
       });
 
       const result = parseDestatisCpiResponse(response);
@@ -236,14 +236,14 @@ describe("parseDestatisCpiResponse", () => {
     });
 
     it("uses first-of-month UTC midnight timestamps", () => {
-      const jahre = ["2020"];
+      const years = ["2020"];
       const qmuValues = [
         100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
       ];
 
       const response = buildResponse({
-        jahre,
-        qmuCells: fillQmuCells(jahre, qmuValues),
+        years,
+        qmuCells: fillQmuCells(years, qmuValues),
       });
 
       const result = parseDestatisCpiResponse(response);
@@ -268,11 +268,11 @@ describe("parseDestatisCpiResponse", () => {
     });
 
     it("returns empty when all values are sentinels", () => {
-      const jahre = ["2020"];
+      const years = ["2020"];
       const response = buildResponse({
-        jahre,
+        years,
         qmuCells: fillQmuCells(
-          jahre,
+          years,
           Array.from({ length: 12 }, () => 0.0)
         ),
       });

@@ -102,8 +102,8 @@ export const getDestatisResponse = (
 
   const value: DestatisCell[] = [];
   for (let c = 0; c < DESTATIS_CONTENT_CODES.length; c++) {
-    for (const monatCode of DESTATIS_MONTH_CODES) {
-      const month = parseInt(monatCode.slice("MONAT".length), 10);
+    for (const monthCode of DESTATIS_MONTH_CODES) {
+      const month = parseInt(monthCode.slice("MONAT".length), 10);
       for (const year of years) {
         const cell = fixtures[year]?.[month];
         value.push(cell === undefined ? 0.0 : cell);
@@ -111,10 +111,10 @@ export const getDestatisResponse = (
     }
   }
 
-  const monatIndex = Object.fromEntries(
+  const monthIndex = Object.fromEntries(
     DESTATIS_MONTH_CODES.map((code, i) => [code, i])
   );
-  const jahrIndex = Object.fromEntries(
+  const yearIndex = Object.fromEntries(
     years.map((year, i) => [String(year), i])
   );
   const contentIndex = Object.fromEntries(
@@ -137,8 +137,8 @@ export const getDestatisResponse = (
           statistic: { category: { index: { "61111": 0 } } },
           DINSG: { category: { index: { DG: 0 } } },
           content: { category: { index: contentIndex } },
-          MONAT: { category: { index: monatIndex } },
-          JAHR: { category: { index: jahrIndex } },
+          MONAT: { category: { index: monthIndex } },
+          JAHR: { category: { index: yearIndex } },
         },
       },
     ],

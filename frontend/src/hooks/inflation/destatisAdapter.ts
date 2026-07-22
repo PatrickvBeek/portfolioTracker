@@ -52,47 +52,52 @@ export const parseDestatisCpiResponse = (
   response: DestatisTableResponse
 ): History<number> => {
   const table = response.data?.[0];
-  if (!table || !table.id || !table.value || !table.dimension) {
+  if (!table || !table.id || !table.size || !table.value || !table.dimension) {
     return [];
   }
 
   const dimensions = table.id;
   const size = table.size;
   const contentIdx = dimensions.indexOf("content");
-  const monatIdx = dimensions.indexOf("MONAT");
-  const jahrIdx = dimensions.indexOf("JAHR");
+  const monthIdx = dimensions.indexOf("MONAT");
+  const yearIdx = dimensions.indexOf("JAHR");
 
-  if (contentIdx === -1 || monatIdx === -1 || jahrIdx === -1) {
+  if (contentIdx === -1 || monthIdx === -1 || yearIdx === -1) {
     return [];
   }
 
-  const contentCategories =
-    table.dimension[dimensions[contentIdx]]?.category.index ?? {};
-  const qmuContentPosition = contentCategories[QMU_CONTENT_CODE];
+  const categories = (dimName: string): Record<string, number> =>
+    table.dimension[dimName]?.category.index ?? {};
+
+  const qmuContentPosition = categories(dimensions[contentIdx])[
+    QMU_CONTENT_CODE
+  ];
   if (qmuContentPosition === undefined) {
     return [];
   }
 
-  const monatCategories =
-    table.dimension[dimensions[monatIdx]]?.category.index ?? {};
-  const jahrCategories =
-    table.dimension[dimensions[jahrIdx]]?.category.index ?? {};
+  const monthEntries = Object.entries(categories(dimensions[monthIdx]));
+  const yearEntries = Object.entries(categories(dimensions[yearIdx]));
 
-  const monatEntries = Object.entries(monatCategories);
-  const jahrEntries = Object.entries(jahrCategories);
+  // Row-major (C-order) linear index into the flat `value` array.
+  // Each dimension d contributes position[d] * product(size[d+1..]).
+  // Singleton dimensions (statistic, DINSG) sit at position 0 and add nothing.
+  const positions = Array.from({ length: dimensions.length }, () => 0);
+  positions[contentIdx] = qmuContentPosition;
 
   const points: History<number> = [];
 
-  for (const [jahrCode, jahrPos] of jahrEntries) {
-    const year = parseInt(jahrCode, 10);
+  for (const [yearCode, yearPos] of yearEntries) {
+    const year = parseInt(yearCode, 10);
     if (!Number.isFinite(year)) {
       continue;
     }
-    for (const [monatCode, monatPos] of monatEntries) {
-      if (!monatCode.startsWith(MONTH_PREFIX)) {
+    positions[yearIdx] = yearPos;
+    for (const [monthCode, monthPos] of monthEntries) {
+      if (!monthCode.startsWith(MONTH_PREFIX)) {
         continue;
       }
-      const monthNum = parseInt(monatCode.slice(MONTH_PREFIX.length), 10);
+      const monthNum = parseInt(monthCode.slice(MONTH_PREFIX.length), 10);
       if (
         !Number.isFinite(monthNum) ||
         monthNum < 1 ||
@@ -101,15 +106,10 @@ export const parseDestatisCpiResponse = (
         continue;
       }
 
-      const linearIndex = computeLinearIndex(
-        dimensions.length,
-        size,
-        contentIdx,
-        qmuContentPosition,
-        monatIdx,
-        monatPos,
-        jahrIdx,
-        jahrPos
+      positions[monthIdx] = monthPos;
+      const linearIndex = positions.reduce(
+        (idx, pos, d) => idx * size[d] + pos,
+        0
       );
 
       const rawValue = table.value[linearIndex];
@@ -135,31 +135,6 @@ export const parseDestatisCpiResponse = (
     timestamp: p.timestamp,
     value: p.value / earliestValue,
   }));
-};
-
-const computeLinearIndex = (
-  dimensionCount: number,
-  size: number[],
-  contentIdx: number,
-  contentPosition: number,
-  monatIdx: number,
-  monatPosition: number,
-  jahrIdx: number,
-  jahrPosition: number
-): number => {
-  let index = 0;
-  for (let d = 0; d < dimensionCount; d++) {
-    const position =
-      d === contentIdx
-        ? contentPosition
-        : d === monatIdx
-          ? monatPosition
-          : d === jahrIdx
-            ? jahrPosition
-            : 0;
-    index = index * size[d] + position;
-  }
-  return index;
 };
 
 /**
