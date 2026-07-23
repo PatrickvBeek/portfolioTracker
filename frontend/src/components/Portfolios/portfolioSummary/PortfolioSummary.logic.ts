@@ -137,15 +137,20 @@ export const useRealAnnualizedReturn = (
 
   const now = Date.now();
   const startDate = getFirstOrderTimeStamp(merged) ?? undefined;
-  const inflationIndex = useInflationIndex(startDate);
+  const inflationIndexQuery = useInflationIndex(startDate);
+  const inflationIndex = inflationIndexQuery.data ?? [];
 
   if (portfolios.length === 0) {
-    return { isLoading: false, isError: false, data: undefined };
+    return {
+      isLoading: inflationIndexQuery.isLoading,
+      isError: inflationIndexQuery.isError,
+      data: undefined,
+    };
   }
 
   return {
-    isLoading: priceMapQuery.isLoading,
-    isError: priceMapQuery.isError,
+    isLoading: priceMapQuery.isLoading || inflationIndexQuery.isLoading,
+    isError: priceMapQuery.isError || inflationIndexQuery.isError,
     data: getRealAnnualizedReturn(
       merged,
       priceMapQuery.data,

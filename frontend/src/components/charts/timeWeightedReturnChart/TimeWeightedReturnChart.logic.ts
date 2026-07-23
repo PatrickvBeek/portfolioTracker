@@ -24,24 +24,31 @@ const usePerformanceBenchmark = (
   portfolioNames: string[],
   isin: string,
   mode: TwrMode = "nominal"
-): CustomQuery<History<number>> | undefined => {
+): CustomQuery<History<number>> => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const portfolioStartTime =
     min(portfolios.map((p) => getFirstOrderTimeStamp(p)).filter(isNotNil)) ??
     -Infinity;
 
   const symbol = useSymbol(isin);
-  const inflationIndex = useInflationIndex(
+  const inflationIndexQuery = useInflationIndex(
     portfolioStartTime === -Infinity ? undefined : portfolioStartTime
   );
+  const inflationIndex = inflationIndexQuery.data ?? [];
 
-  return usePriceQuery(symbol, (priceHistory) => {
+  const priceQuery = usePriceQuery(symbol, (priceHistory) => {
     const realPriceHistory =
       mode === "real" && inflationIndex.length
         ? deflateByIndex(priceHistory, inflationIndex)
         : priceHistory;
     return getBenchmarkHistory(realPriceHistory, portfolioStartTime);
   });
+
+  return {
+    isLoading: priceQuery.isLoading || inflationIndexQuery.isLoading,
+    isError: priceQuery.isError || inflationIndexQuery.isError,
+    data: priceQuery.data,
+  };
 };
 
 export type PerformanceChartDataSets = "portfolio" | "benchmark";

@@ -1,6 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 import { customRender } from "../../testUtils/componentHelpers";
+import { mockNetwork } from "../../testUtils/networkMock";
 import Dashboard from "./Dashboard";
 
 vi.mock("./Dashboard.logic", () => ({
@@ -12,6 +13,8 @@ vi.mock("../charts/ChartContainer", () => ({
     <div>{children}</div>
   ),
 }));
+
+mockNetwork({ prices: {} });
 
 const getTag = (name: string) => screen.getByRole("button", { name });
 

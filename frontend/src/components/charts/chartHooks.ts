@@ -54,11 +54,12 @@ export const useRealTimeWeightedReturnHistory = (
   const merged = combinePortfolios(portfolios);
   const priceMapQuery = usePortfolioPriceData(portfolioNames);
   const xMin = getFirstOrderTimeStamp(merged);
-  const inflationIndex = useInflationIndex(xMin ?? undefined);
+  const inflationIndexQuery = useInflationIndex(xMin ?? undefined);
+  const inflationIndex = inflationIndexQuery.data ?? [];
 
   return {
-    isLoading: priceMapQuery.isLoading,
-    isError: priceMapQuery.isError,
+    isLoading: priceMapQuery.isLoading || inflationIndexQuery.isLoading,
+    isError: priceMapQuery.isError || inflationIndexQuery.isError,
     data: getRealTimeWeightedReturn(
       merged,
       priceMapQuery.data,

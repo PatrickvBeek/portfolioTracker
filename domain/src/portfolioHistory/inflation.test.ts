@@ -3,6 +3,7 @@ import { History } from "./history.entities";
 import {
   deflateByIndex,
   generateConstantRateInflationIndex,
+  mergeWithConstantRateTail,
 } from "./inflation";
 
 describe("generateConstantRateInflationIndex", () => {
@@ -212,5 +213,190 @@ describe("deflateByIndex", () => {
 
     expect(result[0].value).toBeCloseTo(1000, 10);
     expect(result[1].value).toBeLessThan(1000);
+  });
+});
+
+describe("mergeWithConstantRateTail", () => {
+  const FEB = new Date("2020-02-01").getTime();
+  const MAR = new Date("2020-03-01").getTime();
+  const APR = new Date("2020-04-01").getTime();
+  const MAY = new Date("2020-05-01").getTime();
+  const JUN = new Date("2020-06-01").getTime();
+  const JUL = new Date("2020-07-01").getTime();
+  const JAN2021 = new Date("2021-01-01").getTime();
+
+  it("returns empty when startDate >= endDate", () => {
+    const t = new Date("2020-01-01").getTime();
+    const real: History<number> = [
+      { timestamp: t, value: 1 },
+      { timestamp: FEB, value: 1.1 },
+    ];
+
+    expect(mergeWithConstantRateTail(real, t, t, 0.02)).toEqual([]);
+    expect(mergeWithConstantRateTail(real, t + 1, t, 0.02)).toEqual([]);
+  });
+
+  it("falls back to constant-rate index when real index is empty", () => {
+    const start = new Date("2020-01-01").getTime();
+    const end = JAN2021;
+
+    const result = mergeWithConstantRateTail([], start, end, 0.02);
+    const expected = generateConstantRateInflationIndex(start, end, 0.02);
+
+    expect(result).toEqual(expected);
+  });
+
+  it("returns real points as-is when real covers the whole range", () => {
+    const start = new Date("2020-01-01").getTime();
+    const real: History<number> = [
+      { timestamp: start, value: 1 },
+      { timestamp: FEB, value: 1.1 },
+      { timestamp: MAR, value: 1.2 },
+      { timestamp: APR, value: 1.3 },
+    ];
+
+    const result = mergeWithConstantRateTail(real, start, APR, 0.02);
+
+    expect(result.map((p) => p.timestamp)).toEqual([start, FEB, MAR, APR]);
+    expect(result.map((p) => p.value)).toEqual([1, 1.1, 1.2, 1.3]);
+  });
+
+  it("is robust to unsorted real input", () => {
+    const start = new Date("2020-01-01").getTime();
+    const real: History<number> = [
+      { timestamp: MAR, value: 1.2 },
+      { timestamp: start, value: 1 },
+      { timestamp: FEB, value: 1.1 },
+      { timestamp: APR, value: 1.3 },
+    ];
+
+    const result = mergeWithConstantRateTail(real, start, APR, 0.02);
+
+    expect(result.map((p) => p.timestamp)).toEqual([start, FEB, MAR, APR]);
+    expect(result.map((p) => p.value)).toEqual([1, 1.1, 1.2, 1.3]);
+  });
+
+  it("forward-fills internal gaps from the last known real value", () => {
+    const start = new Date("2020-01-01").getTime();
+    const real: History<number> = [
+      { timestamp: start, value: 1 },
+      { timestamp: APR, value: 1.3 },
+    ];
+
+    const result = mergeWithConstantRateTail(real, start, APR, 0.02);
+
+    expect(result.map((p) => p.timestamp)).toEqual([start, FEB, MAR, APR]);
+    expect(result[0].value).toBe(1);
+    expect(result[1].value).toBe(1);
+    expect(result[2].value).toBe(1);
+    expect(result[3].value).toBe(1.3);
+  });
+
+  it("compounds a tail anchored to the last real value when real is shorter than range", () => {
+    const start = new Date("2020-01-01").getTime();
+    const real: History<number> = [
+      { timestamp: start, value: 1 },
+      { timestamp: FEB, value: 1.1 },
+      { timestamp: MAR, value: 1.2 },
+    ];
+    const end = JAN2021;
+
+    const result = mergeWithConstantRateTail(real, start, end, 0.02);
+
+    const lastRealIdx = result.findIndex((p) => p.timestamp === MAR);
+    expect(lastRealIdx).toBe(2);
+    expect(result[lastRealIdx].value).toBe(1.2);
+
+    const tail = result.slice(lastRealIdx + 1);
+    expect(tail.length).toBeGreaterThan(0);
+
+    for (const point of tail) {
+      expect(point.value).toBeGreaterThan(1.2);
+    }
+
+    const MS_PER_YEAR = 1000 * 60 * 60 * 24 * 365.25;
+    const expectedFirstTail = 1.2 * Math.pow(1.02, (APR - MAR) / MS_PER_YEAR);
+    expect(tail[0].value).toBeCloseTo(expectedFirstTail, 10);
+    expect(tail[tail.length - 1].timestamp).toBe(end);
+  });
+
+  it("tail continues from the last real value without resetting to 1.0", () => {
+    const start = new Date("2020-01-01").getTime();
+    const real: History<number> = [
+      { timestamp: start, value: 1 },
+      { timestamp: FEB, value: 1.1 },
+      { timestamp: MAR, value: 1.2 },
+    ];
+    const end = APR;
+
+    const result = mergeWithConstantRateTail(real, start, end, 0.02);
+
+    const lastRealIdx = result.findIndex((p) => p.timestamp === MAR);
+    expect(result[lastRealIdx].value).toBe(1.2);
+    expect(result[lastRealIdx + 1].value).toBeGreaterThan(1.2);
+    expect(result[lastRealIdx + 1].value).toBeLessThan(1.2 * 1.02);
+    expect(result[lastRealIdx + 1].value).not.toBeCloseTo(1, 5);
+  });
+
+  it("falls back to constant-rate index when startDate is after the last real point", () => {
+    const realEnd = new Date("2020-01-01").getTime();
+    const real: History<number> = [
+      { timestamp: realEnd, value: 1 },
+      { timestamp: FEB, value: 2 },
+    ];
+    const start = MAR;
+    const end = JUL;
+
+    const result = mergeWithConstantRateTail(real, start, end, 0.02);
+
+    const expected = generateConstantRateInflationIndex(start, end, 0.02);
+    expect(result).toEqual(expected);
+    expect(result[0].value).toBeCloseTo(1, 10);
+    expect(result[result.length - 1].timestamp).toBe(JUL);
+    for (let i = 1; i < result.length; i++) {
+      expect(result[i].value).toBeGreaterThan(result[i - 1].value);
+    }
+  });
+
+  it("emits monthly first-of-month points across the full range", () => {
+    const start = new Date("2020-01-15").getTime();
+    const real: History<number> = [
+      { timestamp: FEB, value: 1.1 },
+      { timestamp: APR, value: 1.3 },
+    ];
+    const end = JUN;
+
+    const result = mergeWithConstantRateTail(real, start, end, 0.02);
+
+    const expectedTimestamps = [
+      new Date("2020-01-01").getTime(),
+      FEB,
+      MAR,
+      APR,
+      MAY,
+      JUN,
+    ];
+    expect(result.map((p) => p.timestamp)).toEqual(expectedTimestamps);
+  });
+
+  it("composes with deflateByIndex without error", () => {
+    const start = new Date("2020-01-01").getTime();
+    const real: History<number> = [
+      { timestamp: start, value: 1 },
+      { timestamp: FEB, value: 1.1 },
+    ];
+    const end = APR;
+
+    const index = mergeWithConstantRateTail(real, start, end, 0.02);
+    const marketValueHistory: History<number> = [
+      { timestamp: start, value: 1000 },
+      { timestamp: APR, value: 1100 },
+    ];
+
+    const deflated = deflateByIndex(marketValueHistory, index);
+
+    expect(deflated.length).toBe(2);
+    expect(deflated[0].value).toBeCloseTo(1000, 10);
+    expect(deflated[1].value).toBeLessThan(1100);
   });
 });
