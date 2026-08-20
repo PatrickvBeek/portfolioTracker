@@ -63,8 +63,17 @@ _Avoid_: Sharpe ratio, risk-adjusted return
 **Time-Weighted Return (TWR)**:
 A portfolio return metric that neutralizes the effect of cash flows, computed from market value and cash flow history.
 
-**GBM Forecast**:
-A Monte Carlo simulation using Geometric Brownian Motion to project future portfolio values with confidence bands.
+**Accumulation Forecast**:
+A Monte Carlo simulation using Geometric Brownian Motion to project future portfolio values with confidence bands, given a recurring nominal contribution.
+_Avoid_: GBM forecast, contribution forecast
+
+**Withdrawal Forecast**:
+A two-phase extension of the Accumulation Forecast: an accumulation phase with recurring nominal contributions, followed by a decumation phase with inflation-escalated real withdrawals and a ruin threshold. The degenerate case (no decumation phase) coincides with an Accumulation Forecast.
+_Avoid_: GBM forecast, decumation forecast, retirement forecast
+
+**Ruin**:
+The first month in a Withdrawal Forecast's decumation phase where the pre-withdrawal balance is below the intended withdrawal. A path is ruined from that month onward; the balance is recorded as zero for all remaining months.
+_Avoid_: bankruptcy, failure, depletion
 
 **Benchmark**:
 A reference Asset whose price history is plotted alongside portfolio TWR to provide a comparison baseline.
