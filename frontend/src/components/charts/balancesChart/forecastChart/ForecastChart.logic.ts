@@ -1,7 +1,5 @@
 import {
-  applyInflationDiscount,
   ForecastInput,
-  ForecastResult,
   GbmParameters,
   logReturnToPercentage,
   runGeometricBrownianMotionForecast,
@@ -14,7 +12,11 @@ import {
   useMarketValue,
 } from "../../../Portfolios/portfolioSummary/PortfolioSummary.logic";
 import { usePortfolioGeometricBrownianMotionParams } from "../../chartHooks";
-import { ChartDataPoint } from "../../chartTypes";
+import {
+  FORECAST_SIMULATION_COUNT,
+  ForecastChartData,
+  transformForecastToChartData,
+} from "../../forecastChartUtils";
 
 export const FORECAST_HORIZONS = {
   "1Y": "1Y",
@@ -28,8 +30,6 @@ type ForecastHorizon =
   (typeof FORECAST_HORIZONS)[keyof typeof FORECAST_HORIZONS];
 
 export type ForecastScenario = "market" | "portfolio";
-export type ForecastChartDataSets = "median" | "uncertaintyBand" | "cashFlow";
-type ForecastChartData = ChartDataPoint<ForecastChartDataSets>[];
 
 export const FORECAST_CONFIDENCE_LEVELS = {
   "50": 50,
@@ -132,37 +132,12 @@ const FORECAST_HORIZON_MONTHS: Record<ForecastHorizon, number> = {
   "30Y": 360,
 };
 
-const transformForecastToChartData = (
-  forecastResult: ForecastResult,
-  startTimestamp: number,
-  currentCashFlow: number,
-  inflationRate: number
-): ForecastChartData => {
-  const discountedResult = applyInflationDiscount(
-    forecastResult,
-    inflationRate
-  );
-  const { median, confidenceLow, confidenceHigh, cashFlows } = discountedResult;
-  const monthInMs = 30 * 24 * 60 * 60 * 1000;
-
-  return median.map((_: number, index: number) => ({
-    timestamp: startTimestamp + (index + 1) * monthInMs,
-    median: median[index],
-    uncertaintyBand: [confidenceLow[index], confidenceHigh[index]],
-    cashFlow: currentCashFlow + cashFlows[index],
-  }));
-};
-
 export const useForecastChartData = (
   portfolioNames: string[],
   params: ForecastParameters
 ): CustomQuery<ForecastChartData> => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
-  const { data, isError, isLoading } = useMarketValue(portfolioNames) ?? {
-    data: 0,
-    isError: false,
-    isLoading: false,
-  };
+  const { data, isError, isLoading } = useMarketValue(portfolioNames);
   const currentValue = data ?? 0;
   const currentCashFlow = useCashFlow(portfolioNames) ?? 0;
   const scenarioDetails = useForecastScenarioParams(
@@ -183,7 +158,7 @@ export const useForecastChartData = (
     months,
     monthlyInvestment: params.monthlyContribution,
     startingValue: currentValue,
-    simulationCount: 1000,
+    simulationCount: FORECAST_SIMULATION_COUNT,
   };
 
   const confidencePercentiles: [number, number] = [

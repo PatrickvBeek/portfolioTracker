@@ -4,6 +4,7 @@ import { Assets } from "./components/Assets/Assets";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { Header } from "./components/header/Header";
 import Portfolios from "./components/Portfolios/Portfolios";
+import { WithdrawalPlannerTab } from "./components/withdrawalPlanner/WithdrawalPlannerTab";
 import { queryClientConfig } from "./queryClient/config";
 import { ThemeProvider } from "./theme/ThemeContext";
 import { UserDataProvider } from "./userDataContext";
@@ -11,13 +12,14 @@ import { UserDataProvider } from "./userDataContext";
 const queryClient = new QueryClient(queryClientConfig);
 
 function App() {
-  const TABS = ["Dashboard", "Portfolios", "Assets"];
+  const TABS = ["Dashboard", "Portfolios", "Assets", "Withdrawal Planner"];
   const [selectedTab, setSelectedTab] = useState(TABS[0]);
 
   const TabToRender: Record<string, () => ReactElement> = {
     Dashboard: Dashboard,
     Portfolios: Portfolios,
     Assets: Assets,
+    "Withdrawal Planner": WithdrawalPlannerTab,
   };
 
   const Content = TabToRender[selectedTab];

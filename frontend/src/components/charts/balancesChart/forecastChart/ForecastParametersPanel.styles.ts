@@ -1,3 +1,5 @@
+import { forecastPanelStyles } from "../../forecastPanel.styles";
+
 export const styles = {
   accordion: "mb-4 border border-border rounded-md bg-bg-card overflow-hidden",
   header: "flex",
@@ -6,10 +8,9 @@ export const styles = {
   chevron: "w-4 h-4 transition-transform duration-200 ml-auto",
   content:
     "flex flex-col gap-4 p-4 overflow-hidden data-[state=open]:animate-accordion-slide-down data-[state=closed]:animate-accordion-slide-up",
-  controlsGrid:
-    "grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 items-start max-md:grid-cols-1 max-md:gap-4",
-  controlGroup: "flex flex-col gap-2 min-w-0 overflow-hidden",
-  label: "font-medium text-accent text-xs",
+  controlsGrid: forecastPanelStyles.controlsGrid,
+  controlGroup: forecastPanelStyles.controlGroup,
+  label: forecastPanelStyles.label,
   scenarioDetails: "mt-2 pt-2 border-t border-border",
   displayOptions: "flex flex-col gap-2",
   chip: "inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs text-text-muted",
