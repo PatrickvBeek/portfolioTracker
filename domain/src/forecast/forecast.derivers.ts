@@ -1,5 +1,4 @@
 import normal from "@stdlib/random/base/normal";
-import { sum } from "radash";
 import { History } from "../portfolioHistory/history.entities";
 import {
   ForecastConfig,
@@ -76,8 +75,6 @@ const calculatePercentile = (values: number[], percentile: number): number => {
 const calculateMedian = (values: number[]): number =>
   calculatePercentile(values, 50);
 
-const calculateMean = (values: number[]): number => sum(values) / values.length;
-
 const computeStatistics = (
   portfolioValuesMatrix: number[][],
   input: ForecastInput,
@@ -88,7 +85,6 @@ const computeStatistics = (
   const [lowPercentile, highPercentile] = confidencePercentiles;
 
   const median: number[] = [];
-  const mean: number[] = [];
   const confidenceLow: number[] = [];
   const confidenceHigh: number[] = [];
   const cashFlows: number[] = [];
@@ -99,7 +95,6 @@ const computeStatistics = (
     );
 
     median.push(calculateMedian(valuesForMonth));
-    mean.push(calculateMean(valuesForMonth));
     confidenceLow.push(calculatePercentile(valuesForMonth, lowPercentile));
     confidenceHigh.push(calculatePercentile(valuesForMonth, highPercentile));
     cashFlows.push((monthIndex + 1) * monthlyInvestment);
@@ -107,7 +102,6 @@ const computeStatistics = (
 
   return {
     median,
-    mean,
     confidenceLow,
     confidenceHigh,
     cashFlows,
@@ -170,7 +164,6 @@ export const applyInflationDiscount = (
 
   return {
     median: discountArray(result.median),
-    mean: discountArray(result.mean),
     confidenceLow: discountArray(result.confidenceLow),
     confidenceHigh: discountArray(result.confidenceHigh),
     cashFlows: discountArray(result.cashFlows),

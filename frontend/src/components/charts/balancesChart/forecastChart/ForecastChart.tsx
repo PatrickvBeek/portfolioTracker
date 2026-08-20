@@ -97,16 +97,6 @@ export const ForecastChart: FC<{
             type={"linear"}
           />
 
-          <Line
-            {...DEFAULT_LINE_PROPS}
-            dataKey={"mean" satisfies ForecastChartDataSets}
-            name={"Market Value (Mean)"}
-            stroke="var(--color-danger-hover)"
-            strokeDasharray="8 4"
-            strokeWidth={2}
-            type={"linear"}
-          />
-
           <Tooltip
             contentStyle={TOOLTIP_STYLE}
             formatter={(value, name) =>

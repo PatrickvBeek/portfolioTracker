@@ -23,7 +23,6 @@ describe("forecasting.derivers", () => {
       const result = runGeometricBrownianMotionForecast(input);
 
       expect(result.median).toHaveLength(3);
-      expect(result.mean).toHaveLength(3);
       expect(result.confidenceLow).toHaveLength(3);
       expect(result.confidenceHigh).toHaveLength(3);
       expect(result.cashFlows).toEqual([2500, 5000, 7500]);
@@ -54,11 +53,11 @@ describe("forecasting.derivers", () => {
       };
       const result = runGeometricBrownianMotionForecast(input);
 
-      const month1Mean = result.mean[0];
-      const month6Mean = result.mean[5];
+      const month1Median = result.median[0];
+      const month6Median = result.median[5];
 
-      expect(month6Mean).toBeGreaterThan(month1Mean);
-      expect(month6Mean).toBeGreaterThan(6000);
+      expect(month6Median).toBeGreaterThan(month1Median);
+      expect(month6Median).toBeGreaterThan(6000);
     });
 
     it("test against reference implementation example", () => {
@@ -73,10 +72,9 @@ describe("forecasting.derivers", () => {
         simulationCount: 2000,
       };
 
-      const { mean, median, confidenceHigh, confidenceLow } =
+      const { median, confidenceHigh, confidenceLow } =
         runGeometricBrownianMotionForecast(input);
 
-      expect(mean.at(N_months - 1)).toBeCloseTo(20000, -3);
       expect(median.at(N_months - 1)).toBeCloseTo(19000, -3);
       expect(confidenceLow.at(N_months - 1)).toBeCloseTo(11700, -3);
       expect(confidenceHigh.at(N_months - 1)).toBeCloseTo(32000, -3.5);
@@ -148,7 +146,6 @@ describe("forecasting.derivers", () => {
     it("should return unchanged result when inflation rate is 0", () => {
       const result = {
         median: [1000, 2000, 3000],
-        mean: [1100, 2100, 3100],
         confidenceLow: [800, 1800, 2800],
         confidenceHigh: [1400, 2400, 3400],
         cashFlows: [100, 200, 300],
@@ -162,7 +159,6 @@ describe("forecasting.derivers", () => {
     it("should correctly discount values at 2% inflation over 12 months", () => {
       const result = {
         median: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
-        mean: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
         confidenceLow: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
         confidenceHigh: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
         cashFlows: [6000, 6500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10000],
@@ -180,7 +176,6 @@ describe("forecasting.derivers", () => {
     it("should correctly discount values at 3% inflation over 120 months (10 years)", () => {
       const result = {
         median: Array(119).fill(0).concat([100000]),
-        mean: Array(119).fill(0).concat([100000]),
         confidenceLow: Array(119).fill(0).concat([100000]),
         confidenceHigh: Array(119).fill(0).concat([100000]),
         cashFlows: Array(119).fill(0).concat([100000]),
@@ -194,10 +189,9 @@ describe("forecasting.derivers", () => {
       );
     });
 
-    it("should discount all five arrays: median, mean, confidenceLow, confidenceHigh, cashFlows", () => {
+    it("should discount all four arrays: median, confidenceLow, confidenceHigh, cashFlows", () => {
       const result = {
         median: [1000, 2000],
-        mean: [1100, 2100],
         confidenceLow: [800, 1800],
         confidenceHigh: [1400, 2400],
         cashFlows: [100, 200],
@@ -210,7 +204,6 @@ describe("forecasting.derivers", () => {
 
       expect(discounted.median[0]).toBeCloseTo(expectedMedian0, 1);
       expect(discounted.median[1]).toBeCloseTo(expectedMedian1, 1);
-      expect(discounted.mean[0]).toBeCloseTo(1100 / Math.pow(1.05, 1 / 12), 1);
       expect(discounted.confidenceLow[1]).toBeCloseTo(
         1800 / Math.pow(1.05, 2 / 12),
         1
@@ -228,7 +221,6 @@ describe("forecasting.derivers", () => {
     it("should handle decimal inflation rates (e.g., 2.5%)", () => {
       const result = {
         median: [1000],
-        mean: [1000],
         confidenceLow: [1000],
         confidenceHigh: [1000],
         cashFlows: [100],
