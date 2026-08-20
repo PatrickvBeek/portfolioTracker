@@ -15,7 +15,6 @@ export interface SimulationResult {
 
 export interface ForecastResult {
   median: number[];
-  mean: number[];
   confidenceLow: number[];
   confidenceHigh: number[];
   cashFlows: number[];

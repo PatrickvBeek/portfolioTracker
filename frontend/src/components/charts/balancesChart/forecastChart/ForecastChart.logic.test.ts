@@ -195,7 +195,6 @@ describe("ForecastChart.logic", () => {
       const firstDataPoint = result.current.data![0];
       expect(firstDataPoint).toHaveProperty("timestamp");
       expect(firstDataPoint.median).toBeCloseTo(100.6, 0);
-      expect(firstDataPoint.mean).toBeCloseTo(100.7, 0);
     });
 
     it("returns forecast chart data for 'portfolio' scenario with minimal portfolio", async () => {

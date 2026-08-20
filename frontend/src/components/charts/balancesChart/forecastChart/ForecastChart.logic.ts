@@ -28,11 +28,7 @@ type ForecastHorizon =
   (typeof FORECAST_HORIZONS)[keyof typeof FORECAST_HORIZONS];
 
 export type ForecastScenario = "market" | "portfolio";
-export type ForecastChartDataSets =
-  | "median"
-  | "mean"
-  | "uncertaintyBand"
-  | "cashFlow";
+export type ForecastChartDataSets = "median" | "uncertaintyBand" | "cashFlow";
 type ForecastChartData = ChartDataPoint<ForecastChartDataSets>[];
 
 export const FORECAST_CONFIDENCE_LEVELS = {
@@ -146,14 +142,12 @@ const transformForecastToChartData = (
     forecastResult,
     inflationRate
   );
-  const { median, mean, confidenceLow, confidenceHigh, cashFlows } =
-    discountedResult;
+  const { median, confidenceLow, confidenceHigh, cashFlows } = discountedResult;
   const monthInMs = 30 * 24 * 60 * 60 * 1000;
 
   return median.map((_: number, index: number) => ({
     timestamp: startTimestamp + (index + 1) * monthInMs,
     median: median[index],
-    mean: mean[index],
     uncertaintyBand: [confidenceLow[index], confidenceHigh[index]],
     cashFlow: currentCashFlow + cashFlows[index],
   }));
