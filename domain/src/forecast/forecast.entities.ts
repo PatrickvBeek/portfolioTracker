@@ -7,17 +7,27 @@ export interface ForecastInput {
   simulationCount: number;
 }
 
-export interface SimulationResult {
-  portfolioValues: number[];
-  totalShares: number[];
-  prices: number[];
-}
-
 export interface ForecastResult {
   median: number[];
   confidenceLow: number[];
   confidenceHigh: number[];
   cashFlows: number[];
+}
+
+export interface WithdrawalForecastInput {
+  mu: number;
+  sigma: number;
+  startingValue: number;
+  simulationCount: number;
+  accumulationMonths: number;
+  decumulationMonths: number;
+  monthlyContribution: number;
+  monthlyWithdrawal: number;
+  annualInflationRate: number;
+}
+
+export interface WithdrawalForecastResult extends ForecastResult {
+  ruinProbability: number;
 }
 
 export interface RandomShockParams {

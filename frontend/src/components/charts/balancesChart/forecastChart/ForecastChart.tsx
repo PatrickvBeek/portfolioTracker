@@ -26,10 +26,10 @@ import {
   getTimeAxisProps,
 } from "../../chartUtils";
 import {
-  ForecastChartDataSets,
   ForecastParameters,
   useForecastChartData,
 } from "./ForecastChart.logic";
+import { ForecastChartDataSets } from "../../forecastChartUtils";
 import { ForecastParametersPanel } from "./ForecastParametersPanel";
 
 export const ForecastChart: FC<{

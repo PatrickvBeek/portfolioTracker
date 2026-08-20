@@ -6,7 +6,8 @@ import {
   ForecastResult,
   GbmParameters,
   RandomShockParams,
-  SimulationResult,
+  WithdrawalForecastInput,
+  WithdrawalForecastResult,
 } from "./forecast.entities";
 import { getLogReturnStats } from "../logReturns";
 
@@ -24,35 +25,6 @@ const generateRandomNormalShocks = (params: RandomShockParams): number[][] => {
   }
 
   return shocks;
-};
-
-const runSingleSimulation = (
-  input: ForecastInput,
-  shocks: number[]
-): SimulationResult => {
-  const { months, startingValue, monthlyInvestment } = input;
-  const portfolioValues: number[] = [];
-  const totalSharesArray: number[] = [];
-  const prices: number[] = [];
-
-  let currentPrice = 100; // arbitrary starting point for relative price level
-  let totalShares = startingValue / currentPrice;
-
-  for (let m = 0; m < months; m++) {
-    currentPrice *= Math.exp(shocks[m]);
-    totalShares += monthlyInvestment / currentPrice;
-    const portfolioValue = totalShares * currentPrice;
-
-    portfolioValues.push(portfolioValue);
-    totalSharesArray.push(totalShares);
-    prices.push(currentPrice);
-  }
-
-  return {
-    portfolioValues,
-    totalShares: totalSharesArray,
-    prices,
-  };
 };
 
 const calculatePercentile = (values: number[], percentile: number): number => {
@@ -75,19 +47,23 @@ const calculatePercentile = (values: number[], percentile: number): number => {
 const calculateMedian = (values: number[]): number =>
   calculatePercentile(values, 50);
 
-const computeStatistics = (
+interface SimulationSummary extends ForecastResult {
+  ruined: boolean[];
+}
+
+const summarizeSimulation = (
   portfolioValuesMatrix: number[][],
-  input: ForecastInput,
+  cashFlows: number[],
+  ruined: boolean[],
   config: ForecastConfig = {}
-): ForecastResult => {
-  const { months, monthlyInvestment } = input;
+): SimulationSummary => {
   const { confidencePercentiles = [5, 95] } = config;
   const [lowPercentile, highPercentile] = confidencePercentiles;
+  const months = cashFlows.length;
 
   const median: number[] = [];
   const confidenceLow: number[] = [];
   const confidenceHigh: number[] = [];
-  const cashFlows: number[] = [];
 
   for (let monthIndex = 0; monthIndex < months; monthIndex++) {
     const valuesForMonth = portfolioValuesMatrix.map(
@@ -97,7 +73,6 @@ const computeStatistics = (
     median.push(calculateMedian(valuesForMonth));
     confidenceLow.push(calculatePercentile(valuesForMonth, lowPercentile));
     confidenceHigh.push(calculatePercentile(valuesForMonth, highPercentile));
-    cashFlows.push((monthIndex + 1) * monthlyInvestment);
   }
 
   return {
@@ -105,14 +80,86 @@ const computeStatistics = (
     confidenceLow,
     confidenceHigh,
     cashFlows,
+    ruined,
   };
 };
 
-export const runGeometricBrownianMotionForecast = (
-  input: ForecastInput,
+const buildAccumulationCashFlow = (
+  months: number,
+  monthlyInvestment: number
+): number[] => Array.from({ length: months }, () => monthlyInvestment);
+
+const buildWithdrawalCashFlow = (input: WithdrawalForecastInput): number[] => {
+  const {
+    accumulationMonths,
+    decumulationMonths,
+    monthlyContribution,
+    monthlyWithdrawal,
+    annualInflationRate,
+  } = input;
+
+  const totalMonths = accumulationMonths + decumulationMonths;
+  const cashFlows: number[] = [];
+
+  for (let m = 0; m < totalMonths; m++) {
+    if (m < accumulationMonths) {
+      cashFlows.push(monthlyContribution);
+    } else {
+      const monthsIntoDecumulation = m - accumulationMonths;
+      const escalation = Math.pow(
+        1 + annualInflationRate,
+        monthsIntoDecumulation / 12
+      );
+      cashFlows.push(-monthlyWithdrawal * escalation);
+    }
+  }
+
+  return cashFlows;
+};
+
+const runSinglePathWithCashFlows = (
+  cashFlows: number[],
+  shocks: number[],
+  startingValue: number
+): { values: number[]; ruined: boolean } => {
+  const values: number[] = [];
+  let balance = startingValue;
+  let ruined = false;
+
+  for (let m = 0; m < cashFlows.length; m++) {
+    const preFlowBalance = balance * Math.exp(shocks[m]);
+    const flow = cashFlows[m];
+
+    if (flow < 0) {
+      const intendedWithdrawal = -flow;
+      if (!ruined && preFlowBalance < intendedWithdrawal) {
+        ruined = true;
+      }
+      if (ruined) {
+        values.push(0);
+        balance = 0;
+      } else {
+        balance = preFlowBalance - intendedWithdrawal;
+        values.push(balance);
+      }
+    } else {
+      balance = preFlowBalance + flow;
+      values.push(balance);
+    }
+  }
+
+  return { values, ruined };
+};
+
+const simulate = (
+  cashFlows: number[],
+  mu: number,
+  sigma: number,
+  startingValue: number,
+  simulationCount: number,
   config: ForecastConfig = {}
-): ForecastResult => {
-  const { mu, sigma, months, simulationCount } = input;
+): SimulationSummary => {
+  const months = cashFlows.length;
 
   const shocks = generateRandomNormalShocks({
     mean: mu,
@@ -122,13 +169,90 @@ export const runGeometricBrownianMotionForecast = (
   });
 
   const portfolioValuesMatrix: number[][] = [];
+  const ruined: boolean[] = [];
 
   for (let sim = 0; sim < simulationCount; sim++) {
-    const simulationResult = runSingleSimulation(input, shocks[sim]);
-    portfolioValuesMatrix.push(simulationResult.portfolioValues);
+    const path = runSinglePathWithCashFlows(
+      cashFlows,
+      shocks[sim],
+      startingValue
+    );
+    portfolioValuesMatrix.push(path.values);
+    ruined.push(path.ruined);
   }
 
-  return computeStatistics(portfolioValuesMatrix, input, config);
+  const cumulativeCashFlows = cashFlows.reduce<number[]>((acc, flow, index) => {
+    acc.push((acc[index - 1] ?? 0) + flow);
+    return acc;
+  }, []);
+
+  return summarizeSimulation(
+    portfolioValuesMatrix,
+    cumulativeCashFlows,
+    ruined,
+    config
+  );
+};
+
+export const runGeometricBrownianMotionForecast = (
+  input: ForecastInput,
+  config: ForecastConfig = {}
+): ForecastResult => {
+  const {
+    mu,
+    sigma,
+    months,
+    monthlyInvestment,
+    startingValue,
+    simulationCount,
+  } = input;
+
+  const cashFlows = buildAccumulationCashFlow(months, monthlyInvestment);
+  const summary = simulate(
+    cashFlows,
+    mu,
+    sigma,
+    startingValue,
+    simulationCount,
+    config
+  );
+
+  return {
+    median: summary.median,
+    confidenceLow: summary.confidenceLow,
+    confidenceHigh: summary.confidenceHigh,
+    cashFlows: summary.cashFlows,
+  };
+};
+
+export const runWithdrawalForecast = (
+  input: WithdrawalForecastInput,
+  config: ForecastConfig = {}
+): WithdrawalForecastResult => {
+  const { mu, sigma, startingValue, simulationCount } = input;
+
+  const cashFlows = buildWithdrawalCashFlow(input);
+  const summary = simulate(
+    cashFlows,
+    mu,
+    sigma,
+    startingValue,
+    simulationCount,
+    config
+  );
+
+  const ruinProbability =
+    simulationCount > 0
+      ? summary.ruined.filter(Boolean).length / simulationCount
+      : 0;
+
+  return {
+    median: summary.median,
+    confidenceLow: summary.confidenceLow,
+    confidenceHigh: summary.confidenceHigh,
+    cashFlows: summary.cashFlows,
+    ruinProbability,
+  };
 };
 
 export const getGeometricBrownianMotionParams = (
