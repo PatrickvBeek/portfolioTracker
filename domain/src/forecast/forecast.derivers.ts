@@ -27,8 +27,7 @@ const generateRandomNormalShocks = (params: RandomShockParams): number[][] => {
   return shocks;
 };
 
-const calculatePercentile = (values: number[], percentile: number): number => {
-  const sorted = values.toSorted((a, b) => a - b);
+const percentileOfSorted = (sorted: number[], percentile: number): number => {
   const index = (percentile / 100) * (sorted.length - 1);
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
@@ -43,9 +42,6 @@ const calculatePercentile = (values: number[], percentile: number): number => {
 
   return sorted[lower] * (1 - weight) + sorted[upper] * weight;
 };
-
-const calculateMedian = (values: number[]): number =>
-  calculatePercentile(values, 50);
 
 interface SimulationSummary extends ForecastResult {
   ruined: boolean[];
@@ -66,13 +62,13 @@ const summarizeSimulation = (
   const confidenceHigh: number[] = [];
 
   for (let monthIndex = 0; monthIndex < months; monthIndex++) {
-    const valuesForMonth = portfolioValuesMatrix.map(
-      (simulation) => simulation[monthIndex]
-    );
+    const valuesForMonth = portfolioValuesMatrix
+      .map((simulation) => simulation[monthIndex])
+      .toSorted((a, b) => a - b);
 
-    median.push(calculateMedian(valuesForMonth));
-    confidenceLow.push(calculatePercentile(valuesForMonth, lowPercentile));
-    confidenceHigh.push(calculatePercentile(valuesForMonth, highPercentile));
+    median.push(percentileOfSorted(valuesForMonth, 50));
+    confidenceLow.push(percentileOfSorted(valuesForMonth, lowPercentile));
+    confidenceHigh.push(percentileOfSorted(valuesForMonth, highPercentile));
   }
 
   return {
