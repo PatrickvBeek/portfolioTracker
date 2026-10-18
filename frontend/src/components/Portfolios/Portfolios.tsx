@@ -1,8 +1,8 @@
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useGetPortfolios } from "../../userDataContext";
-import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
-import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
+import { PortfolioBalancesChart } from "../charts/BalancesChart/BalancesChart";
+import { TimeWeightedReturnChart } from "../charts/TimeWeightedReturnChart/TimeWeightedReturnChart";
 import { Button } from "../ui/Button";
 import { Sheet } from "../ui/Sheet";
 import ActivityList from "./ActivityList/ActivityList";
@@ -10,7 +10,7 @@ import EmptyPortfolios from "./EmptyPortfolios/EmptyPortfolios";
 import PortfolioFormSideBar from "./PortfolioFormSideBar/PortfolioFormSideBar";
 import { styles } from "./Portfolios.styles";
 import PortfolioSelectionHeader from "./PortfolioSelectionHeader/PortfolioSelectionHeader";
-import { PortfolioSummary } from "./portfolioSummary/PortfolioSummary";
+import { PortfolioSummary } from "./PortfolioSummary/PortfolioSummary";
 import { Positions } from "./Positions/Positions";
 
 function Portfolios() {

@@ -2,7 +2,7 @@ import { FC, useState } from "react";
 import {
   useCashFlow,
   usePortfolioAge,
-} from "../../../Portfolios/portfolioSummary/PortfolioSummary.logic";
+} from "../../../Portfolios/PortfolioSummary/PortfolioSummary.logic";
 import { ChartContainer } from "../../ChartContainer";
 import { ChartRange } from "../../chartRange.types";
 import { ForecastChartBody } from "../../ForecastChartBody";
