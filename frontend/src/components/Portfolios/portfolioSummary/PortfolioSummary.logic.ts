@@ -57,9 +57,7 @@ export const useNonRealizedGains = (
   };
 };
 
-export const useMarketValue = (
-  portfolioNames: string[]
-): CustomQuery | undefined => {
+export const useMarketValue = (portfolioNames: string[]): CustomQuery => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const allIsins = [...new Set(portfolios.flatMap((p) => getIsins(p)))];
   const priceMapQuery = useGetPricesForIsins(allIsins);
