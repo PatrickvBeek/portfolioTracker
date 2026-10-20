@@ -11,7 +11,7 @@ import {
   useCashFlow,
   useMarketValue,
   usePortfolioAge,
-} from "../Portfolios/portfolioSummary/PortfolioSummary.logic";
+} from "../Portfolios/PortfolioSummary/PortfolioSummary.logic";
 import {
   ForecastChartData,
   ForecastChartDataSets,
@@ -20,7 +20,7 @@ import {
 import {
   useForecastScenarioParams,
   ForecastScenario,
-} from "../charts/balancesChart/forecastChart/ForecastChart.logic";
+} from "../charts/BalancesChart/ForecastChart/ForecastChart.logic";
 
 export type WithdrawalChartDataSets = ForecastChartDataSets;
 type WithdrawalChartData = ForecastChartData;
