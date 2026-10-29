@@ -10,7 +10,7 @@ import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import {
   useCashFlow,
   useMarketValue,
-} from "../../../Portfolios/portfolioSummary/PortfolioSummary.logic";
+} from "../../../Portfolios/PortfolioSummary/PortfolioSummary.logic";
 import { usePortfolioGeometricBrownianMotionParams } from "../../chartHooks";
 import {
   FORECAST_SIMULATION_COUNT,

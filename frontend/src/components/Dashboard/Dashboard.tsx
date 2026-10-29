@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Heading } from "../ui/Heading";
 import { Tag } from "../ui/Tag";
-import { PortfolioBalancesChart } from "../charts/balancesChart/BalancesChart";
-import { TimeWeightedReturnChart } from "../charts/timeWeightedReturnChart/TimeWeightedReturnChart";
-import { PortfolioSummary } from "../Portfolios/portfolioSummary/PortfolioSummary";
+import { PortfolioBalancesChart } from "../charts/BalancesChart/BalancesChart";
+import { TimeWeightedReturnChart } from "../charts/TimeWeightedReturnChart/TimeWeightedReturnChart";
+import { PortfolioSummary } from "../Portfolios/PortfolioSummary/PortfolioSummary";
 import { usePortfolioNames } from "./Dashboard.logic";
 import { styles } from "./Dashboard.styles";
 

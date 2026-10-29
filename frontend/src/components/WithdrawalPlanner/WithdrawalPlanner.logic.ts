@@ -11,7 +11,7 @@ import {
   useCashFlow,
   useMarketValue,
   usePortfolioAge,
-} from "../Portfolios/portfolioSummary/PortfolioSummary.logic";
+} from "../Portfolios/PortfolioSummary/PortfolioSummary.logic";
 import {
   FORECAST_DEBOUNCE_MS,
   FORECAST_SIMULATION_COUNT,
@@ -22,7 +22,7 @@ import {
 import {
   useForecastScenarioParams,
   ForecastScenario,
-} from "../charts/balancesChart/forecastChart/ForecastChart.logic";
+} from "../charts/BalancesChart/ForecastChart/ForecastChart.logic";
 
 export interface WithdrawalPlannerParameters {
   scenario: ForecastScenario;

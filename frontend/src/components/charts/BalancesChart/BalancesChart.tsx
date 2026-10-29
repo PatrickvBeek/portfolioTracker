@@ -5,10 +5,10 @@ import { ChartRange } from "../chartRange.types";
 import { ChartRangeSelector } from "../ChartRangeSelector";
 import { Heading } from "../../ui/Heading";
 import { styles } from "./BalancesChart.styles";
-import { ForecastChart } from "./forecastChart/ForecastChart";
-import { ProfitChart } from "./profitChart/ProfitChart";
+import { ForecastChart } from "./ForecastChart/ForecastChart";
+import { ProfitChart } from "./ProfitChart/ProfitChart";
 import { ViewMode } from "./shared/balancesChart.types";
-import { TotalValueChart } from "./totalValueChart/TotalValueChart";
+import { TotalValueChart } from "./TotalValueChart/TotalValueChart";
 
 const SubChartComponents: Record<
   ViewMode,
