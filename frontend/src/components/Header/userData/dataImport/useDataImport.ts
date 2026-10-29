@@ -5,30 +5,37 @@ export const useDataImport = () => {
   const setAllUserData = useSetAllUserData();
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
 
+  const showError = useCallback(() => setIsErrorDialogOpen(true), []);
+
+  const handleFileContent = useCallback(
+    (result: string | ArrayBuffer | null) => {
+      if (typeof result !== "string") {
+        console.error("parsed input type is not 'string'");
+        showError();
+        return;
+      }
+
+      try {
+        const parsedUserData = parseUserData(result);
+        setAllUserData(parsedUserData);
+      } catch (e) {
+        console.log(e);
+        showError();
+      }
+    },
+    [setAllUserData, showError]
+  );
+
   const importData = useCallback(
     (file: File) => {
       const fileReader = new FileReader();
-      fileReader.readAsText(file, "UTF-8");
-      fileReader.addEventListener("error", () => {
-        setIsErrorDialogOpen(true);
-      });
+      fileReader.addEventListener("error", showError);
       fileReader.addEventListener("load", (evt) => {
-        const readingResult = evt.target?.result;
-        if (typeof readingResult === "string") {
-          try {
-            const parsedUserData = parseUserData(readingResult);
-            setAllUserData(parsedUserData);
-          } catch (e) {
-            console.log(e);
-            setIsErrorDialogOpen(true);
-          }
-        } else {
-          console.error("parsed input type is not 'string'");
-          setIsErrorDialogOpen(true);
-        }
+        handleFileContent(evt.target?.result ?? null);
       });
+      fileReader.readAsText(file, "UTF-8");
     },
-    [setAllUserData]
+    [handleFileContent, showError]
   );
 
   const handleFileInputChange = useCallback(
@@ -40,10 +47,10 @@ export const useDataImport = () => {
         }
       } catch (e) {
         console.log(e);
-        setIsErrorDialogOpen(true);
+        showError();
       }
     },
-    [importData]
+    [importData, showError]
   );
 
   const triggerFileImport = useCallback(() => {
