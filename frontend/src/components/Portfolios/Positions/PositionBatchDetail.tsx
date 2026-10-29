@@ -1,4 +1,5 @@
 import moment from "moment";
+import { type ReactNode } from "react";
 import { toPrice } from "../../../utility/prices";
 import Balance from "../../general/Balance/Balance";
 import {
@@ -45,6 +46,21 @@ export function PositionBatchDetail({
   );
 }
 
+type MetricProps = {
+  label: string;
+  value: ReactNode;
+  plain?: boolean;
+};
+
+function Metric({ label, value, plain = false }: MetricProps) {
+  return (
+    <div className={styles.metricBlock}>
+      <div className={styles.metricLabel}>{label}</div>
+      {plain ? value : <div className={styles.metricValue}>{value}</div>}
+    </div>
+  );
+}
+
 type OpenBatchesSectionProps = {
   batches: OpenBatchListItem[];
   totals: OpenBatchTotals;
@@ -60,38 +76,16 @@ function OpenBatchesSection({ batches, totals }: OpenBatchesSectionProps) {
             {moment(batch.buyDate).format("ll")}
           </div>
           <div className={styles.metricsGrid}>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Buy Price</div>
-              <div className={styles.metricValue}>
-                {toPrice(batch.buyPrice)}
-              </div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Buy Value</div>
-              <div className={styles.metricValue}>
-                {toPrice(batch.buyValue)}
-              </div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Pieces</div>
-              <div className={styles.metricValue}>
-                {batch.pieces.toFixed(3)}
-              </div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Current Value</div>
-              <div className={styles.metricValue}>
-                {toPrice(batch.currentValue)}
-              </div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Fees</div>
-              <div className={styles.metricValue}>{toPrice(batch.fees)}</div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Gros Profit</div>
-              <Balance value={batch.pendingGrosProfit} />
-            </div>
+            <Metric label="Buy Price" value={toPrice(batch.buyPrice)} />
+            <Metric label="Buy Value" value={toPrice(batch.buyValue)} />
+            <Metric label="Pieces" value={batch.pieces.toFixed(3)} />
+            <Metric label="Current Value" value={toPrice(batch.currentValue)} />
+            <Metric label="Fees" value={toPrice(batch.fees)} />
+            <Metric
+              label="Gros Profit"
+              value={<Balance value={batch.pendingGrosProfit} />}
+              plain
+            />
           </div>
         </div>
       ))}
@@ -99,34 +93,18 @@ function OpenBatchesSection({ batches, totals }: OpenBatchesSectionProps) {
         <div className={styles.totalsLabel}>Totals</div>
         <div className={styles.totalsMetrics}>
           <div className={styles.metricBlock} />
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Buy Value</div>
-            <div className={styles.metricValue}>
-              {toPrice(totals.totalBuyValue)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Pieces</div>
-            <div className={styles.metricValue}>
-              {totals.totalPieces.toFixed(3)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Current Value</div>
-            <div className={styles.metricValue}>
-              {toPrice(totals.totalCurrentValue)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Fees</div>
-            <div className={styles.metricValue}>
-              {toPrice(totals.totalFees)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Gros Profit</div>
-            <Balance value={totals.totalProfit} />
-          </div>
+          <Metric label="Buy Value" value={toPrice(totals.totalBuyValue)} />
+          <Metric label="Pieces" value={totals.totalPieces.toFixed(3)} />
+          <Metric
+            label="Current Value"
+            value={toPrice(totals.totalCurrentValue)}
+          />
+          <Metric label="Fees" value={toPrice(totals.totalFees)} />
+          <Metric
+            label="Gros Profit"
+            value={<Balance value={totals.totalProfit} />}
+            plain
+          />
         </div>
       </div>
     </div>
@@ -148,76 +126,32 @@ function ClosedBatchesSection({ batches, totals }: ClosedBatchesSectionProps) {
             {moment(batch.buyDate).format("ll")}
           </div>
           <div className={styles.metricsGrid}>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Pieces</div>
-              <div className={styles.metricValue}>
-                {batch.pieces.toFixed(3)}
-              </div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Buy Value</div>
-              <div className={styles.metricValue}>
-                {toPrice(batch.buyValue)}
-              </div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Sell Value</div>
-              <div className={styles.metricValue}>
-                {toPrice(batch.sellValue)}
-              </div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Fees</div>
-              <div className={styles.metricValue}>{toPrice(batch.fees)}</div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Taxes</div>
-              <div className={styles.metricValue}>{toPrice(batch.taxes)}</div>
-            </div>
-            <div className={styles.metricBlock}>
-              <div className={styles.metricLabel}>Net Profit</div>
-              <Balance value={batch.netProfit} />
-            </div>
+            <Metric label="Pieces" value={batch.pieces.toFixed(3)} />
+            <Metric label="Buy Value" value={toPrice(batch.buyValue)} />
+            <Metric label="Sell Value" value={toPrice(batch.sellValue)} />
+            <Metric label="Fees" value={toPrice(batch.fees)} />
+            <Metric label="Taxes" value={toPrice(batch.taxes)} />
+            <Metric
+              label="Net Profit"
+              value={<Balance value={batch.netProfit} />}
+              plain
+            />
           </div>
         </div>
       ))}
       <div className={styles.totalsRow}>
         <div className={styles.totalsLabel}>Totals</div>
         <div className={styles.totalsMetrics}>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Pieces</div>
-            <div className={styles.metricValue}>
-              {totals.totalPieces.toFixed(3)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Buy Value</div>
-            <div className={styles.metricValue}>
-              {toPrice(totals.totalBuyValue)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Sell Value</div>
-            <div className={styles.metricValue}>
-              {toPrice(totals.totalSellValue)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Fees</div>
-            <div className={styles.metricValue}>
-              {toPrice(totals.totalFees)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Taxes</div>
-            <div className={styles.metricValue}>
-              {toPrice(totals.totalTaxes)}
-            </div>
-          </div>
-          <div className={styles.metricBlock}>
-            <div className={styles.metricLabel}>Net Profit</div>
-            <Balance value={totals.totalNetProfit} />
-          </div>
+          <Metric label="Pieces" value={totals.totalPieces.toFixed(3)} />
+          <Metric label="Buy Value" value={toPrice(totals.totalBuyValue)} />
+          <Metric label="Sell Value" value={toPrice(totals.totalSellValue)} />
+          <Metric label="Fees" value={toPrice(totals.totalFees)} />
+          <Metric label="Taxes" value={toPrice(totals.totalTaxes)} />
+          <Metric
+            label="Net Profit"
+            value={<Balance value={totals.totalNetProfit} />}
+            plain
+          />
         </div>
       </div>
     </div>
