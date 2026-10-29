@@ -23,6 +23,9 @@ const DEFAULTS = {
   date: new Date(),
 };
 
+const isTruthyNumber = (value: NumberInputValue): value is number =>
+  Boolean(value);
+
 export function OrderInputForm({
   portfolioName,
 }: OrderInputFormProps): ReactElement {
@@ -39,7 +42,11 @@ export function OrderInputForm({
   const { isValid, isDuplicate } = useOrderValidation(portfolioName);
   const addOrder = useAddOrderToPortfolio(portfolioName);
 
-  const isFormValid = isin && pieces && pieces !== 0 && sharePrice && date;
+  const hasAsset = isin.length > 0;
+  const hasPieces = isTruthyNumber(pieces);
+  const hasSharePrice = isTruthyNumber(sharePrice);
+  const hasDate = isNotNil(date);
+  const isFormValid = hasAsset && hasPieces && hasSharePrice && hasDate;
 
   const orderToSubmit = isFormValid
     ? {
