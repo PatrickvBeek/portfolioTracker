@@ -1,0 +1,19 @@
+name: qlty
+on:
+  pull_request:
+jobs:
+  maintainability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: qltysh/qlty-action/install@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Check new maintainability smells
+        run: node scripts/qlty-smells.mjs --base "origin/${{ github.base_ref }}"

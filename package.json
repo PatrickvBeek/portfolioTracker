@@ -13,7 +13,8 @@
     "lint:fix": "oxlint --fix",
     "fmt:check": "oxfmt --check",
     "fmt": "oxfmt",
-    "knip": "knip"
+    "knip": "knip",
+    "qlty:smells": "node scripts/qlty-smells.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.1",
@@ -31,7 +32,8 @@
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "pnpm oxfmt",
-      "pnpm oxlint --fix"
+      "pnpm oxlint --fix",
+      "node scripts/qlty-smells.mjs --base HEAD"
     ],
     "*.{json,md,css,less,html}": [
       "pnpm oxfmt"
