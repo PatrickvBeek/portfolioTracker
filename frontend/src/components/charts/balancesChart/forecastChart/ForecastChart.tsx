@@ -1,32 +1,13 @@
-import moment from "moment";
-import { isArray } from "radash";
 import { FC, useState } from "react";
-import {
-  Area,
-  CartesianGrid,
-  ComposedChart,
-  Legend,
-  Line,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import {
   useCashFlow,
   usePortfolioAge,
 } from "../../../Portfolios/portfolioSummary/PortfolioSummary.logic";
 import { ChartContainer } from "../../ChartContainer";
 import { ChartRange } from "../../chartRange.types";
+import { ForecastChartBody } from "../../ForecastChartBody";
+import { deriveMonthlyContribution } from "../../forecastChartUtils";
 import {
-  asLocaleEuro,
-  DEFAULT_LINE_PROPS,
-  CHART_GRID_STROKE,
-  TOOLTIP_STYLE,
-  getAxisProps,
-  getTimeAxisProps,
-} from "../../chartUtils";
-import {
-  ForecastChartDataSets,
   ForecastParameters,
   useForecastChartData,
 } from "./ForecastChart.logic";
@@ -41,8 +22,7 @@ export const ForecastChart: FC<{
   const [params, setParams] = useState<ForecastParameters>({
     scenario: "portfolio",
     timeHorizon: "10Y",
-    monthlyContribution:
-      50 * Math.round((cashFlow ?? 0) / portfolioAge / 12 / 50),
+    monthlyContribution: deriveMonthlyContribution(cashFlow, portfolioAge),
     confidenceLevel: 68,
     inflationRate: 0.02,
   });
@@ -58,60 +38,14 @@ export const ForecastChart: FC<{
         onParametersChange={setParams}
       />
       <ChartContainer isLoading={isLoading}>
-        <ComposedChart data={chartData} margin={{ bottom: 30 }}>
-          <Legend verticalAlign="bottom" />
-          <XAxis {...getTimeAxisProps(chartData)} />
-          <YAxis
-            {...getAxisProps(chartData)}
-            tickFormatter={(value) => (value / 1000).toString()}
-            unit={" k€"}
-          />
-          <CartesianGrid stroke={CHART_GRID_STROKE} />
-
-          <Area
-            {...DEFAULT_LINE_PROPS}
-            dataKey="uncertaintyBand"
-            type="monotone"
-            stroke="none"
-            fill="var(--color-success-soft)"
-            connectNulls
-            name={`Confidence Interval (${params.confidenceLevel}%)`}
-          />
-
-          <Line
-            {...DEFAULT_LINE_PROPS}
-            dataKey={"cashFlow" satisfies ForecastChartDataSets}
-            name={"Cash Flow"}
-            stroke="var(--color-accent-hover)"
-            strokeDasharray="8 4"
-            strokeWidth={2}
-          />
-
-          <Line
-            {...DEFAULT_LINE_PROPS}
-            dataKey={"median" satisfies ForecastChartDataSets}
-            name={"Market Value (Median)"}
-            stroke="var(--color-success)"
-            strokeDasharray="8 4"
-            strokeWidth={2}
-            type={"linear"}
-          />
-
-          <Tooltip
-            contentStyle={TOOLTIP_STYLE}
-            formatter={(value, name) =>
-              isArray(value)
-                ? [
-                    `${asLocaleEuro(value[0], 0)} - ${asLocaleEuro(value[1], 0)}`,
-                    name,
-                  ]
-                : [asLocaleEuro(Number(value), 0), name]
-            }
-            labelFormatter={(value) =>
-              moment(new Date(Number(value))).format("ddd DD.MM.YYYY")
-            }
-          />
-        </ComposedChart>
+        <ForecastChartBody
+          data={chartData}
+          labels={{
+            band: `Confidence Interval (${params.confidenceLevel}%)`,
+            median: "Market Value (Median)",
+            cashFlow: "Cash Flow",
+          }}
+        />
       </ChartContainer>
     </>
   );
