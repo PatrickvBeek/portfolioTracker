@@ -2,11 +2,11 @@ import { Download, KeyRound, Upload } from "lucide-react";
 import React from "react";
 import { cn } from "../../../utility/cn";
 import { Button } from "../../ui/Button";
-import { Dialog } from "../../ui/Dialog";
 import { Sheet } from "../../ui/Sheet";
 import ApiKeysOverlay from "../apiKeys/ApiKeysOverlay";
 import { useApiKeysManager } from "../apiKeys/useApiKeysManager";
 import { useDataExport } from "../userData/dataExport/useDataExport";
+import { ImportErrorDialog } from "../userData/dataImport/ImportErrorDialog";
 import { useDataImport } from "../userData/dataImport/useDataImport";
 
 interface MobileMenuDrawerProps {
@@ -118,25 +118,10 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
         onSubmit={handleSubmit}
       />
 
-      <Dialog
+      <ImportErrorDialog
         open={isErrorDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsErrorDialogOpen(false);
-          }
-        }}
-        title="Error parsing file"
-      >
-        <div className="text-text">
-          Oh no! 😢 <br />
-          An unknown error occurred while reading the selected file.
-        </div>
-        <div className="mt-6 flex justify-end">
-          <Button intent="ghost" onClick={() => setIsErrorDialogOpen(false)}>
-            Okay
-          </Button>
-        </div>
-      </Dialog>
+        onClose={() => setIsErrorDialogOpen(false)}
+      />
     </>
   );
 };

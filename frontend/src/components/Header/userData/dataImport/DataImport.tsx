@@ -1,8 +1,7 @@
 import { FC, ReactElement, useId } from "react";
 import { Upload } from "lucide-react";
-import { Button } from "../../../ui/Button";
-import { Dialog } from "../../../ui/Dialog";
 import { Tooltip } from "../../../ui/Tooltip";
+import { ImportErrorDialog } from "./ImportErrorDialog";
 import { useDataImport } from "./useDataImport";
 
 export const DataImport: FC = (): ReactElement => {
@@ -34,25 +33,10 @@ export const DataImport: FC = (): ReactElement => {
         className="hidden"
       />
 
-      <Dialog
+      <ImportErrorDialog
         open={isErrorDialogOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsErrorDialogOpen(false);
-          }
-        }}
-        title="Error parsing file"
-      >
-        <div className="text-text">
-          Oh no! 😢 <br />
-          An unknown error occurred while reading the selected file.
-        </div>
-        <div className="mt-6 flex justify-end">
-          <Button intent="ghost" onClick={() => setIsErrorDialogOpen(false)}>
-            Okay
-          </Button>
-        </div>
-      </Dialog>
+        onClose={() => setIsErrorDialogOpen(false)}
+      />
     </>
   );
 };
