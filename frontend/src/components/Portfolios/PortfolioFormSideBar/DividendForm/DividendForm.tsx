@@ -28,30 +28,37 @@ const DEFAULTS: FormState = {
   date: new Date(),
 };
 
+const toPayout = (formState: FormState): DividendPayout | undefined => {
+  const { asset, pieces, dividendPerShare, taxes, date } = formState;
+
+  if (!asset || !pieces || pieces <= 0) {
+    return undefined;
+  }
+  if (!dividendPerShare || dividendPerShare <= 0) {
+    return undefined;
+  }
+  if ((taxes || 0) < 0) {
+    return undefined;
+  }
+  if (!date || new Date(date).getTime() >= new Date().getTime()) {
+    return undefined;
+  }
+
+  return {
+    uuid: uuid(),
+    asset,
+    pieces,
+    taxes: taxes || 0,
+    dividendPerShare,
+    timestamp: date.toISOString(),
+  };
+};
+
 function DividendForm({ portfolioName }: DividendFormProps): ReactElement {
   const [formState, setFormState] = useState(DEFAULTS);
   const addDividendPayout = useAddDividendPayoutToPortfolio(portfolioName);
 
-  const { asset, pieces, taxes, dividendPerShare, date } = formState;
-
-  const payout: DividendPayout | undefined =
-    !!asset &&
-    pieces &&
-    pieces > 0 &&
-    dividendPerShare &&
-    dividendPerShare > 0 &&
-    (taxes || 0) >= 0 &&
-    !!date &&
-    new Date(date).getTime() < new Date().getTime()
-      ? {
-          uuid: uuid(),
-          asset: asset,
-          pieces: pieces,
-          taxes: taxes || 0,
-          dividendPerShare: dividendPerShare,
-          timestamp: date.toISOString(),
-        }
-      : undefined;
+  const payout = toPayout(formState);
 
   return (
     <div className={styles.container}>
