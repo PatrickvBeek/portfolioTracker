@@ -32,8 +32,9 @@ function run(command, commandArgs) {
 
     if (error.code === "ENOENT") {
       console.error(hint);
-    } else if (error.stderr) {
-      process.stderr.write(error.stderr);
+    } else {
+      const detail = error.stderr?.toString().trim() || error.message;
+      console.error(`Could not run ${command}: ${detail}`);
     }
 
     process.exit(error.status ?? 1);
