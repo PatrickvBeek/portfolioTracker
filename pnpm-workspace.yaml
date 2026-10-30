@@ -3,3 +3,7 @@ packages:
   - frontend
 allowBuilds:
   msw: true
+packageExtensions:
+  dependency-cruiser:
+    dependencies:
+      typescript: ^6.0.0
