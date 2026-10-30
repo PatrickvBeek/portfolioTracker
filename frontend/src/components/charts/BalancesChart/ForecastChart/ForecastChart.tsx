@@ -3,6 +3,7 @@ import {
   useCashFlow,
   usePortfolioAge,
 } from "../../../Portfolios/PortfolioSummary/PortfolioSummary.logic";
+import { DEFAULT_INFLATION_RATE } from "../../../../hooks/inflation/inflationHooks";
 import { ChartContainer } from "../../ChartContainer";
 import { ChartRange } from "../../chartRange.types";
 import { ForecastChartBody } from "../../ForecastChartBody";
@@ -24,7 +25,7 @@ export const ForecastChart: FC<{
     timeHorizon: "10Y",
     monthlyContribution: deriveMonthlyContribution(cashFlow, portfolioAge),
     confidenceLevel: 68,
-    inflationRate: 0.02,
+    inflationRate: DEFAULT_INFLATION_RATE,
   });
 
   const { data, isLoading } = useForecastChartData(portfolioNames, params);

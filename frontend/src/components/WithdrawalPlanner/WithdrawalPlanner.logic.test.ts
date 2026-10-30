@@ -7,6 +7,8 @@ import {
 import { setUserData } from "../../testUtils/localStorage";
 import { getPriceResponse, mockNetwork } from "../../testUtils/networkMock";
 import {
+  buildWithdrawalForecastArgs,
+  parseInflationPercent,
   parseNonNegativeInt,
   parseNonNegativeNumber,
   useWithdrawalPlannerData,
@@ -55,6 +57,7 @@ const baseParameters: WithdrawalPlannerParameters = {
   decumulationMonths: 0,
   monthlyContribution: null,
   monthlyWithdrawal: 0,
+  inflationRate: 0,
 };
 
 const renderPlanner = (parameters: WithdrawalPlannerParameters) => {
@@ -121,5 +124,27 @@ describe("input parsing", () => {
   it("clamps negative decimals to zero", () => {
     expect(parseNonNegativeNumber("-2.5")).toBe(0);
     expect(parseNonNegativeNumber("2000.5")).toBe(2000.5);
+  });
+
+  it("parses inflation percentages as fractions within the allowed range", () => {
+    expect(parseInflationPercent("2.5")).toBe(0.025);
+    expect(parseInflationPercent("25")).toBe(0.2);
+    expect(parseInflationPercent("-1")).toBe(0);
+  });
+});
+
+describe("buildWithdrawalForecastArgs", () => {
+  it("passes the selected inflation rate to the forecast and the display", () => {
+    const args = buildWithdrawalForecastArgs({
+      parameters: { ...baseParameters, inflationRate: 0.03 },
+      startingValue: 100_000,
+      monthlyContribution: 500,
+      currentCashFlow: 0,
+      gbmParams: { mu: 0.01, sigma: 0.05 },
+      startTimestamp: 0,
+    });
+
+    expect(args.input.annualInflationRate).toBe(0.03);
+    expect(args.inflationRate).toBe(0.03);
   });
 });

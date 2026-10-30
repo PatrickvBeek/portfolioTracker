@@ -102,11 +102,7 @@ const buildWithdrawalCashFlow = (input: WithdrawalForecastInput): number[] => {
     if (m < accumulationMonths) {
       cashFlows.push(contribution);
     } else {
-      const monthsIntoDecumulation = m - accumulationMonths;
-      const escalation = Math.pow(
-        1 + annualInflationRate,
-        monthsIntoDecumulation / 12
-      );
+      const escalation = Math.pow(1 + annualInflationRate, (m + 1) / 12);
       cashFlows.push(-monthlyWithdrawal * escalation);
     }
   }
