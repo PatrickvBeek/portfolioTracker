@@ -9,23 +9,47 @@ type MockBackendData = {
   destatis?: DestatisTableResponse | null;
 };
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "*",
+} as const;
+
+const corsPreflight = () =>
+  new HttpResponse(null, { status: 204, headers: CORS_HEADERS });
+
 function getHandlers(mockData: MockBackendData): RequestHandler[] {
   return [
-    http.get("https://www.alphavantage.co/*", ({ request }) => {
+    http.options("https://www.alphavantage.co/query", corsPreflight),
+    http.options(
+      "https://genesis.destatis.de/genesis/api/rest/tables/61111-0002/data",
+      corsPreflight
+    ),
+    http.get("https://www.alphavantage.co/query", ({ request }) => {
       const url = new URL(request.url);
       const symbol = url.searchParams.get("symbol");
       if (!symbol) {
-        return new HttpResponse(null, { status: 404 });
+        return new HttpResponse(null, {
+          status: 404,
+          headers: CORS_HEADERS,
+        });
       }
-      return HttpResponse.json(mockData?.prices[symbol]);
+      return HttpResponse.json(mockData?.prices[symbol], {
+        headers: CORS_HEADERS,
+      });
     }),
     http.get(
       "https://genesis.destatis.de/genesis/api/rest/tables/61111-0002/data",
       () => {
         if (mockData?.destatis === null) {
-          return new HttpResponse(null, { status: 500 });
+          return new HttpResponse(null, {
+            status: 500,
+            headers: CORS_HEADERS,
+          });
         }
-        return HttpResponse.json(mockData?.destatis ?? { data: [] });
+        return HttpResponse.json(mockData?.destatis ?? { data: [] }, {
+          headers: CORS_HEADERS,
+        });
       }
     ),
   ];
