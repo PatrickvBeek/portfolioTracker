@@ -195,12 +195,73 @@ describe("runWithdrawalForecast", () => {
 
       const result = runWithdrawalForecast(input);
 
-      const month0Withdrawal = 1000;
-      const month1Withdrawal = 1000 * Math.pow(1.24, 1 / 12);
-      expect(result.cashFlows[0]).toBeCloseTo(-month0Withdrawal, 6);
+      const firstWithdrawal = 1000 * Math.pow(1.24, 1 / 12);
+      const secondWithdrawal = 1000 * Math.pow(1.24, 2 / 12);
+      expect(result.cashFlows[0]).toBeCloseTo(-firstWithdrawal, 6);
       expect(result.cashFlows[1]).toBeCloseTo(
-        -(month0Withdrawal + month1Withdrawal),
+        -(firstWithdrawal + secondWithdrawal),
         5
+      );
+    });
+  });
+
+  describe("real-terms withdrawals", () => {
+    it("keeps the purchasing power of the entered withdrawal through the build-up and retirement phases", () => {
+      useShocks([0]);
+
+      const annualInflationRate = 0.12;
+      const monthlyWithdrawal = 1000;
+      const accumulationMonths = 12;
+      const input: WithdrawalForecastInput = {
+        mu: 0,
+        sigma: 0,
+        startingValue: 100000,
+        simulationCount: 1,
+        accumulationMonths,
+        decumulationMonths: 2,
+        monthlyContribution: 0,
+        monthlyWithdrawal,
+        annualInflationRate,
+      };
+
+      const result = runWithdrawalForecast(input);
+
+      const nominalWithdrawalAt = (monthIndex: number) =>
+        monthlyWithdrawal *
+        Math.pow(1 + annualInflationRate, (monthIndex + 1) / 12);
+      const firstWithdrawal = nominalWithdrawalAt(accumulationMonths);
+      const secondWithdrawal = nominalWithdrawalAt(accumulationMonths + 1);
+
+      expect(result.cashFlows[accumulationMonths]).toBeCloseTo(
+        -firstWithdrawal,
+        6
+      );
+      expect(result.cashFlows[accumulationMonths + 1]).toBeCloseTo(
+        -(firstWithdrawal + secondWithdrawal),
+        6
+      );
+      expect(result.median[accumulationMonths - 1]).toBeCloseTo(100000, 6);
+      expect(result.median[accumulationMonths]).toBeCloseTo(
+        100000 - firstWithdrawal,
+        6
+      );
+      expect(result.median[accumulationMonths + 1]).toBeCloseTo(
+        100000 - firstWithdrawal - secondWithdrawal,
+        6
+      );
+
+      const nominalFlows = result.cashFlows.map(
+        (value, index) => value - (result.cashFlows[index - 1] ?? 0)
+      );
+      const realFlows = nominalFlows.map(
+        (value, index) =>
+          value / Math.pow(1 + annualInflationRate, (index + 1) / 12)
+      );
+
+      expect(realFlows[accumulationMonths]).toBeCloseTo(-monthlyWithdrawal, 6);
+      expect(realFlows[accumulationMonths + 1]).toBeCloseTo(
+        -monthlyWithdrawal,
+        6
       );
     });
   });

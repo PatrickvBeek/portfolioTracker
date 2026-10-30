@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Heading } from "../ui/Heading";
 import { Input } from "../ui/Input";
 import { ToggleGroup, ToggleItem } from "../ui/ToggleGroup";
 import {
+  parseInflationPercent,
   parseNonNegativeInt,
   parseNonNegativeNumber,
   type WithdrawalPlannerParameters,
@@ -78,6 +80,11 @@ export function WithdrawalPlannerForm({
   onScenarioChange,
   onParameterChange,
 }: WithdrawalPlannerFormProps) {
+  const [inflationInput, setInflationInput] = useState(
+    (parameters.inflationRate * 100).toString()
+  );
+  const inflationPercent = Number((parameters.inflationRate * 100).toFixed(2));
+
   return (
     <div className={styles.sectionCard}>
       <div className={styles.sectionBody}>
@@ -124,6 +131,37 @@ export function WithdrawalPlannerForm({
               />
             </div>
           ))}
+
+          <div className={styles.controlGroup}>
+            <label htmlFor="withdrawal-inflation" className={styles.label}>
+              Inflation
+            </label>
+            <div className={styles.inputAdornment}>
+              <Input
+                id="withdrawal-inflation"
+                type="number"
+                min={0}
+                max={20}
+                step={0.5}
+                value={inflationInput}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setInflationInput(value);
+                  onParameterChange(
+                    "inflationRate",
+                    parseInflationPercent(value)
+                  );
+                }}
+                aria-describedby="withdrawal-inflation-helper"
+                className={styles.inputWidth}
+              />
+              <span className={styles.adornmentText}>%</span>
+            </div>
+            <p id="withdrawal-inflation-helper" className={styles.helperText}>
+              Raises withdrawals at {inflationPercent}% per year and converts
+              results to today's money. Contributions stay fixed in euros.
+            </p>
+          </div>
         </div>
       </div>
     </div>

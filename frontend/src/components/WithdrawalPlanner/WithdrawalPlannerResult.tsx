@@ -61,7 +61,6 @@ export function WithdrawalPlannerResult({
             labels={{
               band: "90% Confidence Interval",
               median: "Market Value (Median)",
-              cashFlow: "Net Cash Flow",
             }}
           />
         </ChartContainer>

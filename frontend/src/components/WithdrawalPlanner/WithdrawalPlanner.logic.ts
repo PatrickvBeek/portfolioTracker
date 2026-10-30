@@ -32,6 +32,7 @@ export interface WithdrawalPlannerParameters {
   decumulationMonths: number;
   monthlyContribution: number | null;
   monthlyWithdrawal: number;
+  inflationRate: number;
 }
 
 interface WithdrawalForecastArgs {
@@ -47,11 +48,8 @@ interface WithdrawalForecastArgsInput {
   monthlyContribution: number;
   currentCashFlow: number;
   gbmParams: GbmParameters;
-  inflationRate: number;
   startTimestamp: number;
 }
-
-const DEFAULT_ANNUAL_INFLATION_RATE = 0;
 
 const monthsFromYearsMonths = (years: number, months: number): number =>
   years * 12 + months;
@@ -62,13 +60,15 @@ export const parseNonNegativeInt = (value: string): number =>
 export const parseNonNegativeNumber = (value: string): number =>
   Math.max(0, parseFloat(value) || 0);
 
-const buildWithdrawalForecastArgs = ({
+export const parseInflationPercent = (value: string): number =>
+  Math.min(20, parseNonNegativeNumber(value)) / 100;
+
+export const buildWithdrawalForecastArgs = ({
   parameters,
   startingValue,
   monthlyContribution,
   currentCashFlow,
   gbmParams,
-  inflationRate,
   startTimestamp,
 }: WithdrawalForecastArgsInput): WithdrawalForecastArgs => {
   const accumulationMonths = monthsFromYearsMonths(
@@ -89,14 +89,14 @@ const buildWithdrawalForecastArgs = ({
     decumulationMonths,
     monthlyContribution,
     monthlyWithdrawal: parameters.monthlyWithdrawal,
-    annualInflationRate: inflationRate,
+    annualInflationRate: parameters.inflationRate,
   };
 
   return {
     input,
     startTimestamp,
     currentCashFlow,
-    inflationRate,
+    inflationRate: parameters.inflationRate,
   };
 };
 
@@ -129,7 +129,6 @@ export const useWithdrawalPlannerData = (
     portfolioNames,
     debouncedParameters.scenario
   );
-  const inflationRate = DEFAULT_ANNUAL_INFLATION_RATE;
   const { data: marketValue, isLoading, isError } = marketValueQuery;
   const startingValue = marketValue ?? NaN;
   const hasPortfolios = portfolios.length > 0;
@@ -158,7 +157,6 @@ export const useWithdrawalPlannerData = (
       monthlyContribution,
       currentCashFlow: cashFlow,
       gbmParams: { mu: scenarioMu, sigma: scenarioSigma },
-      inflationRate,
       startTimestamp,
     });
 
@@ -189,7 +187,6 @@ export const useWithdrawalPlannerData = (
     monthlyContribution,
     cashFlow,
     debouncedParameters,
-    inflationRate,
     startTimestamp,
   ]);
 };

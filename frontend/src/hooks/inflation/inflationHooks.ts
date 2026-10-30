@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import { CustomQuery } from "../prices/priceHooks";
 import { fetchDestatisCpiIndex } from "./destatisAdapter";
 
-const DEFAULT_ANNUAL_RATE = 0.02;
+export const DEFAULT_INFLATION_RATE = 0.02;
 const INFLATION_QUERY_KEY = ["inflation", "destatis", "61111-0002"] as const;
 
 export const useInflationIndex = (
@@ -33,14 +33,14 @@ export const useInflationIndex = (
         query.data,
         startDate,
         now,
-        DEFAULT_ANNUAL_RATE
+        DEFAULT_INFLATION_RATE
       );
     }
 
     return generateConstantRateInflationIndex(
       startDate,
       now,
-      DEFAULT_ANNUAL_RATE
+      DEFAULT_INFLATION_RATE
     );
   }, [startDate, query.data]);
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DEFAULT_INFLATION_RATE } from "../../hooks/inflation/inflationHooks";
 import {
   type WithdrawalPlannerParameters,
   useWithdrawalPlannerData,
@@ -15,6 +16,7 @@ const DEFAULT_PARAMETERS: WithdrawalPlannerParameters = {
   decumulationMonths: 0,
   monthlyContribution: null,
   monthlyWithdrawal: 2000,
+  inflationRate: DEFAULT_INFLATION_RATE,
 };
 
 const WithdrawalPlanner = ({
