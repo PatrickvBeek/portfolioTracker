@@ -1,3 +1,5 @@
 packages:
   - domain
   - frontend
+allowBuilds:
+  msw: true
