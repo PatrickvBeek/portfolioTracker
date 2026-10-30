@@ -4,6 +4,7 @@ import {
   getNumericDateTime,
 } from "pt-domain";
 import { unique } from "radash";
+import { useState } from "react";
 import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import { isNotNil } from "../../../../utility/types";
 import { ChartRange } from "../../chartRange.types";
@@ -14,6 +15,7 @@ export const usePortfolioTimeAxis = (
   range: ChartRange
 ): number[] => {
   const portfolios = useGetPortfoliosByNames(portfolioNames);
+  const [now] = useState(() => Date.now());
 
   if (portfolios.length === 0) {
     return [];
@@ -38,7 +40,7 @@ export const usePortfolioTimeAxis = (
   return unique(
     getDefaultTimeAxis(xMin, range)
       .concat(portfolioTimestamps)
-      .concat(Date.now())
+      .concat(now)
       .toSorted((a, b) => a - b)
   );
 };

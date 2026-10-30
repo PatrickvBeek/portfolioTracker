@@ -4,7 +4,7 @@ import {
   logReturnToPercentage,
   runGeometricBrownianMotionForecast,
 } from "pt-domain";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import {
@@ -144,13 +144,13 @@ export const useForecastChartData = (
     portfolioNames,
     params.scenario
   );
+  const [startTimestamp] = useState(() => Date.now());
 
   if (portfolios.length === 0 || !scenarioDetails) {
     return { isError, isLoading, data: [] };
   }
 
   const months = FORECAST_HORIZON_MONTHS[params.timeHorizon];
-  const startTimestamp = Date.now();
 
   const forecastInput: ForecastInput = {
     mu: scenarioDetails.params.mu,
