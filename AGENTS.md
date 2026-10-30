@@ -2,16 +2,31 @@
 
 This file provides guidance to agents when working with code in this repository.
 
-## Build/Lint/Test Commands
+## Commands
+
+**Always** run the validation commands before you hand off. `.github/workflows/ci.yml` runs the same set.
+
+### Validation
+
+| Check                  | Command                                    |
+| ---------------------- | ------------------------------------------ |
+| Lint                   | `pnpm lint`                                |
+| Dead code              | `pnpm knip`                                |
+| Format check           | `pnpm fmt:check`                           |
+| Types                  | `pnpm tsc`                                 |
+| Unit tests             | `pnpm test`                                |
+| Architecture borders   | `pnpm architecture-tests`                  |
+| Dependency sync        | `pnpm syncpack lint`                       |
+| Maintainability smells | `node scripts/qlty-smells.mjs --base HEAD` |
+
+- `architecture-tests` and `syncpack lint` matter when you change imports or `package.json`.
+- Smells need the `qlty` CLI (https://qlty.sh). `--base HEAD` covers uncommitted tracked work; use `--base origin/main` after committing. The gate fails only for findings on added lines. Untracked files stay out of scope until staged, so pre-commit and CI gate them at commit time. If the CLI is missing, say that you skipped this check; do not claim it passed.
+- Qlty is for smells only. The plugins in `.qlty/qlty.toml` (`actionlint`, `knip`, `osv-scanner`, `ripgrep`, `trufflehog`, `zizmor`) run only under `qlty check`, which no hook or workflow calls. Keep oxlint, oxfmt, and knip in the pnpm scripts.
+
+### Development
 
 - **Single test file**: `cd domain && pnpm vitest run <path>` or `cd frontend && pnpm vitest run <path>`
-- **Full test suite**: `pnpm test` (runs both domain and frontend tests)
-- **Type checking**: `pnpm tsc` (root)
-- **Linting**: `pnpm lint` (runs oxlint on all files)
-- **Lint fix**: `pnpm lint:fix` (auto-fixes linting issues)
-- **Dead code check**: `pnpm knip` (check for unused dependencies, files, exports)
-- **Architecture validation**: `pnpm architecture-tests` (runs dependency-cruiser to enforce domain isolation)
-- **Format check**: `pnpm fmt:check`
+- **Lint fix**: `pnpm lint:fix`
 - **Format fix**: `pnpm fmt`
 - **Build frontend**: `pnpm build` or `pnpm --filter frontend build`
 - **Start dev server**: `pnpm start` or `pnpm --filter frontend start`
@@ -59,10 +74,6 @@ This file provides guidance to agents when working with code in this repository.
 - Use optional chaining and nullish coalescing for safe access
 - API failures should display user-friendly error messages
 - LocalStorage errors should be handled gracefully (e.g., userDataContext)
-
-## Dead Code Check
-
-- **Always** run knip before considering your work done
 
 ## Testing Approach
 

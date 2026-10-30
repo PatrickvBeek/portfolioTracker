@@ -6,6 +6,7 @@
 //
 //   node scripts/qlty-smells.mjs --base origin/main
 //     Fail on findings that touch lines added since the merge base.
+//     Untracked files stay out of scope until staged.
 import { execFileSync } from "node:child_process";
 
 const MAX_BUFFER = 64 * 1024 * 1024;
