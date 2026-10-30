@@ -6,6 +6,7 @@
 //
 //   node scripts/qlty-smells.mjs --base origin/main
 //     Fail on findings that touch lines added since the merge base.
+//     Untracked files stay out of scope until staged.
 import { execFileSync } from "node:child_process";
 
 const MAX_BUFFER = 64 * 1024 * 1024;
@@ -32,8 +33,9 @@ function run(command, commandArgs) {
 
     if (error.code === "ENOENT") {
       console.error(hint);
-    } else if (error.stderr) {
-      process.stderr.write(error.stderr);
+    } else {
+      const detail = error.stderr?.toString().trim() || error.message;
+      console.error(`Could not run ${command}: ${detail}`);
     }
 
     process.exit(error.status ?? 1);

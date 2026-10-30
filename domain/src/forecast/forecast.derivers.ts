@@ -148,14 +148,23 @@ const runSinglePathWithCashFlows = (
   return { values, ruined };
 };
 
-const simulate = (
-  cashFlows: number[],
-  mu: number,
-  sigma: number,
-  startingValue: number,
-  simulationCount: number,
-  config: ForecastConfig = {}
-): SimulationSummary => {
+interface SimulationParams {
+  cashFlows: number[];
+  mu: number;
+  sigma: number;
+  startingValue: number;
+  simulationCount: number;
+  config?: ForecastConfig;
+}
+
+const simulate = ({
+  cashFlows,
+  mu,
+  sigma,
+  startingValue,
+  simulationCount,
+  config = {},
+}: SimulationParams): SimulationSummary => {
   const months = cashFlows.length;
 
   const shocks = generateRandomNormalShocks({
@@ -205,14 +214,14 @@ export const runGeometricBrownianMotionForecast = (
   } = input;
 
   const cashFlows = buildAccumulationCashFlow(months, monthlyInvestment);
-  const summary = simulate(
+  const summary = simulate({
     cashFlows,
     mu,
     sigma,
     startingValue,
     simulationCount,
-    config
-  );
+    config,
+  });
 
   return {
     median: summary.median,
@@ -229,14 +238,14 @@ export const runWithdrawalForecast = (
   const { mu, sigma, startingValue, simulationCount } = input;
 
   const cashFlows = buildWithdrawalCashFlow(input);
-  const summary = simulate(
+  const summary = simulate({
     cashFlows,
     mu,
     sigma,
     startingValue,
     simulationCount,
-    config
-  );
+    config,
+  });
 
   const ruinProbability =
     simulationCount > 0

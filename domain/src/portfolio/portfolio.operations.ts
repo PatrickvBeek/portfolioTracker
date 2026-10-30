@@ -36,23 +36,28 @@ export const addOrderToPortfolio = (
   },
 });
 
+const deleteActivityFrom = <T extends PortfolioActivity>(
+  activities: Record<string, T[]>,
+  activity: T
+): Record<string, T[]> | undefined => {
+  if (!activities[activity.asset]) {
+    return undefined;
+  }
+
+  return purgeEmptyArrays({
+    ...activities,
+    [activity.asset]: activities[activity.asset].filter(
+      (current) => current.uuid !== activity.uuid
+    ),
+  });
+};
+
 export const deleteOrderFromPortfolio = (
   portfolio: Portfolio,
   order: Order
 ): Portfolio => {
-  if (!portfolio.orders[order.asset]) {
-    return portfolio;
-  }
-
-  return {
-    ...portfolio,
-    orders: purgeEmptyArrays({
-      ...portfolio.orders,
-      [order.asset]: portfolio.orders[order.asset].filter(
-        (currentOrder) => currentOrder.uuid !== order.uuid
-      ),
-    }),
-  };
+  const orders = deleteActivityFrom(portfolio.orders, order);
+  return orders ? { ...portfolio, orders } : portfolio;
 };
 
 export function addDividendPayoutToPortfolio(
@@ -75,18 +80,8 @@ export const deleteDividendPayoutFromPortfolio = (
   portfolio: Portfolio,
   payout: DividendPayout
 ): Portfolio => {
-  if (!portfolio.dividendPayouts[payout.asset]) {
-    return portfolio;
-  }
-  return {
-    ...portfolio,
-    dividendPayouts: purgeEmptyArrays({
-      ...portfolio.dividendPayouts,
-      [payout.asset]: portfolio.dividendPayouts[payout.asset].filter(
-        (currentOrder) => currentOrder.uuid !== payout.uuid
-      ),
-    }),
-  };
+  const dividendPayouts = deleteActivityFrom(portfolio.dividendPayouts, payout);
+  return dividendPayouts ? { ...portfolio, dividendPayouts } : portfolio;
 };
 
 export const newPortfolioFromName: (name: string) => Portfolio = (name) => ({
