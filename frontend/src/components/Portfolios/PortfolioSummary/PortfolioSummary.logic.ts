@@ -12,6 +12,7 @@ import {
   getTotalCashFlow,
 } from "pt-domain";
 import { max, sum } from "radash";
+import { useState } from "react";
 import { useGetPortfoliosByNames } from "../../../userDataContext";
 import {
   CustomQuery,
@@ -133,9 +134,9 @@ export const useRealAnnualizedReturn = (
   const isins = getIsins(merged);
   const priceMapQuery = useGetPricesForIsins(isins);
 
-  const now = Date.now();
   const startDate = getFirstOrderTimeStamp(merged) ?? undefined;
   const inflationIndexQuery = useInflationIndex(startDate);
+  const [now] = useState(() => Date.now());
   const inflationIndex = inflationIndexQuery.data ?? [];
 
   if (portfolios.length === 0) {

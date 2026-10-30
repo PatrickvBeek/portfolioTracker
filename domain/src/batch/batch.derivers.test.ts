@@ -195,9 +195,6 @@ describe("the portfolio deriver", () => {
     const day2 = "2023-01-02";
     const day3 = "2023-01-03";
 
-    const getTestOrders = (orders: Partial<Order>[]) =>
-      orders.map(getTestOrder);
-
     it("returns a correct history for a buying 1,1 selling 2", () => {
       const TEST_ORDERS = getTestOrders([
         { asset: "abc", pieces: 1, sharePrice: 10, timestamp: day1 },

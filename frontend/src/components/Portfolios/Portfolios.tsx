@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGetPortfolios } from "../../userDataContext";
 import { PortfolioBalancesChart } from "../charts/BalancesChart/BalancesChart";
 import { TimeWeightedReturnChart } from "../charts/TimeWeightedReturnChart/TimeWeightedReturnChart";
@@ -15,23 +15,21 @@ import { Positions } from "./Positions/Positions";
 
 function Portfolios() {
   const portfolioLib = useGetPortfolios();
+  const portfolioNames = Object.keys(portfolioLib);
   const [selectedPortfolio, setSelectedPortfolio] = useState<
     string | undefined
-  >(Object.keys(portfolioLib)[0]);
+  >(portfolioNames[0]);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const selected =
+    selectedPortfolio && portfolioNames.includes(selectedPortfolio)
+      ? selectedPortfolio
+      : portfolioNames[0];
 
-  useEffect(() => {
-    const portfolios = Object.keys(portfolioLib || {});
-    if (!selectedPortfolio || !portfolios.includes(selectedPortfolio)) {
-      setSelectedPortfolio(portfolios[0]);
-    }
-  }, [portfolioLib, selectedPortfolio]);
-
-  if (Object.keys(portfolioLib).length < 1) {
+  if (portfolioNames.length < 1) {
     return <EmptyPortfolios />;
   }
 
-  if (!selectedPortfolio) {
+  if (!selected) {
     return <></>;
   }
 
@@ -39,29 +37,29 @@ function Portfolios() {
     <div className={styles.container}>
       <div className={styles.header}>
         <PortfolioSelectionHeader
-          portfolioNames={Object.keys(portfolioLib)}
-          selectedPortfolio={selectedPortfolio}
+          portfolioNames={portfolioNames}
+          selectedPortfolio={selected}
           setSelectedPortfolio={setSelectedPortfolio}
-          portfolioName={selectedPortfolio}
+          portfolioName={selected}
         />
       </div>
 
       <div className={styles.main}>
         <div className={styles.content}>
-          <PortfolioSummary portfolioNames={[selectedPortfolio]} />
-          <PortfolioBalancesChart portfolioNames={[selectedPortfolio]} />
-          <TimeWeightedReturnChart portfolioNames={[selectedPortfolio]} />
-          <Positions portfolioName={selectedPortfolio} />
-          <ActivityList portfolio={selectedPortfolio} />
+          <PortfolioSummary portfolioNames={[selected]} />
+          <PortfolioBalancesChart portfolioNames={[selected]} />
+          <TimeWeightedReturnChart portfolioNames={[selected]} />
+          <Positions portfolioName={selected} />
+          <ActivityList portfolio={selected} />
         </div>
 
         <div className={styles.formSidebar}>
-          <PortfolioFormSideBar portfolioName={selectedPortfolio} />
+          <PortfolioFormSideBar portfolioName={selected} />
         </div>
       </div>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <PortfolioFormSideBar portfolioName={selectedPortfolio} />
+        <PortfolioFormSideBar portfolioName={selected} />
       </Sheet>
 
       <Button

@@ -1,10 +1,11 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import {
   CellContext,
+  columnVisibilityFeature,
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
-  useReactTable,
+  tableFeatures,
+  useTable,
 } from "@tanstack/react-table";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { Asset } from "pt-domain";
@@ -16,21 +17,20 @@ import { AssetPriceHistory } from "./AssetPriceHistory";
 import { styles } from "./AssetTable.styles";
 import { SymbolConnectionIndicator } from "./SymbolConnectionIndicator";
 
-const columnHelper = createColumnHelper<Asset>();
+const features = tableFeatures({ columnVisibilityFeature });
+const columnHelper = createColumnHelper<typeof features, Asset>();
 
-function DisplayNameCell({ info }: { info: CellContext<Asset, string> }) {
+type AssetCellContext<TValue> = CellContext<typeof features, Asset, TValue>;
+
+function DisplayNameCell({ info }: { info: AssetCellContext<string> }) {
   return <span className={styles.cellName}>{info.getValue()}</span>;
 }
 
-function IsinCell({ info }: { info: CellContext<Asset, string> }) {
+function IsinCell({ info }: { info: AssetCellContext<string> }) {
   return <span className={styles.cellIsin}>{info.getValue()}</span>;
 }
 
-function SymbolCell({
-  info,
-}: {
-  info: CellContext<Asset, string | undefined>;
-}) {
+function SymbolCell({ info }: { info: AssetCellContext<string | undefined> }) {
   const symbol = info.getValue();
   return symbol ? (
     <SymbolConnectionIndicator symbol={symbol} />
@@ -43,7 +43,7 @@ function ActionsCell({
   info,
   onDelete,
 }: {
-  info: CellContext<Asset, Asset>;
+  info: AssetCellContext<Asset>;
   onDelete: (asset: Asset) => void;
 }) {
   const value = info.getValue();
@@ -61,24 +61,25 @@ function ActionsCell({
   );
 }
 
-const getColumns = (onDeleteAsset: (asset: Asset) => void) => [
-  columnHelper.accessor("displayName", {
-    header: "Name",
-    cell: (info) => <DisplayNameCell info={info} />,
-  }),
-  columnHelper.accessor("isin", {
-    header: "ISIN",
-    cell: (info) => <IsinCell info={info} />,
-  }),
-  columnHelper.accessor("symbol", {
-    header: "Symbol",
-    cell: (info) => <SymbolCell info={info} />,
-  }),
-  columnHelper.accessor((a) => a, {
-    header: "Actions",
-    cell: (info) => <ActionsCell info={info} onDelete={onDeleteAsset} />,
-  }),
-];
+const getColumns = (onDeleteAsset: (asset: Asset) => void) =>
+  columnHelper.columns([
+    columnHelper.accessor("displayName", {
+      header: "Name",
+      cell: (info) => <DisplayNameCell info={info} />,
+    }),
+    columnHelper.accessor("isin", {
+      header: "ISIN",
+      cell: (info) => <IsinCell info={info} />,
+    }),
+    columnHelper.accessor("symbol", {
+      header: "Symbol",
+      cell: (info) => <SymbolCell info={info} />,
+    }),
+    columnHelper.accessor((a) => a, {
+      header: "Actions",
+      cell: (info) => <ActionsCell info={info} onDelete={onDeleteAsset} />,
+    }),
+  ]);
 
 export function AssetTable() {
   const deleteAsset = useDeleteAsset();
@@ -97,10 +98,10 @@ export function AssetTable() {
     [assetLibrary]
   );
 
-  const table = useReactTable({
+  const table = useTable({
+    features,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
   });
 
   if (!assetLibrary) {

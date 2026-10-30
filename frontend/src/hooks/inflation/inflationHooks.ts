@@ -4,7 +4,7 @@ import {
   History,
   mergeWithConstantRateTail,
 } from "pt-domain";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { CustomQuery } from "../prices/priceHooks";
 import { fetchDestatisCpiIndex } from "./destatisAdapter";
 
@@ -21,12 +21,12 @@ export const useInflationIndex = (
     retry: false,
   });
 
+  const [now] = useState(() => Date.now());
+
   const data = useMemo(() => {
     if (startDate === undefined) {
       return [];
     }
-
-    const now = Date.now();
 
     if (query.data && query.data.length > 0) {
       return mergeWithConstantRateTail(
@@ -42,7 +42,7 @@ export const useInflationIndex = (
       now,
       DEFAULT_INFLATION_RATE
     );
-  }, [startDate, query.data]);
+  }, [startDate, query.data, now]);
 
   return {
     isLoading: query.isLoading,

@@ -9,14 +9,14 @@
   },
   "dependencies": {
     "@stdlib/random": "^0.4.1",
-    "moment": "^2.30.1",
+    "moment": "^2.31.0",
     "radash": "^12.1.1",
-    "uuid": "^14.0.1"
+    "uuid": "^14.0.3"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "vite": "^8.1.4",
-    "vitest": "^4.1.10"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   },
   "private": true,
   "scripts": {
