@@ -67,20 +67,23 @@ This file provides guidance to agents when working with code in this repository.
 - **Styles (MUI legacy)**: `.module.less` files (migrate from `bemHelper` + `.css`)
 - **Tests**: `<module>.test.ts`, `<Component>.test.tsx`
 
-### Error Handling
+## Testing
 
-- Domain functions return undefined/null for invalid states unless error type required
-- React components show "Error..." text for loading/query failures
-- Use optional chaining and nullish coalescing for safe access
-- API failures should display user-friendly error messages
-- LocalStorage errors should be handled gracefully (e.g., userDataContext)
-
-## Testing Approach
+### Strategy
 
 - **Unit test domain logic**: the core domain functions carrying business logic have to be unit tested
 - **Integration style testing for UI**: Not every UI component needs a test. Treat them as integration style
 - **Refactor safety**: When wondering on which level a test should live, ask yourself how likely is it that a valid refactor breaks the test?
   - likely? -> consider moving higher up
+- **Code Design** To enable this kind of testing, business logic should separated from 'adapter-like' code.
+  -Example: code to reformat data for display, can be tested through the component, and should never contain business logic.
+- **Mocking**: Avoid mocking project code. Only external dependencies, browser APIs should be mocked.
+
+### Patterns
+
+- **Render helpers**: Use `customRender()` or `customRenderHook()` from `testUtils/componentHelpers.tsx`
+- **Helper functions**: `customRender()` returns user + helpers (`fillNumberInput`, `selectAsset`)
+- **Test data**: Use helper functions from domain `dataHelpers.ts` (`getTestOrder`, `getTestPortfolio`)
 
 ## Critical Architecture Rules
 
@@ -90,15 +93,12 @@ This file provides guidance to agents when working with code in this repository.
 
 ## React Patterns
 
-- Use hooks from `<Component>.logic.ts` files, never inline logic
-- State management: React state for local, `usePortfolioSelector` for global
-- Query state: TanStack Query API calls via hooks
+- Use hooks from `<Component>.logic.ts` files, avoid inlining logic
 - Component composition: Build small reusable components
-- Props: Define explicit interfaces, use `Props<T>` helper for flexibility
 
 ## Styling Rules
 
-### RadixUI + Tailwind (preferred for new components)
+### RadixUI + Tailwind
 
 - **Design tokens**: Defined in `frontend/src/index.css` via Tailwind v4 `@theme` directive
 - **Utility function**: `cn()` from `frontend/src/utility/cn.ts` (combines `clsx` + `tailwind-merge`)
@@ -124,38 +124,6 @@ This file provides guidance to agents when working with code in this repository.
 - Never use `@apply` in CSS for component styles (Tailwind team discourages it)
 - Never use CSS Modules (`.module.css`) for Tailwind-styled components
 - Always use `cn()` for composing classes: `cn(buttonVariants({ intent: "primary" }), className)`
-
-## Testing Patterns
-
-- **Framework**: Vitest with happydom (frontend) and node (domain)
-- **Render helpers**: Use `customRender()` or `customRenderHook()` from `testUtils/componentHelpers.tsx`
-- **Helper functions**: `customRender()` returns user + helpers (`fillNumberInput`, `selectAsset`)
-- **Test data**: Use helper functions from domain `dataHelpers.ts` (`getTestOrder`, `getTestPortfolio`)
-- **Test globals**: Automatically available: `describe`, `it`, `expect`, `test`, `beforeAll`, `beforeEach`, `afterAll`, `afterEach`, `vi`
-- **Coverage**: Vitest with c8 coverage reporter
-
-## Common Dependencies
-
-- **Package manager**: pnpm (monorepo with workspaces)
-- **Date handling**: `moment` (consistent across domain and frontend)
-- **Utils**: `radash` for functional utilities (`omit`, `shake`, `sort`)
-- **UUID**: `uuid` package for unique identifiers
-- **Icons**: FontAwesome (`@fortawesome/fontawesome-free`), `lucide-react` (preferred for RadixUI components)
-- **Charts**: Recharts, D3 arrays/scaling
-- **Dev tools**: oxlint (linting), oxfmt (formatting), syncpack (dependency version sync)
-
-## TypeScript Config
-
-- ES modules: `"type": "module"` in package.json
-- Paths: No custom path mappings - use `"pt-domain"` alias
-- Strict mode enabled
-- Workspace dependencies use `"workspace:*"` protocol
-
-## Important Notes
-
-- **syncpack**: Uses `.syncpackrc.yml` configuration with workspace packages ignored via `versionGroups`
-- **pnpm-lock.yaml**: Single lockfile at root for all workspaces
-- **node_modules**: pnpm uses symlinks and shared content-addressable storage for efficiency
 
 ## Agent skills
 
