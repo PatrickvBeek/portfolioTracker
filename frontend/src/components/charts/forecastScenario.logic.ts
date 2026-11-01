@@ -1,4 +1,4 @@
-import { GbmParameters, logReturnToPercentage } from "pt-domain";
+import { GbmParameters, annualizeGbmParameters } from "pt-domain";
 import { usePortfolioGeometricBrownianMotionParams } from "./chartHooks";
 
 export type ForecastScenario = "market" | "portfolio";
@@ -19,14 +19,13 @@ const FORECAST_SCENARIOS = {
   },
 } as const;
 
-interface ScenarioDetails {
+export interface ScenarioDetails {
   params: GbmParameters;
   displayInfo: {
     name: string;
     description: string;
-    annualReturn: string;
-    volatility: string;
-    isAvailable: boolean;
+    annualReturnPercent: number;
+    annualVolatilityPercent: number;
   };
 }
 
@@ -35,43 +34,38 @@ const usePortfolioScenarioParams = (
 ): GbmParameters | undefined =>
   usePortfolioGeometricBrownianMotionParams(portfolioNames, "Max");
 
+const describeScenario = (
+  params: GbmParameters,
+  name: string,
+  description: string
+): ScenarioDetails => ({
+  params,
+  displayInfo: {
+    name,
+    description,
+    ...annualizeGbmParameters(params),
+  },
+});
+
 const getScenarioDetails = (
   scenario: ForecastScenario,
   portfolioGbmParams: GbmParameters | undefined
 ): ScenarioDetails | undefined => {
   if (scenario === "market") {
     const marketScenario = FORECAST_SCENARIOS.market;
-    const annualReturn = logReturnToPercentage(12 * marketScenario.params.mu);
-    const annualVolatility = logReturnToPercentage(
-      Math.sqrt(12) * marketScenario.params.sigma
+    return describeScenario(
+      marketScenario.params,
+      marketScenario.name,
+      marketScenario.description
     );
-    return {
-      params: marketScenario.params,
-      displayInfo: {
-        name: marketScenario.name,
-        description: marketScenario.description,
-        annualReturn: `${annualReturn.toFixed(1)}%`,
-        volatility: `${annualVolatility.toFixed(1)}%`,
-        isAvailable: true,
-      },
-    };
   }
 
-  if (scenario === "portfolio" && portfolioGbmParams) {
-    const annualReturn = logReturnToPercentage(12 * portfolioGbmParams.mu);
-    const annualVolatility = logReturnToPercentage(
-      Math.sqrt(12) * portfolioGbmParams.sigma
+  if (portfolioGbmParams) {
+    return describeScenario(
+      portfolioGbmParams,
+      "Your Portfolio",
+      "Based on your portfolio's historical performance"
     );
-    return {
-      params: portfolioGbmParams,
-      displayInfo: {
-        name: "Your Portfolio",
-        description: "Based on your portfolio's historical performance",
-        annualReturn: `${annualReturn.toFixed(1)}%`,
-        volatility: `${annualVolatility.toFixed(1)}%`,
-        isAvailable: true,
-      },
-    };
   }
 
   return undefined;

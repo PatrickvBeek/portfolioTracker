@@ -1,6 +1,7 @@
 import normal from "@stdlib/random/base/normal";
 import { History } from "../portfolioHistory/history.entities";
 import {
+  AnnualizedGbmReturns,
   ForecastConfig,
   ForecastInput,
   ForecastResult,
@@ -9,7 +10,7 @@ import {
   WithdrawalForecastInput,
   WithdrawalForecastResult,
 } from "./forecast.entities";
-import { getLogReturnStats } from "../logReturns";
+import { getLogReturnStats, logReturnToPercentage } from "../logReturns";
 
 const generateRandomNormalShocks = (params: RandomShockParams): number[][] => {
   const { mean, standardDeviation, simulationCount, timePeriodsCount } = params;
@@ -270,6 +271,13 @@ export const getGeometricBrownianMotionParams = (
     sigma: stats.monthlySigma,
   };
 };
+
+export const annualizeGbmParameters = (
+  params: GbmParameters
+): AnnualizedGbmReturns => ({
+  annualReturnPercent: logReturnToPercentage(12 * params.mu),
+  annualVolatilityPercent: logReturnToPercentage(Math.sqrt(12) * params.sigma),
+});
 
 export const applyInflationDiscount = (
   result: ForecastResult,

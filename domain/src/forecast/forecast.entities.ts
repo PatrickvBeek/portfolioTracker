@@ -45,3 +45,8 @@ export type GbmParameters = {
   mu: number;
   sigma: number;
 };
+
+export interface AnnualizedGbmReturns {
+  annualReturnPercent: number;
+  annualVolatilityPercent: number;
+}

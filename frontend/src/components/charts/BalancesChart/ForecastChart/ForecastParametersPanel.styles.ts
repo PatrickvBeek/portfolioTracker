@@ -13,7 +13,6 @@ export const styles = {
   label: forecastPanelStyles.label,
   scenarioDetails: "mt-2 pt-2 border-t border-border",
   displayOptions: "flex flex-col gap-2",
-  chip: "inline-flex items-center rounded-full border border-border px-2.5 py-0.5 text-xs text-text-muted",
   infoContainer: "flex items-center gap-2",
   infoIcon: "w-4 h-4 text-text-dim",
   inputAdornment: "flex items-center gap-1",

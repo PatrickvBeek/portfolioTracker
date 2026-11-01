@@ -28,19 +28,22 @@ describe("useForecastScenarioParams", () => {
       useForecastScenarioParams(["TEST"], "market")
     );
 
-    expect(result.current).toEqual({
-      params: {
-        mu: 0.00721,
-        sigma: 0.044,
-      },
-      displayInfo: {
-        name: "Market (S&P 500)",
-        description: "Based on historical S&P 500 performance since 1985",
-        annualReturn: "9.0%",
-        volatility: "16.5%",
-        isAvailable: true,
-      },
+    expect(result.current?.params).toEqual({
+      mu: 0.00721,
+      sigma: 0.044,
     });
+    expect(result.current?.displayInfo.name).toBe("Market (S&P 500)");
+    expect(result.current?.displayInfo.description).toBe(
+      "Based on historical S&P 500 performance since 1985"
+    );
+    expect(result.current?.displayInfo.annualReturnPercent).toBeCloseTo(
+      9.04,
+      1
+    );
+    expect(result.current?.displayInfo.annualVolatilityPercent).toBeCloseTo(
+      16.46,
+      1
+    );
   });
 
   it('returns undefined when scenario is "portfolio" but no portfolio exists', () => {
@@ -102,6 +105,8 @@ describe("useForecastScenarioParams", () => {
     expect(result.current?.displayInfo.description).toBe(
       "Based on your portfolio's historical performance"
     );
-    expect(result.current?.displayInfo.isAvailable).toBe(true);
+    expect(typeof result.current?.displayInfo.annualReturnPercent).toBe(
+      "number"
+    );
   });
 });
