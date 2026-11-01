@@ -15,6 +15,6 @@ export const styles = {
   displayOptions: "flex flex-col gap-2",
   infoContainer: "flex items-center gap-2",
   infoIcon: "w-4 h-4 text-text-dim",
-  inputAdornment: "flex items-center gap-1",
-  adornmentText: "px-2 text-text-muted",
+  inputAdornment: forecastPanelStyles.inputAdornment,
+  adornmentText: forecastPanelStyles.adornmentText,
 } as const;
