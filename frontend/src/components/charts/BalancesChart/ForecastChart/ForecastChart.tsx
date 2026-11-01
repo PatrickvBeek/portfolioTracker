@@ -23,7 +23,7 @@ export const ForecastChart: FC<{
   const [params, setParams] = useState<ForecastParameters>({
     scenario: "portfolio",
     timeHorizon: "10Y",
-    monthlyContribution: deriveMonthlyContribution(cashFlow, portfolioAge),
+    monthlyContribution: deriveMonthlyContribution(cashFlow, portfolioAge) ?? 0,
     confidenceLevel: 68,
     inflationRate: DEFAULT_INFLATION_RATE,
   });

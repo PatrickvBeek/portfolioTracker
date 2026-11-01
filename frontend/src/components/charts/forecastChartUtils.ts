@@ -12,13 +12,13 @@ const CONTRIBUTION_ROUNDING_STEP = 50;
 export const deriveMonthlyContribution = (
   cashFlow: number,
   portfolioAgeYears: number
-): number => {
+): number | undefined => {
   if (
     !Number.isFinite(cashFlow) ||
     !Number.isFinite(portfolioAgeYears) ||
     portfolioAgeYears <= 0
   ) {
-    return 0;
+    return undefined;
   }
 
   const monthlyAverage = cashFlow / portfolioAgeYears / 12;

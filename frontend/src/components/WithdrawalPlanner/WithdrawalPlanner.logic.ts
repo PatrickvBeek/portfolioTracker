@@ -124,7 +124,7 @@ export const useWithdrawalPlannerData = (
     portfolioAge
   );
   const monthlyContribution =
-    debouncedParameters.monthlyContribution ?? derivedMonthlyContribution;
+    debouncedParameters.monthlyContribution ?? derivedMonthlyContribution ?? 0;
   const scenarioDetails = useForecastScenarioParams(
     portfolioNames,
     debouncedParameters.scenario

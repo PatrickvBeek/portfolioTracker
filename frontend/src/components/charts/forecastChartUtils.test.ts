@@ -10,12 +10,16 @@ describe("deriveMonthlyContribution", () => {
     expect(deriveMonthlyContribution(-59_000, 2)).toBe(0);
   });
 
-  it("returns zero without a usable portfolio age", () => {
-    expect(deriveMonthlyContribution(10_000, 0)).toBe(0);
-    expect(deriveMonthlyContribution(10_000, NaN)).toBe(0);
+  it("returns a number for a real zero cash flow", () => {
+    expect(deriveMonthlyContribution(0, 2)).toBe(0);
   });
 
-  it("returns zero for a non-finite cash flow", () => {
-    expect(deriveMonthlyContribution(NaN, 2)).toBe(0);
+  it("returns undefined without a usable portfolio age", () => {
+    expect(deriveMonthlyContribution(10_000, 0)).toBeUndefined();
+    expect(deriveMonthlyContribution(10_000, NaN)).toBeUndefined();
+  });
+
+  it("returns undefined for a non-finite cash flow", () => {
+    expect(deriveMonthlyContribution(NaN, 2)).toBeUndefined();
   });
 });
