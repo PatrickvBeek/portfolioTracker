@@ -27,6 +27,16 @@ export const styles = {
   inputAdornment: forecastPanelStyles.inputAdornment,
   adornmentText: forecastPanelStyles.adornmentText,
   helperText: "text-xs text-text-muted",
+  formGroup:
+    "flex flex-col gap-4 border-t border-border pt-6 mt-6 first-of-type:border-0 first-of-type:pt-0 first-of-type:mt-0",
+  actionText: "self-start text-xs font-medium text-accent hover:underline",
+  validationText: "text-sm text-danger",
+  planTimeline: "flex flex-col gap-2 border-t border-border pt-4",
+  timelineTrack: "flex h-2 w-full overflow-hidden rounded-full bg-bg-elevated",
+  timelineBuildUp: "h-full bg-accent",
+  timelineWithdrawal: "h-full bg-success",
+  timelineLabels: "flex justify-between text-xs text-text-muted",
+  planDates: "flex flex-wrap gap-x-6 gap-y-1 text-sm text-text-muted",
   warning:
     "flex items-center gap-2 text-sm text-text-muted border border-border rounded-md p-3 bg-bg-elevated",
   warningIcon: "w-4 h-4 text-text-dim",

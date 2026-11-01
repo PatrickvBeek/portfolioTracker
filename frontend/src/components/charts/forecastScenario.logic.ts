@@ -29,7 +29,7 @@ export interface ScenarioDetails {
   };
 }
 
-const usePortfolioScenarioParams = (
+export const usePortfolioScenarioParams = (
   portfolioNames: string[]
 ): GbmParameters | undefined =>
   usePortfolioGeometricBrownianMotionParams(portfolioNames, "Max");
@@ -47,7 +47,7 @@ const describeScenario = (
   },
 });
 
-const getScenarioDetails = (
+export const getScenarioDetails = (
   scenario: ForecastScenario,
   portfolioGbmParams: GbmParameters | undefined
 ): ScenarioDetails | undefined => {
