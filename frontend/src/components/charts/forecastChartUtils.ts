@@ -1,4 +1,5 @@
 import { applyInflationDiscount, ForecastResult } from "pt-domain";
+import { addMonths } from "../../utility/dates";
 import { ChartDataPoint } from "./chartTypes";
 
 export type ForecastChartDataSets = "median" | "uncertaintyBand" | "cashFlow";
@@ -40,10 +41,9 @@ export const transformForecastToChartData = (
     inflationRate
   );
   const { median, confidenceLow, confidenceHigh, cashFlows } = discountedResult;
-  const monthInMs = 30 * 24 * 60 * 60 * 1000;
 
   return median.map((_: number, index: number) => ({
-    timestamp: startTimestamp + (index + 1) * monthInMs,
+    timestamp: addMonths(startTimestamp, index + 1).getTime(),
     median: median[index],
     uncertaintyBand: [confidenceLow[index], confidenceHigh[index]],
     cashFlow: currentCashFlow + cashFlows[index],

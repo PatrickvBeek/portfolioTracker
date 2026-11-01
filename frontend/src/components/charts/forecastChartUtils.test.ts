@@ -1,4 +1,7 @@
-import { deriveMonthlyContribution } from "./forecastChartUtils";
+import {
+  deriveMonthlyContribution,
+  transformForecastToChartData,
+} from "./forecastChartUtils";
 
 describe("deriveMonthlyContribution", () => {
   it("rounds the average monthly cash flow to the nearest 50", () => {
@@ -21,5 +24,28 @@ describe("deriveMonthlyContribution", () => {
 
   it("returns undefined for a non-finite cash flow", () => {
     expect(deriveMonthlyContribution(NaN, 2)).toBeUndefined();
+  });
+});
+
+describe("transformForecastToChartData", () => {
+  it("steps timestamps by calendar month", () => {
+    const start = new Date(2021, 0, 31).getTime();
+    const result = transformForecastToChartData(
+      {
+        median: [1, 2, 3],
+        confidenceLow: [0, 1, 2],
+        confidenceHigh: [2, 3, 4],
+        cashFlows: [0, 0, 0],
+      },
+      start,
+      0,
+      0
+    );
+
+    expect(result.map((point) => point.timestamp)).toEqual([
+      new Date(2021, 1, 1).getTime(),
+      new Date(2021, 2, 1).getTime(),
+      new Date(2021, 3, 1).getTime(),
+    ]);
   });
 });
