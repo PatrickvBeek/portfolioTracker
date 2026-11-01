@@ -22,7 +22,7 @@ import {
 import {
   useForecastScenarioParams,
   ForecastScenario,
-} from "../charts/BalancesChart/ForecastChart/ForecastChart.logic";
+} from "../charts/forecastScenario.logic";
 
 export interface WithdrawalPlannerParameters {
   scenario: ForecastScenario;

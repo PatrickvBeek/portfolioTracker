@@ -1,17 +1,15 @@
-import {
-  ForecastInput,
-  GbmParameters,
-  logReturnToPercentage,
-  runGeometricBrownianMotionForecast,
-} from "pt-domain";
-import { useMemo, useState } from "react";
+import { ForecastInput, runGeometricBrownianMotionForecast } from "pt-domain";
+import { useState } from "react";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import {
   useCashFlow,
   useMarketValue,
 } from "../../../Portfolios/PortfolioSummary/PortfolioSummary.logic";
-import { usePortfolioGeometricBrownianMotionParams } from "../../chartHooks";
+import {
+  ForecastScenario,
+  useForecastScenarioParams,
+} from "../../forecastScenario.logic";
 import {
   FORECAST_SIMULATION_COUNT,
   ForecastChartData,
@@ -29,8 +27,6 @@ export const FORECAST_HORIZONS = {
 type ForecastHorizon =
   (typeof FORECAST_HORIZONS)[keyof typeof FORECAST_HORIZONS];
 
-export type ForecastScenario = "market" | "portfolio";
-
 export const FORECAST_CONFIDENCE_LEVELS = {
   "50": 50,
   "68": 68,
@@ -46,82 +42,6 @@ export interface ForecastParameters {
   confidenceLevel: ForecastConfidenceLevel;
   inflationRate: number;
 }
-
-const MU_MARKET = 0.00721;
-const SIGMA_MARKET = 0.044;
-
-const MARKET_PARAMS: GbmParameters = {
-  mu: MU_MARKET,
-  sigma: SIGMA_MARKET,
-};
-
-const FORECAST_SCENARIOS = {
-  market: {
-    params: MARKET_PARAMS,
-    name: "Market (S&P 500)",
-    description: "Based on historical S&P 500 performance since 1985",
-  },
-} as const;
-
-interface ScenarioDetails {
-  params: GbmParameters;
-  displayInfo: {
-    name: string;
-    description: string;
-    annualReturn: string;
-    volatility: string;
-    isAvailable: boolean;
-  };
-}
-
-export const useForecastScenarioParams = (
-  portfolioNames: string[],
-  scenario: ForecastScenario
-): ScenarioDetails | undefined => {
-  const portfolioGbmParams = usePortfolioGeometricBrownianMotionParams(
-    portfolioNames,
-    "Max"
-  );
-
-  return useMemo(() => {
-    if (scenario === "market") {
-      const marketScenario = FORECAST_SCENARIOS.market;
-      const annualReturn = logReturnToPercentage(12 * marketScenario.params.mu);
-      const annualVolatility = logReturnToPercentage(
-        Math.sqrt(12) * marketScenario.params.sigma
-      );
-      return {
-        params: marketScenario.params,
-        displayInfo: {
-          name: marketScenario.name,
-          description: marketScenario.description,
-          annualReturn: `${annualReturn.toFixed(1)}%`,
-          volatility: `${annualVolatility.toFixed(1)}%`,
-          isAvailable: true,
-        },
-      };
-    }
-
-    if (scenario === "portfolio" && portfolioGbmParams) {
-      const annualReturn = logReturnToPercentage(12 * portfolioGbmParams.mu);
-      const annualVolatility = logReturnToPercentage(
-        Math.sqrt(12) * portfolioGbmParams.sigma
-      );
-      return {
-        params: portfolioGbmParams,
-        displayInfo: {
-          name: "Your Portfolio",
-          description: "Based on your portfolio's historical performance",
-          annualReturn: `${annualReturn.toFixed(1)}%`,
-          volatility: `${annualVolatility.toFixed(1)}%`,
-          isAvailable: true,
-        },
-      };
-    }
-
-    return undefined;
-  }, [portfolioGbmParams, scenario]);
-};
 
 const FORECAST_HORIZON_MONTHS: Record<ForecastHorizon, number> = {
   "1Y": 12,

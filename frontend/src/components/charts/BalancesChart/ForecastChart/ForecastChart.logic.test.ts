@@ -1,8 +1,4 @@
-import {
-  getTestOrder,
-  getTestOrdersGroupedByAsset,
-  getTestPortfolio,
-} from "pt-domain";
+import { getTestOrder, getTestPortfolio } from "pt-domain";
 import { vi } from "vitest";
 import {
   customRenderHook,
@@ -18,7 +14,6 @@ import {
   FORECAST_HORIZONS,
   ForecastParameters,
   useForecastChartData,
-  useForecastScenarioParams,
 } from "./ForecastChart.logic";
 
 const DAY1 = "2020-03-01";
@@ -40,90 +35,6 @@ mockNetwork({
 describe("ForecastChart.logic", () => {
   beforeEach(() => {
     localStorage.clear();
-  });
-
-  describe("useForecastScenarioParams", () => {
-    it('returns market scenario details when scenario is "market"', () => {
-      const { result } = customRenderHook(() =>
-        useForecastScenarioParams(["TEST"], "market")
-      );
-
-      expect(result.current).toEqual({
-        params: {
-          mu: 0.00721,
-          sigma: 0.044,
-        },
-        displayInfo: {
-          name: "Market (S&P 500)",
-          description: "Based on historical S&P 500 performance since 1985",
-          annualReturn: "9.0%",
-          volatility: "16.5%",
-          isAvailable: true,
-        },
-      });
-    });
-
-    it('returns undefined when scenario is "portfolio" but no portfolio exists', () => {
-      const { result } = customRenderHook(() =>
-        useForecastScenarioParams(["nonexistent"], "portfolio")
-      );
-
-      expect(result.current).toBeUndefined();
-    });
-
-    it('returns portfolio scenario details when scenario is "portfolio" and portfolio exists', () => {
-      localStorage.setItem(
-        "assets",
-        JSON.stringify({
-          ABC: {
-            isin: "ABC",
-            symbol: "ABC",
-            name: "ABC Corp",
-          },
-        })
-      );
-
-      const portfolio = getTestPortfolio({
-        name: "testPortfolio",
-        orders: getTestOrdersGroupedByAsset([
-          {
-            asset: "ABC",
-            pieces: 10,
-            sharePrice: 100,
-            taxes: 0,
-            orderFee: 0,
-            timestamp: DAY1,
-          },
-          {
-            asset: "ABC",
-            pieces: 5,
-            sharePrice: 101,
-            taxes: 0,
-            orderFee: 0,
-            timestamp: DAY2,
-          },
-        ]),
-      });
-
-      localStorage.setItem(
-        "portfolios",
-        JSON.stringify({
-          testPortfolio: portfolio,
-        })
-      );
-
-      const { result } = customRenderHook(() =>
-        useForecastScenarioParams(["testPortfolio"], "portfolio")
-      );
-
-      expect(result.current).toBeDefined();
-      expect(result.current?.params).toBeDefined();
-      expect(result.current?.displayInfo.name).toBe("Your Portfolio");
-      expect(result.current?.displayInfo.description).toBe(
-        "Based on your portfolio's historical performance"
-      );
-      expect(result.current?.displayInfo.isAvailable).toBe(true);
-    });
   });
 
   describe("useForecastChartData", () => {

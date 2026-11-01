@@ -7,8 +7,8 @@ import {
   FORECAST_CONFIDENCE_LEVELS,
   FORECAST_HORIZONS,
   ForecastParameters,
-  useForecastScenarioParams,
 } from "./ForecastChart.logic";
+import { useForecastScenarioParams } from "../../forecastScenario.logic";
 import { styles } from "./ForecastParametersPanel.styles";
 
 interface ForecastParametersPanelProps {
