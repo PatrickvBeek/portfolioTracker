@@ -79,8 +79,8 @@ describe("useInflationIndex", () => {
     expect(firstTailValue).not.toBeCloseTo(1, 5);
   });
 
-  it("falls back to a full-range 2% constant-rate index when the fetch fails", async () => {
-    setBackendData({ prices: {}, destatis: null });
+  it("falls back to a full-range 2% constant-rate index when the response is invalid", async () => {
+    setBackendData({ prices: {}, destatis: "invalid" });
 
     const startDate = new Date("1998-01-01").getTime();
     const { result } = customRenderHook(() => useInflationIndex(startDate));

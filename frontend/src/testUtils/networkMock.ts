@@ -6,7 +6,7 @@ import { AlphaVantageDailyResult } from "../hooks/prices/alphaVantage";
 
 type MockBackendData = {
   prices: Record<string, AlphaVantageDailyResult>;
-  destatis?: DestatisTableResponse | null;
+  destatis?: DestatisTableResponse | "invalid";
 };
 
 const CORS_HEADERS = {
@@ -41,9 +41,9 @@ function getHandlers(mockData: MockBackendData): RequestHandler[] {
     http.get(
       "https://genesis.destatis.de/genesis/api/rest/tables/61111-0002/data",
       () => {
-        if (mockData?.destatis === null) {
-          return new HttpResponse(null, {
-            status: 500,
+        if (mockData?.destatis === "invalid") {
+          return new HttpResponse("not json", {
+            status: 200,
             headers: CORS_HEADERS,
           });
         }
