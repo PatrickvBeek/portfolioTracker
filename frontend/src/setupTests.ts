@@ -1,4 +1,6 @@
-import { vi } from "vitest";
+import "@testing-library/jest-dom/vitest";
+import { afterAll, beforeAll, beforeEach, vi } from "vitest";
+import { resetMockNetwork, server } from "./testUtils/networkMock";
 
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
@@ -24,22 +26,10 @@ const localStorageMock = (() => {
   };
 })();
 
-import "@testing-library/jest-dom/vitest";
-import { afterAll, beforeAll, beforeEach } from "vitest";
-import { resetMockNetwork, server } from "./testUtils/networkMock";
+vi.stubGlobal("localStorage", localStorageMock);
 
-beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+beforeAll(() => server.listen({ onUnhandledFrame: "error" }));
 beforeEach(() => {
   resetMockNetwork();
 });
 afterAll(() => server.close());
-
-vi.stubGlobal("localStorage", localStorageMock);
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
-import "@testing-library/jest-dom";
-import * as matchers from "@testing-library/jest-dom/matchers";
-
-expect.extend(matchers);
