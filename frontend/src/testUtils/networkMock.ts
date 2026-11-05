@@ -6,7 +6,7 @@ import { AlphaVantageDailyResult } from "../hooks/prices/alphaVantage";
 
 type MockBackendData = {
   prices: Record<string, AlphaVantageDailyResult>;
-  destatis?: DestatisTableResponse | null;
+  destatis?: DestatisTableResponse | "invalid";
 };
 
 const CORS_HEADERS = {
@@ -41,9 +41,9 @@ function getHandlers(mockData: MockBackendData): RequestHandler[] {
     http.get(
       "https://genesis.destatis.de/genesis/api/rest/tables/61111-0002/data",
       () => {
-        if (mockData?.destatis === null) {
-          return new HttpResponse(null, {
-            status: 500,
+        if (mockData?.destatis === "invalid") {
+          return new HttpResponse("not json", {
+            status: 200,
             headers: CORS_HEADERS,
           });
         }
@@ -55,18 +55,25 @@ function getHandlers(mockData: MockBackendData): RequestHandler[] {
   ];
 }
 
-export function mockNetwork(backendData: MockBackendData) {
-  const server = setupServer(...getHandlers(backendData));
+let initialHandlers: RequestHandler[] = [];
 
-  beforeAll(() => server.listen());
-  beforeEach(() => {
-    server.resetHandlers();
-  });
-  afterAll(() => server.close());
+export const server = setupServer();
+
+const applyHandlers = (handlers: RequestHandler[]) => {
+  server.resetHandlers(...handlers);
+};
+
+export const resetMockNetwork = () => {
+  server.resetHandlers(...initialHandlers);
+};
+
+export function mockNetwork(backendData: MockBackendData) {
+  initialHandlers = getHandlers(backendData);
+  applyHandlers(initialHandlers);
 
   return {
     setBackendData: (newData: MockBackendData) =>
-      server.resetHandlers(...getHandlers(newData)),
+      applyHandlers(getHandlers(newData)),
   };
 }
 

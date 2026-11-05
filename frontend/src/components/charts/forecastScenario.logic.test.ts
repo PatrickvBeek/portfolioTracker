@@ -1,6 +1,9 @@
 import { getTestOrdersGroupedByAsset, getTestPortfolio } from "pt-domain";
 import { vi } from "vitest";
-import { customRenderHook } from "../../testUtils/componentHelpers";
+import {
+  customRenderHook,
+  customWaitFor,
+} from "../../testUtils/componentHelpers";
 import { getPriceResponse, mockNetwork } from "../../testUtils/networkMock";
 import { useForecastScenarioParams } from "./forecastScenario.logic";
 
@@ -54,7 +57,7 @@ describe("useForecastScenarioParams", () => {
     expect(result.current).toBeUndefined();
   });
 
-  it('returns portfolio scenario details when scenario is "portfolio" and portfolio exists', () => {
+  it('returns portfolio scenario details when scenario is "portfolio" and portfolio exists', async () => {
     localStorage.setItem(
       "assets",
       JSON.stringify({
@@ -95,9 +98,10 @@ describe("useForecastScenarioParams", () => {
       })
     );
 
-    const { result } = customRenderHook(() =>
+    const { result, queryClient } = customRenderHook(() =>
       useForecastScenarioParams(["testPortfolio"], "portfolio")
     );
+    await customWaitFor(() => expect(queryClient.isFetching()).toBe(0));
 
     expect(result.current).toBeDefined();
     expect(result.current?.params).toBeDefined();

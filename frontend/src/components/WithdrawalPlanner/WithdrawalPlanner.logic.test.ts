@@ -139,14 +139,17 @@ describe("useWithdrawalPlannerData", () => {
     expect(result.current.data?.ruinProbability).toBe(1);
   });
 
-  it("returns no data and skips the simulation when both phases are zero", () => {
+  it("returns no data and skips the simulation when both phases are zero", async () => {
     runWithdrawalForecastMock.mockClear();
 
-    const result = renderPlanner({
-      ...baseParameters,
-      accumulationYears: 0,
-      decumulationYears: 0,
-    });
+    const { result, queryClient } = customRenderHook(() =>
+      useWithdrawalPlannerData([portfolioName], {
+        ...baseParameters,
+        accumulationYears: 0,
+        decumulationYears: 0,
+      })
+    );
+    await customWaitFor(() => expect(queryClient.isFetching()).toBe(0));
 
     expect(result.current.data).toBeUndefined();
     expect(result.current.isLoading).toBe(false);

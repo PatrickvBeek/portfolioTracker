@@ -1,14 +1,14 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { render, renderHook, screen, waitFor } from "@testing-library/react";
 import userEvent, { Options, UserEvent } from "@testing-library/user-event";
 import { ReactElement } from "react";
 import { CustomQuery } from "../hooks/prices/priceHooks";
-import { queryClientConfig } from "../queryClient/config";
 import { UserDataProvider } from "../userDataContext";
+import { createTestQueryClient } from "./queryClient";
 
 export function customRenderHook<T>(hookCallback: () => T) {
-  const queryClient = new QueryClient(queryClientConfig);
-  return renderHook(hookCallback, {
+  const queryClient = createTestQueryClient();
+  const renderResult = renderHook(hookCallback, {
     wrapper: ({ children }) => (
       <UserDataProvider>
         <QueryClientProvider client={queryClient}>
@@ -17,6 +17,7 @@ export function customRenderHook<T>(hookCallback: () => T) {
       </UserDataProvider>
     ),
   });
+  return { ...renderResult, queryClient };
 }
 
 export function customRender({
@@ -26,7 +27,7 @@ export function customRender({
   component: ReactElement;
   userEventOptions?: Options;
 }) {
-  const queryClient = new QueryClient(queryClientConfig);
+  const queryClient = createTestQueryClient();
   const user = userEvent.setup(userEventOptions);
   const renderResult = render(
     <UserDataProvider>
