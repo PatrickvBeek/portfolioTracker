@@ -78,8 +78,10 @@ const GOOGL_PRICES = getPriceResponse("GOOGL", [
   [new Date(NOW), 126.82],
 ]);
 
+const SINGLE_POINT_PRICES = getPriceResponse("SINGLE", [[new Date(NOW), 100]]);
+
 describe("useAssetPriceChartData", () => {
-  mockNetwork({ prices: GOOGL_PRICES });
+  mockNetwork({ prices: { ...GOOGL_PRICES, ...SINGLE_POINT_PRICES } });
 
   afterEach(() => {
     localStorage.clear();
@@ -101,9 +103,6 @@ describe("useAssetPriceChartData", () => {
   });
 
   it("returns undefined stats when there is insufficient data", async () => {
-    const singlePoint = getPriceResponse("SINGLE", [[new Date(NOW), 100]]);
-    mockNetwork({ prices: singlePoint });
-
     const { result } = customRenderHook(() =>
       useAssetPriceChartData("SINGLE", CHART_RANGES.Max)
     );

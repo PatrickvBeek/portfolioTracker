@@ -37,16 +37,6 @@ describe("useProfitHistory", () => {
     new Date(d).getTime()
   );
 
-  mockNetwork({
-    prices: getPriceResponse("ABC", [
-      [new Date(DAY1), 100],
-      [new Date(DAY2), 101],
-      [new Date(DAY3), 102],
-      [new Date(DAY4), 103],
-      [new Date(TODAY), 110],
-    ]),
-  });
-
   it("handles a missing portfolio gracefully", () => {
     const { result } = customRenderHook(() =>
       useProfitHistory(["I don't exist"], "Max")

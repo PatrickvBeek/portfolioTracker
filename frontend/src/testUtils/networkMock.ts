@@ -55,18 +55,25 @@ function getHandlers(mockData: MockBackendData): RequestHandler[] {
   ];
 }
 
-export function mockNetwork(backendData: MockBackendData) {
-  const server = setupServer(...getHandlers(backendData));
+let initialHandlers: RequestHandler[] = [];
 
-  beforeAll(() => server.listen());
-  beforeEach(() => {
-    server.resetHandlers();
-  });
-  afterAll(() => server.close());
+export const server = setupServer();
+
+const applyHandlers = (handlers: RequestHandler[]) => {
+  server.resetHandlers(...handlers);
+};
+
+export const resetMockNetwork = () => {
+  server.resetHandlers(...initialHandlers);
+};
+
+export function mockNetwork(backendData: MockBackendData) {
+  initialHandlers = getHandlers(backendData);
+  applyHandlers(initialHandlers);
 
   return {
     setBackendData: (newData: MockBackendData) =>
-      server.resetHandlers(...getHandlers(newData)),
+      applyHandlers(getHandlers(newData)),
   };
 }
 

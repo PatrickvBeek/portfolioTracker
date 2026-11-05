@@ -81,9 +81,10 @@ setUserData({
   assets: assetLib,
 });
 
+mockNetwork({ prices: {} });
+
 describe("PortfolioSummary hooks", () => {
   describe("without online prices", () => {
-    mockNetwork({ prices: {} });
     it("useCashflow", () => {
       const { result } = customRenderHook(() => useCashFlow([portfolioName]));
 
@@ -206,8 +207,6 @@ describe("PortfolioSummary hooks", () => {
   });
 
   describe("with empty portfolio array", () => {
-    mockNetwork({ prices: {} });
-
     it("useCashFlow returns 0", () => {
       const { result } = customRenderHook(() => useCashFlow([]));
       expect(result.current).toBe(0);
@@ -314,8 +313,6 @@ describe("PortfolioSummary hooks", () => {
       });
     });
 
-    mockNetwork({ prices: {} });
-
     it("useCashFlow sums cashflows across portfolios", () => {
       const { result: single1 } = customRenderHook(() =>
         useCashFlow([portfolio1Name])
@@ -400,8 +397,6 @@ describe("PortfolioSummary hooks", () => {
   });
 
   describe("with non-existent portfolio", () => {
-    mockNetwork({ prices: {} });
-
     it("useCashFlow ignores non-existent portfolios", () => {
       const { result } = customRenderHook(() =>
         useCashFlow([portfolioName, "non-existent"])
