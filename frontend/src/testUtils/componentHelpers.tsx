@@ -8,7 +8,7 @@ import { UserDataProvider } from "../userDataContext";
 
 export function customRenderHook<T>(hookCallback: () => T) {
   const queryClient = new QueryClient(queryClientConfig);
-  return renderHook(hookCallback, {
+  const renderResult = renderHook(hookCallback, {
     wrapper: ({ children }) => (
       <UserDataProvider>
         <QueryClientProvider client={queryClient}>
@@ -17,6 +17,7 @@ export function customRenderHook<T>(hookCallback: () => T) {
       </UserDataProvider>
     ),
   });
+  return { ...renderResult, queryClient };
 }
 
 export function customRender({
