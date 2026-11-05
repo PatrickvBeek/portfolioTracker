@@ -7,8 +7,9 @@ import {
   FORECAST_CONFIDENCE_LEVELS,
   FORECAST_HORIZONS,
   ForecastParameters,
-  useForecastScenarioParams,
 } from "./ForecastChart.logic";
+import { useForecastScenarioParams } from "../../forecastScenario.logic";
+import { ScenarioSummary } from "../../ScenarioSummary";
 import { styles } from "./ForecastParametersPanel.styles";
 
 interface ForecastParametersPanelProps {
@@ -181,22 +182,10 @@ export const ForecastParametersPanel: FC<ForecastParametersPanelProps> = ({
 
           <div className={styles.scenarioDetails}>
             {scenarioDetails ? (
-              <div>
-                <p className="font-medium text-sm mb-1">
-                  {`Forecast Scenario: ${scenarioDetails.displayInfo.name}`}
-                </p>
-                <p className="text-sm text-text-muted mb-2">
-                  {scenarioDetails.displayInfo.description}
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  <span className={styles.chip}>
-                    Annual Return: {scenarioDetails.displayInfo.annualReturn}
-                  </span>
-                  <span className={styles.chip}>
-                    Volatility: {scenarioDetails.displayInfo.volatility}
-                  </span>
-                </div>
-              </div>
+              <ScenarioSummary
+                displayInfo={scenarioDetails.displayInfo}
+                namePrefix="Forecast Scenario: "
+              />
             ) : (
               <div className={styles.infoContainer}>
                 <Info className={styles.infoIcon} />

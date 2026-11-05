@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { DEFAULT_INFLATION_RATE } from "../../hooks/inflation/inflationHooks";
 import {
+  hasPositivePhase,
   type WithdrawalPlannerParameters,
   useWithdrawalPlannerData,
 } from "./WithdrawalPlanner.logic";
@@ -9,13 +10,11 @@ import { WithdrawalPlannerResult } from "./WithdrawalPlannerResult";
 import { styles } from "./WithdrawalPlanner.styles";
 
 const DEFAULT_PARAMETERS: WithdrawalPlannerParameters = {
-  scenario: "portfolio",
+  scenario: "market",
   accumulationYears: 10,
-  accumulationMonths: 0,
   decumulationYears: 20,
-  decumulationMonths: 0,
   monthlyContribution: null,
-  monthlyWithdrawal: 2000,
+  monthlyWithdrawal: null,
   inflationRate: DEFAULT_INFLATION_RATE,
 };
 
@@ -26,10 +25,13 @@ const WithdrawalPlanner = ({
 }) => {
   const [params, setParams] =
     useState<WithdrawalPlannerParameters>(DEFAULT_PARAMETERS);
-  const { data, isLoading, isError } = useWithdrawalPlannerData(
-    portfolioNames,
-    params
-  );
+  const {
+    data,
+    isLoading,
+    isError,
+    planStart,
+    derivedContribution: derivedMonthlyContribution,
+  } = useWithdrawalPlannerData(portfolioNames, params);
 
   const updateParameter = <K extends keyof WithdrawalPlannerParameters>(
     key: K,
@@ -40,22 +42,29 @@ const WithdrawalPlanner = ({
     data?.ruinProbability === undefined
       ? undefined
       : Math.round(data.ruinProbability * 100);
+  const isPlanInvalid = !hasPositivePhase(
+    params.accumulationYears,
+    params.decumulationYears
+  );
 
   return (
     <div className={styles.container}>
       <WithdrawalPlannerForm
+        portfolioNames={portfolioNames}
+        planStart={planStart}
         parameters={params}
-        monthlyContributionFallback={data?.monthlyContribution}
-        onScenarioChange={(scenario) => updateParameter("scenario", scenario)}
+        derivedMonthlyContribution={derivedMonthlyContribution}
         onParameterChange={updateParameter}
       />
-      <WithdrawalPlannerResult
-        isLoading={isLoading}
-        isError={isError}
-        ruinPercent={ruinPercent}
-        scenario={params.scenario}
-        chartData={data?.chartData ?? []}
-      />
+      {!isPlanInvalid && (
+        <WithdrawalPlannerResult
+          isLoading={isLoading}
+          isError={isError}
+          ruinPercent={ruinPercent}
+          scenario={params.scenario}
+          chartData={data?.chartData ?? []}
+        />
+      )}
     </div>
   );
 };

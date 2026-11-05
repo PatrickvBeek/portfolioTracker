@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { History } from "../portfolioHistory/history.entities";
 import {
+  annualizeGbmParameters,
   applyInflationDiscount,
   getGeometricBrownianMotionParams,
   runGeometricBrownianMotionForecast,
@@ -139,6 +140,22 @@ describe("forecasting.derivers", () => {
       expect(mu).toBeCloseTo(expectedMonthlyMu, 3);
 
       expect(sigma).toBeCloseTo(0, 3);
+    });
+  });
+
+  describe("annualizeGbmParameters", () => {
+    it("should annualize monthly log returns to percentages", () => {
+      expect(annualizeGbmParameters({ mu: 0.00721, sigma: 0.044 })).toEqual({
+        annualReturnPercent: expect.closeTo(9.04, 1),
+        annualVolatilityPercent: expect.closeTo(16.46, 1),
+      });
+    });
+
+    it("should return zero percentages for zero parameters", () => {
+      expect(annualizeGbmParameters({ mu: 0, sigma: 0 })).toEqual({
+        annualReturnPercent: 0,
+        annualVolatilityPercent: 0,
+      });
     });
   });
 
