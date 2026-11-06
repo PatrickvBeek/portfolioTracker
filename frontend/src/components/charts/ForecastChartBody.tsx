@@ -1,4 +1,3 @@
-import moment from "moment";
 import { isArray } from "radash";
 import { ReactNode } from "react";
 import {
@@ -23,6 +22,11 @@ import {
   ForecastChartDataSets,
   getForecastYAxisProps,
 } from "./forecastChartUtils";
+
+const MONTH_YEAR_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  year: "numeric",
+});
 
 export interface ForecastChartLabels {
   band: string;
@@ -94,9 +98,7 @@ export const ForecastChartBody = ({
               ]
             : [asLocaleEuro(Number(value), 0), name]
         }
-        labelFormatter={(value) =>
-          moment(new Date(Number(value))).format("ddd DD.MM.YYYY")
-        }
+        labelFormatter={(value) => MONTH_YEAR_FORMATTER.format(Number(value))}
       />
       {children}
     </ComposedChart>

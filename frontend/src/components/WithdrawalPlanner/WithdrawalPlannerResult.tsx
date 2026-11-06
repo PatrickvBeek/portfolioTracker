@@ -2,7 +2,10 @@ import { AlertTriangle } from "lucide-react";
 import { ChartContainer } from "../charts/ChartContainer";
 import { ForecastChartBody } from "../charts/ForecastChartBody";
 import type { ForecastChartData } from "../charts/forecastChartUtils";
-import type { WithdrawalPlannerParameters } from "./WithdrawalPlanner.logic";
+import {
+  WITHDRAWAL_CONFIDENCE_PERCENT,
+  type WithdrawalPlannerParameters,
+} from "./WithdrawalPlanner.logic";
 import { headlineVariants, styles } from "./WithdrawalPlanner.styles";
 
 type WithdrawalPlannerResultProps = {
@@ -59,8 +62,8 @@ export function WithdrawalPlannerResult({
           <ForecastChartBody
             data={chartData}
             labels={{
-              band: "90% Confidence Interval",
-              median: "Market Value (Median)",
+              band: `${WITHDRAWAL_CONFIDENCE_PERCENT}% simulated range`,
+              median: "Market value (median, today's euros)",
             }}
           />
         </ChartContainer>

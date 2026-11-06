@@ -42,9 +42,9 @@ export const ForecastChart: FC<{
         <ForecastChartBody
           data={chartData}
           labels={{
-            band: `Confidence Interval (${params.confidenceLevel}%)`,
-            median: "Market Value (Median)",
-            cashFlow: "Cash Flow",
+            band: `${params.confidenceLevel}% simulated range`,
+            median: "Market value (median, today's euros)",
+            cashFlow: "Cumulative contributions",
           }}
         />
       </ChartContainer>
