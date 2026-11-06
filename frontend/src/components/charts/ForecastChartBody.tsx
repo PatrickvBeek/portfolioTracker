@@ -1,5 +1,4 @@
 import { isArray } from "radash";
-import { ReactNode } from "react";
 import {
   Area,
   CartesianGrid,
@@ -37,16 +36,18 @@ export interface ForecastChartLabels {
 export const ForecastChartBody = ({
   data,
   labels,
-  children,
 }: {
   data: ForecastChartData;
   labels: ForecastChartLabels;
-  children?: ReactNode;
 }) => {
   const hasCashFlow = labels.cashFlow !== undefined;
 
   return (
-    <ComposedChart data={data} margin={{ bottom: 30 }}>
+    <ComposedChart
+      data={data}
+      margin={{ bottom: 30 }}
+      desc={`Forecast chart: ${labels.median}, ${labels.band}`}
+    >
       <Legend verticalAlign="bottom" />
       <XAxis {...getTimeAxisProps(data)} />
       <YAxis
@@ -100,7 +101,6 @@ export const ForecastChartBody = ({
         }
         labelFormatter={(value) => MONTH_YEAR_FORMATTER.format(Number(value))}
       />
-      {children}
     </ComposedChart>
   );
 };
