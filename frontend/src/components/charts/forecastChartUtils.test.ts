@@ -1,3 +1,4 @@
+import { formatAxisValue, getAxisUnit } from "./chartUtils";
 import {
   deriveMonthlyContribution,
   getForecastYAxisProps,
@@ -111,8 +112,14 @@ describe("getForecastYAxisProps", () => {
       point(1_000_000, [900_000, 1_200_000]),
     ]);
 
-    expect(euros.tickFormatter?.(1_500)).toBe("1,500 €");
-    expect(thousands.tickFormatter?.(11_000)).toBe("11 k€");
-    expect(millions.tickFormatter?.(1_100_000)).toBe("1.1 M€");
+    expect(euros.tickFormatter?.(1_500)).toBe(
+      formatAxisValue(1_500, getAxisUnit(1_500))
+    );
+    expect(thousands.tickFormatter?.(11_000)).toBe(
+      formatAxisValue(11_000, getAxisUnit(11_000))
+    );
+    expect(millions.tickFormatter?.(1_100_000)).toBe(
+      formatAxisValue(1_100_000, getAxisUnit(1_100_000))
+    );
   });
 });
