@@ -59,7 +59,7 @@ export const ForecastChartBody = ({
       <Area
         {...DEFAULT_LINE_PROPS}
         dataKey="uncertaintyBand"
-        type="monotone"
+        type="linear"
         stroke="var(--color-success)"
         strokeWidth={0}
         fill="var(--color-success-soft)"
@@ -73,7 +73,7 @@ export const ForecastChartBody = ({
           dataKey={"cashFlow" satisfies ForecastChartDataSets}
           name={labels.cashFlow}
           stroke="var(--color-accent-hover)"
-          strokeDasharray="8 4"
+          strokeDasharray="2 4"
           strokeWidth={2}
         />
       )}
