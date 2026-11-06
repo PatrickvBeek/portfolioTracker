@@ -23,6 +23,8 @@ export function WithdrawalPlannerResult({
   scenario,
   chartData,
 }: WithdrawalPlannerResultProps) {
+  const showChart = !isError && (isLoading || chartData.length > 0);
+
   return (
     <div className={styles.sectionCard}>
       <div className={styles.sectionBody}>
@@ -50,23 +52,28 @@ export function WithdrawalPlannerResult({
           </>
         )}
 
-        <div className={styles.warning}>
-          <AlertTriangle className={styles.warningIcon} />
-          <span>
-            This forecast assumes the same allocation throughout. If you plan to
-            de-risk at retirement, ruin risk may be higher than shown.
-          </span>
-        </div>
+        {showChart && (
+          <>
+            <div className={styles.warning}>
+              <AlertTriangle className={styles.warningIcon} />
+              <span>
+                This forecast assumes the same allocation throughout. If you
+                plan to de-risk at retirement, ruin risk may be higher than
+                shown.
+              </span>
+            </div>
 
-        <ChartContainer isLoading={isLoading}>
-          <ForecastChartBody
-            data={chartData}
-            labels={{
-              band: `${WITHDRAWAL_CONFIDENCE_PERCENT}% simulated range`,
-              median: "Market value (median, today's euros)",
-            }}
-          />
-        </ChartContainer>
+            <ChartContainer isLoading={isLoading}>
+              <ForecastChartBody
+                data={chartData}
+                labels={{
+                  band: `${WITHDRAWAL_CONFIDENCE_PERCENT}% simulated range`,
+                  median: "Market value (median, today's euros)",
+                }}
+              />
+            </ChartContainer>
+          </>
+        )}
       </div>
     </div>
   );
