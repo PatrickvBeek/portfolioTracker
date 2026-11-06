@@ -56,7 +56,8 @@ export const ForecastChartBody = ({
         {...DEFAULT_LINE_PROPS}
         dataKey="uncertaintyBand"
         type="monotone"
-        stroke="none"
+        stroke="var(--color-success)"
+        strokeWidth={0}
         fill="var(--color-success-soft)"
         connectNulls
         name={labels.band}
