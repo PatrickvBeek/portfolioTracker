@@ -32,6 +32,37 @@ mockNetwork({
   ]),
 });
 
+const setUpPortfolio = () => {
+  localStorage.setItem(
+    "portfolios",
+    JSON.stringify({
+      testPortfolio: getTestPortfolio({
+        name: "testPortfolio",
+        orders: {
+          ABC: [
+            getTestOrder({
+              asset: "ABC",
+              pieces: 1,
+              sharePrice: 100,
+              timestamp: DAY1,
+            }),
+          ],
+        },
+      }),
+    })
+  );
+  localStorage.setItem(
+    "assets",
+    JSON.stringify({
+      ABC: {
+        isin: "ABC",
+        symbol: "ABC",
+        name: "ABC Corp",
+      },
+    })
+  );
+};
+
 describe("ForecastChart.logic", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -178,6 +209,35 @@ describe("ForecastChart.logic", () => {
         useForecastChartData(["testPortfolio"], paramsWithDifferentHorizon)
       );
 
+      expect(result.current.data).toHaveLength(12);
+    });
+
+    it("keeps the data reference across identical rerenders", () => {
+      setUpPortfolio();
+
+      const { result, rerender } = customRenderHook(() =>
+        useForecastChartData(["testPortfolio"], baseParams)
+      );
+      const firstData = result.current.data;
+
+      rerender();
+
+      expect(result.current.data).toBe(firstData);
+    });
+
+    it("recomputes data when the horizon changes", () => {
+      setUpPortfolio();
+
+      let params: ForecastParameters = baseParams;
+      const { result, rerender } = customRenderHook(() =>
+        useForecastChartData(["testPortfolio"], params)
+      );
+      const firstData = result.current.data;
+
+      params = { ...baseParams, timeHorizon: FORECAST_HORIZONS["1Y"] };
+      rerender();
+
+      expect(result.current.data).not.toBe(firstData);
       expect(result.current.data).toHaveLength(12);
     });
   });

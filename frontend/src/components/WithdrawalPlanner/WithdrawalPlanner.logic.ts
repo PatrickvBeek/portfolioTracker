@@ -27,6 +27,11 @@ import {
 
 export const MAX_PLAN_YEARS = 60;
 export const MAX_MONTHLY_WITHDRAWAL = 10_000;
+export const WITHDRAWAL_CONFIDENCE_PERCENT = 90;
+export const WITHDRAWAL_CONFIDENCE_PERCENTILES: [number, number] = [
+  50 - WITHDRAWAL_CONFIDENCE_PERCENT / 2,
+  50 + WITHDRAWAL_CONFIDENCE_PERCENT / 2,
+];
 
 export interface WithdrawalPlannerParameters {
   scenario: ForecastScenario;
@@ -211,7 +216,9 @@ export const useWithdrawalPlannerData = (
       gbmParams: { mu: scenarioMu, sigma: scenarioSigma },
     });
 
-    const result = runWithdrawalForecast(forecastInput);
+    const result = runWithdrawalForecast(forecastInput, {
+      confidencePercentiles: WITHDRAWAL_CONFIDENCE_PERCENTILES,
+    });
     const chartData = transformForecastToChartData(
       result,
       planStart,

@@ -1,6 +1,12 @@
 import { vi } from "vitest";
 import { CHART_RANGE_DAYS } from "./chartRange.types";
-import { calculateGradientOffset, getDefaultTimeAxis } from "./chartUtils";
+import {
+  calculateGradientOffset,
+  formatAxisValue,
+  getAxisUnit,
+  getCurrencyAxisProps,
+  getDefaultTimeAxis,
+} from "./chartUtils";
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const TODAY = "2020-03-05";
@@ -123,5 +129,75 @@ describe("calculateGradientOffset", () => {
     expect(calculateGradientOffset(data, "v")).toEqual(
       calculateGradientOffset(data, "v", { baseline: 0 })
     );
+  });
+});
+
+describe("getAxisUnit", () => {
+  it("uses euros for small magnitudes", () => {
+    expect(getAxisUnit(0)).toEqual({ divisor: 1, suffix: "€" });
+    expect(getAxisUnit(9_999)).toEqual({ divisor: 1, suffix: "€" });
+  });
+
+  it("uses thousands from 10,000", () => {
+    expect(getAxisUnit(10_000)).toEqual({ divisor: 1_000, suffix: "k€" });
+    expect(getAxisUnit(999_999)).toEqual({ divisor: 1_000, suffix: "k€" });
+  });
+
+  it("uses millions from 1,000,000", () => {
+    expect(getAxisUnit(1_000_000)).toEqual({
+      divisor: 1_000_000,
+      suffix: "M€",
+    });
+  });
+
+  it("uses the magnitude for negative values", () => {
+    expect(getAxisUnit(-1_500_000)).toEqual({
+      divisor: 1_000_000,
+      suffix: "M€",
+    });
+  });
+});
+
+describe("formatAxisValue", () => {
+  it("formats euros", () => {
+    expect(formatAxisValue(1_500, getAxisUnit(1_500), "en-US")).toBe("1,500 €");
+  });
+
+  it("formats thousands", () => {
+    expect(formatAxisValue(15_000, getAxisUnit(15_000), "en-US")).toBe("15 k€");
+  });
+
+  it("formats millions with one decimal", () => {
+    expect(formatAxisValue(1_250_000, getAxisUnit(1_250_000), "en-US")).toBe(
+      "1.3 M€"
+    );
+  });
+
+  it("formats negative values", () => {
+    expect(formatAxisValue(-2_500, getAxisUnit(-2_500), "en-US")).toBe(
+      "-2,500 €"
+    );
+  });
+});
+
+describe("getCurrencyAxisProps", () => {
+  it("uses euro ticks for small magnitudes", () => {
+    const props = getCurrencyAxisProps([{ timestamp: 0, value: 1_500 }]);
+    expect(props.tickFormatter?.(1_500, 0)).toMatch(/ €$/);
+  });
+
+  it("uses thousands for mid magnitudes", () => {
+    const props = getCurrencyAxisProps([{ timestamp: 0, value: 50_000 }]);
+    expect(props.tickFormatter?.(50_000, 0)).toMatch(/ k€$/);
+  });
+
+  it("uses millions for large magnitudes", () => {
+    const props = getCurrencyAxisProps([{ timestamp: 0, value: 2_000_000 }]);
+    expect(props.tickFormatter?.(2_000_000, 0)).toMatch(/ M€$/);
+  });
+
+  it("does not throw for empty data", () => {
+    expect(() => getCurrencyAxisProps([])).not.toThrow();
+    expect(getCurrencyAxisProps([]).tickFormatter?.(0, 0)).toMatch(/ €$/);
   });
 });

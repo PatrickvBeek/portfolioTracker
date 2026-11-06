@@ -28,7 +28,10 @@ export const ForecastChart: FC<{
     inflationRate: DEFAULT_INFLATION_RATE,
   });
 
-  const { data, isLoading } = useForecastChartData(portfolioNames, params);
+  const { data, isLoading, isError } = useForecastChartData(
+    portfolioNames,
+    params
+  );
   const chartData = data || [];
 
   return (
@@ -38,16 +41,22 @@ export const ForecastChart: FC<{
         parameters={params}
         onParametersChange={setParams}
       />
-      <ChartContainer isLoading={isLoading}>
-        <ForecastChartBody
-          data={chartData}
-          labels={{
-            band: `Confidence Interval (${params.confidenceLevel}%)`,
-            median: "Market Value (Median)",
-            cashFlow: "Cash Flow",
-          }}
-        />
-      </ChartContainer>
+      {isError ? (
+        <p>Error loading forecast.</p>
+      ) : chartData.length === 0 && !isLoading ? (
+        <p>No forecast data</p>
+      ) : (
+        <ChartContainer isLoading={isLoading}>
+          <ForecastChartBody
+            data={chartData}
+            labels={{
+              band: `${params.confidenceLevel}% simulated range`,
+              median: "Market value (median, today's euros)",
+              cashFlow: "Cumulative contributions",
+            }}
+          />
+        </ChartContainer>
+      )}
     </>
   );
 };

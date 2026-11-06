@@ -2,7 +2,10 @@ import { AlertTriangle } from "lucide-react";
 import { ChartContainer } from "../charts/ChartContainer";
 import { ForecastChartBody } from "../charts/ForecastChartBody";
 import type { ForecastChartData } from "../charts/forecastChartUtils";
-import type { WithdrawalPlannerParameters } from "./WithdrawalPlanner.logic";
+import {
+  WITHDRAWAL_CONFIDENCE_PERCENT,
+  type WithdrawalPlannerParameters,
+} from "./WithdrawalPlanner.logic";
 import { headlineVariants, styles } from "./WithdrawalPlanner.styles";
 
 type WithdrawalPlannerResultProps = {
@@ -20,6 +23,8 @@ export function WithdrawalPlannerResult({
   scenario,
   chartData,
 }: WithdrawalPlannerResultProps) {
+  const showChart = !isError && (isLoading || chartData.length > 0);
+
   return (
     <div className={styles.sectionCard}>
       <div className={styles.sectionBody}>
@@ -47,23 +52,28 @@ export function WithdrawalPlannerResult({
           </>
         )}
 
-        <div className={styles.warning}>
-          <AlertTriangle className={styles.warningIcon} />
-          <span>
-            This forecast assumes the same allocation throughout. If you plan to
-            de-risk at retirement, ruin risk may be higher than shown.
-          </span>
-        </div>
+        {showChart && (
+          <>
+            <div className={styles.warning}>
+              <AlertTriangle className={styles.warningIcon} />
+              <span>
+                This forecast assumes the same allocation throughout. If you
+                plan to de-risk at retirement, ruin risk may be higher than
+                shown.
+              </span>
+            </div>
 
-        <ChartContainer isLoading={isLoading}>
-          <ForecastChartBody
-            data={chartData}
-            labels={{
-              band: "90% Confidence Interval",
-              median: "Market Value (Median)",
-            }}
-          />
-        </ChartContainer>
+            <ChartContainer isLoading={isLoading}>
+              <ForecastChartBody
+                data={chartData}
+                labels={{
+                  band: `${WITHDRAWAL_CONFIDENCE_PERCENT}% simulated range`,
+                  median: "Market value (median, today's euros)",
+                }}
+              />
+            </ChartContainer>
+          </>
+        )}
       </div>
     </div>
   );

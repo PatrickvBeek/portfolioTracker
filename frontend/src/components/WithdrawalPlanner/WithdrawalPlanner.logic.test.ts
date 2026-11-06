@@ -19,6 +19,8 @@ import {
   parseYears,
   useDerivedMonthlyContribution,
   useWithdrawalPlannerData,
+  WITHDRAWAL_CONFIDENCE_PERCENT,
+  WITHDRAWAL_CONFIDENCE_PERCENTILES,
   WithdrawalPlannerParameters,
   yearsToMonths,
 } from "./WithdrawalPlanner.logic";
@@ -315,5 +317,14 @@ describe("buildWithdrawalForecastArgs", () => {
 
     expect(input.monthlyContribution).toBe(0);
     expect(input.monthlyWithdrawal).toBe(0);
+  });
+});
+
+describe("WITHDRAWAL_CONFIDENCE_PERCENTILES", () => {
+  it("matches the confidence percent used in the label", () => {
+    expect(WITHDRAWAL_CONFIDENCE_PERCENTILES).toEqual([
+      50 - WITHDRAWAL_CONFIDENCE_PERCENT / 2,
+      50 + WITHDRAWAL_CONFIDENCE_PERCENT / 2,
+    ]);
   });
 });

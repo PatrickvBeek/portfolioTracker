@@ -15,7 +15,7 @@ import {
   DEFAULT_LINE_PROPS,
   CHART_GRID_STROKE,
   TOOLTIP_STYLE,
-  getAxisProps,
+  getCurrencyAxisProps,
   getTimeAxisProps,
 } from "../../chartUtils";
 import {
@@ -38,11 +38,7 @@ export const TotalValueChart: FC<{
         <LineChart data={data || []} margin={{ bottom: 30 }}>
           <Legend verticalAlign="bottom" />
           <XAxis {...getTimeAxisProps(data || [])} />
-          <YAxis
-            {...getAxisProps(data || [])}
-            tickFormatter={(value) => (value / 1000).toString()}
-            unit={" k€"}
-          />
+          <YAxis width="auto" {...getCurrencyAxisProps(data || [])} />
           <CartesianGrid stroke={CHART_GRID_STROKE} />
           <Line
             {...DEFAULT_LINE_PROPS}
