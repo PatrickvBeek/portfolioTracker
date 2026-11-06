@@ -14,6 +14,30 @@ const MARGIN = 0.05;
 
 export const CHART_GRID_STROKE = "var(--color-border)";
 
+interface AxisUnit {
+  divisor: number;
+  suffix: "€" | "k€" | "M€";
+}
+
+export const getAxisUnit = (maxAbs: number): AxisUnit => {
+  if (Math.abs(maxAbs) >= 1_000_000) {
+    return { divisor: 1_000_000, suffix: "M€" };
+  }
+  if (Math.abs(maxAbs) >= 10_000) {
+    return { divisor: 1_000, suffix: "k€" };
+  }
+  return { divisor: 1, suffix: "€" };
+};
+
+export const formatAxisValue = (
+  value: number,
+  unit: AxisUnit,
+  locale?: string
+): string =>
+  `${(value / unit.divisor).toLocaleString(locale, {
+    maximumFractionDigits: 1,
+  })} ${unit.suffix}`;
+
 export const TOOLTIP_STYLE: React.CSSProperties = {
   background: "var(--color-bg-card)",
   border: "1px solid var(--color-border)",
@@ -21,29 +45,72 @@ export const TOOLTIP_STYLE: React.CSSProperties = {
   color: "var(--color-text)",
 };
 
-export function getAxisProps(
+interface ValueAxis {
+  props: Partial<YAxisProps>;
+  domain?: [number, number];
+}
+
+const buildValueAxis = (
   chartData: ChartData<string>,
-  nTicks: number = 5
-): Partial<YAxisProps> {
+  nTicks: number
+): ValueAxis => {
   const values = chartData
     .map((point) => Object.values(omit(point, ["timestamp"])))
     .flat(2)
     .filter(isNumber);
   const domain = d3Extent(values);
   if (domain[0] === undefined || domain[1] === undefined) {
-    return { type: "number" };
+    return {
+      props: {
+        type: "number",
+        axisLine: { stroke: "var(--color-border)" },
+        tickLine: { stroke: "var(--color-border)" },
+      },
+    };
   }
   const scale = d3LinearScale(values).domain(domain).range([0, 1]);
 
   const [yMin, yMax] = domain;
   const diff = yMax - yMin;
+  const paddedDomain: [number, number] = [
+    yMin - MARGIN * diff,
+    yMax + MARGIN * diff,
+  ];
 
   return {
-    tick: { fill: "var(--color-text)" },
-    tickFormatter: scale.tickFormat(nTicks),
-    ticks: scale.ticks(nTicks),
-    type: "number",
-    domain: [yMin - MARGIN * diff, yMax + MARGIN * diff],
+    domain: paddedDomain,
+    props: {
+      axisLine: { stroke: "var(--color-border)" },
+      tickLine: { stroke: "var(--color-border)" },
+      tick: { fill: "var(--color-text)" },
+      tickFormatter: scale.tickFormat(nTicks),
+      ticks: scale.ticks(nTicks),
+      type: "number",
+      domain: paddedDomain,
+    },
+  };
+};
+
+export function getAxisProps(
+  chartData: ChartData<string>,
+  nTicks: number = 5
+): Partial<YAxisProps> {
+  return buildValueAxis(chartData, nTicks).props;
+}
+
+export function getCurrencyAxisProps(
+  chartData: ChartData<string>,
+  nTicks: number = 5
+): Partial<YAxisProps> {
+  const { props, domain } = buildValueAxis(chartData, nTicks);
+  const maxAbs = domain
+    ? Math.max(Math.abs(domain[0]), Math.abs(domain[1]))
+    : 0;
+  const unit = getAxisUnit(maxAbs);
+
+  return {
+    ...props,
+    tickFormatter: (value: number) => formatAxisValue(value, unit),
   };
 }
 
@@ -54,12 +121,19 @@ export function getTimeAxisProps(
   const dates = chartData.map((point) => point.timestamp);
   const domain = d3Extent(dates);
   if (domain[0] === undefined || domain[1] === undefined) {
-    return { dataKey: "timestamp", type: "number" };
+    return {
+      dataKey: "timestamp",
+      type: "number",
+      axisLine: { stroke: "var(--color-border)" },
+      tickLine: { stroke: "var(--color-border)" },
+    };
   }
   const tScale = d3ScaleTime().domain(domain).range([0, 1]);
 
   return {
     dataKey: "timestamp",
+    axisLine: { stroke: "var(--color-border)" },
+    tickLine: { stroke: "var(--color-border)" },
     tick: { fill: "var(--color-text)" },
     tickFormatter: tScale.tickFormat(nTicks),
     ticks: tScale.ticks(nTicks).map((tick) => tick.getTime()),
