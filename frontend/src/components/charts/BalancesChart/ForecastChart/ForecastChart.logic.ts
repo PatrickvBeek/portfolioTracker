@@ -1,5 +1,5 @@
 import { ForecastInput, runGeometricBrownianMotionForecast } from "pt-domain";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CustomQuery } from "../../../../hooks/prices/priceHooks";
 import { useGetPortfoliosByNames } from "../../../../userDataContext";
 import {
@@ -64,38 +64,53 @@ export const useForecastChartData = (
     portfolioNames,
     params.scenario
   );
+  const mu = scenarioDetails?.params.mu;
+  const sigma = scenarioDetails?.params.sigma;
   const [startTimestamp] = useState(() => Date.now());
 
-  if (portfolios.length === 0 || !scenarioDetails) {
-    return { isError, isLoading, data: [] };
-  }
+  const forecastData = useMemo(() => {
+    if (portfolios.length === 0 || mu === undefined || sigma === undefined) {
+      return [];
+    }
 
-  const months = FORECAST_HORIZON_MONTHS[params.timeHorizon];
+    const months = FORECAST_HORIZON_MONTHS[params.timeHorizon];
 
-  const forecastInput: ForecastInput = {
-    mu: scenarioDetails.params.mu,
-    sigma: scenarioDetails.params.sigma,
-    months,
-    monthlyInvestment: params.monthlyContribution,
-    startingValue: currentValue,
-    simulationCount: FORECAST_SIMULATION_COUNT,
-  };
+    const forecastInput: ForecastInput = {
+      mu,
+      sigma,
+      months,
+      monthlyInvestment: params.monthlyContribution,
+      startingValue: currentValue,
+      simulationCount: FORECAST_SIMULATION_COUNT,
+    };
 
-  const confidencePercentiles: [number, number] = [
-    50 - params.confidenceLevel / 2,
-    50 + params.confidenceLevel / 2,
-  ];
+    const confidencePercentiles: [number, number] = [
+      50 - params.confidenceLevel / 2,
+      50 + params.confidenceLevel / 2,
+    ];
 
-  const forecastResult = runGeometricBrownianMotionForecast(forecastInput, {
-    confidencePercentiles,
-  });
+    const forecastResult = runGeometricBrownianMotionForecast(forecastInput, {
+      confidencePercentiles,
+    });
 
-  const forecastData = transformForecastToChartData(
-    forecastResult,
-    startTimestamp,
+    return transformForecastToChartData(
+      forecastResult,
+      startTimestamp,
+      currentCashFlow,
+      params.inflationRate
+    );
+  }, [
+    portfolios.length,
+    mu,
+    sigma,
+    currentValue,
     currentCashFlow,
-    params.inflationRate
-  );
+    params.timeHorizon,
+    params.monthlyContribution,
+    params.confidenceLevel,
+    params.inflationRate,
+    startTimestamp,
+  ]);
 
   return {
     isLoading,
