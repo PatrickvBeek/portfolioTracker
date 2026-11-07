@@ -159,7 +159,7 @@ export const useWithdrawalPlannerData = (
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const marketValueQuery = useMarketValue(portfolioNames);
   const cashFlow = useCashFlow(portfolioNames);
-  const debouncedParameters = useDebouncedValue(
+  const { value: debouncedParameters } = useDebouncedValue(
     parameters,
     FORECAST_DEBOUNCE_MS
   );
