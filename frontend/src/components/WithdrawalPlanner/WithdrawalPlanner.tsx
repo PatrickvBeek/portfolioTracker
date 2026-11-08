@@ -26,9 +26,7 @@ const WithdrawalPlanner = ({
   const [params, setParams] =
     useState<WithdrawalPlannerParameters>(DEFAULT_PARAMETERS);
   const {
-    data,
-    isLoading,
-    isError,
+    state,
     planStart,
     derivedContribution: derivedMonthlyContribution,
   } = useWithdrawalPlannerData(portfolioNames, params);
@@ -38,14 +36,18 @@ const WithdrawalPlanner = ({
     value: WithdrawalPlannerParameters[K]
   ) => setParams((prev) => ({ ...prev, [key]: value }));
 
-  const ruinPercent =
-    data?.ruinProbability === undefined
-      ? undefined
-      : Math.round(data.ruinProbability * 100);
   const isPlanInvalid = !hasPositivePhase(
     params.accumulationYears,
     params.decumulationYears
   );
+  const result =
+    state.status === "ready" || state.status === "updating"
+      ? state.result
+      : undefined;
+  const isLoading = state.status === "loading";
+  const isError = state.status === "error";
+  const ruinPercent =
+    result === undefined ? undefined : Math.round(result.ruinProbability * 100);
 
   return (
     <div className={styles.container}>
@@ -62,7 +64,7 @@ const WithdrawalPlanner = ({
           isError={isError}
           ruinPercent={ruinPercent}
           scenario={params.scenario}
-          chartData={data?.chartData ?? []}
+          chartData={result?.chartData ?? []}
         />
       )}
     </div>

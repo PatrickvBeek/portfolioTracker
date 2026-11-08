@@ -1,47 +1,45 @@
 import {
   getTestPortfolio,
   getTestOrdersGroupedByAsset,
-  runWithdrawalForecast,
+  type WithdrawalForecastResult,
 } from "pt-domain";
+import { HttpResponse, http } from "msw";
 import { vi } from "vitest";
 import {
   customRenderHook,
   customWaitFor,
 } from "../../testUtils/componentHelpers";
 import { setUserData } from "../../testUtils/localStorage";
-import { getPriceResponse, mockNetwork } from "../../testUtils/networkMock";
+import {
+  getPriceResponse,
+  mockNetwork,
+  resetMockNetwork,
+  server,
+} from "../../testUtils/networkMock";
 import {
   buildPlanDates,
   buildWithdrawalForecastArgs,
+  computeWithdrawalResult,
   parseInflationPercent,
   parseMonthlyWithdrawal,
   parseNonNegativeNumber,
   parseYears,
+  resolvePlanReadiness,
+  resolveWithdrawalPlannerState,
   useDerivedMonthlyContribution,
   useWithdrawalPlannerData,
   WITHDRAWAL_CONFIDENCE_PERCENT,
   WITHDRAWAL_CONFIDENCE_PERCENTILES,
+  type WithdrawalPlanComputation,
+  type WithdrawalPlanInputs,
+  type WithdrawalPlanReadiness,
+  type WithdrawalPlanReadinessInput,
+  type WithdrawalPlannerResultState,
   WithdrawalPlannerParameters,
   yearsToMonths,
 } from "./WithdrawalPlanner.logic";
 
-type PtDomainModule = Record<string, unknown> & {
-  runWithdrawalForecast: typeof runWithdrawalForecast;
-};
-
-vi.mock("pt-domain", async (importOriginal) => {
-  const actual = await importOriginal<PtDomainModule>();
-  return {
-    ...actual,
-    runWithdrawalForecast: vi.fn<typeof runWithdrawalForecast>(
-      actual.runWithdrawalForecast
-    ),
-  };
-});
-
 vi.setSystemTime(new Date(2021, 0, 1));
-
-const runWithdrawalForecastMock = vi.mocked(runWithdrawalForecast);
 
 const portfolioName = "testPortfolio";
 const portfolio = getTestPortfolio({
@@ -72,7 +70,10 @@ setUserData({
 });
 
 mockNetwork({
-  prices: getPriceResponse("ABC", [[new Date("2020-01-01"), 100]]),
+  prices: getPriceResponse("ABC", [
+    [new Date("2020-01-01"), 100],
+    [new Date("2020-02-01"), 110],
+  ]),
 });
 
 const baseParameters: WithdrawalPlannerParameters = {
@@ -91,6 +92,11 @@ const renderPlanner = (parameters: WithdrawalPlannerParameters) => {
   return result;
 };
 
+const resultOf = (state: WithdrawalPlannerResultState) =>
+  state.status === "ready" || state.status === "updating"
+    ? state.result
+    : undefined;
+
 const buildArgs = (
   parameters: WithdrawalPlannerParameters,
   derivedContribution: number | undefined
@@ -105,19 +111,23 @@ const buildArgs = (
 describe("useWithdrawalPlannerData", () => {
   it("returns chart data for the whole plan horizon", async () => {
     const result = renderPlanner(baseParameters);
-    await customWaitFor(() => expect(result.current.isLoading).toBe(false));
+    await customWaitFor(() =>
+      expect(result.current.state.status).toBe("ready")
+    );
 
-    expect(result.current.data?.chartData).toHaveLength(24);
-    expect(result.current.data?.ruinProbability).toBe(0);
-    expect(result.current.isError).toBe(false);
+    const data = resultOf(result.current.state);
+    expect(data?.chartData).toHaveLength(24);
+    expect(data?.ruinProbability).toBe(0);
   });
 
   it("fixes the plan start and ends the chart at the calendar plan end", async () => {
     const result = renderPlanner(baseParameters);
-    await customWaitFor(() => expect(result.current.isLoading).toBe(false));
+    await customWaitFor(() =>
+      expect(result.current.state.status).toBe("ready")
+    );
 
     expect(result.current.planStart).toBe(new Date(2021, 0, 1).getTime());
-    const lastPoint = result.current.data?.chartData.at(-1);
+    const lastPoint = resultOf(result.current.state)?.chartData.at(-1);
     expect(new Date(lastPoint?.timestamp ?? 0)).toEqual(new Date(2023, 0, 1));
   });
 
@@ -126,9 +136,13 @@ describe("useWithdrawalPlannerData", () => {
       ...baseParameters,
       monthlyContribution: 1_000_000,
     });
-    await customWaitFor(() => expect(result.current.isLoading).toBe(false));
+    await customWaitFor(() =>
+      expect(result.current.state.status).toBe("ready")
+    );
 
-    expect(result.current.data?.chartData[0].median).toBeGreaterThan(500_000);
+    expect(resultOf(result.current.state)?.chartData[0].median).toBeGreaterThan(
+      500_000
+    );
   });
 
   it("reports certain ruin when the withdrawal exceeds the balance", async () => {
@@ -136,14 +150,14 @@ describe("useWithdrawalPlannerData", () => {
       ...baseParameters,
       monthlyWithdrawal: 1_000_000,
     });
-    await customWaitFor(() => expect(result.current.isLoading).toBe(false));
+    await customWaitFor(() =>
+      expect(result.current.state.status).toBe("ready")
+    );
 
-    expect(result.current.data?.ruinProbability).toBe(1);
+    expect(resultOf(result.current.state)?.ruinProbability).toBe(1);
   });
 
-  it("returns no data and skips the simulation when both phases are zero", async () => {
-    runWithdrawalForecastMock.mockClear();
-
+  it("reports unavailable when both phases are zero", async () => {
     const { result, queryClient } = customRenderHook(() =>
       useWithdrawalPlannerData([portfolioName], {
         ...baseParameters,
@@ -153,18 +167,70 @@ describe("useWithdrawalPlannerData", () => {
     );
     await customWaitFor(() => expect(queryClient.isFetching()).toBe(0));
 
-    expect(result.current.data).toBeUndefined();
-    expect(result.current.isLoading).toBe(false);
-    expect(runWithdrawalForecastMock).not.toHaveBeenCalled();
+    expect(result.current.state.status).toBe("unavailable");
   });
 
-  it("returns no data for an unknown portfolio", () => {
+  it("reports unavailable for an unknown portfolio", () => {
     const { result } = customRenderHook(() =>
       useWithdrawalPlannerData(["unknown"], baseParameters)
     );
 
-    expect(result.current.data).toBeUndefined();
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.state.status).toBe("unavailable");
+  });
+
+  it("keeps the previous result object while the debounce is pending", async () => {
+    let parameters = baseParameters;
+    const { result, rerender } = customRenderHook(() =>
+      useWithdrawalPlannerData([portfolioName], parameters)
+    );
+    await customWaitFor(() =>
+      expect(result.current.state.status).toBe("ready")
+    );
+
+    const ready = result.current.state;
+    if (ready.status !== "ready") {
+      throw new Error("expected ready");
+    }
+
+    parameters = { ...baseParameters, monthlyWithdrawal: 100 };
+    rerender();
+
+    const pending = result.current.state;
+    expect(pending.status).toBe("updating");
+    if (pending.status !== "updating") {
+      return;
+    }
+
+    expect(pending.result).toBe(ready.result);
+
+    await customWaitFor(() =>
+      expect(result.current.state.status).toBe("ready")
+    );
+  });
+
+  it("reports a market value error when prices cannot be loaded", async () => {
+    server.use(
+      http.get(
+        "https://www.alphavantage.co/query",
+        () => new HttpResponse(null, { status: 500 })
+      )
+    );
+
+    try {
+      const { result } = customRenderHook(() =>
+        useWithdrawalPlannerData([portfolioName], baseParameters)
+      );
+      await customWaitFor(() =>
+        expect(result.current.state.status).toBe("error")
+      );
+
+      expect(result.current.state).toEqual({
+        status: "error",
+        kind: "marketValue",
+      });
+    } finally {
+      resetMockNetwork();
+    }
   });
 });
 
@@ -317,6 +383,241 @@ describe("buildWithdrawalForecastArgs", () => {
 
     expect(input.monthlyContribution).toBe(0);
     expect(input.monthlyWithdrawal).toBe(0);
+  });
+});
+
+const buildForecast = (
+  ruinProbability: number,
+  median: number[] = [100, 110, 120, 130]
+): WithdrawalForecastResult => ({
+  median,
+  confidenceLow: [...median],
+  confidenceHigh: [...median],
+  cashFlows: median.map(() => 0),
+  ruinProbability,
+});
+
+const buildReadinessInput = (
+  overrides: Partial<WithdrawalPlanReadinessInput> = {}
+): WithdrawalPlanReadinessInput => ({
+  hasPositivePhase: true,
+  waitingForFreshPlan: false,
+  isLoading: false,
+  isMarketValueError: false,
+  marketValue: 100_000,
+  hasPortfolios: true,
+  scenario: { mu: 0.01, sigma: 0.05 },
+  ...overrides,
+});
+
+describe("resolvePlanReadiness", () => {
+  it("prioritizes a fresh plan over the other readiness signals", () => {
+    expect(
+      resolvePlanReadiness(
+        buildReadinessInput({
+          waitingForFreshPlan: true,
+          hasPositivePhase: false,
+          isLoading: true,
+          isMarketValueError: true,
+        })
+      )
+    ).toEqual({ status: "loading" });
+  });
+
+  it("reports unavailable when the plan has no positive phase", () => {
+    expect(
+      resolvePlanReadiness(buildReadinessInput({ hasPositivePhase: false }))
+    ).toEqual({ status: "unavailable" });
+  });
+
+  it("reports loading while the market value loads", () => {
+    expect(
+      resolvePlanReadiness(buildReadinessInput({ isLoading: true }))
+    ).toEqual({ status: "loading" });
+  });
+
+  it("reports a market value error for a failed price query", () => {
+    expect(
+      resolvePlanReadiness(buildReadinessInput({ isMarketValueError: true }))
+    ).toEqual({ status: "error", kind: "marketValue" });
+  });
+
+  it("reports a market value error for a missing or non-finite value", () => {
+    expect(
+      resolvePlanReadiness(buildReadinessInput({ marketValue: undefined }))
+    ).toEqual({ status: "error", kind: "marketValue" });
+    expect(
+      resolvePlanReadiness(buildReadinessInput({ marketValue: NaN }))
+    ).toEqual({ status: "error", kind: "marketValue" });
+  });
+
+  it("reports unavailable without portfolios or scenario parameters", () => {
+    expect(
+      resolvePlanReadiness(buildReadinessInput({ hasPortfolios: false }))
+    ).toEqual({ status: "unavailable" });
+    expect(
+      resolvePlanReadiness(buildReadinessInput({ scenario: undefined }))
+    ).toEqual({ status: "unavailable" });
+  });
+
+  it("carries primitives for a ready plan", () => {
+    expect(resolvePlanReadiness(buildReadinessInput())).toEqual({
+      status: "ready",
+      startingValue: 100_000,
+      mu: 0.01,
+      sigma: 0.05,
+    });
+  });
+});
+
+const readyReadiness: WithdrawalPlanReadiness = {
+  status: "ready",
+  startingValue: 100_000,
+  mu: 0.01,
+  sigma: 0.05,
+};
+
+const computedResult = {
+  ruinProbability: 0.1,
+  chartData: [],
+};
+
+const computed: WithdrawalPlanComputation = {
+  status: "computed",
+  result: computedResult,
+};
+
+describe("resolveWithdrawalPlannerState", () => {
+  it("passes through a non-ready readiness before the computation", () => {
+    expect(
+      resolveWithdrawalPlannerState(
+        { status: "loading" },
+        { status: "failed" },
+        false
+      )
+    ).toEqual({ status: "loading" });
+    expect(
+      resolveWithdrawalPlannerState(
+        { status: "error", kind: "marketValue" },
+        computed,
+        false
+      )
+    ).toEqual({ status: "error", kind: "marketValue" });
+    expect(
+      resolveWithdrawalPlannerState({ status: "unavailable" }, computed, false)
+    ).toEqual({ status: "unavailable" });
+  });
+
+  it("maps a failed computation to a calculation error", () => {
+    expect(
+      resolveWithdrawalPlannerState(readyReadiness, { status: "failed" }, false)
+    ).toEqual({ status: "error", kind: "calculation" });
+  });
+
+  it("reports loading while the computation is idle", () => {
+    expect(
+      resolveWithdrawalPlannerState(readyReadiness, { status: "idle" }, false)
+    ).toEqual({ status: "loading" });
+  });
+
+  it("reports the computed result as ready or updating", () => {
+    expect(
+      resolveWithdrawalPlannerState(readyReadiness, computed, false)
+    ).toEqual({ status: "ready", result: computedResult });
+    expect(
+      resolveWithdrawalPlannerState(readyReadiness, computed, true)
+    ).toEqual({ status: "updating", result: computedResult });
+  });
+
+  it("keeps the same result reference while updating", () => {
+    const updating = resolveWithdrawalPlannerState(
+      readyReadiness,
+      computed,
+      true
+    );
+
+    expect(updating).toMatchObject({ status: "updating" });
+    if (updating.status !== "updating") {
+      return;
+    }
+
+    expect(updating.result).toBe(computedResult);
+  });
+});
+
+const buildComputeInputs = (
+  overrides: Partial<WithdrawalPlanInputs> = {}
+): WithdrawalPlanInputs => ({
+  parameters: baseParameters,
+  startingValue: 100_000,
+  mu: 0.01,
+  sigma: 0.05,
+  derivedContribution: undefined,
+  cashFlow: 0,
+  planStart: new Date(2021, 0, 1).getTime(),
+  confidencePercentiles: [5, 95],
+  ...overrides,
+});
+
+describe("computeWithdrawalResult", () => {
+  it("computes the result from the injected simulation", () => {
+    let receivedConfig: { confidencePercentiles: [number, number] } | undefined;
+
+    const computation = computeWithdrawalResult(
+      buildComputeInputs(),
+      (input, config) => {
+        expect(input.startingValue).toBe(100_000);
+        expect(input.mu).toBe(0.01);
+        expect(input.sigma).toBe(0.05);
+        receivedConfig = config;
+        return buildForecast(0.1);
+      }
+    );
+
+    expect(receivedConfig).toEqual({ confidencePercentiles: [5, 95] });
+    expect(computation.status).toBe("computed");
+    if (computation.status !== "computed") {
+      return;
+    }
+
+    expect(computation.result.ruinProbability).toBe(0.1);
+    expect(computation.result.chartData).toHaveLength(4);
+  });
+
+  it("logs a simulation failure once and reports failed", () => {
+    const error = new Error("forecast failed");
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    try {
+      expect(
+        computeWithdrawalResult(buildComputeInputs(), () => {
+          throw error;
+        })
+      ).toEqual({ status: "failed" });
+      expect(consoleError).toHaveBeenCalledTimes(1);
+      expect(consoleError).toHaveBeenCalledWith(
+        "Withdrawal forecast simulation failed",
+        error
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
+  it("does not swallow defects outside the simulation", () => {
+    const brokenForecast = buildForecast(0);
+    Object.defineProperty(brokenForecast, "median", { value: 0 });
+    let outcome: WithdrawalPlanComputation | undefined;
+
+    expect(() => {
+      outcome = computeWithdrawalResult(
+        buildComputeInputs(),
+        () => brokenForecast
+      );
+    }).toThrow(/./);
+    expect(outcome).toBeUndefined();
   });
 });
 
