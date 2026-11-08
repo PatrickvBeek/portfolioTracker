@@ -86,16 +86,11 @@ export const deriveMonthlyContribution = (
   );
 };
 
-export const transformForecastToChartData = (
-  forecastResult: ForecastResult,
+export const buildForecastChartData = (
+  discountedResult: ForecastResult,
   startTimestamp: number,
-  currentCashFlow: number,
-  inflationRate: number
+  currentCashFlow: number
 ): ForecastChartData => {
-  const discountedResult = applyInflationDiscount(
-    forecastResult,
-    inflationRate
-  );
   const { median, confidenceLow, confidenceHigh, cashFlows } = discountedResult;
 
   return median.map((_: number, index: number) => ({
@@ -105,3 +100,15 @@ export const transformForecastToChartData = (
     cashFlow: currentCashFlow + cashFlows[index],
   }));
 };
+
+export const transformForecastToChartData = (
+  forecastResult: ForecastResult,
+  startTimestamp: number,
+  currentCashFlow: number,
+  inflationRate: number
+): ForecastChartData =>
+  buildForecastChartData(
+    applyInflationDiscount(forecastResult, inflationRate),
+    startTimestamp,
+    currentCashFlow
+  );

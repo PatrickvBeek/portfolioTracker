@@ -1,13 +1,30 @@
 import { useEffect, useState } from "react";
 
-export const useDebouncedValue = <T>(value: T, delayMs: number): T => {
+export const useDebouncedValue = <T>(
+  value: T,
+  delayMs: number
+): { value: T; isPending: boolean } => {
   const [debouncedValue, setDebouncedValue] = useState(value);
+  const [seenValue, setSeenValue] = useState(value);
+  const [isPending, setIsPending] = useState(false);
+
+  if (!Object.is(seenValue, value)) {
+    setSeenValue(value);
+    setIsPending(true);
+  }
 
   useEffect(() => {
-    const timeout = setTimeout(() => setDebouncedValue(value), delayMs);
+    if (!isPending) {
+      return undefined;
+    }
+
+    const timeout = setTimeout(() => {
+      setDebouncedValue(value);
+      setIsPending(false);
+    }, delayMs);
 
     return () => clearTimeout(timeout);
-  }, [value, delayMs]);
+  }, [isPending, value, delayMs]);
 
-  return debouncedValue;
+  return { value: debouncedValue, isPending };
 };
