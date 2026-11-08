@@ -1,5 +1,6 @@
 import { formatAxisValue, getAxisUnit } from "./chartUtils";
 import {
+  buildForecastChartData,
   deriveMonthlyContribution,
   getForecastYAxisProps,
   transformForecastToChartData,
@@ -26,6 +27,38 @@ describe("deriveMonthlyContribution", () => {
 
   it("returns undefined for a non-finite cash flow", () => {
     expect(deriveMonthlyContribution(NaN, 2)).toBeUndefined();
+  });
+});
+
+describe("buildForecastChartData", () => {
+  it("maps an already discounted result without discounting again", () => {
+    const start = new Date(2021, 0, 15).getTime();
+
+    const result = buildForecastChartData(
+      {
+        median: [100, 90],
+        confidenceLow: [80, 70],
+        confidenceHigh: [120, 110],
+        cashFlows: [10, 20],
+      },
+      start,
+      500
+    );
+
+    expect(result).toEqual([
+      {
+        timestamp: new Date(2021, 1, 1).getTime(),
+        median: 100,
+        uncertaintyBand: [80, 120],
+        cashFlow: 510,
+      },
+      {
+        timestamp: new Date(2021, 2, 1).getTime(),
+        median: 90,
+        uncertaintyBand: [70, 110],
+        cashFlow: 520,
+      },
+    ]);
   });
 });
 
