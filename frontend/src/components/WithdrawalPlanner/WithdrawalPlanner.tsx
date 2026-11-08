@@ -40,19 +40,6 @@ const WithdrawalPlanner = ({
     params.accumulationYears,
     params.decumulationYears
   );
-  const result =
-    state.status === "ready" || state.status === "updating"
-      ? state.result
-      : undefined;
-  const isLoading = state.status === "loading";
-  const isError = state.status === "error";
-  const ruinPercent =
-    result === undefined
-      ? undefined
-      : Math.round(
-          (result.summary.ruinedCount / result.summary.simulationCount) * 100
-        );
-
   return (
     <div className={styles.container}>
       <WithdrawalPlannerForm
@@ -63,13 +50,7 @@ const WithdrawalPlanner = ({
         onParameterChange={updateParameter}
       />
       {!isPlanInvalid && (
-        <WithdrawalPlannerResult
-          isLoading={isLoading}
-          isError={isError}
-          ruinPercent={ruinPercent}
-          scenario={params.scenario}
-          chartData={result?.chartData ?? []}
-        />
+        <WithdrawalPlannerResult state={state} scenario={params.scenario} />
       )}
     </div>
   );

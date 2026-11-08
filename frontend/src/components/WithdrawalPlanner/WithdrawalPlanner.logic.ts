@@ -140,7 +140,7 @@ export interface WithdrawalResultSummary {
   isMedianRuined: boolean;
 }
 
-const roundsToZero = (value: number): boolean => Math.round(value) === 0;
+export const roundsToZero = (value: number): boolean => Math.round(value) === 0;
 
 export const buildWithdrawalResultSummary = (input: {
   ruinedCount: number;
@@ -164,7 +164,7 @@ export const buildWithdrawalResultSummary = (input: {
   };
 };
 
-interface WithdrawalPlannerResultData {
+export interface WithdrawalPlannerResultData {
   summary: WithdrawalResultSummary;
   chartData: ForecastChartData;
 }
