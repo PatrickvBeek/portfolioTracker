@@ -132,8 +132,40 @@ export const buildWithdrawalForecastArgs = ({
   annualInflationRate: parameters.inflationRate,
 });
 
+export interface WithdrawalResultSummary {
+  ruinedCount: number;
+  simulationCount: number;
+  atRetirement: number;
+  atPlanEnd: number;
+  isMedianRuined: boolean;
+}
+
+const roundsToZero = (value: number): boolean => Math.round(value) === 0;
+
+export const buildWithdrawalResultSummary = (input: {
+  ruinedCount: number;
+  simulationCount: number;
+  accumulationMonths: number;
+  startingValue: number;
+  median: number[];
+}): WithdrawalResultSummary => {
+  const atRetirement =
+    input.accumulationMonths === 0
+      ? input.startingValue
+      : input.median[input.accumulationMonths - 1];
+  const atPlanEnd = input.median[input.median.length - 1];
+
+  return {
+    ruinedCount: input.ruinedCount,
+    simulationCount: input.simulationCount,
+    atRetirement,
+    atPlanEnd,
+    isMedianRuined: roundsToZero(atPlanEnd),
+  };
+};
+
 interface WithdrawalPlannerResultData {
-  ruinProbability: number;
+  summary: WithdrawalResultSummary;
   chartData: ForecastChartData;
 }
 
@@ -248,7 +280,15 @@ export const computeWithdrawalResult = (
   return {
     status: "computed",
     result: {
-      ruinProbability: forecast.ruinProbability,
+      summary: buildWithdrawalResultSummary({
+        ruinedCount: Math.round(
+          forecast.ruinProbability * forecastInput.simulationCount
+        ),
+        simulationCount: forecastInput.simulationCount,
+        accumulationMonths: forecastInput.accumulationMonths,
+        startingValue: inputs.startingValue,
+        median: discounted.median,
+      }),
       chartData: buildForecastChartData(
         discounted,
         inputs.planStart,

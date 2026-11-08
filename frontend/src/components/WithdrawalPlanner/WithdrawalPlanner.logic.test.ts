@@ -19,6 +19,7 @@ import {
 import {
   buildPlanDates,
   buildWithdrawalForecastArgs,
+  buildWithdrawalResultSummary,
   computeWithdrawalResult,
   parseInflationPercent,
   parseMonthlyWithdrawal,
@@ -38,6 +39,7 @@ import {
   WithdrawalPlannerParameters,
   yearsToMonths,
 } from "./WithdrawalPlanner.logic";
+import { getTestWithdrawalSummary } from "../../testUtils/withdrawalPlannerHelpers";
 
 vi.setSystemTime(new Date(2021, 0, 1));
 
@@ -117,7 +119,8 @@ describe("useWithdrawalPlannerData", () => {
 
     const data = resultOf(result.current.state);
     expect(data?.chartData).toHaveLength(24);
-    expect(data?.ruinProbability).toBe(0);
+    expect(data?.summary.ruinedCount).toBe(0);
+    expect(data?.summary.atPlanEnd).toBe(data?.chartData.at(-1)?.median);
   });
 
   it("fixes the plan start and ends the chart at the calendar plan end", async () => {
@@ -154,7 +157,8 @@ describe("useWithdrawalPlannerData", () => {
       expect(result.current.state.status).toBe("ready")
     );
 
-    expect(resultOf(result.current.state)?.ruinProbability).toBe(1);
+    const summary = resultOf(result.current.state)?.summary;
+    expect(summary?.ruinedCount).toBe(summary?.simulationCount);
   });
 
   it("reports unavailable when both phases are zero", async () => {
@@ -386,6 +390,83 @@ describe("buildWithdrawalForecastArgs", () => {
   });
 });
 
+describe("buildWithdrawalResultSummary", () => {
+  const median = [110, 120, 130];
+
+  it("reads the value at retirement from the accumulation end", () => {
+    const summary = buildWithdrawalResultSummary({
+      ruinedCount: 50,
+      simulationCount: 1000,
+      accumulationMonths: 2,
+      startingValue: 100,
+      median,
+    });
+
+    expect(summary.atRetirement).toBe(120);
+    expect(summary.atPlanEnd).toBe(130);
+  });
+
+  it("indexes the retirement and plan-end medians directly", () => {
+    const summary = buildWithdrawalResultSummary({
+      ruinedCount: 50,
+      simulationCount: 1000,
+      accumulationMonths: 3,
+      startingValue: 100,
+      median: [90, 95, 70, 40, 10],
+    });
+
+    expect(summary.atRetirement).toBe(70);
+    expect(summary.atPlanEnd).toBe(10);
+  });
+
+  it("uses the starting value when there is no accumulation phase", () => {
+    const summary = buildWithdrawalResultSummary({
+      ruinedCount: 0,
+      simulationCount: 1000,
+      accumulationMonths: 0,
+      startingValue: 100,
+      median,
+    });
+
+    expect(summary.atRetirement).toBe(100);
+  });
+
+  it("keeps the simulation counts as facts", () => {
+    const summary = buildWithdrawalResultSummary({
+      ruinedCount: 123,
+      simulationCount: 1000,
+      accumulationMonths: 1,
+      startingValue: 100,
+      median,
+    });
+
+    expect(summary.ruinedCount).toBe(123);
+    expect(summary.simulationCount).toBe(1000);
+  });
+
+  it("flags a median that rounds to zero", () => {
+    const ruined = buildWithdrawalResultSummary({
+      ruinedCount: 900,
+      simulationCount: 1000,
+      accumulationMonths: 1,
+      startingValue: 100,
+      median: [110, 0.4],
+    });
+
+    expect(ruined.isMedianRuined).toBe(true);
+
+    const surviving = buildWithdrawalResultSummary({
+      ruinedCount: 900,
+      simulationCount: 1000,
+      accumulationMonths: 1,
+      startingValue: 100,
+      median: [110, 1],
+    });
+
+    expect(surviving.isMedianRuined).toBe(false);
+  });
+});
+
 const buildForecast = (
   ruinProbability: number,
   median: number[] = [100, 110, 120, 130]
@@ -478,7 +559,7 @@ const readyReadiness: WithdrawalPlanReadiness = {
 };
 
 const computedResult = {
-  ruinProbability: 0.1,
+  summary: getTestWithdrawalSummary(),
   chartData: [],
 };
 
@@ -562,6 +643,7 @@ const buildComputeInputs = (
 describe("computeWithdrawalResult", () => {
   it("computes the result from the injected simulation", () => {
     let receivedConfig: { confidencePercentiles: [number, number] } | undefined;
+    const median = Array.from({ length: 24 }, (_, index) => 100 + index);
 
     const computation = computeWithdrawalResult(
       buildComputeInputs(),
@@ -570,7 +652,7 @@ describe("computeWithdrawalResult", () => {
         expect(input.mu).toBe(0.01);
         expect(input.sigma).toBe(0.05);
         receivedConfig = config;
-        return buildForecast(0.1);
+        return buildForecast(0.1, median);
       }
     );
 
@@ -580,8 +662,34 @@ describe("computeWithdrawalResult", () => {
       return;
     }
 
-    expect(computation.result.ruinProbability).toBe(0.1);
-    expect(computation.result.chartData).toHaveLength(4);
+    expect(computation.result.chartData).toHaveLength(median.length);
+    expect(computation.result.summary).toMatchObject({
+      ruinedCount: 100,
+      simulationCount: 1000,
+      atRetirement: 111,
+      atPlanEnd: 123,
+    });
+  });
+
+  it("expresses both metrics in today's money", () => {
+    const nominalMedian = Array.from({ length: 24 }, () => 1000);
+
+    const computation = computeWithdrawalResult(
+      buildComputeInputs({
+        parameters: { ...baseParameters, inflationRate: 0.02 },
+      }),
+      () => buildForecast(0, nominalMedian)
+    );
+
+    if (computation.status !== "computed") {
+      throw new Error("expected a computed result");
+    }
+
+    expect(computation.result.summary.atRetirement).toBeCloseTo(1000 / 1.02, 6);
+    expect(computation.result.summary.atPlanEnd).toBeCloseTo(
+      1000 / 1.02 ** 2,
+      6
+    );
   });
 
   it("logs a simulation failure once and reports failed", () => {

@@ -47,7 +47,11 @@ const WithdrawalPlanner = ({
   const isLoading = state.status === "loading";
   const isError = state.status === "error";
   const ruinPercent =
-    result === undefined ? undefined : Math.round(result.ruinProbability * 100);
+    result === undefined
+      ? undefined
+      : Math.round(
+          (result.summary.ruinedCount / result.summary.simulationCount) * 100
+        );
 
   return (
     <div className={styles.container}>
