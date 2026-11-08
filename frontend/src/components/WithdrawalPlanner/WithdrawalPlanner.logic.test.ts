@@ -212,6 +212,46 @@ describe("useWithdrawalPlannerData", () => {
     );
   });
 
+  it("keeps the scenario snapshot in step with the displayed result", async () => {
+    let parameters: WithdrawalPlannerParameters = {
+      ...baseParameters,
+      scenario: "market",
+    };
+    const { result, rerender } = customRenderHook(() =>
+      useWithdrawalPlannerData([portfolioName], parameters)
+    );
+    await customWaitFor(() =>
+      expect(result.current.state.status).toBe("ready")
+    );
+
+    const ready = result.current.state;
+    if (ready.status !== "ready") {
+      throw new Error("expected ready");
+    }
+    expect(ready.result.scenario).toBe("market");
+
+    parameters = { ...baseParameters, scenario: "portfolio" };
+    rerender();
+
+    const pending = result.current.state;
+    expect(pending.status).toBe("updating");
+    if (pending.status !== "updating") {
+      return;
+    }
+    expect(pending.result).toBe(ready.result);
+    expect(pending.result.scenario).toBe("market");
+
+    await customWaitFor(() =>
+      expect(result.current.state.status).toBe("ready")
+    );
+
+    const settled = result.current.state;
+    if (settled.status !== "ready") {
+      throw new Error("expected ready");
+    }
+    expect(settled.result.scenario).toBe("portfolio");
+  });
+
   it("reports a market value error when prices cannot be loaded", async () => {
     server.use(
       http.get(
@@ -559,6 +599,7 @@ const readyReadiness: WithdrawalPlanReadiness = {
 };
 
 const computedResult = {
+  scenario: "market" as const,
   summary: getTestWithdrawalSummary(),
   chartData: [],
 };
@@ -662,6 +703,7 @@ describe("computeWithdrawalResult", () => {
       return;
     }
 
+    expect(computation.result.scenario).toBe("market");
     expect(computation.result.chartData).toHaveLength(median.length);
     expect(computation.result.summary).toMatchObject({
       ruinedCount: 100,

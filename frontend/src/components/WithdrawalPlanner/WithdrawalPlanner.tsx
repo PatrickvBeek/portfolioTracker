@@ -49,9 +49,7 @@ const WithdrawalPlanner = ({
         derivedMonthlyContribution={derivedMonthlyContribution}
         onParameterChange={updateParameter}
       />
-      {!isPlanInvalid && (
-        <WithdrawalPlannerResult state={state} scenario={params.scenario} />
-      )}
+      {!isPlanInvalid && <WithdrawalPlannerResult state={state} />}
     </div>
   );
 };

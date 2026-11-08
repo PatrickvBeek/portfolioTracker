@@ -4,6 +4,7 @@ import { vi } from "vitest";
 import { customRender } from "../../testUtils/componentHelpers";
 import { getTestWithdrawalSummary } from "../../testUtils/withdrawalPlannerHelpers";
 import type { ForecastChartData } from "../charts/forecastChartUtils";
+import type { ForecastScenario } from "../charts/forecastScenario.logic";
 import type {
   WithdrawalPlannerResultState,
   WithdrawalResultSummary,
@@ -24,10 +25,17 @@ const chartData: ForecastChartData = [
   { timestamp: 0, median: 100, uncertaintyBand: [80, 120], cashFlow: 0 },
 ];
 
+type ResultStatus = WithdrawalPlannerResultState["status"];
+type ResultErrorKind = Extract<
+  WithdrawalPlannerResultState,
+  { status: "error" }
+>["kind"];
+
 type RenderOptions = {
-  status?: "ready" | "updating" | "loading" | "unavailable" | "error";
-  kind?: "marketValue" | "calculation";
+  status?: ResultStatus;
+  kind?: ResultErrorKind;
   summary?: WithdrawalResultSummary;
+  scenario?: ForecastScenario;
   data?: ForecastChartData;
 };
 
@@ -46,6 +54,7 @@ const buildState = (
   return {
     status,
     result: {
+      scenario: options.scenario ?? "market",
       summary: options.summary ?? getTestWithdrawalSummary(),
       chartData: options.data ?? chartData,
     },
@@ -54,16 +63,18 @@ const buildState = (
 
 const renderResult = (options: RenderOptions = {}) =>
   customRender({
-    component: (
-      <WithdrawalPlannerResult state={buildState(options)} scenario="market" />
-    ),
+    component: <WithdrawalPlannerResult state={buildState(options)} />,
   });
+
+const renderSummary = (
+  overrides: Partial<WithdrawalResultSummary> = {}
+): void => {
+  renderResult({ summary: getTestWithdrawalSummary(overrides) });
+};
 
 describe("WithdrawalPlannerResult", () => {
   it("renders the funded share as a heading", () => {
-    renderResult({
-      summary: getTestWithdrawalSummary({ ruinedCount: 490 }),
-    });
+    renderSummary({ ruinedCount: 490 });
 
     expect(
       screen.getByRole("heading", {
@@ -73,16 +84,91 @@ describe("WithdrawalPlannerResult", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the meter with proportional segment widths", () => {
-    renderResult({
-      summary: getTestWithdrawalSummary({ ruinedCount: 490 }),
-    });
+  it.each([
+    {
+      ruinedCount: 0,
+      successPercent: 100,
+      successLabel: "100%",
+      ruinLabel: "0%",
+      note: "No simulation ran out of money.",
+    },
+    {
+      ruinedCount: 1,
+      successPercent: 100,
+      successLabel: ">99%",
+      ruinLabel: "<1%",
+      note: "About 1 in 1000 simulations cannot cover the intended withdrawal.",
+    },
+    {
+      ruinedCount: 490,
+      successPercent: 51,
+      successLabel: "51%",
+      ruinLabel: "49%",
+      note: "About 1 in 2 simulations cannot cover the intended withdrawal.",
+    },
+    {
+      ruinedCount: 495,
+      successPercent: 51,
+      successLabel: "51%",
+      ruinLabel: "49%",
+      note: "About 1 in 2 simulations cannot cover the intended withdrawal.",
+    },
+    {
+      ruinedCount: 501,
+      successPercent: 50,
+      successLabel: "50%",
+      ruinLabel: "50%",
+      note: "About 1 in 2 simulations cannot cover the intended withdrawal.",
+    },
+    {
+      ruinedCount: 505,
+      successPercent: 50,
+      successLabel: "50%",
+      ruinLabel: "50%",
+      note: "About 1 in 2 simulations cannot cover the intended withdrawal.",
+    },
+    {
+      ruinedCount: 999,
+      successPercent: 0,
+      successLabel: "<1%",
+      ruinLabel: ">99%",
+      note: "About 1 in 1 simulations cannot cover the intended withdrawal.",
+    },
+    {
+      ruinedCount: 1000,
+      successPercent: 0,
+      successLabel: "0%",
+      ruinLabel: "100%",
+      note: "All simulations ran out of money.",
+    },
+  ])(
+    "renders $ruinedCount ruined of 1000 as $successLabel surviving",
+    ({ ruinedCount, successPercent, successLabel, ruinLabel, note }) => {
+      renderSummary({ ruinedCount });
+
+      expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
+        `${successLabel} of simulations fund the full plan`
+      );
+      expect(screen.getByRole("meter")).toHaveAttribute(
+        "aria-valuenow",
+        `${successPercent}`
+      );
+      expect(screen.getByTestId("meter-success")).toHaveStyle({
+        width: `${successPercent}%`,
+      });
+      expect(screen.getByText(`success ${successLabel}`)).toBeInTheDocument();
+      expect(screen.getByText(`ruin ${ruinLabel}`)).toBeInTheDocument();
+      expect(screen.getByText(note)).toBeInTheDocument();
+    }
+  );
+
+  it("describes the meter for assistive technology", () => {
+    renderSummary({ ruinedCount: 490 });
 
     const meter = screen.getByRole("meter");
 
     expect(meter).toHaveAttribute("aria-valuemin", "0");
     expect(meter).toHaveAttribute("aria-valuemax", "100");
-    expect(meter).toHaveAttribute("aria-valuenow", "51");
     expect(meter).toHaveAttribute(
       "aria-label",
       "Share of simulations that fund the full plan"
@@ -91,88 +177,44 @@ describe("WithdrawalPlannerResult", () => {
       "aria-valuetext",
       "51% of simulations fund the full plan"
     );
-
-    expect(screen.getByTestId("meter-success")).toHaveStyle({
-      width: "51%",
-    });
-  });
-
-  it("renders both meter labels", () => {
-    renderResult({
-      summary: getTestWithdrawalSummary({ ruinedCount: 490 }),
-    });
-
-    expect(screen.getByText("success 51%")).toBeInTheDocument();
-    expect(screen.getByText("ruin 49%")).toBeInTheDocument();
-  });
-
-  it("shows the no-ruin sentence", () => {
-    renderResult({
-      summary: getTestWithdrawalSummary({ ruinedCount: 0 }),
-    });
-
-    expect(
-      screen.getByText("No simulation ran out of money.")
-    ).toBeInTheDocument();
-  });
-
-  it("shows the all-ruin sentence", () => {
-    renderResult({
-      summary: getTestWithdrawalSummary({ ruinedCount: 1000 }),
-    });
-
-    expect(
-      screen.getByText("All simulations ran out of money.")
-    ).toBeInTheDocument();
-  });
-
-  it("shows the one-in-N ruin sentence", () => {
-    renderResult({
-      summary: getTestWithdrawalSummary({ ruinedCount: 250 }),
-    });
-
-    expect(
-      screen.getByText(
-        "About 1 in 4 simulations cannot cover the intended withdrawal."
-      )
-    ).toBeInTheDocument();
   });
 
   it("shows the median portfolio values", () => {
-    renderResult();
+    renderSummary();
 
-    expect(
-      screen.getByText("At retirement").nextElementSibling
-    ).toHaveTextContent("250,000 €");
-    expect(
-      screen.getByText("At plan end").nextElementSibling
-    ).toHaveTextContent("120,000 €");
+    expect(screen.getByText("At retirement")).toBeInTheDocument();
+    expect(screen.getByText("250,000 €")).toBeInTheDocument();
+    expect(screen.getByText("At plan end")).toBeInTheDocument();
+    expect(screen.getByText("120,000 €")).toBeInTheDocument();
   });
 
-  it("explains a ruined median when the plan end value is zero", () => {
-    renderResult({
-      summary: getTestWithdrawalSummary({ atPlanEnd: 0, isMedianRuined: true }),
-    });
+  it("shows a zero plan end as euros and explains the ruined median", () => {
+    renderSummary({ atPlanEnd: 0, isMedianRuined: true });
 
+    expect(screen.getByText("At plan end")).toBeInTheDocument();
+    expect(screen.getByText("€0")).toBeInTheDocument();
     expect(
       screen.getByText("The median simulation is ruined before the plan ends.")
     ).toBeInTheDocument();
   });
 
-  it("explains a ruined median when the plan end value rounds to zero", () => {
-    renderResult({
-      summary: getTestWithdrawalSummary({
-        atPlanEnd: 0.4,
-        isMedianRuined: true,
-      }),
-    });
+  it("rounds a sub-euro plan end to zero and explains the ruined median", () => {
+    renderSummary({ atPlanEnd: 0.4, isMedianRuined: true });
 
+    expect(screen.getByText("€0")).toBeInTheDocument();
     expect(
       screen.getByText("The median simulation is ruined before the plan ends.")
     ).toBeInTheDocument();
+  });
+
+  it("omits the ruin note for a surviving median", () => {
+    renderSummary({ isMedianRuined: false });
+
     expect(
-      screen.getByText("At plan end").nextElementSibling
-    ).toHaveTextContent("€0");
+      screen.queryByText(
+        "The median simulation is ruined before the plan ends."
+      )
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the previous values visible while updating", () => {
@@ -188,9 +230,13 @@ describe("WithdrawalPlannerResult", () => {
         name: "70% of simulations fund the full plan",
       })
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("At retirement").nextElementSibling
-    ).toHaveTextContent("250,000 €");
+    expect(screen.getByText("250,000 €")).toBeInTheDocument();
+  });
+
+  it("shows no update notice for a settled result", () => {
+    renderSummary();
+
+    expect(screen.queryByText("Updating...")).not.toBeInTheDocument();
   });
 
   it("shows a market value error without metrics or chart", () => {
@@ -227,16 +273,24 @@ describe("WithdrawalPlannerResult", () => {
     expect(screen.getByTestId("chart-container")).toBeInTheDocument();
   });
 
-  it("shows the chart for a successful forecast", () => {
-    renderResult();
+  it("shows the chart and the simulation count for a successful forecast", () => {
+    renderSummary();
 
     expect(screen.getByTestId("chart-container")).toBeInTheDocument();
     expect(screen.getByTestId("forecast-chart-body")).toBeInTheDocument();
     expect(
-      screen.getByText(`Based on ${(1000).toLocaleString()} simulations.`)
+      screen.getByText(/^Based on 1[.,]000 simulations\.$/)
     ).toBeInTheDocument();
     expect(
       screen.getByText("Based on market return assumptions.")
+    ).toBeInTheDocument();
+  });
+
+  it("uses the scenario snapshot stored with the result", () => {
+    renderResult({ scenario: "portfolio" });
+
+    expect(
+      screen.getByText("Based on portfolio return assumptions.")
     ).toBeInTheDocument();
   });
 });

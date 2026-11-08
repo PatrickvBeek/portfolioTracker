@@ -165,6 +165,7 @@ export const buildWithdrawalResultSummary = (input: {
 };
 
 export interface WithdrawalPlannerResultData {
+  scenario: ForecastScenario;
   summary: WithdrawalResultSummary;
   chartData: ForecastChartData;
 }
@@ -280,6 +281,7 @@ export const computeWithdrawalResult = (
   return {
     status: "computed",
     result: {
+      scenario: inputs.parameters.scenario,
       summary: buildWithdrawalResultSummary({
         ruinedCount: Math.round(
           forecast.ruinProbability * forecastInput.simulationCount

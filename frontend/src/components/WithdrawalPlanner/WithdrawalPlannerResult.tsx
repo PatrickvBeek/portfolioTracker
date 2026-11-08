@@ -14,7 +14,6 @@ import { styles } from "./WithdrawalPlanner.styles";
 
 type WithdrawalPlannerResultProps = {
   state: WithdrawalPlannerResultState;
-  scenario: ForecastScenario;
 };
 
 type WithdrawalSummaryProps = {
@@ -156,18 +155,16 @@ function WithdrawalSummary({
 function ResultContent({
   result,
   isUpdating,
-  scenario,
 }: {
   result: WithdrawalPlannerResultData;
   isUpdating: boolean;
-  scenario: ForecastScenario;
 }) {
   return (
     <>
       <WithdrawalSummary
         summary={result.summary}
         isUpdating={isUpdating}
-        scenario={scenario}
+        scenario={result.scenario}
       />
       {result.chartData.length > 0 && (
         <>
@@ -189,7 +186,6 @@ function ResultContent({
 
 export function WithdrawalPlannerResult({
   state,
-  scenario,
 }: WithdrawalPlannerResultProps) {
   return (
     <div className={styles.sectionCard}>
@@ -222,7 +218,6 @@ export function WithdrawalPlannerResult({
             <ResultContent
               result={state.result}
               isUpdating={state.status === "updating"}
-              scenario={scenario}
             />
           )}
         </div>
