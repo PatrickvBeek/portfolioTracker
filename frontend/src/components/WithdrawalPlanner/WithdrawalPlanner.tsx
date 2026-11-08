@@ -40,6 +40,7 @@ const WithdrawalPlanner = ({
     params.accumulationYears,
     params.decumulationYears
   );
+
   return (
     <div className={styles.container}>
       <WithdrawalPlannerForm

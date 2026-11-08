@@ -18,10 +18,10 @@ export const styles = {
   metricValue: "text-lg font-semibold text-text tabular-nums",
   ruinNote: "text-sm text-danger",
   note: "text-xs text-text-muted",
-  warning:
-    "flex items-center gap-2 text-sm text-text-muted border border-border " +
-    "rounded-md p-3 bg-bg-elevated",
-  warningIcon: "w-4 h-4 text-text-dim",
+  info:
+    "flex items-start gap-2 rounded-md border border-accent-muted " +
+    "bg-accent-soft p-3 text-sm text-text-muted",
+  infoIcon: "w-4 h-4 shrink-0 text-accent",
   emptyState: "text-center p-12",
   controlsGrid: forecastPanelStyles.controlsGrid,
   controlGroup: forecastPanelStyles.controlGroup,

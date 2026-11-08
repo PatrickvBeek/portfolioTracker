@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { Info } from "lucide-react";
 import { asLocaleEuro } from "../charts/chartUtils";
 import { ChartContainer } from "../charts/ChartContainer";
 import { ForecastChartBody } from "../charts/ForecastChartBody";
@@ -168,16 +168,16 @@ function ResultContent({
       />
       {result.chartData.length > 0 && (
         <>
-          <div className={styles.warning}>
-            <AlertTriangle className={styles.warningIcon} />
+          <ChartContainer isLoading={false}>
+            <ForecastChartBody data={result.chartData} labels={CHART_LABELS} />
+          </ChartContainer>
+          <div className={styles.info}>
+            <Info className={styles.infoIcon} aria-hidden={true} />
             <span>
               This forecast assumes the same allocation throughout. If you plan
               to de-risk at retirement, ruin risk may be higher than shown.
             </span>
           </div>
-          <ChartContainer isLoading={false}>
-            <ForecastChartBody data={result.chartData} labels={CHART_LABELS} />
-          </ChartContainer>
         </>
       )}
     </>

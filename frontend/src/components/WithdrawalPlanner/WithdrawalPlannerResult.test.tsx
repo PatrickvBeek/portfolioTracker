@@ -293,4 +293,18 @@ describe("WithdrawalPlannerResult", () => {
       screen.getByText("Based on portfolio return assumptions.")
     ).toBeInTheDocument();
   });
+
+  it("shows the de-risking note after the chart", () => {
+    renderSummary();
+
+    const note = screen.getByText(/This forecast assumes the same allocation/);
+    const chart = screen.getByTestId("chart-container");
+
+    expect(
+      chart.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(note).toHaveTextContent(
+      "If you plan to de-risk at retirement, ruin risk may be higher than shown."
+    );
+  });
 });
