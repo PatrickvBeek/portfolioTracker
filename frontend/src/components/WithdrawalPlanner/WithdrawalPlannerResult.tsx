@@ -63,11 +63,6 @@ const buildRuinSentence = (
   return `About 1 in ${oneIn} simulations cannot cover the intended withdrawal.`;
 };
 
-const SCENARIO_LABELS: Record<ForecastScenario, string> = {
-  market: "market",
-  portfolio: "portfolio",
-};
-
 const buildWithdrawalResultView = (
   summary: WithdrawalResultSummary,
   scenario: ForecastScenario
@@ -86,7 +81,7 @@ const buildWithdrawalResultView = (
     retirementText: formatEuroAmount(summary.atRetirement),
     planEndText: formatEuroAmount(summary.atPlanEnd),
     simulationNote: `Based on ${summary.simulationCount.toLocaleString()} simulations.`,
-    assumptionNote: `Based on ${SCENARIO_LABELS[scenario]} return assumptions.`,
+    assumptionNote: `Based on ${scenario} return assumptions.`,
     showRuinNote: summary.isMedianRuined,
   };
 };
@@ -198,10 +193,7 @@ export function WithdrawalPlannerResult({
           )}
 
           {state.status === "ready" && (
-            <ResultContent
-              result={state.result}
-              scenario={state.parameters.scenario}
-            />
+            <ResultContent result={state.result} scenario={state.scenario} />
           )}
         </div>
       </div>

@@ -6,7 +6,6 @@ import { getTestWithdrawalSummary } from "../../testUtils/withdrawalPlannerHelpe
 import type { ForecastChartData } from "../charts/forecastChartUtils";
 import type { ForecastScenario } from "../charts/forecastScenario.logic";
 import type {
-  ResolvedWithdrawalPlannerParameters,
   WithdrawalPlannerResultState,
   WithdrawalResultSummary,
 } from "./WithdrawalPlanner.logic";
@@ -35,15 +34,6 @@ type RenderOptions = {
   data?: ForecastChartData;
 };
 
-const submittedParameters: ResolvedWithdrawalPlannerParameters = {
-  scenario: "market",
-  accumulationYears: 1,
-  decumulationYears: 1,
-  monthlyContribution: 850,
-  monthlyWithdrawal: 850,
-  inflationRate: 0,
-};
-
 const buildState = (
   options: RenderOptions = {}
 ): WithdrawalPlannerResultState => {
@@ -55,10 +45,7 @@ const buildState = (
 
   return {
     status,
-    parameters: {
-      ...submittedParameters,
-      scenario: options.scenario ?? "market",
-    },
+    scenario: options.scenario ?? "market",
     result: {
       summary: options.summary ?? getTestWithdrawalSummary(),
       chartData: options.data ?? chartData,

@@ -5,7 +5,7 @@ import {
   applyInflationDiscount,
   runWithdrawalForecast,
 } from "pt-domain";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { addMonths } from "../../utility/dates";
 import { useGetPortfoliosByNames } from "../../userDataContext";
 import {
@@ -27,7 +27,7 @@ import {
 export const MAX_PLAN_YEARS = 60;
 export const MAX_MONTHLY_WITHDRAWAL = 10_000;
 export const WITHDRAWAL_CONFIDENCE_PERCENT = 90;
-export const WITHDRAWAL_CONFIDENCE_PERCENTILES: [number, number] = [
+const WITHDRAWAL_CONFIDENCE_PERCENTILES: [number, number] = [
   50 - WITHDRAWAL_CONFIDENCE_PERCENT / 2,
   50 + WITHDRAWAL_CONFIDENCE_PERCENT / 2,
 ];
@@ -184,7 +184,7 @@ export interface WithdrawalPlannerResultData {
 
 interface SubmittedWithdrawalPlan {
   status: "ready";
-  parameters: ResolvedWithdrawalPlannerParameters;
+  scenario: ForecastScenario;
   result: WithdrawalPlannerResultData;
 }
 
@@ -240,7 +240,6 @@ export interface WithdrawalPlanInputs {
   sigma: number;
   cashFlow: number;
   planStart: number;
-  confidencePercentiles: [number, number];
 }
 
 export const buildWithdrawalPlannerResult = (
@@ -280,19 +279,10 @@ export const computeWithdrawalResult = (
     gbmParams: { mu: inputs.mu, sigma: inputs.sigma },
   });
   const forecast = runWithdrawalForecast(forecastInput, {
-    confidencePercentiles: inputs.confidencePercentiles,
+    confidencePercentiles: WITHDRAWAL_CONFIDENCE_PERCENTILES,
   });
 
   return buildWithdrawalPlannerResult(forecast, forecastInput, inputs);
-};
-
-export const useDerivedMonthlyContribution = (
-  portfolioNames: string[]
-): number | undefined => {
-  const cashFlow = useCashFlow(portfolioNames);
-  const portfolioAge = usePortfolioAge(portfolioNames);
-
-  return deriveMonthlyContribution(cashFlow, portfolioAge);
 };
 
 export interface WithdrawalPlannerHookResult {
@@ -324,10 +314,11 @@ export const useWithdrawalPlanner = (
   const [submitted, setSubmitted] = useState<SubmittedWithdrawalPlan | null>(
     null
   );
-  const derivedContribution = useDerivedMonthlyContribution(portfolioNames);
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const marketValueQuery = useMarketValue(portfolioNames);
   const cashFlow = useCashFlow(portfolioNames);
+  const portfolioAge = usePortfolioAge(portfolioNames);
+  const derivedContribution = deriveMonthlyContribution(cashFlow, portfolioAge);
   const scenarioDetails = useForecastScenarioParams(
     portfolioNames,
     parameters.scenario
@@ -338,59 +329,37 @@ export const useWithdrawalPlanner = (
     parameters.accumulationYears,
     parameters.decumulationYears
   );
-  const scenarioParams = scenarioDetails?.params;
-  const scenarioMu = scenarioParams?.mu;
-  const scenarioSigma = scenarioParams?.sigma;
 
-  const readiness = useMemo(
-    () =>
-      resolvePlanReadiness({
-        isLoading,
-        isMarketValueError: isError,
-        marketValue,
-        hasPortfolios,
-        scenario:
-          scenarioMu === undefined || scenarioSigma === undefined
-            ? undefined
-            : { mu: scenarioMu, sigma: scenarioSigma },
-      }),
-    [isLoading, isError, marketValue, hasPortfolios, scenarioMu, scenarioSigma]
-  );
+  const readiness = resolvePlanReadiness({
+    isLoading,
+    isMarketValueError: isError,
+    marketValue,
+    hasPortfolios,
+    scenario: scenarioDetails?.params,
+  });
 
   const canSimulate = readiness.status === "ready" && planHasPositivePhase;
 
-  const simulate = useCallback(() => {
+  const simulate = () => {
     if (!canSimulate || readiness.status !== "ready") {
       return;
     }
 
-    const resolvedParameters = resolvePlanParameters(
-      parameters,
-      derivedContribution
-    );
     const result = computeWithdrawalResult({
-      parameters: resolvedParameters,
+      parameters: resolvePlanParameters(parameters, derivedContribution),
       startingValue: readiness.startingValue,
       mu: readiness.mu,
       sigma: readiness.sigma,
       cashFlow,
       planStart,
-      confidencePercentiles: WITHDRAWAL_CONFIDENCE_PERCENTILES,
     });
 
     setSubmitted({
       status: "ready",
-      parameters: resolvedParameters,
+      scenario: parameters.scenario,
       result,
     });
-  }, [
-    canSimulate,
-    readiness,
-    parameters,
-    derivedContribution,
-    cashFlow,
-    planStart,
-  ]);
+  };
 
   return {
     state: submitted ?? resolveDisplayState(readiness),

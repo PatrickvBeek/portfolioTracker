@@ -29,10 +29,7 @@ import {
   parseYears,
   resolvePlanParameters,
   resolvePlanReadiness,
-  useDerivedMonthlyContribution,
   useWithdrawalPlanner,
-  WITHDRAWAL_CONFIDENCE_PERCENT,
-  WITHDRAWAL_CONFIDENCE_PERCENTILES,
   type ResolvedWithdrawalPlannerParameters,
   type WithdrawalPlanInputs,
   type WithdrawalPlanReadinessInput,
@@ -149,17 +146,12 @@ describe("useWithdrawalPlanner", () => {
     expect(new Date(lastPoint?.timestamp ?? 0)).toEqual(new Date(2023, 0, 1));
   });
 
-  it("snapshots the resolved monthly amounts", async () => {
+  it("derives the automatic monthly contribution from cash flow", async () => {
     const { result } = renderPlanner(baseParameters);
-    await waitForSimulationReady(result);
-    simulate(result);
 
-    const state = result.current.state;
-    if (state.status !== "ready") {
-      throw new Error("expected ready");
-    }
-    expect(state.parameters.monthlyContribution).toBe(850);
-    expect(state.parameters.monthlyWithdrawal).toBe(850);
+    expect(result.current.derivedContribution).toBe(850);
+
+    await waitForSimulationReady(result);
   });
 
   it("uses an explicit monthly contribution in the simulation", async () => {
@@ -235,7 +227,7 @@ describe("useWithdrawalPlanner", () => {
     if (ready.status !== "ready") {
       throw new Error("expected ready");
     }
-    expect(ready.parameters.scenario).toBe("market");
+    expect(ready.scenario).toBe("market");
 
     parameters = { ...baseParameters, scenario: "portfolio" };
     rerender();
@@ -249,7 +241,7 @@ describe("useWithdrawalPlanner", () => {
     if (settled.status !== "ready") {
       throw new Error("expected ready");
     }
-    expect(settled.parameters.scenario).toBe("portfolio");
+    expect(settled.scenario).toBe("portfolio");
   });
 
   it("does not allow simulation without a positive phase", async () => {
@@ -296,24 +288,6 @@ describe("useWithdrawalPlanner", () => {
     } finally {
       resetMockNetwork();
     }
-  });
-});
-
-describe("useDerivedMonthlyContribution", () => {
-  it("derives the monthly contribution from cash flow and portfolio age", () => {
-    const { result } = customRenderHook(() =>
-      useDerivedMonthlyContribution([portfolioName])
-    );
-
-    expect(result.current).toBe(850);
-  });
-
-  it("returns undefined when there is no usable history", () => {
-    const { result } = customRenderHook(() =>
-      useDerivedMonthlyContribution(["unknown"])
-    );
-
-    expect(result.current).toBeUndefined();
   });
 });
 
@@ -599,7 +573,6 @@ const buildComputeInputs = (
   sigma: 0.05,
   cashFlow: 0,
   planStart: new Date(2021, 0, 1).getTime(),
-  confidencePercentiles: [5, 95],
   ...overrides,
 });
 
@@ -647,14 +620,5 @@ describe("computeWithdrawalResult", () => {
     );
 
     expect(result.summary.ruinedCount).toBe(result.summary.simulationCount);
-  });
-});
-
-describe("WITHDRAWAL_CONFIDENCE_PERCENTILES", () => {
-  it("matches the confidence percent used in the label", () => {
-    expect(WITHDRAWAL_CONFIDENCE_PERCENTILES).toEqual([
-      50 - WITHDRAWAL_CONFIDENCE_PERCENT / 2,
-      50 + WITHDRAWAL_CONFIDENCE_PERCENT / 2,
-    ]);
   });
 });
