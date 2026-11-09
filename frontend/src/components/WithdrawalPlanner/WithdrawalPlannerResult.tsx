@@ -18,7 +18,6 @@ type WithdrawalPlannerResultProps = {
 
 type WithdrawalSummaryProps = {
   summary: WithdrawalResultSummary;
-  isUpdating: boolean;
   scenario: ForecastScenario;
 };
 
@@ -97,19 +96,12 @@ const CHART_LABELS = {
   median: "Market value (median, today's euros)",
 };
 
-function WithdrawalSummary({
-  summary,
-  isUpdating,
-  scenario,
-}: WithdrawalSummaryProps) {
+function WithdrawalSummary({ summary, scenario }: WithdrawalSummaryProps) {
   const view = buildWithdrawalResultView(summary, scenario);
 
   return (
     <div className="flex flex-col gap-3">
       <h2 className={styles.headline}>{view.outcomeText}</h2>
-      <p className={styles.updating} role="status">
-        {isUpdating ? "Updating..." : ""}
-      </p>
       <div
         className={styles.meter}
         role="meter"
@@ -154,18 +146,14 @@ function WithdrawalSummary({
 
 function ResultContent({
   result,
-  isUpdating,
+  scenario,
 }: {
   result: WithdrawalPlannerResultData;
-  isUpdating: boolean;
+  scenario: ForecastScenario;
 }) {
   return (
     <>
-      <WithdrawalSummary
-        summary={result.summary}
-        isUpdating={isUpdating}
-        scenario={result.scenario}
-      />
+      <WithdrawalSummary summary={result.summary} scenario={scenario} />
       {result.chartData.length > 0 && (
         <>
           <ChartContainer isLoading={false}>
@@ -191,20 +179,15 @@ export function WithdrawalPlannerResult({
     <div className={styles.sectionCard}>
       <div className={styles.sectionBody}>
         <div className="flex flex-col gap-4">
-          {state.status === "loading" && (
-            <>
-              <p className={styles.headlineMuted}>Calculating...</p>
-              <ChartContainer isLoading>
-                <ForecastChartBody data={[]} labels={CHART_LABELS} />
-              </ChartContainer>
-            </>
+          {state.status === "idle" && (
+            <p className={styles.headlineMuted}>
+              Set your assumptions, then select Simulate plan.
+            </p>
           )}
 
           {state.status === "error" && (
             <p className={styles.errorText} role="alert">
-              {state.kind === "marketValue"
-                ? "Could not load the current portfolio value."
-                : "Could not calculate the forecast."}
+              Could not load the current portfolio value.
             </p>
           )}
 
@@ -214,10 +197,10 @@ export function WithdrawalPlannerResult({
             </p>
           )}
 
-          {(state.status === "ready" || state.status === "updating") && (
+          {state.status === "ready" && (
             <ResultContent
               result={state.result}
-              isUpdating={state.status === "updating"}
+              scenario={state.parameters.scenario}
             />
           )}
         </div>

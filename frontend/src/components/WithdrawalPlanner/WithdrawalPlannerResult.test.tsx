@@ -6,6 +6,7 @@ import { getTestWithdrawalSummary } from "../../testUtils/withdrawalPlannerHelpe
 import type { ForecastChartData } from "../charts/forecastChartUtils";
 import type { ForecastScenario } from "../charts/forecastScenario.logic";
 import type {
+  ResolvedWithdrawalPlannerParameters,
   WithdrawalPlannerResultState,
   WithdrawalResultSummary,
 } from "./WithdrawalPlanner.logic";
@@ -26,17 +27,21 @@ const chartData: ForecastChartData = [
 ];
 
 type ResultStatus = WithdrawalPlannerResultState["status"];
-type ResultErrorKind = Extract<
-  WithdrawalPlannerResultState,
-  { status: "error" }
->["kind"];
 
 type RenderOptions = {
   status?: ResultStatus;
-  kind?: ResultErrorKind;
   summary?: WithdrawalResultSummary;
   scenario?: ForecastScenario;
   data?: ForecastChartData;
+};
+
+const submittedParameters: ResolvedWithdrawalPlannerParameters = {
+  scenario: "market",
+  accumulationYears: 1,
+  decumulationYears: 1,
+  monthlyContribution: 850,
+  monthlyWithdrawal: 850,
+  inflationRate: 0,
 };
 
 const buildState = (
@@ -44,17 +49,17 @@ const buildState = (
 ): WithdrawalPlannerResultState => {
   const status = options.status ?? "ready";
 
-  if (status === "error") {
-    return { status, kind: options.kind ?? "calculation" };
-  }
-  if (status === "loading" || status === "unavailable") {
+  if (status === "idle" || status === "error" || status === "unavailable") {
     return { status };
   }
 
   return {
     status,
-    result: {
+    parameters: {
+      ...submittedParameters,
       scenario: options.scenario ?? "market",
+    },
+    result: {
       summary: options.summary ?? getTestWithdrawalSummary(),
       chartData: options.data ?? chartData,
     },
@@ -217,43 +222,21 @@ describe("WithdrawalPlannerResult", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("keeps the previous values visible while updating", () => {
-    renderResult({
-      status: "updating",
-      summary: getTestWithdrawalSummary({ ruinedCount: 300 }),
-    });
+  it("prompts for a simulation before the first result", () => {
+    renderResult({ status: "idle" });
 
-    expect(screen.getByRole("status")).toHaveTextContent("Updating...");
     expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: "70% of simulations fund the full plan",
-      })
+      screen.getByText("Set your assumptions, then select Simulate plan.")
     ).toBeInTheDocument();
-    expect(screen.getByText("250,000 €")).toBeInTheDocument();
-  });
-
-  it("shows no update notice for a settled result", () => {
-    renderSummary();
-
-    expect(screen.queryByText("Updating...")).not.toBeInTheDocument();
-  });
-
-  it("shows a market value error without metrics or chart", () => {
-    renderResult({ status: "error", kind: "marketValue" });
-
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Could not load the current portfolio value."
-    );
     expect(screen.queryByRole("meter")).not.toBeInTheDocument();
     expect(screen.queryByTestId("chart-container")).not.toBeInTheDocument();
   });
 
-  it("shows a calculation error without metrics or chart", () => {
-    renderResult({ status: "error", kind: "calculation" });
+  it("shows a market value error without metrics or chart", () => {
+    renderResult({ status: "error" });
 
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Could not calculate the forecast."
+      "Could not load the current portfolio value."
     );
     expect(screen.queryByRole("meter")).not.toBeInTheDocument();
     expect(screen.queryByTestId("chart-container")).not.toBeInTheDocument();
@@ -264,13 +247,6 @@ describe("WithdrawalPlannerResult", () => {
 
     expect(screen.getByText(/insufficient/)).toBeInTheDocument();
     expect(screen.queryByTestId("chart-container")).not.toBeInTheDocument();
-  });
-
-  it("shows Calculating while loading without a summary", () => {
-    renderResult({ status: "loading" });
-
-    expect(screen.getByText("Calculating...")).toBeInTheDocument();
-    expect(screen.getByTestId("chart-container")).toBeInTheDocument();
   });
 
   it("shows the chart and the simulation count for a successful forecast", () => {

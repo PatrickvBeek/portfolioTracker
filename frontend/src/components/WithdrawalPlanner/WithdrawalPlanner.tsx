@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { DEFAULT_INFLATION_RATE } from "../../hooks/inflation/inflationHooks";
 import {
-  hasPositivePhase,
   type WithdrawalPlannerParameters,
-  useWithdrawalPlannerData,
+  useWithdrawalPlanner,
 } from "./WithdrawalPlanner.logic";
 import { WithdrawalPlannerForm } from "./WithdrawalPlannerForm";
 import { WithdrawalPlannerResult } from "./WithdrawalPlannerResult";
@@ -25,21 +24,13 @@ const WithdrawalPlanner = ({
 }) => {
   const [params, setParams] =
     useState<WithdrawalPlannerParameters>(DEFAULT_PARAMETERS);
-  const {
-    state,
-    planStart,
-    derivedContribution: derivedMonthlyContribution,
-  } = useWithdrawalPlannerData(portfolioNames, params);
+  const { state, canSimulate, planStart, derivedContribution, simulate } =
+    useWithdrawalPlanner(portfolioNames, params);
 
   const updateParameter = <K extends keyof WithdrawalPlannerParameters>(
     key: K,
     value: WithdrawalPlannerParameters[K]
   ) => setParams((prev) => ({ ...prev, [key]: value }));
-
-  const isPlanInvalid = !hasPositivePhase(
-    params.accumulationYears,
-    params.decumulationYears
-  );
 
   return (
     <div className={styles.container}>
@@ -47,10 +38,12 @@ const WithdrawalPlanner = ({
         portfolioNames={portfolioNames}
         planStart={planStart}
         parameters={params}
-        derivedMonthlyContribution={derivedMonthlyContribution}
+        derivedMonthlyContribution={derivedContribution}
+        canSimulate={canSimulate}
         onParameterChange={updateParameter}
+        onSimulate={simulate}
       />
-      {!isPlanInvalid && <WithdrawalPlannerResult state={state} />}
+      <WithdrawalPlannerResult state={state} />
     </div>
   );
 };

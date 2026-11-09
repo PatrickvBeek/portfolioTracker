@@ -10,7 +10,6 @@ export type ForecastChartDataSets = "median" | "uncertaintyBand" | "cashFlow";
 export type ForecastChartData = ChartDataPoint<ForecastChartDataSets>[];
 
 export const FORECAST_SIMULATION_COUNT = 1000;
-export const FORECAST_DEBOUNCE_MS = 500;
 
 const CONTRIBUTION_ROUNDING_STEP = 50;
 const AXIS_HEADROOM = 0.1;

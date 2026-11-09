@@ -5,8 +5,7 @@ import {
   applyInflationDiscount,
   runWithdrawalForecast,
 } from "pt-domain";
-import { useMemo, useState } from "react";
-import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { useCallback, useMemo, useState } from "react";
 import { addMonths } from "../../utility/dates";
 import { useGetPortfoliosByNames } from "../../userDataContext";
 import {
@@ -15,7 +14,6 @@ import {
   usePortfolioAge,
 } from "../Portfolios/PortfolioSummary/PortfolioSummary.logic";
 import {
-  FORECAST_DEBOUNCE_MS,
   FORECAST_SIMULATION_COUNT,
   ForecastChartData,
   buildForecastChartData,
@@ -43,10 +41,17 @@ export interface WithdrawalPlannerParameters {
   inflationRate: number;
 }
 
+export type ResolvedWithdrawalPlannerParameters = Omit<
+  WithdrawalPlannerParameters,
+  "monthlyContribution" | "monthlyWithdrawal"
+> & {
+  monthlyContribution: number;
+  monthlyWithdrawal: number;
+};
+
 interface WithdrawalForecastArgsInput {
-  parameters: WithdrawalPlannerParameters;
+  parameters: ResolvedWithdrawalPlannerParameters;
   startingValue: number;
-  derivedContribution: number | undefined;
   gbmParams: GbmParameters;
 }
 
@@ -78,6 +83,16 @@ export const parseMonthlyWithdrawal = (value: string): number =>
 
 export const parseInflationPercent = (value: string): number =>
   Math.min(20, parseNonNegativeNumber(value)) / 100;
+
+export const resolvePlanParameters = (
+  parameters: WithdrawalPlannerParameters,
+  derivedContribution: number | undefined
+): ResolvedWithdrawalPlannerParameters => ({
+  ...parameters,
+  monthlyContribution:
+    parameters.monthlyContribution ?? derivedContribution ?? 0,
+  monthlyWithdrawal: parameters.monthlyWithdrawal ?? derivedContribution ?? 0,
+});
 
 const PLAN_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   month: "long",
@@ -117,7 +132,6 @@ export const buildPlanDates = (
 export const buildWithdrawalForecastArgs = ({
   parameters,
   startingValue,
-  derivedContribution,
   gbmParams,
 }: WithdrawalForecastArgsInput): WithdrawalForecastInput => ({
   mu: gbmParams.mu,
@@ -126,9 +140,8 @@ export const buildWithdrawalForecastArgs = ({
   simulationCount: FORECAST_SIMULATION_COUNT,
   accumulationMonths: yearsToMonths(parameters.accumulationYears),
   decumulationMonths: yearsToMonths(parameters.decumulationYears),
-  monthlyContribution:
-    parameters.monthlyContribution ?? derivedContribution ?? 0,
-  monthlyWithdrawal: parameters.monthlyWithdrawal ?? derivedContribution ?? 0,
+  monthlyContribution: parameters.monthlyContribution,
+  monthlyWithdrawal: parameters.monthlyWithdrawal,
   annualInflationRate: parameters.inflationRate,
 });
 
@@ -165,21 +178,23 @@ export const buildWithdrawalResultSummary = (input: {
 };
 
 export interface WithdrawalPlannerResultData {
-  scenario: ForecastScenario;
   summary: WithdrawalResultSummary;
   chartData: ForecastChartData;
 }
 
+interface SubmittedWithdrawalPlan {
+  status: "ready";
+  parameters: ResolvedWithdrawalPlannerParameters;
+  result: WithdrawalPlannerResultData;
+}
+
 export type WithdrawalPlannerResultState =
-  | { status: "loading" }
-  | { status: "updating"; result: WithdrawalPlannerResultData }
-  | { status: "error"; kind: "marketValue" | "calculation" }
+  | { status: "idle" }
+  | { status: "error" }
   | { status: "unavailable" }
-  | { status: "ready"; result: WithdrawalPlannerResultData };
+  | SubmittedWithdrawalPlan;
 
 export interface WithdrawalPlanReadinessInput {
-  hasPositivePhase: boolean;
-  waitingForFreshPlan: boolean;
   isLoading: boolean;
   isMarketValueError: boolean;
   marketValue: number | undefined;
@@ -189,19 +204,22 @@ export interface WithdrawalPlanReadinessInput {
 
 export type WithdrawalPlanReadiness =
   | { status: "loading" }
-  | { status: "error"; kind: "marketValue" }
+  | { status: "error" }
   | { status: "unavailable" }
   | { status: "ready"; startingValue: number; mu: number; sigma: number };
 
-const resolveAvailablePlan = (
+export const resolvePlanReadiness = (
   input: WithdrawalPlanReadinessInput
 ): WithdrawalPlanReadiness => {
+  if (input.isLoading) {
+    return { status: "loading" };
+  }
   if (
     input.isMarketValueError ||
     input.marketValue === undefined ||
     !Number.isFinite(input.marketValue)
   ) {
-    return { status: "error", kind: "marketValue" };
+    return { status: "error" };
   }
   if (!input.hasPortfolios || input.scenario === undefined) {
     return { status: "unavailable" };
@@ -215,109 +233,57 @@ const resolveAvailablePlan = (
   };
 };
 
-export const resolvePlanReadiness = (
-  input: WithdrawalPlanReadinessInput
-): WithdrawalPlanReadiness => {
-  if (input.waitingForFreshPlan) {
-    return { status: "loading" };
-  }
-  if (!input.hasPositivePhase) {
-    return { status: "unavailable" };
-  }
-  if (input.isLoading) {
-    return { status: "loading" };
-  }
-
-  return resolveAvailablePlan(input);
-};
-
 export interface WithdrawalPlanInputs {
-  parameters: WithdrawalPlannerParameters;
+  parameters: ResolvedWithdrawalPlannerParameters;
   startingValue: number;
   mu: number;
   sigma: number;
-  derivedContribution: number | undefined;
   cashFlow: number;
   planStart: number;
   confidencePercentiles: [number, number];
 }
 
-export type SimulateWithdrawal = (
-  input: WithdrawalForecastInput,
-  config: { confidencePercentiles: [number, number] }
-) => WithdrawalForecastResult;
-
-export type WithdrawalPlanComputation =
-  | { status: "idle" }
-  | { status: "computed"; result: WithdrawalPlannerResultData }
-  | { status: "failed" };
-
-export const computeWithdrawalResult = (
-  inputs: WithdrawalPlanInputs,
-  simulate: SimulateWithdrawal = runWithdrawalForecast
-): WithdrawalPlanComputation => {
-  const forecastInput = buildWithdrawalForecastArgs({
-    parameters: inputs.parameters,
-    startingValue: inputs.startingValue,
-    derivedContribution: inputs.derivedContribution,
-    gbmParams: { mu: inputs.mu, sigma: inputs.sigma },
-  });
-
-  let forecast: WithdrawalForecastResult;
-  try {
-    forecast = simulate(forecastInput, {
-      confidencePercentiles: inputs.confidencePercentiles,
-    });
-  } catch (error) {
-    console.error("Withdrawal forecast simulation failed", error);
-    return { status: "failed" };
-  }
-
+export const buildWithdrawalPlannerResult = (
+  forecast: WithdrawalForecastResult,
+  forecastInput: WithdrawalForecastInput,
+  inputs: WithdrawalPlanInputs
+): WithdrawalPlannerResultData => {
   const discounted = applyInflationDiscount(
     forecast,
     inputs.parameters.inflationRate
   );
 
   return {
-    status: "computed",
-    result: {
-      scenario: inputs.parameters.scenario,
-      summary: buildWithdrawalResultSummary({
-        ruinedCount: Math.round(
-          forecast.ruinProbability * forecastInput.simulationCount
-        ),
-        simulationCount: forecastInput.simulationCount,
-        accumulationMonths: forecastInput.accumulationMonths,
-        startingValue: inputs.startingValue,
-        median: discounted.median,
-      }),
-      chartData: buildForecastChartData(
-        discounted,
-        inputs.planStart,
-        inputs.cashFlow
+    summary: buildWithdrawalResultSummary({
+      ruinedCount: Math.round(
+        forecast.ruinProbability * forecastInput.simulationCount
       ),
-    },
+      simulationCount: forecastInput.simulationCount,
+      accumulationMonths: forecastInput.accumulationMonths,
+      startingValue: inputs.startingValue,
+      median: discounted.median,
+    }),
+    chartData: buildForecastChartData(
+      discounted,
+      inputs.planStart,
+      inputs.cashFlow
+    ),
   };
 };
 
-export const resolveWithdrawalPlannerState = (
-  readiness: WithdrawalPlanReadiness,
-  computation: WithdrawalPlanComputation,
-  isUpdating: boolean
-): WithdrawalPlannerResultState => {
-  if (readiness.status !== "ready") {
-    return readiness;
-  }
-  if (computation.status === "failed") {
-    return { status: "error", kind: "calculation" };
-  }
-  if (computation.status !== "computed") {
-    return { status: "loading" };
-  }
+export const computeWithdrawalResult = (
+  inputs: WithdrawalPlanInputs
+): WithdrawalPlannerResultData => {
+  const forecastInput = buildWithdrawalForecastArgs({
+    parameters: inputs.parameters,
+    startingValue: inputs.startingValue,
+    gbmParams: { mu: inputs.mu, sigma: inputs.sigma },
+  });
+  const forecast = runWithdrawalForecast(forecastInput, {
+    confidencePercentiles: inputs.confidencePercentiles,
+  });
 
-  return isUpdating
-    ? { status: "updating", result: computation.result }
-    : { status: "ready", result: computation.result };
+  return buildWithdrawalPlannerResult(forecast, forecastInput, inputs);
 };
 
 export const useDerivedMonthlyContribution = (
@@ -331,24 +297,40 @@ export const useDerivedMonthlyContribution = (
 
 export interface WithdrawalPlannerHookResult {
   state: WithdrawalPlannerResultState;
+  canSimulate: boolean;
   planStart: number;
   derivedContribution: number | undefined;
+  simulate: () => void;
 }
 
-export const useWithdrawalPlannerData = (
+const resolveDisplayState = (
+  readiness: WithdrawalPlanReadiness
+): WithdrawalPlannerResultState => {
+  if (readiness.status === "error") {
+    return { status: "error" };
+  }
+  if (readiness.status === "unavailable") {
+    return { status: "unavailable" };
+  }
+
+  return { status: "idle" };
+};
+
+export const useWithdrawalPlanner = (
   portfolioNames: string[],
   parameters: WithdrawalPlannerParameters
 ): WithdrawalPlannerHookResult => {
   const [planStart] = useState(() => Date.now());
+  const [submitted, setSubmitted] = useState<SubmittedWithdrawalPlan | null>(
+    null
+  );
   const derivedContribution = useDerivedMonthlyContribution(portfolioNames);
   const portfolios = useGetPortfoliosByNames(portfolioNames);
   const marketValueQuery = useMarketValue(portfolioNames);
   const cashFlow = useCashFlow(portfolioNames);
-  const { value: debouncedParameters, isPending: isUpdating } =
-    useDebouncedValue(parameters, FORECAST_DEBOUNCE_MS);
   const scenarioDetails = useForecastScenarioParams(
     portfolioNames,
-    debouncedParameters.scenario
+    parameters.scenario
   );
   const { data: marketValue, isLoading, isError } = marketValueQuery;
   const hasPortfolios = portfolios.length > 0;
@@ -356,12 +338,6 @@ export const useWithdrawalPlannerData = (
     parameters.accumulationYears,
     parameters.decumulationYears
   );
-  const debouncedPlanHasPositivePhase = hasPositivePhase(
-    debouncedParameters.accumulationYears,
-    debouncedParameters.decumulationYears
-  );
-  const waitingForFreshPlan =
-    planHasPositivePhase && !debouncedPlanHasPositivePhase;
   const scenarioParams = scenarioDetails?.params;
   const scenarioMu = scenarioParams?.mu;
   const scenarioSigma = scenarioParams?.sigma;
@@ -369,8 +345,6 @@ export const useWithdrawalPlannerData = (
   const readiness = useMemo(
     () =>
       resolvePlanReadiness({
-        hasPositivePhase: planHasPositivePhase,
-        waitingForFreshPlan,
         isLoading,
         isMarketValueError: isError,
         marketValue,
@@ -380,39 +354,49 @@ export const useWithdrawalPlannerData = (
             ? undefined
             : { mu: scenarioMu, sigma: scenarioSigma },
       }),
-    [
-      planHasPositivePhase,
-      waitingForFreshPlan,
-      isLoading,
-      isError,
-      marketValue,
-      hasPortfolios,
-      scenarioMu,
-      scenarioSigma,
-    ]
+    [isLoading, isError, marketValue, hasPortfolios, scenarioMu, scenarioSigma]
   );
 
-  const computation = useMemo<WithdrawalPlanComputation>(
-    () =>
-      readiness.status === "ready"
-        ? computeWithdrawalResult({
-            parameters: debouncedParameters,
-            startingValue: readiness.startingValue,
-            mu: readiness.mu,
-            sigma: readiness.sigma,
-            derivedContribution,
-            cashFlow,
-            planStart,
-            confidencePercentiles: WITHDRAWAL_CONFIDENCE_PERCENTILES,
-          })
-        : { status: "idle" },
-    [readiness, debouncedParameters, derivedContribution, cashFlow, planStart]
-  );
+  const canSimulate = readiness.status === "ready" && planHasPositivePhase;
 
-  const state = useMemo(
-    () => resolveWithdrawalPlannerState(readiness, computation, isUpdating),
-    [readiness, computation, isUpdating]
-  );
+  const simulate = useCallback(() => {
+    if (!canSimulate || readiness.status !== "ready") {
+      return;
+    }
 
-  return { state, planStart, derivedContribution };
+    const resolvedParameters = resolvePlanParameters(
+      parameters,
+      derivedContribution
+    );
+    const result = computeWithdrawalResult({
+      parameters: resolvedParameters,
+      startingValue: readiness.startingValue,
+      mu: readiness.mu,
+      sigma: readiness.sigma,
+      cashFlow,
+      planStart,
+      confidencePercentiles: WITHDRAWAL_CONFIDENCE_PERCENTILES,
+    });
+
+    setSubmitted({
+      status: "ready",
+      parameters: resolvedParameters,
+      result,
+    });
+  }, [
+    canSimulate,
+    readiness,
+    parameters,
+    derivedContribution,
+    cashFlow,
+    planStart,
+  ]);
+
+  return {
+    state: submitted ?? resolveDisplayState(readiness),
+    canSimulate,
+    planStart,
+    derivedContribution,
+    simulate,
+  };
 };

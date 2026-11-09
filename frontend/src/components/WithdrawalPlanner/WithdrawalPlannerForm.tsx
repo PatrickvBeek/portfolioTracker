@@ -1,4 +1,5 @@
-import { ReactNode, useState } from "react";
+import { FormEvent, ReactNode, useState } from "react";
+import { Button } from "../ui/Button";
 import { Heading } from "../ui/Heading";
 import { Input } from "../ui/Input";
 import { ToggleGroup, ToggleItem } from "../ui/ToggleGroup";
@@ -284,10 +285,12 @@ type WithdrawalPlannerFormProps = {
   planStart: number;
   parameters: WithdrawalPlannerParameters;
   derivedMonthlyContribution: number | undefined;
+  canSimulate: boolean;
   onParameterChange: <K extends keyof WithdrawalPlannerParameters>(
     key: K,
     value: WithdrawalPlannerParameters[K]
   ) => void;
+  onSimulate: () => void;
 };
 
 export function WithdrawalPlannerForm({
@@ -295,8 +298,26 @@ export function WithdrawalPlannerForm({
   planStart,
   parameters,
   derivedMonthlyContribution,
+  canSimulate,
   onParameterChange,
+  onSimulate,
 }: WithdrawalPlannerFormProps) {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canSimulate) {
+      return;
+    }
+
+    const activeElement = event.currentTarget.ownerDocument.activeElement;
+    if (
+      activeElement instanceof HTMLInputElement &&
+      event.currentTarget.contains(activeElement)
+    ) {
+      activeElement.blur();
+    }
+    onSimulate();
+  };
+
   const contributionHelper =
     parameters.monthlyContribution !== null
       ? "Custom amount"
@@ -316,7 +337,7 @@ export function WithdrawalPlannerForm({
     withdrawalValue === 0;
 
   return (
-    <div className={styles.sectionCard}>
+    <form className={styles.sectionCard} onSubmit={handleSubmit} noValidate>
       <div className={styles.sectionBody}>
         <Heading level="h1">Withdrawal Planner</Heading>
 
@@ -447,7 +468,13 @@ export function WithdrawalPlannerForm({
           accumulationYears={parameters.accumulationYears}
           decumulationYears={parameters.decumulationYears}
         />
+
+        <div className="mt-6 flex justify-end">
+          <Button type="submit" disabled={!canSimulate}>
+            Simulate plan
+          </Button>
+        </div>
       </div>
-    </div>
+    </form>
   );
 }
