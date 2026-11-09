@@ -8,7 +8,6 @@ export const styles = {
   headline: "text-2xl font-semibold text-text tabular-nums",
   headlineMuted: "text-sm text-text-muted",
   errorText: "text-sm text-danger",
-  updating: "text-sm text-text-muted empty:hidden",
   meter: "flex h-3 w-full overflow-hidden rounded-full bg-bg-elevated",
   meterSuccess: "h-full bg-success",
   meterRuin: "h-full flex-1 bg-danger",

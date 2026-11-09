@@ -1,3 +1,4 @@
+import { act } from "@testing-library/react";
 import {
   getTestPortfolio,
   getTestOrdersGroupedByAsset,
@@ -19,27 +20,24 @@ import {
 import {
   buildPlanDates,
   buildWithdrawalForecastArgs,
+  buildWithdrawalPlannerResult,
   buildWithdrawalResultSummary,
   computeWithdrawalResult,
   parseInflationPercent,
   parseMonthlyWithdrawal,
   parseNonNegativeNumber,
   parseYears,
+  resolvePlanParameters,
   resolvePlanReadiness,
-  resolveWithdrawalPlannerState,
-  useDerivedMonthlyContribution,
-  useWithdrawalPlannerData,
-  WITHDRAWAL_CONFIDENCE_PERCENT,
-  WITHDRAWAL_CONFIDENCE_PERCENTILES,
-  type WithdrawalPlanComputation,
+  useWithdrawalPlanner,
+  type ResolvedWithdrawalPlannerParameters,
   type WithdrawalPlanInputs,
-  type WithdrawalPlanReadiness,
   type WithdrawalPlanReadinessInput,
+  type WithdrawalPlannerHookResult,
+  type WithdrawalPlannerParameters,
   type WithdrawalPlannerResultState,
-  WithdrawalPlannerParameters,
   yearsToMonths,
 } from "./WithdrawalPlanner.logic";
-import { getTestWithdrawalSummary } from "../../testUtils/withdrawalPlannerHelpers";
 
 vi.setSystemTime(new Date(2021, 0, 1));
 
@@ -87,35 +85,50 @@ const baseParameters: WithdrawalPlannerParameters = {
   inflationRate: 0,
 };
 
-const renderPlanner = (parameters: WithdrawalPlannerParameters) => {
-  const { result } = customRenderHook(() =>
-    useWithdrawalPlannerData([portfolioName], parameters)
-  );
-  return result;
+const resolvedBaseParameters: ResolvedWithdrawalPlannerParameters = {
+  ...baseParameters,
+  monthlyContribution: 850,
+  monthlyWithdrawal: 850,
+};
+
+const renderPlanner = (parameters: WithdrawalPlannerParameters) =>
+  customRenderHook(() => useWithdrawalPlanner([portfolioName], parameters));
+
+const waitForSimulationReady = (result: {
+  current: WithdrawalPlannerHookResult;
+}) => customWaitFor(() => expect(result.current.canSimulate).toBe(true));
+
+const simulate = (result: { current: WithdrawalPlannerHookResult }) => {
+  act(() => result.current.simulate());
 };
 
 const resultOf = (state: WithdrawalPlannerResultState) =>
-  state.status === "ready" || state.status === "updating"
-    ? state.result
-    : undefined;
+  state.status === "ready" ? state.result : undefined;
 
 const buildArgs = (
-  parameters: WithdrawalPlannerParameters,
-  derivedContribution: number | undefined
+  overrides: Partial<ResolvedWithdrawalPlannerParameters> = {}
 ) =>
   buildWithdrawalForecastArgs({
-    parameters,
+    parameters: { ...resolvedBaseParameters, ...overrides },
     startingValue: 100_000,
-    derivedContribution,
     gbmParams: { mu: 0.01, sigma: 0.05 },
   });
 
-describe("useWithdrawalPlannerData", () => {
-  it("returns chart data for the whole plan horizon", async () => {
-    const result = renderPlanner(baseParameters);
-    await customWaitFor(() =>
-      expect(result.current.state.status).toBe("ready")
-    );
+describe("useWithdrawalPlanner", () => {
+  it("stays idle until the user simulates", async () => {
+    const { result } = renderPlanner(baseParameters);
+
+    expect(result.current.state).toEqual({ status: "idle" });
+
+    await waitForSimulationReady(result);
+
+    expect(result.current.state).toEqual({ status: "idle" });
+  });
+
+  it("returns chart data for the whole plan horizon after submit", async () => {
+    const { result } = renderPlanner(baseParameters);
+    await waitForSimulationReady(result);
+    simulate(result);
 
     const data = resultOf(result.current.state);
     expect(data?.chartData).toHaveLength(24);
@@ -124,24 +137,30 @@ describe("useWithdrawalPlannerData", () => {
   });
 
   it("fixes the plan start and ends the chart at the calendar plan end", async () => {
-    const result = renderPlanner(baseParameters);
-    await customWaitFor(() =>
-      expect(result.current.state.status).toBe("ready")
-    );
+    const { result } = renderPlanner(baseParameters);
+    await waitForSimulationReady(result);
+    simulate(result);
 
     expect(result.current.planStart).toBe(new Date(2021, 0, 1).getTime());
     const lastPoint = resultOf(result.current.state)?.chartData.at(-1);
     expect(new Date(lastPoint?.timestamp ?? 0)).toEqual(new Date(2023, 0, 1));
   });
 
+  it("derives the automatic monthly contribution from cash flow", async () => {
+    const { result } = renderPlanner(baseParameters);
+
+    expect(result.current.derivedContribution).toBe(850);
+
+    await waitForSimulationReady(result);
+  });
+
   it("uses an explicit monthly contribution in the simulation", async () => {
-    const result = renderPlanner({
+    const { result } = renderPlanner({
       ...baseParameters,
       monthlyContribution: 1_000_000,
     });
-    await customWaitFor(() =>
-      expect(result.current.state.status).toBe("ready")
-    );
+    await waitForSimulationReady(result);
+    simulate(result);
 
     expect(resultOf(result.current.state)?.chartData[0].median).toBeGreaterThan(
       500_000
@@ -149,21 +168,85 @@ describe("useWithdrawalPlannerData", () => {
   });
 
   it("reports certain ruin when the withdrawal exceeds the balance", async () => {
-    const result = renderPlanner({
+    const { result } = renderPlanner({
       ...baseParameters,
       monthlyWithdrawal: 1_000_000,
     });
-    await customWaitFor(() =>
-      expect(result.current.state.status).toBe("ready")
-    );
+    await waitForSimulationReady(result);
+    simulate(result);
 
     const summary = resultOf(result.current.state)?.summary;
     expect(summary?.ruinedCount).toBe(summary?.simulationCount);
   });
 
-  it("reports unavailable when both phases are zero", async () => {
+  it("does not recompute when parameters change", async () => {
+    let parameters = baseParameters;
+    const { result, rerender } = customRenderHook(() =>
+      useWithdrawalPlanner([portfolioName], parameters)
+    );
+    await waitForSimulationReady(result);
+    simulate(result);
+
+    const ready = result.current.state;
+
+    parameters = { ...baseParameters, monthlyWithdrawal: 100 };
+    rerender();
+
+    expect(result.current.state).toBe(ready);
+    expect(result.current.canSimulate).toBe(true);
+  });
+
+  it("keeps the displayed result when prices refetch", async () => {
     const { result, queryClient } = customRenderHook(() =>
-      useWithdrawalPlannerData([portfolioName], {
+      useWithdrawalPlanner([portfolioName], baseParameters)
+    );
+    await waitForSimulationReady(result);
+    simulate(result);
+
+    const ready = result.current.state;
+
+    await act(async () => {
+      await queryClient.refetchQueries({ queryKey: ["prices"] });
+    });
+
+    expect(result.current.state).toBe(ready);
+  });
+
+  it("snapshots the scenario with the submitted result", async () => {
+    let parameters: WithdrawalPlannerParameters = {
+      ...baseParameters,
+      scenario: "market",
+    };
+    const { result, rerender } = customRenderHook(() =>
+      useWithdrawalPlanner([portfolioName], parameters)
+    );
+    await waitForSimulationReady(result);
+    simulate(result);
+
+    const ready = result.current.state;
+    if (ready.status !== "ready") {
+      throw new Error("expected ready");
+    }
+    expect(ready.scenario).toBe("market");
+
+    parameters = { ...baseParameters, scenario: "portfolio" };
+    rerender();
+    await waitForSimulationReady(result);
+
+    expect(result.current.state).toBe(ready);
+
+    simulate(result);
+
+    const settled = result.current.state;
+    if (settled.status !== "ready") {
+      throw new Error("expected ready");
+    }
+    expect(settled.scenario).toBe("portfolio");
+  });
+
+  it("does not allow simulation without a positive phase", async () => {
+    const { result, queryClient } = customRenderHook(() =>
+      useWithdrawalPlanner([portfolioName], {
         ...baseParameters,
         accumulationYears: 0,
         decumulationYears: 0,
@@ -171,85 +254,17 @@ describe("useWithdrawalPlannerData", () => {
     );
     await customWaitFor(() => expect(queryClient.isFetching()).toBe(0));
 
-    expect(result.current.state.status).toBe("unavailable");
+    expect(result.current.state).toEqual({ status: "idle" });
+    expect(result.current.canSimulate).toBe(false);
   });
 
   it("reports unavailable for an unknown portfolio", () => {
     const { result } = customRenderHook(() =>
-      useWithdrawalPlannerData(["unknown"], baseParameters)
+      useWithdrawalPlanner(["unknown"], baseParameters)
     );
 
-    expect(result.current.state.status).toBe("unavailable");
-  });
-
-  it("keeps the previous result object while the debounce is pending", async () => {
-    let parameters = baseParameters;
-    const { result, rerender } = customRenderHook(() =>
-      useWithdrawalPlannerData([portfolioName], parameters)
-    );
-    await customWaitFor(() =>
-      expect(result.current.state.status).toBe("ready")
-    );
-
-    const ready = result.current.state;
-    if (ready.status !== "ready") {
-      throw new Error("expected ready");
-    }
-
-    parameters = { ...baseParameters, monthlyWithdrawal: 100 };
-    rerender();
-
-    const pending = result.current.state;
-    expect(pending.status).toBe("updating");
-    if (pending.status !== "updating") {
-      return;
-    }
-
-    expect(pending.result).toBe(ready.result);
-
-    await customWaitFor(() =>
-      expect(result.current.state.status).toBe("ready")
-    );
-  });
-
-  it("keeps the scenario snapshot in step with the displayed result", async () => {
-    let parameters: WithdrawalPlannerParameters = {
-      ...baseParameters,
-      scenario: "market",
-    };
-    const { result, rerender } = customRenderHook(() =>
-      useWithdrawalPlannerData([portfolioName], parameters)
-    );
-    await customWaitFor(() =>
-      expect(result.current.state.status).toBe("ready")
-    );
-
-    const ready = result.current.state;
-    if (ready.status !== "ready") {
-      throw new Error("expected ready");
-    }
-    expect(ready.result.scenario).toBe("market");
-
-    parameters = { ...baseParameters, scenario: "portfolio" };
-    rerender();
-
-    const pending = result.current.state;
-    expect(pending.status).toBe("updating");
-    if (pending.status !== "updating") {
-      return;
-    }
-    expect(pending.result).toBe(ready.result);
-    expect(pending.result.scenario).toBe("market");
-
-    await customWaitFor(() =>
-      expect(result.current.state.status).toBe("ready")
-    );
-
-    const settled = result.current.state;
-    if (settled.status !== "ready") {
-      throw new Error("expected ready");
-    }
-    expect(settled.result.scenario).toBe("portfolio");
+    expect(result.current.state).toEqual({ status: "unavailable" });
+    expect(result.current.canSimulate).toBe(false);
   });
 
   it("reports a market value error when prices cannot be loaded", async () => {
@@ -262,37 +277,17 @@ describe("useWithdrawalPlannerData", () => {
 
     try {
       const { result } = customRenderHook(() =>
-        useWithdrawalPlannerData([portfolioName], baseParameters)
+        useWithdrawalPlanner([portfolioName], baseParameters)
       );
       await customWaitFor(() =>
         expect(result.current.state.status).toBe("error")
       );
 
-      expect(result.current.state).toEqual({
-        status: "error",
-        kind: "marketValue",
-      });
+      expect(result.current.state).toEqual({ status: "error" });
+      expect(result.current.canSimulate).toBe(false);
     } finally {
       resetMockNetwork();
     }
-  });
-});
-
-describe("useDerivedMonthlyContribution", () => {
-  it("derives the monthly contribution from cash flow and portfolio age", () => {
-    const { result } = customRenderHook(() =>
-      useDerivedMonthlyContribution([portfolioName])
-    );
-
-    expect(result.current).toBe(850);
-  });
-
-  it("returns undefined when there is no usable history", () => {
-    const { result } = customRenderHook(() =>
-      useDerivedMonthlyContribution(["unknown"])
-    );
-
-    expect(result.current).toBeUndefined();
   });
 });
 
@@ -370,63 +365,73 @@ describe("buildPlanDates", () => {
   });
 });
 
+describe("resolvePlanParameters", () => {
+  it("uses the derived contribution for both amounts when automatic", () => {
+    expect(resolvePlanParameters(baseParameters, 850)).toMatchObject({
+      monthlyContribution: 850,
+      monthlyWithdrawal: 850,
+    });
+  });
+
+  it("prefers explicit amounts over the derived contribution", () => {
+    expect(
+      resolvePlanParameters(
+        {
+          ...baseParameters,
+          monthlyContribution: 500,
+          monthlyWithdrawal: 2_000,
+        },
+        850
+      )
+    ).toMatchObject({
+      monthlyContribution: 500,
+      monthlyWithdrawal: 2_000,
+    });
+  });
+
+  it("keeps an explicit zero amount", () => {
+    expect(
+      resolvePlanParameters(
+        { ...baseParameters, monthlyContribution: 0, monthlyWithdrawal: 0 },
+        850
+      )
+    ).toMatchObject({
+      monthlyContribution: 0,
+      monthlyWithdrawal: 0,
+    });
+  });
+
+  it("uses zero when amounts and derived contribution are unavailable", () => {
+    expect(resolvePlanParameters(baseParameters, undefined)).toMatchObject({
+      monthlyContribution: 0,
+      monthlyWithdrawal: 0,
+    });
+  });
+});
+
 describe("buildWithdrawalForecastArgs", () => {
   it("passes the selected inflation rate to the forecast", () => {
-    const input = buildArgs({ ...baseParameters, inflationRate: 0.03 }, 850);
-
-    expect(input.annualInflationRate).toBe(0.03);
+    expect(buildArgs({ inflationRate: 0.03 }).annualInflationRate).toBe(0.03);
   });
 
   it("converts whole years to accumulation and decumulation months", () => {
-    const input = buildArgs(
-      {
-        ...baseParameters,
-        accumulationYears: 10,
-        decumulationYears: 20,
-      },
-      850
-    );
+    const input = buildArgs({
+      accumulationYears: 10,
+      decumulationYears: 20,
+    });
 
     expect(input.accumulationMonths).toBe(120);
     expect(input.decumulationMonths).toBe(240);
   });
 
-  it("uses the derived contribution for both amounts when automatic", () => {
-    const input = buildArgs(baseParameters, 850);
-
-    expect(input.monthlyContribution).toBe(850);
-    expect(input.monthlyWithdrawal).toBe(850);
-  });
-
-  it("prefers explicit amounts over the derived contribution", () => {
-    const input = buildArgs(
-      {
-        ...baseParameters,
-        monthlyContribution: 500,
-        monthlyWithdrawal: 2_000,
-      },
-      850
-    );
+  it("passes the resolved monthly amounts to the forecast", () => {
+    const input = buildArgs({
+      monthlyContribution: 500,
+      monthlyWithdrawal: 2_000,
+    });
 
     expect(input.monthlyContribution).toBe(500);
     expect(input.monthlyWithdrawal).toBe(2_000);
-  });
-
-  it("keeps an explicit zero amount", () => {
-    const input = buildArgs(
-      { ...baseParameters, monthlyContribution: 0, monthlyWithdrawal: 0 },
-      850
-    );
-
-    expect(input.monthlyContribution).toBe(0);
-    expect(input.monthlyWithdrawal).toBe(0);
-  });
-
-  it("uses zero when amounts and derived contribution are unavailable", () => {
-    const input = buildArgs(baseParameters, undefined);
-
-    expect(input.monthlyContribution).toBe(0);
-    expect(input.monthlyWithdrawal).toBe(0);
   });
 });
 
@@ -507,22 +512,9 @@ describe("buildWithdrawalResultSummary", () => {
   });
 });
 
-const buildForecast = (
-  ruinProbability: number,
-  median: number[] = [100, 110, 120, 130]
-): WithdrawalForecastResult => ({
-  median,
-  confidenceLow: [...median],
-  confidenceHigh: [...median],
-  cashFlows: median.map(() => 0),
-  ruinProbability,
-});
-
 const buildReadinessInput = (
   overrides: Partial<WithdrawalPlanReadinessInput> = {}
 ): WithdrawalPlanReadinessInput => ({
-  hasPositivePhase: true,
-  waitingForFreshPlan: false,
   isLoading: false,
   isMarketValueError: false,
   marketValue: 100_000,
@@ -532,25 +524,6 @@ const buildReadinessInput = (
 });
 
 describe("resolvePlanReadiness", () => {
-  it("prioritizes a fresh plan over the other readiness signals", () => {
-    expect(
-      resolvePlanReadiness(
-        buildReadinessInput({
-          waitingForFreshPlan: true,
-          hasPositivePhase: false,
-          isLoading: true,
-          isMarketValueError: true,
-        })
-      )
-    ).toEqual({ status: "loading" });
-  });
-
-  it("reports unavailable when the plan has no positive phase", () => {
-    expect(
-      resolvePlanReadiness(buildReadinessInput({ hasPositivePhase: false }))
-    ).toEqual({ status: "unavailable" });
-  });
-
   it("reports loading while the market value loads", () => {
     expect(
       resolvePlanReadiness(buildReadinessInput({ isLoading: true }))
@@ -560,16 +533,16 @@ describe("resolvePlanReadiness", () => {
   it("reports a market value error for a failed price query", () => {
     expect(
       resolvePlanReadiness(buildReadinessInput({ isMarketValueError: true }))
-    ).toEqual({ status: "error", kind: "marketValue" });
+    ).toEqual({ status: "error" });
   });
 
   it("reports a market value error for a missing or non-finite value", () => {
     expect(
       resolvePlanReadiness(buildReadinessInput({ marketValue: undefined }))
-    ).toEqual({ status: "error", kind: "marketValue" });
+    ).toEqual({ status: "error" });
     expect(
       resolvePlanReadiness(buildReadinessInput({ marketValue: NaN }))
-    ).toEqual({ status: "error", kind: "marketValue" });
+    ).toEqual({ status: "error" });
   });
 
   it("reports unavailable without portfolios or scenario parameters", () => {
@@ -591,191 +564,61 @@ describe("resolvePlanReadiness", () => {
   });
 });
 
-const readyReadiness: WithdrawalPlanReadiness = {
-  status: "ready",
-  startingValue: 100_000,
-  mu: 0.01,
-  sigma: 0.05,
-};
-
-const computedResult = {
-  scenario: "market" as const,
-  summary: getTestWithdrawalSummary(),
-  chartData: [],
-};
-
-const computed: WithdrawalPlanComputation = {
-  status: "computed",
-  result: computedResult,
-};
-
-describe("resolveWithdrawalPlannerState", () => {
-  it("passes through a non-ready readiness before the computation", () => {
-    expect(
-      resolveWithdrawalPlannerState(
-        { status: "loading" },
-        { status: "failed" },
-        false
-      )
-    ).toEqual({ status: "loading" });
-    expect(
-      resolveWithdrawalPlannerState(
-        { status: "error", kind: "marketValue" },
-        computed,
-        false
-      )
-    ).toEqual({ status: "error", kind: "marketValue" });
-    expect(
-      resolveWithdrawalPlannerState({ status: "unavailable" }, computed, false)
-    ).toEqual({ status: "unavailable" });
-  });
-
-  it("maps a failed computation to a calculation error", () => {
-    expect(
-      resolveWithdrawalPlannerState(readyReadiness, { status: "failed" }, false)
-    ).toEqual({ status: "error", kind: "calculation" });
-  });
-
-  it("reports loading while the computation is idle", () => {
-    expect(
-      resolveWithdrawalPlannerState(readyReadiness, { status: "idle" }, false)
-    ).toEqual({ status: "loading" });
-  });
-
-  it("reports the computed result as ready or updating", () => {
-    expect(
-      resolveWithdrawalPlannerState(readyReadiness, computed, false)
-    ).toEqual({ status: "ready", result: computedResult });
-    expect(
-      resolveWithdrawalPlannerState(readyReadiness, computed, true)
-    ).toEqual({ status: "updating", result: computedResult });
-  });
-
-  it("keeps the same result reference while updating", () => {
-    const updating = resolveWithdrawalPlannerState(
-      readyReadiness,
-      computed,
-      true
-    );
-
-    expect(updating).toMatchObject({ status: "updating" });
-    if (updating.status !== "updating") {
-      return;
-    }
-
-    expect(updating.result).toBe(computedResult);
-  });
-});
-
 const buildComputeInputs = (
   overrides: Partial<WithdrawalPlanInputs> = {}
 ): WithdrawalPlanInputs => ({
-  parameters: baseParameters,
+  parameters: resolvedBaseParameters,
   startingValue: 100_000,
   mu: 0.01,
   sigma: 0.05,
-  derivedContribution: undefined,
   cashFlow: 0,
   planStart: new Date(2021, 0, 1).getTime(),
-  confidencePercentiles: [5, 95],
   ...overrides,
 });
 
-describe("computeWithdrawalResult", () => {
-  it("computes the result from the injected simulation", () => {
-    let receivedConfig: { confidencePercentiles: [number, number] } | undefined;
-    const median = Array.from({ length: 24 }, (_, index) => 100 + index);
+const buildForecast = (
+  ruinProbability: number,
+  median: number[]
+): WithdrawalForecastResult => ({
+  median,
+  confidenceLow: [...median],
+  confidenceHigh: [...median],
+  cashFlows: median.map(() => 0),
+  ruinProbability,
+});
 
-    const computation = computeWithdrawalResult(
-      buildComputeInputs(),
-      (input, config) => {
-        expect(input.startingValue).toBe(100_000);
-        expect(input.mu).toBe(0.01);
-        expect(input.sigma).toBe(0.05);
-        receivedConfig = config;
-        return buildForecast(0.1, median);
-      }
-    );
-
-    expect(receivedConfig).toEqual({ confidencePercentiles: [5, 95] });
-    expect(computation.status).toBe("computed");
-    if (computation.status !== "computed") {
-      return;
-    }
-
-    expect(computation.result.scenario).toBe("market");
-    expect(computation.result.chartData).toHaveLength(median.length);
-    expect(computation.result.summary).toMatchObject({
-      ruinedCount: 100,
-      simulationCount: 1000,
-      atRetirement: 111,
-      atPlanEnd: 123,
-    });
-  });
-
+describe("buildWithdrawalPlannerResult", () => {
   it("expresses both metrics in today's money", () => {
     const nominalMedian = Array.from({ length: 24 }, () => 1000);
-
-    const computation = computeWithdrawalResult(
+    const result = buildWithdrawalPlannerResult(
+      buildForecast(0, nominalMedian),
+      buildArgs(),
       buildComputeInputs({
-        parameters: { ...baseParameters, inflationRate: 0.02 },
-      }),
-      () => buildForecast(0, nominalMedian)
+        parameters: { ...resolvedBaseParameters, inflationRate: 0.02 },
+      })
     );
 
-    if (computation.status !== "computed") {
-      throw new Error("expected a computed result");
-    }
-
-    expect(computation.result.summary.atRetirement).toBeCloseTo(1000 / 1.02, 6);
-    expect(computation.result.summary.atPlanEnd).toBeCloseTo(
-      1000 / 1.02 ** 2,
-      6
-    );
-  });
-
-  it("logs a simulation failure once and reports failed", () => {
-    const error = new Error("forecast failed");
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-
-    try {
-      expect(
-        computeWithdrawalResult(buildComputeInputs(), () => {
-          throw error;
-        })
-      ).toEqual({ status: "failed" });
-      expect(consoleError).toHaveBeenCalledTimes(1);
-      expect(consoleError).toHaveBeenCalledWith(
-        "Withdrawal forecast simulation failed",
-        error
-      );
-    } finally {
-      consoleError.mockRestore();
-    }
-  });
-
-  it("does not swallow defects outside the simulation", () => {
-    const brokenForecast = buildForecast(0);
-    Object.defineProperty(brokenForecast, "median", { value: 0 });
-    let outcome: WithdrawalPlanComputation | undefined;
-
-    expect(() => {
-      outcome = computeWithdrawalResult(
-        buildComputeInputs(),
-        () => brokenForecast
-      );
-    }).toThrow(/./);
-    expect(outcome).toBeUndefined();
+    expect(result.summary.atRetirement).toBeCloseTo(1000 / 1.02, 6);
+    expect(result.summary.atPlanEnd).toBeCloseTo(1000 / 1.02 ** 2, 6);
   });
 });
 
-describe("WITHDRAWAL_CONFIDENCE_PERCENTILES", () => {
-  it("matches the confidence percent used in the label", () => {
-    expect(WITHDRAWAL_CONFIDENCE_PERCENTILES).toEqual([
-      50 - WITHDRAWAL_CONFIDENCE_PERCENT / 2,
-      50 + WITHDRAWAL_CONFIDENCE_PERCENT / 2,
-    ]);
+describe("computeWithdrawalResult", () => {
+  it("returns a summary and chart data for the whole plan", () => {
+    const result = computeWithdrawalResult(buildComputeInputs());
+
+    expect(result.chartData).toHaveLength(24);
+    expect(result.summary.simulationCount).toBe(1000);
+    expect(result.summary.atPlanEnd).toBe(result.chartData.at(-1)?.median);
+  });
+
+  it("reports certain ruin when the withdrawal exceeds the balance", () => {
+    const result = computeWithdrawalResult(
+      buildComputeInputs({
+        parameters: { ...resolvedBaseParameters, monthlyWithdrawal: 1_000_000 },
+      })
+    );
+
+    expect(result.summary.ruinedCount).toBe(result.summary.simulationCount);
   });
 });

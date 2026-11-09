@@ -61,10 +61,12 @@ const TestForm = ({
   initialParameters = defaultParameters,
   derivedMonthlyContribution,
   portfolioNames = [],
+  canSimulate = true,
 }: {
   initialParameters?: WithdrawalPlannerParameters;
   derivedMonthlyContribution: number | undefined;
   portfolioNames?: string[];
+  canSimulate?: boolean;
 }) => {
   const [parameters, setParameters] = useState(initialParameters);
 
@@ -74,9 +76,11 @@ const TestForm = ({
       planStart={PLAN_START}
       parameters={parameters}
       derivedMonthlyContribution={derivedMonthlyContribution}
+      canSimulate={canSimulate}
       onParameterChange={(key, value) =>
         setParameters((current) => ({ ...current, [key]: value }))
       }
+      onSimulate={() => undefined}
     />
   );
 };
@@ -102,6 +106,7 @@ const renderForm = (
     initialParameters?: WithdrawalPlannerParameters;
     derivedMonthlyContribution?: number | undefined;
     portfolioNames?: string[];
+    canSimulate?: boolean;
   } = {}
 ) =>
   customRender({
@@ -225,6 +230,30 @@ describe("WithdrawalPlannerForm", () => {
     await user.type(withdrawal, "20000");
     await user.tab();
     expect(withdrawal).toHaveValue(10_000);
+  });
+
+  it("disables the simulate action when the basis is not ready", () => {
+    renderForm({ canSimulate: false });
+
+    expect(
+      screen.getByRole("button", { name: "Simulate plan" })
+    ).toBeDisabled();
+  });
+
+  it("enables the simulate action when the basis is ready", () => {
+    renderForm();
+
+    expect(screen.getByRole("button", { name: "Simulate plan" })).toBeEnabled();
+  });
+
+  it("clamps out-of-range input when the form is submitted", async () => {
+    const { user } = renderForm();
+    const years = screen.getByLabelText("Years until retirement");
+
+    await user.clear(years);
+    await user.type(years, "61{Enter}");
+
+    expect(years).toHaveValue(60);
   });
 
   it("tracks the derived contribution until the withdrawal is edited", async () => {
