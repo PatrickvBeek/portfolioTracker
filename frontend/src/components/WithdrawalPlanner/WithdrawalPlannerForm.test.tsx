@@ -182,6 +182,18 @@ describe("WithdrawalPlannerForm", () => {
     ).toBeTruthy();
   });
 
+  it("clamps inflation after blur", async () => {
+    const { user } = renderForm();
+    const inflation = screen.getByLabelText("Inflation");
+
+    await user.clear(inflation);
+    await user.type(inflation, "25");
+    await user.tab();
+
+    expect(inflation).toHaveValue(20);
+    expect(screen.getByText(/Raises withdrawals at 20% per year/)).toBeTruthy();
+  });
+
   it("clamps out-of-range input in the field after blur", async () => {
     const { user } = renderForm();
     const years = screen.getByLabelText("Years until retirement");
