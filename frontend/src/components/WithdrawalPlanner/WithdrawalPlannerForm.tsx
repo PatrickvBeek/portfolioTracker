@@ -5,8 +5,7 @@ import { Input } from "../ui/Input";
 import { ToggleGroup, ToggleItem } from "../ui/ToggleGroup";
 import {
   ForecastScenario,
-  getScenarioDetails,
-  usePortfolioScenarioParams,
+  ScenarioDetails,
 } from "../charts/forecastScenario.logic";
 import { ScenarioSummary } from "../charts/ScenarioSummary";
 import {
@@ -183,17 +182,16 @@ const PercentField = ({
 };
 
 const ReturnAssumptionField = ({
-  portfolioNames,
   scenario,
+  scenarioDetails,
+  isPortfolioScenarioAvailable,
   onScenarioChange,
 }: {
-  portfolioNames: string[];
   scenario: ForecastScenario;
+  scenarioDetails: ScenarioDetails | undefined;
+  isPortfolioScenarioAvailable: boolean;
   onScenarioChange: (scenario: ForecastScenario) => void;
 }) => {
-  const portfolioParams = usePortfolioScenarioParams(portfolioNames);
-  const scenarioDetails = getScenarioDetails(scenario, portfolioParams);
-
   return (
     <div className={styles.controlGroup}>
       <span className={styles.label}>Return assumption</span>
@@ -209,7 +207,7 @@ const ReturnAssumptionField = ({
           value="portfolio"
           selected={scenario === "portfolio"}
           onSelect={() => onScenarioChange("portfolio")}
-          disabled={portfolioParams === undefined}
+          disabled={!isPortfolioScenarioAvailable}
         >
           Your portfolio
         </ToggleItem>
@@ -281,9 +279,10 @@ const PlanSummary = ({
 };
 
 type WithdrawalPlannerFormProps = {
-  portfolioNames: string[];
   planStart: number;
   parameters: WithdrawalPlannerParameters;
+  scenarioDetails: ScenarioDetails | undefined;
+  isPortfolioScenarioAvailable: boolean;
   derivedMonthlyContribution: number | undefined;
   canSimulate: boolean;
   onParameterChange: <K extends keyof WithdrawalPlannerParameters>(
@@ -294,9 +293,10 @@ type WithdrawalPlannerFormProps = {
 };
 
 export function WithdrawalPlannerForm({
-  portfolioNames,
   planStart,
   parameters,
+  scenarioDetails,
+  isPortfolioScenarioAvailable,
   derivedMonthlyContribution,
   canSimulate,
   onParameterChange,
@@ -345,8 +345,9 @@ export function WithdrawalPlannerForm({
           <Heading level="section">Assumptions</Heading>
           <div className={styles.controlsGrid}>
             <ReturnAssumptionField
-              portfolioNames={portfolioNames}
               scenario={parameters.scenario}
+              scenarioDetails={scenarioDetails}
+              isPortfolioScenarioAvailable={isPortfolioScenarioAvailable}
               onScenarioChange={(scenario) =>
                 onParameterChange("scenario", scenario)
               }

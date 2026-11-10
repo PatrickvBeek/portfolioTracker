@@ -1,52 +1,13 @@
 import { useState } from "react";
-import { screen, waitFor } from "@testing-library/react";
-import { getTestOrdersGroupedByAsset, getTestPortfolio } from "pt-domain";
+import { screen } from "@testing-library/react";
 import { customRender } from "../../testUtils/componentHelpers";
-import { setUserData } from "../../testUtils/localStorage";
-import { getPriceResponse, mockNetwork } from "../../testUtils/networkMock";
+import { getScenarioDetails } from "../charts/forecastScenario.logic";
 import { type WithdrawalPlannerParameters } from "./WithdrawalPlanner.logic";
 import { WithdrawalPlannerForm } from "./WithdrawalPlannerForm";
 
 const PLAN_START = new Date(2021, 0, 1).getTime();
 
-const portfolioName = "formPortfolio";
-
-setUserData({
-  portfolios: {
-    [portfolioName]: getTestPortfolio({
-      name: portfolioName,
-      orders: getTestOrdersGroupedByAsset([
-        {
-          asset: "ABC",
-          timestamp: "2020-03-01",
-          sharePrice: 100,
-          pieces: 100,
-          orderFee: 0,
-          taxes: 0,
-        },
-        {
-          asset: "ABC",
-          timestamp: "2020-04-01",
-          sharePrice: 105,
-          pieces: 10,
-          orderFee: 0,
-          taxes: 0,
-        },
-      ]),
-    }),
-  },
-  assets: {
-    ABC: { displayName: "ABC Corp", isin: "ABC", symbol: "ABC" },
-  },
-});
-
-mockNetwork({
-  prices: getPriceResponse("ABC", [
-    [new Date("2020-03-01"), 100],
-    [new Date("2020-04-01"), 105],
-    [new Date("2020-05-01"), 110],
-  ]),
-});
+const PORTFOLIO_GBM = { mu: 0.005, sigma: 0.04 };
 
 const defaultParameters: WithdrawalPlannerParameters = {
   scenario: "market",
@@ -60,21 +21,26 @@ const defaultParameters: WithdrawalPlannerParameters = {
 const TestForm = ({
   initialParameters = defaultParameters,
   derivedMonthlyContribution,
-  portfolioNames = [],
+  portfolioAvailable = false,
   canSimulate = true,
 }: {
   initialParameters?: WithdrawalPlannerParameters;
   derivedMonthlyContribution: number | undefined;
-  portfolioNames?: string[];
+  portfolioAvailable?: boolean;
   canSimulate?: boolean;
 }) => {
   const [parameters, setParameters] = useState(initialParameters);
+  const scenarioDetails = getScenarioDetails(
+    parameters.scenario,
+    portfolioAvailable ? PORTFOLIO_GBM : undefined
+  );
 
   return (
     <WithdrawalPlannerForm
-      portfolioNames={portfolioNames}
       planStart={PLAN_START}
       parameters={parameters}
+      scenarioDetails={scenarioDetails}
+      isPortfolioScenarioAvailable={portfolioAvailable}
       derivedMonthlyContribution={derivedMonthlyContribution}
       canSimulate={canSimulate}
       onParameterChange={(key, value) =>
@@ -105,7 +71,7 @@ const renderForm = (
   props: {
     initialParameters?: WithdrawalPlannerParameters;
     derivedMonthlyContribution?: number | undefined;
-    portfolioNames?: string[];
+    portfolioAvailable?: boolean;
     canSimulate?: boolean;
   } = {}
 ) =>
@@ -295,12 +261,12 @@ describe("WithdrawalPlannerForm", () => {
   });
 
   it("enables the portfolio scenario when parameters are available", async () => {
-    const { user } = renderForm({ portfolioNames: [portfolioName] });
+    const { user } = renderForm({ portfolioAvailable: true });
     const portfolioOption = screen.getByRole("radio", {
       name: "Your portfolio",
     });
 
-    await waitFor(() => expect(portfolioOption).toBeEnabled());
+    expect(portfolioOption).toBeEnabled();
     await user.click(portfolioOption);
 
     expect(portfolioOption).toHaveAttribute("aria-checked", "true");

@@ -20,8 +20,10 @@ import {
   deriveMonthlyContribution,
 } from "../charts/forecastChartUtils";
 import {
-  useForecastScenarioParams,
   ForecastScenario,
+  ScenarioDetails,
+  getScenarioDetails,
+  usePortfolioScenarioParams,
 } from "../charts/forecastScenario.logic";
 
 export const MAX_PLAN_YEARS = 60;
@@ -288,6 +290,8 @@ export interface WithdrawalPlannerHookResult {
   canSimulate: boolean;
   planStart: number;
   derivedContribution: number | undefined;
+  scenarioDetails: ScenarioDetails | undefined;
+  isPortfolioScenarioAvailable: boolean;
   simulate: () => void;
 }
 
@@ -317,9 +321,10 @@ export const useWithdrawalPlanner = (
   const cashFlow = useCashFlow(portfolioNames);
   const portfolioAge = usePortfolioAge(portfolioNames);
   const derivedContribution = deriveMonthlyContribution(cashFlow, portfolioAge);
-  const scenarioDetails = useForecastScenarioParams(
-    portfolioNames,
-    parameters.scenario
+  const portfolioScenarioParams = usePortfolioScenarioParams(portfolioNames);
+  const scenarioDetails = getScenarioDetails(
+    parameters.scenario,
+    portfolioScenarioParams
   );
   const { data: marketValue, isLoading, isError } = marketValueQuery;
   const hasPortfolios = portfolios.length > 0;
@@ -364,6 +369,8 @@ export const useWithdrawalPlanner = (
     canSimulate,
     planStart,
     derivedContribution,
+    scenarioDetails,
+    isPortfolioScenarioAvailable: portfolioScenarioParams !== undefined,
     simulate,
   };
 };
