@@ -1,4 +1,5 @@
 import {
+  ForecastResult,
   GbmParameters,
   WithdrawalForecastInput,
   WithdrawalForecastResult,
@@ -6,6 +7,7 @@ import {
   runWithdrawalForecast,
 } from "pt-domain";
 import { useState } from "react";
+import { addMonths } from "../../utility/dates";
 import { useGetPortfoliosByNames } from "../../userDataContext";
 import {
   useCashFlow,
@@ -15,7 +17,6 @@ import {
 import {
   FORECAST_SIMULATION_COUNT,
   ForecastChartData,
-  buildForecastChartData,
   deriveMonthlyContribution,
 } from "../charts/forecastChartUtils";
 import {
@@ -135,12 +136,25 @@ const buildForecastInput = (
   annualInflationRate: parameters.inflationRate,
 });
 
+const buildBalanceChartData = (
+  result: ForecastResult,
+  startTimestamp: number
+): ForecastChartData =>
+  result.median.map((_, index) => ({
+    timestamp: addMonths(startTimestamp, index + 1).getTime(),
+    median: result.median[index],
+    uncertaintyBand: [
+      result.confidenceLow[index],
+      result.confidenceHigh[index],
+    ],
+    cashFlow: undefined,
+  }));
+
 const buildResult = (
   forecast: WithdrawalForecastResult,
   forecastInput: WithdrawalForecastInput,
   startingValue: number,
-  planStart: number,
-  cashFlow: number
+  planStart: number
 ): WithdrawalPlannerResultData => {
   const discounted = applyInflationDiscount(
     forecast,
@@ -159,7 +173,7 @@ const buildResult = (
       atRetirement,
       atPlanEnd: median[median.length - 1],
     },
-    chartData: buildForecastChartData(discounted, planStart, cashFlow),
+    chartData: buildBalanceChartData(discounted, planStart),
   };
 };
 
@@ -167,8 +181,7 @@ const computeResult = (
   parameters: WithdrawalPlannerParameters,
   readiness: { startingValue: number; gbm: GbmParameters },
   derivedContribution: number | undefined,
-  planStart: number,
-  cashFlow: number
+  planStart: number
 ): WithdrawalPlannerResultData => {
   const forecastInput = buildForecastInput(
     parameters,
@@ -184,8 +197,7 @@ const computeResult = (
     forecast,
     forecastInput,
     readiness.startingValue,
-    planStart,
-    cashFlow
+    planStart
   );
 };
 
@@ -249,8 +261,7 @@ export const useWithdrawalPlanner = (
         parameters,
         readiness,
         derivedContribution,
-        planStart,
-        cashFlow
+        planStart
       ),
     });
   };
