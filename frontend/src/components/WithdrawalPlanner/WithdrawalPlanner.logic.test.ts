@@ -585,6 +585,7 @@ const buildForecast = (
   confidenceHigh: [...median],
   cashFlows: median.map(() => 0),
   ruinProbability,
+  ruinedCount: Math.round(ruinProbability * 1000),
 });
 
 describe("buildWithdrawalPlannerResult", () => {

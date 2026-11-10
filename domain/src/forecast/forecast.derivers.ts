@@ -244,10 +244,9 @@ export const runWithdrawalForecast = (
     config,
   });
 
+  const ruinedCount = summary.ruined.filter(Boolean).length;
   const ruinProbability =
-    simulationCount > 0
-      ? summary.ruined.filter(Boolean).length / simulationCount
-      : 0;
+    simulationCount > 0 ? ruinedCount / simulationCount : 0;
 
   return {
     median: summary.median,
@@ -255,6 +254,7 @@ export const runWithdrawalForecast = (
     confidenceHigh: summary.confidenceHigh,
     cashFlows: summary.cashFlows,
     ruinProbability,
+    ruinedCount,
   };
 };
 

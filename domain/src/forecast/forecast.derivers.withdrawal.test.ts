@@ -55,6 +55,9 @@ describe("runWithdrawalForecast", () => {
       expect(result.cashFlows).toHaveLength(totalMonths);
       expect(result.ruinProbability).toBeGreaterThanOrEqual(0);
       expect(result.ruinProbability).toBeLessThanOrEqual(1);
+      expect(result.ruinedCount).toBe(
+        Math.round(result.ruinProbability * input.simulationCount)
+      );
     });
   });
 
@@ -75,6 +78,7 @@ describe("runWithdrawalForecast", () => {
       const result = runWithdrawalForecast(input);
 
       expect(result.ruinProbability).toBe(1);
+      expect(result.ruinedCount).toBe(100);
       expect(result.median.every((v) => v === 0)).toBe(true);
     });
 
@@ -94,6 +98,7 @@ describe("runWithdrawalForecast", () => {
       const result = runWithdrawalForecast(input);
 
       expect(result.ruinProbability).toBe(0);
+      expect(result.ruinedCount).toBe(0);
     });
 
     it("records zero balances for all remaining months after ruin (comparable paths)", () => {
@@ -137,6 +142,7 @@ describe("runWithdrawalForecast", () => {
 
       expect(result.median).toEqual([0]);
       expect(result.ruinProbability).toBe(0);
+      expect(result.ruinedCount).toBe(0);
     });
 
     it("keeps the balance flat when the withdrawal is zero", () => {

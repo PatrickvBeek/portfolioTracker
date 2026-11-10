@@ -254,9 +254,7 @@ export const buildWithdrawalPlannerResult = (
 
   return {
     summary: buildWithdrawalResultSummary({
-      ruinedCount: Math.round(
-        forecast.ruinProbability * forecastInput.simulationCount
-      ),
+      ruinedCount: forecast.ruinedCount,
       simulationCount: forecastInput.simulationCount,
       accumulationMonths: forecastInput.accumulationMonths,
       startingValue: inputs.startingValue,
