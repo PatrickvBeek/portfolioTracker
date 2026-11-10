@@ -11,15 +11,70 @@ import { ScenarioSummary } from "../charts/ScenarioSummary";
 import {
   MAX_MONTHLY_WITHDRAWAL,
   MAX_PLAN_YEARS,
-  buildPlanDates,
-  hasPositivePhase,
-  parseInflationPercent,
-  parseMonthlyWithdrawal,
-  parseNonNegativeNumber,
-  parseYears,
   type WithdrawalPlannerParameters,
 } from "./WithdrawalPlanner.logic";
+import { addMonths } from "../../utility/dates";
 import { styles } from "./WithdrawalPlanner.styles";
+
+const INFLATION_MAX_PERCENT = 20;
+
+const toMonths = (years: number): number => Math.round(years * 12);
+
+const parseYears = (value: string): number => {
+  const parsed = Number.parseFloat(value);
+
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+
+  return Math.min(MAX_PLAN_YEARS, Math.max(0, Math.trunc(parsed)));
+};
+
+const parseNonNegativeNumber = (value: string): number => {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+};
+
+const parseMonthlyWithdrawal = (value: string): number =>
+  Math.min(MAX_MONTHLY_WITHDRAWAL, parseNonNegativeNumber(value));
+
+const parseInflationPercent = (value: string): number =>
+  Math.min(INFLATION_MAX_PERCENT, parseNonNegativeNumber(value)) / 100;
+
+const PLAN_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  year: "numeric",
+});
+
+interface PlanDates {
+  retirementLabel: string;
+  planEndLabel: string;
+}
+
+const buildPlanDates = (
+  planStart: number,
+  accumulationYears: number,
+  decumulationYears: number
+): PlanDates => {
+  const accumulationMonths = toMonths(accumulationYears);
+  const decumulationMonths = toMonths(decumulationYears);
+  const retirementDate = addMonths(planStart, accumulationMonths);
+  const planEndDate = addMonths(
+    planStart,
+    accumulationMonths + decumulationMonths
+  );
+
+  return {
+    retirementLabel:
+      accumulationMonths === 0
+        ? "Retire now"
+        : `Retire around ${PLAN_DATE_FORMATTER.format(retirementDate)}`,
+    planEndLabel:
+      decumulationMonths === 0
+        ? "No withdrawal phase"
+        : `Plan ends around ${PLAN_DATE_FORMATTER.format(planEndDate)}`,
+  };
+};
 
 const DurationField = ({
   id,
@@ -163,7 +218,7 @@ const PercentField = ({
           id={id}
           type="number"
           min={0}
-          max={20}
+          max={INFLATION_MAX_PERCENT}
           step={0.5}
           value={draft ?? String(percent)}
           onChange={(event) => {
@@ -228,7 +283,7 @@ const PlanSummary = ({
   accumulationYears: number;
   decumulationYears: number;
 }) => {
-  if (!hasPositivePhase(accumulationYears, decumulationYears)) {
+  if (toMonths(accumulationYears) + toMonths(decumulationYears) === 0) {
     return (
       <p role="alert" className={styles.validationText}>
         Set at least one phase.

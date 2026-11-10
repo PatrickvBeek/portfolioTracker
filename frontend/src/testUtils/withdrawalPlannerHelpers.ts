@@ -7,6 +7,5 @@ export const getTestWithdrawalSummary = (
   simulationCount: 1000,
   atRetirement: 250000,
   atPlanEnd: 120000,
-  isMedianRuined: false,
   ...overrides,
 });
