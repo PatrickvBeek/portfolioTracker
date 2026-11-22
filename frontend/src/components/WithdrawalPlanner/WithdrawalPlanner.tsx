@@ -24,8 +24,15 @@ const WithdrawalPlanner = ({
 }) => {
   const [params, setParams] =
     useState<WithdrawalPlannerParameters>(DEFAULT_PARAMETERS);
-  const { state, canSimulate, planStart, derivedContribution, simulate } =
-    useWithdrawalPlanner(portfolioNames, params);
+  const {
+    state,
+    canSimulate,
+    planStart,
+    derivedContribution,
+    scenarioDetails,
+    isPortfolioScenarioAvailable,
+    simulate,
+  } = useWithdrawalPlanner(portfolioNames, params);
 
   const updateParameter = <K extends keyof WithdrawalPlannerParameters>(
     key: K,
@@ -35,9 +42,10 @@ const WithdrawalPlanner = ({
   return (
     <div className={styles.container}>
       <WithdrawalPlannerForm
-        portfolioNames={portfolioNames}
         planStart={planStart}
         parameters={params}
+        scenarioDetails={scenarioDetails}
+        isPortfolioScenarioAvailable={isPortfolioScenarioAvailable}
         derivedMonthlyContribution={derivedContribution}
         canSimulate={canSimulate}
         onParameterChange={updateParameter}

@@ -181,7 +181,7 @@ describe("WithdrawalPlannerResult", () => {
   });
 
   it("shows a zero plan end as euros and explains the ruined median", () => {
-    renderSummary({ atPlanEnd: 0, isMedianRuined: true });
+    renderSummary({ atPlanEnd: 0 });
 
     expect(screen.getByText("At plan end")).toBeInTheDocument();
     expect(screen.getByText("€0")).toBeInTheDocument();
@@ -191,7 +191,7 @@ describe("WithdrawalPlannerResult", () => {
   });
 
   it("rounds a sub-euro plan end to zero and explains the ruined median", () => {
-    renderSummary({ atPlanEnd: 0.4, isMedianRuined: true });
+    renderSummary({ atPlanEnd: 0.4 });
 
     expect(screen.getByText("€0")).toBeInTheDocument();
     expect(
@@ -200,7 +200,7 @@ describe("WithdrawalPlannerResult", () => {
   });
 
   it("omits the ruin note for a surviving median", () => {
-    renderSummary({ isMedianRuined: false });
+    renderSummary();
 
     expect(
       screen.queryByText(

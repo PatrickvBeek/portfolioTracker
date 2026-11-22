@@ -4,7 +4,6 @@ import { ChartContainer } from "../charts/ChartContainer";
 import { ForecastChartBody } from "../charts/ForecastChartBody";
 import type { ForecastScenario } from "../charts/forecastScenario.logic";
 import {
-  roundsToZero,
   WITHDRAWAL_CONFIDENCE_PERCENT,
   type WithdrawalPlannerResultData,
   type WithdrawalPlannerResultState,
@@ -45,6 +44,8 @@ const describeProbability = (probability: number, percent: number): string => {
   return `${percent}%`;
 };
 
+const roundsToZero = (value: number): boolean => Math.round(value) === 0;
+
 const formatEuroAmount = (value: number): string =>
   roundsToZero(value) ? "€0" : asLocaleEuro(value, 0);
 
@@ -82,7 +83,7 @@ const buildWithdrawalResultView = (
     planEndText: formatEuroAmount(summary.atPlanEnd),
     simulationNote: `Based on ${summary.simulationCount.toLocaleString()} simulations.`,
     assumptionNote: `Based on ${scenario} return assumptions.`,
-    showRuinNote: summary.isMedianRuined,
+    showRuinNote: roundsToZero(summary.atPlanEnd),
   };
 };
 

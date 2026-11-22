@@ -28,6 +28,7 @@ export interface WithdrawalForecastInput {
 
 export interface WithdrawalForecastResult extends ForecastResult {
   ruinProbability: number;
+  ruinedCount: number;
 }
 
 export interface RandomShockParams {

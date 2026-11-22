@@ -1,26 +1,128 @@
-import { FormEvent, ReactNode, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Button } from "../ui/Button";
 import { Heading } from "../ui/Heading";
 import { Input } from "../ui/Input";
 import { ToggleGroup, ToggleItem } from "../ui/ToggleGroup";
 import {
   ForecastScenario,
-  getScenarioDetails,
-  usePortfolioScenarioParams,
+  ScenarioDetails,
 } from "../charts/forecastScenario.logic";
 import { ScenarioSummary } from "../charts/ScenarioSummary";
 import {
   MAX_MONTHLY_WITHDRAWAL,
   MAX_PLAN_YEARS,
-  buildPlanDates,
-  hasPositivePhase,
-  parseInflationPercent,
-  parseMonthlyWithdrawal,
-  parseNonNegativeNumber,
-  parseYears,
   type WithdrawalPlannerParameters,
 } from "./WithdrawalPlanner.logic";
+import { addMonths } from "../../utility/dates";
 import { styles } from "./WithdrawalPlanner.styles";
+
+const INFLATION_MAX_PERCENT = 20;
+
+const toMonths = (years: number): number => Math.round(years * 12);
+
+const parseYears = (value: string): number => {
+  const parsed = Number.parseFloat(value);
+
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+
+  return Math.min(MAX_PLAN_YEARS, Math.max(0, Math.trunc(parsed)));
+};
+
+const parseNonNegativeNumber = (value: string): number => {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+};
+
+const parseMonthlyWithdrawal = (value: string): number =>
+  Math.min(MAX_MONTHLY_WITHDRAWAL, parseNonNegativeNumber(value));
+
+const parseInflationPercent = (value: string): number =>
+  Math.min(INFLATION_MAX_PERCENT, parseNonNegativeNumber(value)) / 100;
+
+const PLAN_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  year: "numeric",
+});
+
+interface PlanDates {
+  retirementLabel: string;
+  planEndLabel: string;
+}
+
+const buildPlanDates = (
+  planStart: number,
+  accumulationYears: number,
+  decumulationYears: number
+): PlanDates => {
+  const accumulationMonths = toMonths(accumulationYears);
+  const decumulationMonths = toMonths(decumulationYears);
+  const retirementDate = addMonths(planStart, accumulationMonths);
+  const planEndDate = addMonths(
+    planStart,
+    accumulationMonths + decumulationMonths
+  );
+
+  return {
+    retirementLabel:
+      accumulationMonths === 0
+        ? "Retire now"
+        : `Retire around ${PLAN_DATE_FORMATTER.format(retirementDate)}`,
+    planEndLabel:
+      decumulationMonths === 0
+        ? "No withdrawal phase"
+        : `Plan ends around ${PLAN_DATE_FORMATTER.format(planEndDate)}`,
+  };
+};
+
+const NumberField = ({
+  id,
+  label,
+  value,
+  min,
+  max,
+  step,
+  suffix,
+  disabled,
+  describedBy,
+  onChange,
+  onBlur,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  min: number;
+  max?: number;
+  step: number;
+  suffix: string;
+  disabled?: boolean;
+  describedBy?: string;
+  onChange: (raw: string) => void;
+  onBlur: () => void;
+}) => (
+  <>
+    <label htmlFor={id} className={styles.label}>
+      {label}
+    </label>
+    <div className={styles.inputAdornment}>
+      <Input
+        id={id}
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onBlur={onBlur}
+        disabled={disabled}
+        aria-describedby={describedBy}
+        className={styles.inputWidth}
+      />
+      <span className={styles.adornmentText}>{suffix}</span>
+    </div>
+  </>
+);
 
 const DurationField = ({
   id,
@@ -37,99 +139,71 @@ const DurationField = ({
 
   return (
     <div className={styles.controlGroup}>
-      <label htmlFor={id} className={styles.label}>
-        {label}
-      </label>
-      <div className={styles.inputAdornment}>
-        <Input
-          id={id}
-          type="number"
-          min={0}
-          max={MAX_PLAN_YEARS}
-          step={1}
-          value={draft ?? String(years)}
-          onChange={(event) => {
-            const value = event.target.value;
-            setDraft(value);
-            onChange(parseYears(value));
-          }}
-          onBlur={() => setDraft(undefined)}
-          className={styles.inputWidth}
-        />
-        <span className={styles.adornmentText}>years</span>
-      </div>
+      <NumberField
+        id={id}
+        label={label}
+        value={draft ?? String(years)}
+        min={0}
+        max={MAX_PLAN_YEARS}
+        step={1}
+        suffix="years"
+        onChange={(raw) => {
+          setDraft(raw);
+          onChange(parseYears(raw));
+        }}
+        onBlur={() => setDraft(undefined)}
+      />
     </div>
   );
 };
 
-const MoneyField = ({
-  id,
-  label,
+const ContributionField = ({
   value,
   automaticValue,
-  min,
-  max,
-  step,
-  parse,
   onChange,
-  describedBy,
-  disabled,
-  onUseAutomatic,
-  footer,
 }: {
-  id: string;
-  label: string;
   value: number | null;
   automaticValue: number | undefined;
-  min: number;
-  max?: number;
-  step: number;
-  parse: (value: string) => number;
   onChange: (value: number | null) => void;
-  describedBy: string;
-  disabled?: boolean;
-  onUseAutomatic?: () => void;
-  footer: ReactNode;
 }) => {
   const [draft, setDraft] = useState<string>();
   const automaticText =
     automaticValue === undefined ? "" : String(automaticValue);
   const displayValue =
     draft ?? (value !== null ? String(value) : automaticText);
+  const helper =
+    value !== null
+      ? "Custom amount"
+      : automaticValue === undefined
+        ? "No cash flow history. Enter an amount."
+        : "Calculated from your cash flow";
 
   return (
     <div className={styles.controlGroup}>
-      <label htmlFor={id} className={styles.label}>
-        {label}
-      </label>
-      <div className={styles.inputAdornment}>
-        <Input
-          id={id}
-          type="number"
-          min={min}
-          max={max}
-          step={step}
-          value={displayValue}
-          onChange={(event) => {
-            const nextValue = event.target.value;
-            setDraft(nextValue);
-            onChange(nextValue === "" ? null : parse(nextValue));
-          }}
-          onBlur={() => setDraft(undefined)}
-          disabled={disabled}
-          aria-describedby={describedBy}
-          className={styles.inputWidth}
-        />
-        <span className={styles.adornmentText}>€ per month</span>
-      </div>
-      {footer}
-      {onUseAutomatic && (
+      <NumberField
+        id="withdrawal-contribution"
+        label="Monthly contribution"
+        value={displayValue}
+        min={0}
+        step={50}
+        suffix="€ per month"
+        describedBy="withdrawal-contribution-helper"
+        onChange={(raw) => {
+          setDraft(raw);
+          onChange(raw === "" ? null : parseNonNegativeNumber(raw));
+        }}
+        onBlur={() => setDraft(undefined)}
+      />
+      <p id="withdrawal-contribution-helper" className={styles.helperText}>
+        {helper}
+      </p>
+      {value !== null && (
         <button
           type="button"
           className={styles.actionText}
           onClick={() => {
             setDraft(undefined);
-            onUseAutomatic();
+            onChange(null);
           }}
         >
           Use automatic
@@ -139,61 +213,104 @@ const MoneyField = ({
   );
 };
 
+const WithdrawalField = ({
+  value,
+  automaticValue,
+  disabled,
+  onChange,
+}: {
+  value: number | null;
+  automaticValue: number | undefined;
+  disabled: boolean;
+  onChange: (value: number | null) => void;
+}) => {
+  const [draft, setDraft] = useState<string>();
+  const automaticText =
+    automaticValue === undefined ? "" : String(automaticValue);
+  const displayValue =
+    draft ?? (value !== null ? String(value) : automaticText);
+  const effectiveValue = value ?? automaticValue;
+  const helper = disabled
+    ? "No withdrawal phase. The result shows accumulation only."
+    : effectiveValue === undefined
+      ? "Enter an amount."
+      : "In today's money. Rises with inflation.";
+
+  return (
+    <div className={styles.controlGroup}>
+      <NumberField
+        id="withdrawal-withdrawal"
+        label="Monthly withdrawal"
+        value={displayValue}
+        min={0}
+        max={MAX_MONTHLY_WITHDRAWAL}
+        step={100}
+        suffix="€ per month"
+        disabled={disabled}
+        describedBy="withdrawal-withdrawal-helper"
+        onChange={(raw) => {
+          setDraft(raw);
+          onChange(raw === "" ? null : parseMonthlyWithdrawal(raw));
+        }}
+        onBlur={() => setDraft(undefined)}
+      />
+      <p id="withdrawal-withdrawal-helper" className={styles.helperText}>
+        {helper}
+      </p>
+      {!disabled && effectiveValue === 0 && (
+        <p className={styles.helperText}>
+          No withdrawals. The plan cannot run out of money.
+        </p>
+      )}
+    </div>
+  );
+};
+
 const PercentField = ({
-  id,
-  label,
   percent,
   onChange,
-  footer,
 }: {
-  id: string;
-  label: string;
   percent: number;
-  onChange: (percent: string) => void;
-  footer: ReactNode;
+  onChange: (raw: string) => void;
 }) => {
   const [draft, setDraft] = useState<string>();
 
   return (
     <div className={styles.controlGroup}>
-      <label htmlFor={id} className={styles.label}>
-        {label}
-      </label>
-      <div className={styles.inputAdornment}>
-        <Input
-          id={id}
-          type="number"
-          min={0}
-          max={20}
-          step={0.5}
-          value={draft ?? String(percent)}
-          onChange={(event) => {
-            setDraft(event.target.value);
-            onChange(event.target.value);
-          }}
-          onBlur={() => setDraft(undefined)}
-          aria-describedby={`${id}-helper`}
-          className={styles.inputWidth}
-        />
-        <span className={styles.adornmentText}>%</span>
-      </div>
-      {footer}
+      <NumberField
+        id="withdrawal-inflation"
+        label="Inflation"
+        value={draft ?? String(percent)}
+        min={0}
+        max={INFLATION_MAX_PERCENT}
+        step={0.5}
+        suffix="%"
+        describedBy="withdrawal-inflation-helper"
+        onChange={(raw) => {
+          setDraft(raw);
+          onChange(raw);
+        }}
+        onBlur={() => setDraft(undefined)}
+      />
+      <p id="withdrawal-inflation-helper" className={styles.helperText}>
+        Raises withdrawals at {percent}% per year and converts results to
+        today's money.
+      </p>
     </div>
   );
 };
 
 const ReturnAssumptionField = ({
-  portfolioNames,
   scenario,
+  scenarioDetails,
+  isPortfolioScenarioAvailable,
   onScenarioChange,
 }: {
-  portfolioNames: string[];
   scenario: ForecastScenario;
+  scenarioDetails: ScenarioDetails | undefined;
+  isPortfolioScenarioAvailable: boolean;
   onScenarioChange: (scenario: ForecastScenario) => void;
 }) => {
-  const portfolioParams = usePortfolioScenarioParams(portfolioNames);
-  const scenarioDetails = getScenarioDetails(scenario, portfolioParams);
-
   return (
     <div className={styles.controlGroup}>
       <span className={styles.label}>Return assumption</span>
@@ -209,7 +326,7 @@ const ReturnAssumptionField = ({
           value="portfolio"
           selected={scenario === "portfolio"}
           onSelect={() => onScenarioChange("portfolio")}
-          disabled={portfolioParams === undefined}
+          disabled={!isPortfolioScenarioAvailable}
         >
           Your portfolio
         </ToggleItem>
@@ -230,7 +347,7 @@ const PlanSummary = ({
   accumulationYears: number;
   decumulationYears: number;
 }) => {
-  if (!hasPositivePhase(accumulationYears, decumulationYears)) {
+  if (toMonths(accumulationYears) + toMonths(decumulationYears) === 0) {
     return (
       <p role="alert" className={styles.validationText}>
         Set at least one phase.
@@ -281,9 +398,10 @@ const PlanSummary = ({
 };
 
 type WithdrawalPlannerFormProps = {
-  portfolioNames: string[];
   planStart: number;
   parameters: WithdrawalPlannerParameters;
+  scenarioDetails: ScenarioDetails | undefined;
+  isPortfolioScenarioAvailable: boolean;
   derivedMonthlyContribution: number | undefined;
   canSimulate: boolean;
   onParameterChange: <K extends keyof WithdrawalPlannerParameters>(
@@ -294,9 +412,10 @@ type WithdrawalPlannerFormProps = {
 };
 
 export function WithdrawalPlannerForm({
-  portfolioNames,
   planStart,
   parameters,
+  scenarioDetails,
+  isPortfolioScenarioAvailable,
   derivedMonthlyContribution,
   canSimulate,
   onParameterChange,
@@ -318,24 +437,6 @@ export function WithdrawalPlannerForm({
     onSimulate();
   };
 
-  const contributionHelper =
-    parameters.monthlyContribution !== null
-      ? "Custom amount"
-      : derivedMonthlyContribution === undefined
-        ? "No cash flow history. Enter an amount."
-        : "Calculated from your cash flow";
-
-  const withdrawalUnavailable =
-    parameters.monthlyWithdrawal === null &&
-    derivedMonthlyContribution === undefined;
-  const isWithdrawalDisabled = parameters.decumulationYears === 0;
-  const withdrawalValue =
-    parameters.monthlyWithdrawal ?? derivedMonthlyContribution;
-  const showNoWithdrawals =
-    !isWithdrawalDisabled &&
-    withdrawalValue !== undefined &&
-    withdrawalValue === 0;
-
   return (
     <form className={styles.sectionCard} onSubmit={handleSubmit} noValidate>
       <div className={styles.sectionBody}>
@@ -345,28 +446,17 @@ export function WithdrawalPlannerForm({
           <Heading level="section">Assumptions</Heading>
           <div className={styles.controlsGrid}>
             <ReturnAssumptionField
-              portfolioNames={portfolioNames}
               scenario={parameters.scenario}
+              scenarioDetails={scenarioDetails}
+              isPortfolioScenarioAvailable={isPortfolioScenarioAvailable}
               onScenarioChange={(scenario) =>
                 onParameterChange("scenario", scenario)
               }
             />
             <PercentField
-              id="withdrawal-inflation"
-              label="Inflation"
               percent={Number((parameters.inflationRate * 100).toFixed(2))}
               onChange={(value) =>
                 onParameterChange("inflationRate", parseInflationPercent(value))
-              }
-              footer={
-                <p
-                  id="withdrawal-inflation-helper"
-                  className={styles.helperText}
-                >
-                  Raises withdrawals at{" "}
-                  {Number((parameters.inflationRate * 100).toFixed(2))}% per
-                  year and converts results to today's money.
-                </p>
               }
             />
           </div>
@@ -386,30 +476,11 @@ export function WithdrawalPlannerForm({
                 onParameterChange("accumulationYears", years)
               }
             />
-            <MoneyField
-              id="withdrawal-contribution"
-              label="Monthly contribution"
+            <ContributionField
               value={parameters.monthlyContribution}
               automaticValue={derivedMonthlyContribution}
-              min={0}
-              step={50}
-              parse={parseNonNegativeNumber}
               onChange={(value) =>
                 onParameterChange("monthlyContribution", value)
-              }
-              describedBy="withdrawal-contribution-helper"
-              onUseAutomatic={
-                parameters.monthlyContribution === null
-                  ? undefined
-                  : () => onParameterChange("monthlyContribution", null)
-              }
-              footer={
-                <p
-                  id="withdrawal-contribution-helper"
-                  className={styles.helperText}
-                >
-                  {contributionHelper}
-                </p>
               }
             />
           </div>
@@ -426,38 +497,12 @@ export function WithdrawalPlannerForm({
                 onParameterChange("decumulationYears", years)
               }
             />
-            <MoneyField
-              id="withdrawal-withdrawal"
-              label="Monthly withdrawal"
+            <WithdrawalField
               value={parameters.monthlyWithdrawal}
               automaticValue={derivedMonthlyContribution}
-              min={0}
-              max={MAX_MONTHLY_WITHDRAWAL}
-              step={100}
-              parse={parseMonthlyWithdrawal}
+              disabled={parameters.decumulationYears === 0}
               onChange={(value) =>
                 onParameterChange("monthlyWithdrawal", value)
-              }
-              describedBy="withdrawal-withdrawal-helper"
-              disabled={isWithdrawalDisabled}
-              footer={
-                <>
-                  <p
-                    id="withdrawal-withdrawal-helper"
-                    className={styles.helperText}
-                  >
-                    {isWithdrawalDisabled
-                      ? "No withdrawal phase. The result shows accumulation only."
-                      : withdrawalUnavailable
-                        ? "Enter an amount."
-                        : "In today's money. Rises with inflation."}
-                  </p>
-                  {showNoWithdrawals && (
-                    <p className={styles.helperText}>
-                      No withdrawals. The plan cannot run out of money.
-                    </p>
-                  )}
-                </>
               }
             />
           </div>
